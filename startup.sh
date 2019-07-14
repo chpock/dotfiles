@@ -1241,11 +1241,15 @@ unset GREP
 #alias diff='diff --color=auto'
 
 alias mv='mv -i'
+
 alias mkdir='mkdir -p'
+alias mkcd='_(){ mkdir -p $1; cd $1; }; _'
 
 alias ..='cd ..'
 
 alias tailf='tail -F'
+
+alias ff='find . -name'
 
 VIM="vim -u \"$IAM_HOME/vimrc\" -i \"$IAM_HOME/viminfo\""
 if command -v vim >/dev/null; then
@@ -1259,6 +1263,22 @@ else
 fi
 export EDITOR
 unset VIM
+
+apt-get() {
+    echo "${COLOR_RED}The 'sudo' prefix was added automatically for the 'apt-get' command${COLOR_DEFAULT}" >&2
+    sudo apt-get "$@"
+}
+
+apt() {
+    case "$1" in
+        install|remove|purge|autoremove|update|upgrade|full-upgrade|edit-sources)
+            echo "${COLOR_RED}The 'sudo' prefix was added automatically for the 'apt' command${COLOR_DEFAULT}" >&2
+            sudo apt "$@"
+        ;;
+        *) command apt "$@"
+        ;;
+    esac
+}
 
 lastbuild() {
     if [ -z "$1" ] || [ "$1" = "common64" ] || [ "$1" = "common" ]; then
