@@ -745,6 +745,13 @@ function! <SID>SynStack()
   echo map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
 endfunc
 
+" Special file types
+
+" YAML
+au! BufNewFile,BufReadPost *.{yaml,yml} set filetype=yaml
+" disable auto ident for keys: ':', '-', '#', '}', ']'
+au! FileType yaml setlocal ts=2 sts=2 sw=2 expandtab indentkeys-=0#,0},0],<:>,-
+
 EOF
 
 cat <<'EOF' > "$IAM_HOME/bashrc"
