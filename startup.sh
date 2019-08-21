@@ -1448,6 +1448,96 @@ HISTIGNORE="&:[bf]g:exit"
 # history file
 HISTFILE="$HOME/.${IAM}_history"
 
+(set +e; command -v git >/dev/null 2>&1)
+__GIT_NOT_AVAILABLE=$?
+
+# based on: https://github.com/magicmonty/bash-git-prompt
+__git_status() {
+
+    if [ "$__GIT_NOT_AVAILABLE" != 0 ]; then
+        return
+    fi
+
+    __GIT_STATUS="$(LC_ALL=C git status --porcelain --branch 2>/dev/null)"
+    if [ "$?" -ne 0 ]; then
+        unset __GIT_STATUS
+        return
+    fi
+
+    __GIT_REPO_ROOT="$(git rev-parse --git-dir)"
+
+    if [ "$__GIT_REPO_ROOT" = ".git" ]; then
+        __GIT_REPO_ROOT="$(pwd)"
+    else
+        __GIT_REPO_ROOT="$(dirname "$__GIT_REPO_ROOT")"
+    fi
+
+    __GIT_BRANCH="!ERROR!"
+    __GIT_NUM_STAGED=0
+    __GIT_NUM_CHANGED=0
+    __GIT_NUM_CONFLICT=0
+    __GIT_NUM_UNTRACKED=0
+
+    while IFS='' read -r line || [[ -n "${line}" ]]; do
+        status="${line:0:2}"
+        while [[ -n ${status} ]]; do
+            case "${status}" in
+                \#\#) __GIT_BRANCH="${line/\.\.\./^}"; break ;;
+                \?\?) ((__GIT_NUM_UNTRACKED++)); break ;;
+                U?) ((__GIT_NUM_CONFLICT++)); break;;
+                ?U) ((__GIT_NUM_CONFLICT++)); break;;
+                DD) ((__GIT_NUM_CONFLICT++)); break;;
+                AA) ((__GIT_NUM_CONFLICT++)); break;;
+                ?M) ((__GIT_NUM_CHANGED++)) ;;
+                ?D) ((__GIT_NUM_CHANGED++)) ;;
+                ?\ ) ;;
+                U) ((__GIT_NUM_CONFLICT++)) ;;
+                \ ) ;;
+                *) ((__GIT_NUM_STAGED++)) ;;
+            esac
+            status="${status:0:(${#status}-1)}"
+        done
+    done <<< "${__GIT_STATUS}"
+
+    unset line
+    unset status
+
+    IFS="^" read -ra __GIT_BRANCH_FIELDS <<< "${__GIT_BRANCH/\#\# }"
+    __GIT_BRANCH="${__GIT_BRANCH_FIELDS[0]}"
+
+    __GIT_OUTPUT="${COLOR_GRAY}[${COLOR_WHITE}GIT${COLOR_GRAY}: $COLOR_CYAN$__GIT_REPO_ROOT"
+    __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}branch${COLOR_GRAY}: $COLOR_PURPLE$__GIT_BRANCH"
+
+    if [ "$__GIT_NUM_CONFLICT" -ne 0 ]; then
+        __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}; ${COLOR_LIGHTRED}conflict${COLOR_GRAY}: $COLOR_DEFAULT$__GIT_NUM_CONFLICT"
+    fi
+
+    if [ "$__GIT_NUM_STAGED" -ne 0 ]; then
+        __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}; ${COLOR_GREEN}staged${COLOR_GRAY}: $COLOR_DEFAULT$__GIT_NUM_STAGED"
+    fi
+
+    if [ "$__GIT_NUM_CHANGED" -ne 0 ]; then
+        __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}; ${COLOR_BROWN}changed${COLOR_GRAY}: $COLOR_DEFAULT$__GIT_NUM_CHANGED"
+    fi
+
+    if [ "$__GIT_NUM_UNTRACKED" -ne 0 ]; then
+        __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}untracked${COLOR_GRAY}: $COLOR_LIGHTRED$__GIT_NUM_UNTRACKED"
+    fi
+
+    __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}]${COLOR_DEFAULT}"
+
+    echo "$__GIT_OUTPUT"
+
+    unset __GIT_REPO_ROOT
+    unset __GIT_BRANCH
+    unset __GIT_BRANCH_FIELDS
+    unset __GIT_NUM_STAGED
+    unset __GIT_NUM_CHANGED
+    unset __GIT_NUM_CONFLICT
+    unset __GIT_NUM_UNTRACKED
+    unset __GIT_OUTPUT
+}
+
 # Function to set prompt_command to.
 function promptcmd () {
     # Exit status of the last command run.
@@ -1486,6 +1576,8 @@ function promptcmd () {
             local TITLEBAR=''
         ;;
     esac
+
+    __git_status
 
     PS1="${TITLEBAR}"
 
