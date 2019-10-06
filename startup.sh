@@ -1289,19 +1289,19 @@ apt() {
 
 lastbuild() {
     if [ -z "$1" ] || [ "$1" = "common64" ] || [ "$1" = "common" ]; then
-        BLD="`/bin/ls -t -1 /net/chronic3build/commander-main-full-*/out/x86_64_Linux/nimbus/install/CloudBeesFlow-x64-* | head -1`"
+        BLD="`/bin/ls -t -1 /net/chronic3build/commander-git-main-full-*/out/x86_64_Linux/nimbus/install/CloudBeesFlow-x64-* | head -1`"
     elif [ "$1" = "common32" ]; then
-        BLD="`/bin/ls -t -1 /net/chronic3build/commander-main-full-*/out/i686_Linux/nimbus/install/CloudBeesFlow-* | head -1`"
+        BLD="`/bin/ls -t -1 /net/chronic3build/commander-git-main-full-*/out/i686_Linux/nimbus/install/CloudBeesFlow-* | head -1`"
     elif [ "$1" = "agent32" ]; then
-        BLD="`/bin/ls -t -1 /net/chronic3build/commander-main-full-*/out/i686_Linux/nimbus/install/CloudBeesFlowAgent-x86-* | head -1`"
+        BLD="`/bin/ls -t -1 /net/chronic3build/commander-git-main-full-*/out/i686_Linux/nimbus/install/CloudBeesFlowAgent-x86-* | head -1`"
     elif [ "$1" = "agent64" ]; then
-        BLD="`/bin/ls -t -1 /net/chronic3build/commander-main-full-*/out/i686_Linux/nimbus/install/CloudBeesFlowAgent-x64-* | head -1`"
+        BLD="`/bin/ls -t -1 /net/chronic3build/commander-git-main-full-*/out/i686_Linux/nimbus/install/CloudBeesFlowAgent-x64-* | head -1`"
     elif [ "$1" = "agent64p" ] || [ "$1" = "agent" ]; then
-        BLD="`/bin/ls -t -1 /net/chronic3build/commander-main-full-*/out/x86_64_Linux/nimbus/install/CloudBeesFlowAgent-x64-* | head -1`"
+        BLD="`/bin/ls -t -1 /net/chronic3build/commander-git-main-full-*/out/x86_64_Linux/nimbus/install/CloudBeesFlowAgent-x64-* | head -1`"
     elif [ "$1" = "dois" ]; then
-        BLD="`/bin/ls -t -1 /net/chronic3build/commander-main-full-*/out/i686_Linux/nimbus/install/CloudBeesFlowDevOpsInsightServer-x64-* | head -1`"
+        BLD="`/bin/ls -t -1 /net/chronic3build/commander-git-main-full-*/out/i686_Linux/nimbus/install/CloudBeesFlowDevOpsInsightServer-x64-* | head -1`"
     elif [ "$1" = "dofs" ]; then
-        BLD="`/bin/ls -t -1 /net/chronic3build/commander-main-full-*/out/x86_64_Linux/nimbus/install/CloudBeesFlowDevOpsForesightServer-x64-* | head -1`"
+        BLD="`/bin/ls -t -1 /net/chronic3build/commander-git-main-full-*/out/x86_64_Linux/nimbus/install/CloudBeesFlowDevOpsForesightServer-x64-* | head -1`"
     else
         echo 'Usage: lastbuild [common|common32|agent|agent32|agent64|agent64p|dois|dofs]' >&2
         exit 1
@@ -1314,6 +1314,30 @@ lastbuild() {
 gitconfig() {
     (set -x; git config user.name "$GIT_USER_NAME")
     (set -x; git config user.email "$GIT_USER_EMAIL")
+}
+
+kube() {
+    case "$1" in
+        on)
+            if [ "$__K8S_NOT_AVAILABLE" != 0 ]; then
+                echo "${COLOR_RED}ERROR${COLOR_GRAY}:$COLOR_DEFAULT kubectl command is not available in this environment"
+                return 1
+            fi
+            __K8S_PROMPT_ON=1
+        ;;
+        off)
+            unset __K8S_PROMPT_ON
+        ;;
+        *)
+            [ -n "$1" ] && echo "Unknown command '$1'"
+            echo "Usage: kube <command>"
+            echo
+            echo "Available commands:"
+            echo "  on  - turn on k8s bash prompt"
+            echo "  off - turn off k8s bash prompt"
+            return 1
+        ;;
+    esac
 }
 
 #magic
@@ -1451,6 +1475,52 @@ HISTFILE="$HOME/.${IAM}_history"
 (set +e; command -v git >/dev/null 2>&1)
 __GIT_NOT_AVAILABLE=$?
 
+(set +e; command -v kubectl >/dev/null 2>&1)
+__K8S_NOT_AVAILABLE=$?
+
+__kubectl_status() {
+
+    if [ "$__K8S_NOT_AVAILABLE" != 0 ] || [ -z "$__K8S_PROMPT_ON" ]; then
+        return
+    fi
+
+    if [ -z "$KUBECONFIG" ]; then
+        __K8S_CONF="$HOME/.kube/config"
+    else
+        __K8S_CONF="$KUBECONFIG"
+    fi
+
+    __GIT_OUTPUT="${COLOR_GRAY}[${COLOR_WHITE}K8S${COLOR_GRAY}: $COLOR_CYAN$__K8S_CONF"
+
+    if [ ! -e "$__K8S_CONF" ]; then
+        __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_DEFAULT} - ${COLOR_RED}DOESN'T EXIST"
+    else
+
+        __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}cluster${COLOR_GRAY}: "
+
+        if ! __K8S_CURRENT_CLUSTER="$(grep '^current-context:' "$__K8S_CONF")"; then
+            __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_LIGHTRED}NOT FOUND"
+        else
+            __K8S_CURRENT_CLUSTER="${__K8S_CURRENT_CLUSTER##*/}"
+            if [ -z "$__K8S_CURRENT_CLUSTER" ]; then
+                __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_LIGHTRED}UNKNOWN"
+            else
+                __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_PURPLE}$__K8S_CURRENT_CLUSTER"
+            fi
+        fi
+
+    fi
+
+    __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}]${COLOR_DEFAULT}"
+
+    echo "$__GIT_OUTPUT"
+
+    unset __K8S_CONF
+    unset __K8S_CURRENT_CLUSTER
+    unset __GIT_OUTPUT
+
+}
+
 # based on: https://github.com/magicmonty/bash-git-prompt
 __git_status() {
 
@@ -1578,6 +1648,7 @@ function promptcmd () {
     esac
 
     __git_status
+    __kubectl_status
 
     PS1="${TITLEBAR}"
 
