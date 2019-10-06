@@ -1363,12 +1363,13 @@ lastbuild() {
 }
 
 kube() {
+    if [ -n "$1" ] && [ "$__K8S_NOT_AVAILABLE" != 0 ]; then
+        echo "${COLOR_RED}ERROR${COLOR_GRAY}:$COLOR_DEFAULT kubectl command is not available in this environment"
+        return 1
+    fi
+
     case "$1" in
         on)
-            if [ "$__K8S_NOT_AVAILABLE" != 0 ]; then
-                echo "${COLOR_RED}ERROR${COLOR_GRAY}:$COLOR_DEFAULT kubectl command is not available in this environment"
-                return 1
-            fi
             __K8S_PROMPT_ON=1
         ;;
         off)
