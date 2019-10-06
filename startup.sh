@@ -1468,12 +1468,15 @@ clip() {
 
 # 'less' settings
 # -F Causes less to automatically exit if the entire file can be displayed on the first screen
+# -X Disables sending the termcap initialization and deinitialization strings to the terminal.
+#    It allows to see text when 'less' exited because of the above option (-F). Without this
+#    option screen will be initialized and deinitialized, and console will be cleared.
 # -R Turn on ANSI "color" escape sequences in output
 # -i Causes searches to ignore case
 # -w Temporarily highlights the first "new" line after a forward movement of a full page
 # -z-4 Changes the default scrolling window size to "screen-4" lines
 # -P Prompt. Must be last option
-LESS="-F -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
+LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
 #PAGER=less
 #export PAGER
