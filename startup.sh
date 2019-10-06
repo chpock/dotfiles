@@ -419,6 +419,18 @@ if { [file exists [file join $::env(IAM_HOME) tools tcl TclReadLine]] } {
 
 EOF
 
+cat <<EOF > "$IAM_HOME/gitconfig"
+[user]
+  name = $GIT_USER_NAME
+  email = $GIT_USER_EMAIL
+[core]
+  editor = vim
+[color]
+  ui = auto
+[push]
+  default = simple
+EOF
+
 cat <<'EOF' > "$IAM_HOME/vimrc"
 set nocompatible
 set t_Co=256           " enable 256 colors
@@ -1208,6 +1220,11 @@ hostinfo() {
 
 hostinfo
 
+GIT_CONFIG="$IAM_HOME/gitconfig"
+export GIT_CONFIG
+unset GIT_USER_NAME
+unset GIT_USER_EMAIL
+
 # Don't want my shell to warn me of incoming mail.
 unset MAILCHECK
 
@@ -1241,7 +1258,6 @@ bind "set visible-stats on"
 bind "set blink-matching-paren on"
 # turn off the use of the internal pager when returning long completion lists
 bind "set page-completions off"
-
 
 # How to find out keys:
 # 1. run "od -c"
@@ -1346,11 +1362,6 @@ lastbuild() {
     echo "$BLD"
 }
 
-gitconfig() {
-    (set -x; git config user.name "$GIT_USER_NAME")
-    (set -x; git config user.email "$GIT_USER_EMAIL")
-}
-
 kube() {
     case "$1" in
         on)
@@ -1379,8 +1390,6 @@ kube() {
 myssh() {
    ssh -t $* "IAM=\"$IAM\" && export IAM && \
               SSH_PUB_KEY=\"$SSH_PUB_KEY\" && export SSH_PUB_KEY && \
-              GIT_USER_NAME=\"$GIT_USER_NAME\" && export GIT_USER_NAME && \
-              GIT_USER_EMAIL=\"$GIT_USER_EMAIL\" && export GIT_USER_EMAIL && \
               IAM_HOME=\"\$HOME/.${IAM}_home\" && export IAM_HOME &&
               rm -rf \"\$HOME/.${IAM}_terminfo\" && \
               rm -f \"\$HOME/.${IAM}_startup\" && \
@@ -1391,6 +1400,7 @@ myssh() {
               TERMINFO=\"\$IAM_HOME/terminfo\" && \
               export TERMINFO && \
               tic \"\$IAM_HOME/terminfo/.terminfo\" && \
+              echo \"$(cat ${IAM_HOME}/gitconfig | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/gitconfig\" && \
               echo \"$(cat ${IAM_HOME}/vimrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/vimrc\" && \
               echo \"$(cat ${HOME}/.tclshrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$HOME/.tclshrc\" && \
               echo \"$(cat ${IAM_HOME}/bashrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/bashrc\"; exec bash --rcfile \"\$IAM_HOME/bashrc\" -i || exec \$SHELL -i"
@@ -1398,8 +1408,6 @@ myssh() {
 mydocker() {
    docker exec -ti $1 /bin/bash -c "IAM=\"$IAM\" && export IAM && \
               SSH_PUB_KEY=\"$SSH_PUB_KEY\" && export SSH_PUB_KEY && \
-              GIT_USER_NAME=\"$GIT_USER_NAME\" && export GIT_USER_NAME && \
-              GIT_USER_EMAIL=\"$GIT_USER_EMAIL\" && export GIT_USER_EMAIL && \
               IAM_HOME=\"\$HOME/.${IAM}_home\" && export IAM_HOME &&
               rm -rf \"\$HOME/.${IAM}_terminfo\" && \
               rm -f \"\$HOME/.${IAM}_startup\" && \
@@ -1410,6 +1418,7 @@ mydocker() {
               TERMINFO=\"\$IAM_HOME/terminfo\" && \
               export TERMINFO && \
               tic \"\$IAM_HOME/terminfo/.terminfo\" && \
+              echo \"$(cat ${IAM_HOME}/gitconfig | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/gitconfig\" && \
               echo \"$(cat ${IAM_HOME}/vimrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/vimrc\" && \
               echo \"$(cat ${HOME}/.tclshrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$HOME/.tclshrc\" && \
               echo \"$(cat ${IAM_HOME}/bashrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/bashrc\"; stty cols $COLUMNS; exec bash --rcfile \"\$IAM_HOME/bashrc\" -i || exec \$SHELL -i"
@@ -1423,8 +1432,6 @@ mysudo() {
     fi
     $sudo_cmd -H bash -c "IAM=\"$IAM\" && export IAM && \
               SSH_PUB_KEY=\"$SSH_PUB_KEY\" && export SSH_PUB_KEY && \
-              GIT_USER_NAME=\"$GIT_USER_NAME\" && export GIT_USER_NAME && \
-              GIT_USER_EMAIL=\"$GIT_USER_EMAIL\" && export GIT_USER_EMAIL && \
               IAM_HOME=\"\$HOME/.${IAM}_home\" && export IAM_HOME &&
               rm -rf \"\$HOME/.${IAM}_terminfo\" && \
               rm -f \"\$HOME/.${IAM}_startup\" && \
@@ -1435,6 +1442,7 @@ mysudo() {
               TERMINFO=\"\$IAM_HOME/terminfo\" && \
               export TERMINFO && \
               tic \"\$IAM_HOME/terminfo/.terminfo\" && \
+              echo \"$(cat ${IAM_HOME}/gitconfig | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/gitconfig\" && \
               echo \"$(cat ${IAM_HOME}/vimrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/vimrc\" && \
               echo \"$(cat ${HOME}/.tclshrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$HOME/.tclshrc\" && \
               echo \"$(cat ${IAM_HOME}/bashrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/bashrc\"; exec bash --rcfile \"\$IAM_HOME/bashrc\" -i || exec \$SHELL -i"
