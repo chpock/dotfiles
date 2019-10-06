@@ -745,6 +745,41 @@ function! <SID>SynStack()
   echo map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
 endfunc
 
+" go to the position I was when last editing the file
+" based on: https://github.com/farmergreg/vim-lastplace
+function! <SID>lastplace()
+  if index(split("quickfix,nofile,help", ","), &buftype) != -1
+    return
+  endif
+
+  if index(split("gitcommit,gitrebase,svn,hgcommit", ","), &filetype) != -1
+    return
+  endif
+
+  try
+    if empty(glob(@%))
+      return
+    endif
+  catch
+    return
+  endtry
+
+  if line("'\"") > 0 && line("'\"") <= line("$")
+    if line("w$") == line("$")
+      execute "normal! g`\""
+    elseif line("$") - line("'\"") > ((line("w$") - line("w0")) / 2) - 1
+      execute "normal! g`\"zz"
+    else
+      execute "normal! \G'\"\<c-e>"
+    endif
+  endif
+
+  if foldclosed(".") != -1
+    execute "normal! zvzz"
+  endif
+endfunc
+au! BufWinEnter * call <SID>lastplace()
+
 " Special file types
 
 " YAML
