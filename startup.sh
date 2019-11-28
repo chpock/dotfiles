@@ -425,10 +425,9 @@ cat <<EOF > "$IAM_HOME/gitconfig"
   email = $GIT_USER_EMAIL
 [core]
   editor = vim
+  autocrlf = false
 [color]
   ui = auto
-[push]
-  default = simple
 EOF
 
 cat <<'EOF' > "$IAM_HOME/vimrc"
@@ -1220,6 +1219,11 @@ hostinfo() {
 
 hostinfo
 
+mkdir -p "$IAM_HOME/state"
+
+KUBECONFIG="$IAM_HOME/kubeconfig"
+export KUBECONFIG
+
 GIT_CONFIG="$IAM_HOME/gitconfig"
 export GIT_CONFIG
 unset GIT_USER_NAME
@@ -1363,6 +1367,9 @@ lastbuild() {
 }
 
 kube() {
+
+    local __K8S_CONF
+
     if [ -n "$1" ] && [ "$__K8S_NOT_AVAILABLE" != 0 ]; then
         echo "${COLOR_RED}ERROR${COLOR_GRAY}:$COLOR_DEFAULT kubectl command is not available in this environment"
         return 1
@@ -1370,21 +1377,103 @@ kube() {
 
     case "$1" in
         on)
-            __K8S_PROMPT_ON=1
+            touch "$IAM_HOME/state/on_kube"
         ;;
         off)
-            unset __K8S_PROMPT_ON
+            rm -f "$IAM_HOME/state/on_kube"
+        ;;
+        conf)
+            if [ -z "$2" ]; then
+                echo "${COLOR_RED}ERROR${COLOR_GRAY}:$COLOR_DEFAULT the kubeconfig is not specified"
+                echo
+                echo "Usage: kube conf <kubeconfig file>"
+                return 1
+            fi
+            __K8S_CONF="$2"
+            if [ "${DIR:0:1}" != "/" ]; then
+                __K8S_CONF="$PWD/$__K8S_CONF"
+            fi
+            if [ ! -f "$__K8S_CONF" ]; then
+                echo "${COLOR_RED}ERROR${COLOR_GRAY}:$COLOR_DEFAULT the specified kubeconfig file doesn't exist: '$__K8S_CONF'"
+                echo
+                echo "Usage: kube conf <kubeconfig file>"
+                return 1
+            fi
+            export KUBECONFIG="$__K8S_CONF"
+        ;;
+        ns)
+            if [ -z "$2" ]; then
+                echo "${COLOR_RED}ERROR${COLOR_GRAY}:$COLOR_DEFAULT the namespace is not specified"
+                echo
+                echo "Usage: kube ns <namespace>"
+                return 1
+            fi
+            kubectl config set-context --current --namespace "$2"
         ;;
         *)
             [ -n "$1" ] && echo "Unknown command '$1'"
             echo "Usage: kube <command>"
             echo
             echo "Available commands:"
-            echo "  on  - turn on k8s bash prompt"
-            echo "  off - turn off k8s bash prompt"
+            echo "  conf - set the current kubeconfig"
+            echo "  ns   - set the current namespace"
+            echo "  on   - turn on k8s bash prompt"
+            echo "  off  - turn off k8s bash prompt"
             return 1
         ;;
     esac
+
+}
+
+__kube_complete() {
+
+    local __VAR
+
+    COMPREPLY=()
+
+    if [ $COMP_CWORD -lt 2 ]; then
+        COMPREPLY=($(compgen -W "on off conf ns" "${COMP_WORDS[1]}"))
+        return
+    fi
+
+    case "${COMP_WORDS[1]}" in
+        conf)
+            compopt -o default
+        ;;
+        ns)
+            if ! __VAR="$(kubectl get namespace -o jsonpath='{.items[*].metadata.name}' 2>&1)"; then
+                echo
+                printf '%s' "${COLOR_RED}ERROR${COLOR_GRAY}:$COLOR_DEFAULT $__VAR"
+                COMPREPLY=('~=~=~=~=~=~' '=~=~=~=~=~=')
+            else
+                COMPREPLY=($(compgen -W "$__VAR" "${COMP_WORDS[2]}"))
+            fi
+        ;;
+    esac
+
+}
+
+complete -F __kube_complete kube
+
+aws() {
+
+    if [ -n "$1" ] && [ "$__AWS_NOT_AVAILABLE" != 0 ]; then
+        echo "${COLOR_RED}ERROR${COLOR_GRAY}:$COLOR_DEFAULT aws command is not available in this environment"
+        return 1
+    fi
+
+    case "$1" in
+        on)
+            touch "$IAM_HOME/state/on_aws"
+        ;;
+        off)
+            rm -f "$IAM_HOME/state/on_aws"
+        ;;
+        *)
+            command aws "$@"
+        ;;
+    esac
+
 }
 
 #magic
@@ -1447,6 +1536,33 @@ mysudo() {
               echo \"$(cat ${IAM_HOME}/vimrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/vimrc\" && \
               echo \"$(cat ${HOME}/.tclshrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$HOME/.tclshrc\" && \
               echo \"$(cat ${IAM_HOME}/bashrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/bashrc\"; exec bash --rcfile \"\$IAM_HOME/bashrc\" -i || exec \$SHELL -i"
+}
+
+# one-liner:
+# export ROLE=arn:aws:iam::<AWS ACCOUNT>:role/<AWS ROLE> && unset AWS_ACCESS_KEY_ID && unset AWS_SECRET_ACCESS_KEY && unset AWS_SESSION_TOKEN && set -- $(SESS_NAME=$(hostname -s); set -x; aws sts assume-role --role-arn "$ROLE" --role-session-name $SESS_NAME --output text --query '[Credentials.AccessKeyId,Credentials.SecretAccessKey,Credentials.SessionToken]') && unset ROLE && export AWS_ACCESS_KEY_ID="$1" && export AWS_SECRET_ACCESS_KEY="$2" && export AWS_SESSION_TOKEN="$3" && export AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-us-east-1}" && set --
+aws_role() {
+    if [ -z "$1" ]; then
+        echo "Usage: aws_role <role ARN>"
+        echo
+        echo "Example: aws_role arn:aws:iam::<AWS ACCOUNT>:role/<AWS ROLE>"
+        exit 1
+    fi
+    echo "Assume role: $1"
+    if [ -n "$AWS_SESSION_TOKEN" ]; then
+        unset AWS_SESSION_TOKEN
+        unset AWS_ACCESS_KEY_ID
+        unset AWS_SECRET_ACCESS_KEY
+    fi
+    export __ROLE="$1"
+    export __SESS_NAME="$(hostname -s)"
+    set -- $(set -x; aws sts assume-role --role-arn "$__ROLE" --role-session-name $__SESS_NAME --output text --query '[Credentials.AccessKeyId,Credentials.SecretAccessKey,Credentials.SessionToken]')
+    unset __ROLE
+    unset __SESS_NAME
+    export AWS_ACCESS_KEY_ID="$1"
+    export AWS_SECRET_ACCESS_KEY="$2"
+    export AWS_SESSION_TOKEN="$3"
+    export AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-us-east-1}"
+    set --
 }
 
 # KiTTY functions to receive file(s) and launch winscp
@@ -1525,9 +1641,17 @@ __GIT_NOT_AVAILABLE=$?
 (set +e; command -v kubectl >/dev/null 2>&1)
 __K8S_NOT_AVAILABLE=$?
 
+(set +e; command -v aws >/dev/null 2>&1)
+__AWS_NOT_AVAILABLE=$?
+
 __kubectl_status() {
 
-    if [ "$__K8S_NOT_AVAILABLE" != 0 ] || [ -z "$__K8S_PROMPT_ON" ]; then
+    local __K8S_CONTEXT
+    local __K8S_CONF
+    local __K8S_OUTPUT
+    local __K8S_NS
+
+    if [ "$__K8S_NOT_AVAILABLE" != 0 ] || [ ! -e "$IAM_HOME/state/on_kube" ]; then
         return
     fi
 
@@ -1537,34 +1661,93 @@ __kubectl_status() {
         __K8S_CONF="$KUBECONFIG"
     fi
 
-    __GIT_OUTPUT="${COLOR_GRAY}[${COLOR_WHITE}K8S${COLOR_GRAY}: $COLOR_CYAN$__K8S_CONF"
+    __K8S_OUTPUT="${COLOR_GRAY}[${COLOR_WHITE}K8S${COLOR_GRAY}: $COLOR_CYAN$(prompt_workingdir "$__K8S_CONF")"
 
     if [ ! -e "$__K8S_CONF" ]; then
-        __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_DEFAULT} - ${COLOR_RED}DOESN'T EXIST"
+        __K8S_OUTPUT="${__K8S_OUTPUT}${COLOR_DEFAULT} - ${COLOR_RED}DOESN'T EXIST"
     else
 
-        __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}cluster${COLOR_GRAY}: "
+        __K8S_OUTPUT="${__K8S_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}cluster${COLOR_GRAY}: "
 
-        if ! __K8S_CURRENT_CLUSTER="$(grep '^current-context:' "$__K8S_CONF")"; then
-            __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_LIGHTRED}NOT FOUND"
+        if ! __K8S_CONTEXT="$(kubectl config current-context 2>&1)"; then
+            # convert from:
+            #   error: current-context is not set
+            # to:
+            #   current-context is not set
+            __K8S_CONTEXT="${__K8S_CONTEXT#* }"
+            __K8S_OUTPUT="${__K8S_OUTPUT}${COLOR_LIGHTRED}$__K8S_CONTEXT"
         else
-            __K8S_CURRENT_CLUSTER="${__K8S_CURRENT_CLUSTER##*/}"
-            if [ -z "$__K8S_CURRENT_CLUSTER" ]; then
-                __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_LIGHTRED}UNKNOWN"
-            else
-                __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_PURPLE}$__K8S_CURRENT_CLUSTER"
-            fi
+
+            __K8S_OUTPUT="${__K8S_OUTPUT}${COLOR_PURPLE}$__K8S_CONTEXT"
+
+            __K8S_NS="$(kubectl config view -o=jsonpath="{.contexts[?(@.name==\"$__K8S_CONTEXT\")].context.namespace}")"
+            [ -z "$__K8S_NS" ] && __K8S_NS="default"
+            __K8S_OUTPUT="${__K8S_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}namespace${COLOR_GRAY}: ${COLOR_PURPLE}$__K8S_NS"
+
         fi
 
     fi
 
-    __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}]${COLOR_DEFAULT}"
+    __K8S_OUTPUT="${__K8S_OUTPUT}${COLOR_GRAY}]${COLOR_DEFAULT}"
 
-    echo "$__GIT_OUTPUT"
+    echo "$__K8S_OUTPUT"
 
-    unset __K8S_CONF
-    unset __K8S_CURRENT_CLUSTER
-    unset __GIT_OUTPUT
+}
+
+__aws_status() {
+
+    local __AWS_OUTPUT
+    local __AWS_INDENTITY
+
+    if [ "$__AWS_NOT_AVAILABLE" != 0 ] || [ ! -e "$IAM_HOME/state/on_aws" ]; then
+        return
+    fi
+
+    __AWS_OUTPUT="${COLOR_GRAY}[${COLOR_WHITE}AWS${COLOR_GRAY}: "
+
+    __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_DEFAULT}key${COLOR_GRAY}:"
+    if declare -p AWS_ACCESS_KEY_ID >/dev/null 2>&1; then
+        __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_GREEN} Y"
+    else
+        __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_RED} N"
+    fi
+
+    __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}secret${COLOR_GRAY}:"
+    if declare -p AWS_SECRET_ACCESS_KEY >/dev/null 2>&1; then
+        __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_GREEN} Y"
+    else
+        __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_RED} N"
+    fi
+
+    __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}session${COLOR_GRAY}:"
+    if declare -p AWS_SESSION_TOKEN >/dev/null 2>&1; then
+        __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_GREEN} Y"
+    else
+        __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_RED} N"
+    fi
+
+    __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}region${COLOR_GRAY}:"
+    if declare -p AWS_DEFAULT_REGION >/dev/null 2>&1; then
+        __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_CYAN} $AWS_DEFAULT_REGION"
+    else
+        __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_RED} N"
+    fi
+
+    __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}indentity${COLOR_GRAY}:"
+    if ! __AWS_INDENTITY="$(aws sts get-caller-identity --query 'Arn' 2>&1)"; then
+        # convert from:
+        #   An error occurred (InvalidClientTokenId) when calling the GetCallerIdentity operation: The security token included in the request is invalid.
+        # to
+        #   The security token included in the request is invalid.
+        __AWS_INDENTITY="${__AWS_INDENTITY#*:}"
+        __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_LIGHTRED}$__AWS_INDENTITY"
+    else
+        __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_GREEN} $(echo "$__AWS_INDENTITY" | tr -d '"')"
+    fi
+
+    __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}]${COLOR_DEFAULT}"
+
+    echo "$__AWS_OUTPUT"
 
 }
 
@@ -1622,7 +1805,7 @@ __git_status() {
     IFS="^" read -ra __GIT_BRANCH_FIELDS <<< "${__GIT_BRANCH/\#\# }"
     __GIT_BRANCH="${__GIT_BRANCH_FIELDS[0]}"
 
-    __GIT_OUTPUT="${COLOR_GRAY}[${COLOR_WHITE}GIT${COLOR_GRAY}: $COLOR_CYAN$__GIT_REPO_ROOT"
+    __GIT_OUTPUT="${COLOR_GRAY}[${COLOR_WHITE}GIT${COLOR_GRAY}: $COLOR_CYAN$(prompt_workingdir "$__GIT_REPO_ROOT")"
     __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}branch${COLOR_GRAY}: $COLOR_PURPLE$__GIT_BRANCH"
 
     if [ "$__GIT_NUM_CONFLICT" -ne 0 ]; then
@@ -1694,8 +1877,9 @@ function promptcmd () {
         ;;
     esac
 
-    __git_status
+    __aws_status
     __kubectl_status
+    __git_status
 
     PS1="${TITLEBAR}"
 
@@ -1773,16 +1957,22 @@ function promptcmd () {
 
 # Trim working dir to 1/4 the screen width
 function prompt_workingdir () {
+  local MY_PWD
   if [ "x$COLUMNS" = "x" ]; then
       local pwdmaxlen=20
   else
       local pwdmaxlen=$(($COLUMNS/4))
   fi
   local trunc_symbol="..."
-  if [[ $PWD == $HOME* ]]; then
-    newPWD="~${PWD#$HOME}"
+  if [ -z "$1" ]; then
+      MY_PWD="$PWD"
   else
-    newPWD=${PWD}
+      MY_PWD="$1"
+  fi
+  if [[ $MY_PWD == $HOME* ]]; then
+    newPWD="~${MY_PWD#$HOME}"
+  else
+    newPWD="$MY_PWD"
   fi
   if [ ${#newPWD} -gt $pwdmaxlen ]; then
     local pwdoffset=$(( ${#newPWD} - $pwdmaxlen + 3 ))
@@ -2002,6 +2192,21 @@ else
     echo "${COLOR_RED}Custom bash completion are not exist. Run the 'updatetools' command.${COLOR_DEFAULT}"
     echo ""
 fi
+
+if [ "$__K8S_NOT_AVAILABLE" = 0 ]; then
+
+    alias kc=kubectl
+
+    if type __start_kubectl >/dev/null 2>&1; then
+        if [ "$(type -t compopt)" = "builtin" ]; then
+            complete -o default -F __start_kubectl kc
+        else
+            complete -o default -o nospace -F __start_kubectl kc
+        fi
+    fi
+
+fi
+
 
 SSH_PUB_KEY_ONLY="`echo $SSH_PUB_KEY | awk '{print $2}'`"
 
