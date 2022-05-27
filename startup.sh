@@ -1,11 +1,11 @@
 IAM="kk" && \
 SSH_PUB_KEY="ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEApJEHtvysrpZeN7xfBS5GY0JjFD8eL5UCYZFbwcUhKXKNXsjtLl9FtwA9sS0cJhqM8CSSGAcceSirACC5L5PSLckeUh2eofYlqJPBkNzU2Uycwc7CSKJRaVTY+yNAJrdpO+7fJPxzis5H3CEB6roguEr+ZqDF9BSEZ0CO8l4wTGgsmqZ2UJuEKfVpPMg6cqGCUj6NvoADavMyrOPRKVCvKikJaWd3NJK4UXueLW0pc/lNoKvbVYRyXO0VruwsAAeciPtn/M1po/iz3+pQW9fk6uM1YContqmR3Ga7TfF249cSyml2gSO8VeNoPbm3RM/KPMZ8F9eyfwQUf6bic2IRoQ== kkushnir" && \
-GIT_USER_NAME="Konstantin Kushnir" && \
-GIT_USER_EMAIL="chpock@gmail.com" && \
+_GIT_USER_NAME="Konstantin Kushnir" && \
+_GIT_USER_EMAIL="chpock@gmail.com" && \
 export IAM && \
 export SSH_PUB_KEY && \
-export GIT_USER_NAME && \
-export GIT_USER_EMAIL && \
+export _GIT_USER_NAME && \
+export _GIT_USER_EMAIL && \
 IAM_HOME="$HOME/.${IAM}_home" && \
 export IAM_HOME && \
 rm -rf "$HOME/.${IAM}_terminfo" && \
@@ -419,17 +419,6 @@ if { [file exists [file join $::env(IAM_HOME) tools tcl TclReadLine]] } {
 
 EOF
 
-cat <<EOF > "$IAM_HOME/gitconfig"
-[user]
-  name = $GIT_USER_NAME
-  email = $GIT_USER_EMAIL
-[core]
-  editor = vim
-  autocrlf = false
-[color]
-  ui = auto
-EOF
-
 cat <<'EOF' > "$IAM_HOME/vimrc"
 set nocompatible
 set t_Co=256           " enable 256 colors
@@ -828,7 +817,7 @@ COLOR_BOLD=$'\e[1m'
 COLOR_ERROR=$'\e[41m\e[1m\e[97m'
 COLOR_SIGN=$'\e[38;5;136m'
 
-case `uname -s` in
+case $(uname -s) in
     AIX)
         # Insert path to GNU utilities for AIX platform
         PATH="/opt/freeware/bin:$PATH"
@@ -839,11 +828,43 @@ case `uname -s` in
         PATH="/usr/xpg4/bin:$PATH"
         export PATH
     ;;
-    Linux)
-        # "stat -c" is used to detect a zombie directories
-        MY_STATC="stat -c"
+    Darwin)
+        # Insert path to GNU utilities for MacOS platform
+        PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
+        # Add local bin directory
+        PATH="/usr/local/bin:$PATH"
+        export PATH
     ;;
 esac
+
+__WSL_NOT_AVAILABLE=1
+
+case $(uname -r) in
+    *-WSL2)
+        __WSL_NOT_AVAILABLE=0
+    ;;
+esac
+
+# GCP
+if [ -f ~/gcloud/google-cloud-sdk/path.bash.inc ]; then
+    . ~/gcloud/google-cloud-sdk/path.bash.inc
+fi
+
+PATH="$PATH:/usr/local/bin"
+export PATH
+
+(set +e; command -v git >/dev/null 2>&1)
+__GIT_NOT_AVAILABLE=$?
+
+if [ "$__GIT_NOT_AVAILABLE" = 0 ]; then
+    __GIT_VERSION="$(git --version | awk '{print $3}')"
+fi
+
+(set +e; command -v kubectl >/dev/null 2>&1)
+__K8S_NOT_AVAILABLE=$?
+
+(set +e; command -v aws >/dev/null 2>&1)
+__AWS_NOT_AVAILABLE=$?
 
 hostinfo() {
 
@@ -958,58 +979,60 @@ hostinfo() {
 
     case "${UNAME}" in
         *Linux:*|*:Darwin:*|*:SunOS:* )
-            # https://stackoverflow.com/questions/13322485/how-to-get-the-primary-ip-address-of-the-local-machine-on-linux-and-os-x
-            int2ip() {
-                # avoid overflow in bash math
-#               _a=$(echo "$1 / 2^16" | bc)
-#               printf "%d.%d.%d.%d" $(($_a>>8&255)) $(($_a&255)) $(($1>>8&255)) $(($1&255))
-                printf "%d.%d.%d.%d" $(($1>>24)) $(($1>>16&255)) $(($1>>8&255)) $(($1&255))
-            }
-            ip2int() {
-                _a=(${1//./ })
-                printf "%u" $(( _a<<24 | ${_a[1]} << 16 | ${_a[2]} << 8 | ${_a[3]} ))
-            }
-
-            runOnMac=0
-            while IFS=$' :\t\r\n' read a b c d; do
-                [ "$a" = "usage" ] && [ "$b" = "route" ] && runOnMac=1
-                if [ "x$runOnMac" = "x1" ]; then
-                    case $a in
-                        gateway )    gWay=$b  ;;
-                        interface )  iFace=$b ;;
-                    esac
-                else
-                    [ "$a" = "0.0.0.0" ] && [ "$c" = "$a" ] && iFace=${d##* } gWay=$b
-                fi
-            done < <(/sbin/route -n 2>&1 || /sbin/route -n get 0.0.0.0/0 2>&1 || true)
-
-            [ -z "$gWay" ] && gw=0 || gw=$(ip2int $gWay)
-
-            while read lhs rhs; do
-                [ "$lhs" ] && {
-                    [ "x$lhs" != "xinet" ] && [ "x$lhs" != "xinet6" ] && iface="$lhs"
-                    [ -z "${lhs#*:}" ] && iface=${lhs%:}
-                    [ "x$lhs" = "xinet" ] && {
-                        mask=${rhs#*netmask }
-                        mask=${mask#*Mask:}
-                        mask=${mask%% *}
-                        case "$mask" in
-                            0x*) mask="$(printf %u $mask)"; ;;
-                            f*)  mask="$(printf %u 0x$mask)"; ;;
-                            *)   mask="$(ip2int $mask)"; ;;
-                        esac
-                        myIp=${rhs%% *}
-                        myIp=${myIp#*addr:}
-                        ip=$(ip2int $myIp)
-                        netMask=$(int2ip $mask)
-                        (( ( ip & mask ) == ( gw & mask ) )) && myGway=", gw: $gWay" || myGway=
-                        [ "x$myIp" != "x127.0.0.1" ] && \
-                            printf -- "Interface : %s (name: '%s', mask: %s%s)\n" "$myIp" "$iface" "$netMask" "$myGway"
-                    }
+            if [ -e /sbin/ifconfig ]; then
+                # https://stackoverflow.com/questions/13322485/how-to-get-the-primary-ip-address-of-the-local-machine-on-linux-and-os-x
+                int2ip() {
+                    # avoid overflow in bash math
+                    # _a=$(echo "$1 / 2^16" | bc)
+                    # printf "%d.%d.%d.%d" $(($_a>>8&255)) $(($_a&255)) $(($1>>8&255)) $(($1&255))
+                    printf "%d.%d.%d.%d" $(($1>>24)) $(($1>>16&255)) $(($1>>8&255)) $(($1&255))
                 }
-            done < <(/sbin/ifconfig 2>&1 || /sbin/ifconfig -a)
+                ip2int() {
+                    _a=(${1//./ })
+                    printf "%u" $(( _a<<24 | ${_a[1]} << 16 | ${_a[2]} << 8 | ${_a[3]} ))
+                }
 
-            printf -- "-------------------------------------------------------------------[ Network ]--\n"
+                runOnMac=0
+                while IFS=$' :\t\r\n' read a b c d; do
+                    [ "$a" = "usage" ] && [ "$b" = "route" ] && runOnMac=1
+                    if [ "x$runOnMac" = "x1" ]; then
+                        case $a in
+                            gateway )    gWay=$b  ;;
+                            interface )  iFace=$b ;;
+                        esac
+                    else
+                        [ "$a" = "0.0.0.0" ] && [ "$c" = "$a" ] && iFace=${d##* } gWay=$b
+                    fi
+                done < <(/sbin/route -n 2>&1 || /sbin/route -n get 0.0.0.0/0 2>&1 || true)
+
+                [ -z "$gWay" ] && gw=0 || gw=$(ip2int $gWay)
+
+                while read lhs rhs; do
+                    [ "$lhs" ] && {
+                        [ "x$lhs" != "xinet" ] && [ "x$lhs" != "xinet6" ] && iface="$lhs"
+                        [ -z "${lhs#*:}" ] && iface=${lhs%:}
+                        [ "x$lhs" = "xinet" ] && {
+                            mask=${rhs#*netmask }
+                            mask=${mask#*Mask:}
+                            mask=${mask%% *}
+                            case "$mask" in
+                                0x*) mask="$(printf %u $mask)"; ;;
+                                f*)  mask="$(printf %u 0x$mask)"; ;;
+                                *)   mask="$(ip2int $mask)"; ;;
+                            esac
+                            myIp=${rhs%% *}
+                            myIp=${myIp#*addr:}
+                            ip=$(ip2int $myIp)
+                            netMask=$(int2ip $mask)
+                            (( ( ip & mask ) == ( gw & mask ) )) && myGway=", gw: $gWay" || myGway=
+                            [ "x$myIp" != "x127.0.0.1" ] && \
+                                printf -- "Interface : %s (name: '%s', mask: %s%s)\n" "$myIp" "$iface" "$netMask" "$myGway"
+                        }
+                    }
+                done < <(/sbin/ifconfig 2>&1 || /sbin/ifconfig -a)
+
+                printf -- "-------------------------------------------------------------------[ Network ]--\n"
+            fi
         ;;
     esac
 
@@ -1055,20 +1078,78 @@ hostinfo() {
         SWAP_TOTAL=$(( $_swapTotal / 1024 ))
         SWAP_FREE=$(( $_swapFree / 1024 ))
 
+    elif command -v vm_stat >/dev/null 2>&1; then
+
+        read SWAP_TOTAL SWAP_FREE <<< $(sysctl vm.swapusage | awk '{ print $4 "\n" $10 }')
+        SWAP_TOTAL="${SWAP_TOTAL%%.*}"
+        SWAP_FREE="${SWAP_FREE%%.*}"
+
+        MEM_TOTAL="$(sysctl hw.memsize | awk '{ print $NF }')"
+        MEM_TOTAL="$(( $MEM_TOTAL / 1024 / 1024 ))"
+
+        MEM_FREE=0
+        while IFS=$':\r\n' read a b; do
+            if [ "$a" = "Pages free" ] || [ "$a" = "Pages inactive" ] || [ "$a" = "Pages speculative" ]; then
+                b="${b// /}"
+                b="${b//./}"
+                MEM_FREE="$(( $MEM_FREE + $b ))"
+            fi
+        done < <(vm_stat)
+        MEM_FREE="$(( $MEM_FREE * 4096 / 1024 / 1024 ))"
+
     else
         MEM_TOTAL=""
     fi
+
+    _showfeature() {
+
+        local line
+        local width=15
+
+        for f in "$@"; do
+
+            local feature
+            local state
+            local part
+            local color
+
+            feature="${f%:*}"
+            state="${f#*:}"
+
+            if [ "$state" = "0" ]; then
+                color="$COLOR_GREEN"
+            elif [ "$state" = "1" ]; then
+                color="$COLOR_DEFAULT"
+            else
+                color="$COLOR_RED"
+            fi
+
+            part="$(printf "${COLOR_GRAY}[ %s%-${width}s${COLOR_GRAY} ]${COLOR_DEFAULT}" "$color" "$feature")"
+
+            if [ -z "$line" ]; then
+                line="$part"
+            else
+                line="$line $part"
+            fi
+
+        done
+
+        echo "$line"
+
+    }
 
     _showinfo() {
         # $1 - info type
         # $2 - total
         # $3 - free
         # $4 - additional info
+        # $5 - additional info
 
         local infoType="$1"
         local total="$2"
         local free="$3"
         local add="$4"
+        local add2="$5"
 
         gauge() {
             # $1 - total
@@ -1119,7 +1200,11 @@ hostinfo() {
             add="  ${COLOR_WHITE}$add${COLOR_DEFAULT}"
         fi
 
-        printf -- "%-9s : Free ${color}%9s${COLOR_DEFAULT} of %9s %s%s\n" "$infoType" "$free" "$total" "$gauge" "$add"
+        if [ -n "$add2" ]; then
+            add2=" ${COLOR_GRAY}$add2${COLOR_DEFAULT}"
+        fi
+
+        printf -- "%-9s : Free ${color}%9s${COLOR_DEFAULT} of %9s %s%s%s\n" "$infoType" "$free" "$total" "$gauge" "$add" "$add2"
 
     }
 
@@ -1151,10 +1236,23 @@ hostinfo() {
                 [ "$f" = "/boot" ]    && continue
                 [ "${f:0:5}" = "/sys/" ] && continue
                 [ "${f:0:5}" = "/run/" ] && continue
+                [ "${f:0:6}" = "/boot/" ] && continue
 
-                _showinfo "Mount" "$b" "$d" "$f"
+                # hide WSL volumes
+                if [ "$__WSL_NOT_AVAILABLE" -eq 0 ]; then
+                    # [ "$f" = "/init" ]                && continue
+                    [ "${f:0:13}" = "/usr/lib/wsl/" ] && continue
+                fi
 
-            done < <(df -m -P | tail -n +2)
+                if [ "$a" = "${a%:*}" ]; then
+                    unset a
+                else
+                    a="(nfs: $a)"
+                fi
+
+                _showinfo "Mount" "$b" "$d" "$f" "$a"
+
+            done < <(df -m -P | tail -n +2 | grep -v '^/dev/loop')
         ;;
         *:Darwin:*)
             while IFS=$' \t\r\n' read a b c d e f; do
@@ -1206,14 +1304,47 @@ hostinfo() {
 
     printf -- "----------------------------------------------------------------[ Filesystem ]--\n"
 
-    printf -- "Username  : %s\n" "$USER"
+    printf -- "Username  : %s\n" "$(id --user --name)"
     printf -- "Shell     : %s\n" "$MSHELL_L"
-    printf -- "----------------------------------------------------------------------[ User ]--\n\n"
+    printf -- "----------------------------------------------------------------------[ User ]--\n"
     unset MSHELL_L
     unset UNAME
     unset UNAME_MACHINE
     unset UNAME_SYSTEM
     unset UNAME_RELEASE
+
+    _showfeature \
+        "AWS CLI:$__AWS_NOT_AVAILABLE" \
+        "gcloud CLI:$(set +e; command -v gcloud >/dev/null 2>&1; echo $?)"
+
+    _showfeature \
+        "docker:$(set +e; command -v docker >/dev/null 2>&1; echo $?)" \
+        "docker-compose:$(set +e; command -v docker-compose >/dev/null 2>&1; echo $?)"
+
+    _showfeature \
+        "kubectl:$(set +e; command -v kubectl >/dev/null 2>&1; echo $?)" \
+        "eksctl:$(set +e; command -v eksctl >/dev/null 2>&1; echo $?)" \
+        "OpenShift CLI:$(set +e; command -v oc >/dev/null 2>&1; echo $?)"
+
+    _showfeature \
+        "vim:$(set +e; command -v vim >/dev/null 2>&1; echo $?)" \
+        "git:$(set +e; command -v git >/dev/null 2>&1; echo $?)" \
+        "curl:$(set +e; command -v curl >/dev/null 2>&1; echo $?)" \
+        "wget:$(set +e; command -v wget >/dev/null 2>&1; echo $?)"
+
+    if command -v sudo >/dev/null 2>&1; then
+        SUDO_STATUS="$(printf '' | LC_ALL=C sudo -l -S 2>&1)"
+        SUDO_AVAIL="$(echo "$SUDO_STATUS" | grep --fixed-strings --silent 'may run'; echo $?)"
+        SUDO_NOPASS="$(echo "$SUDO_STATUS" | grep --fixed-strings --silent 'NOPASSWD'; echo $?)"
+        _showfeature \
+            "sudo avail:$SUDO_AVAIL" \
+            "sudo nopass:$SUDO_NOPASS"
+        unset SUDO_NOPASS
+        unset SUDO_AVAIL
+        unset SUDO_STATUS
+    fi
+
+    printf -- "------------------------------------------------------------------[ Features ]--\n\n"
 
 }
 
@@ -1224,21 +1355,22 @@ mkdir -p "$IAM_HOME/state"
 KUBECONFIG="$IAM_HOME/kubeconfig"
 export KUBECONFIG
 
-GIT_CONFIG="$IAM_HOME/gitconfig"
-export GIT_CONFIG
-unset GIT_USER_NAME
-unset GIT_USER_EMAIL
-
 # Don't want my shell to warn me of incoming mail.
 unset MAILCHECK
+
+# See http://stackoverflow.com/questions/791765/unable-to-forward-search-bash-history-similarly-as-with-ctrl-r to make ctrl-s work forward
+stty -ixon
 
 # Shell options
 # notify - Notify when jobs running in background terminate
 set -o notify
 # cdspell - If set, minor errors in the spelling of a directory component in a cd command will be corrected.
 shopt -s cdspell
-# dirspell - If set, Bash attempts spelling correction on directory names during word completion if the directory name initially supplied does not exist.
-shopt -s dirspell 2>/dev/null || echo "FYI: 'dirspell' bash option is not supported."
+# This option is for bash only
+if [ -n "$BASH_VERSION" ]; then
+    # dirspell - If set, Bash attempts spelling correction on directory names during word completion if the directory name initially supplied does not exist.
+    shopt -s dirspell 2>/dev/null || echo "FYI: 'dirspell' bash option is not supported."
+fi
 # checkwinsize - If set, Bash checks the window size after each command and, if necessary, updates the values of LINES and COLUMNS.
 shopt -s checkwinsize
 # cmdhist - If set, Bash attempts to save all lines of a multiple-line command in the same history entry. This allows easy re-editing of multi-line commands.
@@ -1322,45 +1454,212 @@ elif command -v vi >/dev/null; then
     EDITOR=vi
 else
     echo "${COLOR_RED}Warning: vi/vim not found${COLOR_DEFAULT}"
+    echo
 fi
 export EDITOR
 unset VIM
 
 apt-get() {
-    echo "${COLOR_RED}The 'sudo' prefix was added automatically for the 'apt-get' command${COLOR_DEFAULT}" >&2
-    sudo apt-get "$@"
+    if [ "$(id -u)" -ne 0 ]; then
+        echo "${COLOR_RED}The 'sudo' prefix was added automatically for the 'apt-get' command${COLOR_DEFAULT}" >&2
+        sudo apt-get "$@"
+    else
+        command apt-get "$@"
+    fi
 }
 
 apt() {
-    case "$1" in
-        install|remove|purge|autoremove|update|upgrade|full-upgrade|edit-sources)
-            echo "${COLOR_RED}The 'sudo' prefix was added automatically for the 'apt' command${COLOR_DEFAULT}" >&2
-            sudo apt "$@"
-        ;;
-        *) command apt "$@"
-        ;;
-    esac
+    if [ "$(id -u)" -ne 0 ]; then
+        case "$1" in
+            install|remove|purge|autoremove|update|upgrade|full-upgrade|edit-sources)
+                echo "${COLOR_RED}The 'sudo' prefix was added automatically for the 'apt' command${COLOR_DEFAULT}" >&2
+                sudo apt "$@"
+            ;;
+            *) command apt "$@"
+            ;;
+        esac
+    else
+        command apt "$@"
+    fi
+}
+
+mydu() {
+
+    local PARAM="$1"
+    local SIZE
+    local SIZE_TOTAL
+    local COUNT_TOTAL
+    local COUNT
+
+    local i
+    local BLANK="$(printf "\r%$(tput cols)s\r")"
+
+    local UNSORTED
+    local SORTED
+
+    declare -A UNSORTED
+    declare -A SORTED
+
+    set --
+
+    while IFS=$' \r\n' read a b c d; do
+        if [ "$c" != "/" ]; then
+            set -- "$@" "--exclude=$c"
+        fi
+    done < <(mount)
+
+    if [ -z "$PARAM" ]; then
+        PARAM="."
+    fi
+
+    COUNT_TOTAL=0
+    while IFS= read -r -d '' a; do
+        COUNT_TOTAL=$(( $COUNT_TOTAL + 1 ))
+    done < <(find "$PARAM" -maxdepth 1 -mindepth 1 -print0)
+
+    COUNT=1
+    SIZE_TOTAL=0
+    while IFS= read -r -d '' a; do
+        a="${a#./*}"
+        printf "[%3i/%3i]: %s ..." "$COUNT" "$COUNT_TOTAL" "$a"
+        SIZE="$(sudo du --one-file-system --block-size=1M --summarize "$@" "$a" | awk '{print $1}')"
+        printf "$BLANK"
+        if [ -n "$SIZE" ]; then
+            if [ "$SIZE" -gt 1 ]; then
+                UNSORTED["$a"]="$SIZE"
+                SIZE_TOTAL=$(( $SIZE_TOTAL + $SIZE ))
+            fi
+        fi
+        COUNT=$(( $COUNT + 1 ))
+    done < <(find "$PARAM" -maxdepth 1 -mindepth 1 -print0)
+
+    while IFS=' ' read a b; do
+
+        if [ "$a" -gt 1023 ]; then
+            a="$(( 100 * $a / 1024 ))e-2"
+            a="$(printf '%.2f GB' "$a")"
+        else
+            a="${a} MB"
+        fi
+
+        if [ -f "$b" ]; then
+            i="F"
+        elif [ -d "$b" ]; then
+            i="D"
+        else
+            i="?"
+        fi
+
+        printf '%10s [%s] %s\n' "$a" "$i" "$b" | sed \
+            -e "s/ MB /${COLOR_GREEN} MB ${COLOR_DEFAULT}/" \
+            -e "s/ GB /${COLOR_RED} GB ${COLOR_DEFAULT}/" \
+            -e "s/\[F\] /${COLOR_GRAY}[${COLOR_DEFAULT}F${COLOR_GRAY}] ${COLOR_DEFAULT}/" \
+            -e "s/\[D\] /${COLOR_GRAY}[${COLOR_WHITE}D${COLOR_GRAY}] ${COLOR_DEFAULT}/"
+
+    done < <(for i in "${!UNSORTED[@]}"; do echo ${UNSORTED["$i"]} $i; done | sort --numeric-sort)
+
+    echo "${COLOR_GRAY}--------------------${COLOR_DEFAULT}"
+
+    if [ "$SIZE_TOTAL" -gt 1023 ]; then
+        SIZE_TOTAL="$(( 100 * $SIZE_TOTAL / 1024 ))e-2"
+        SIZE_TOTAL="$(printf '%.2f GB ' "$SIZE_TOTAL")"
+    else
+        SIZE_TOTAL="${SIZE_TOTAL} MB "
+    fi
+
+    echo "Total: $SIZE_TOTAL" | sed \
+        -e "s/ MB /${COLOR_GREEN} MB ${COLOR_DEFAULT}/" \
+        -e "s/ GB /${COLOR_RED} GB ${COLOR_DEFAULT}/"
+
+}
+
+
+gitconfig() {
+    (set -x; git config user.name "$_GIT_USER_NAME")
+    if [ -z "$1" ]; then
+        (set -x; git config user.email "$_GIT_USER_EMAIL")
+    else
+        (set -x; git config user.email "$1")
+    fi
 }
 
 lastbuild() {
-    if [ -z "$1" ] || [ "$1" = "common64" ] || [ "$1" = "common" ]; then
-        BLD="`/bin/ls -t -1 /net/chronic3build/commander-git-main-full-*/out/x86_64_Linux/nimbus/install/CloudBeesFlow-x64-* | head -1`"
-    elif [ "$1" = "common32" ]; then
-        BLD="`/bin/ls -t -1 /net/chronic3build/commander-git-main-full-*/out/i686_Linux/nimbus/install/CloudBeesFlow-* | head -1`"
-    elif [ "$1" = "agent32" ]; then
-        BLD="`/bin/ls -t -1 /net/chronic3build/commander-git-main-full-*/out/i686_Linux/nimbus/install/CloudBeesFlowAgent-x86-* | head -1`"
-    elif [ "$1" = "agent64" ]; then
-        BLD="`/bin/ls -t -1 /net/chronic3build/commander-git-main-full-*/out/i686_Linux/nimbus/install/CloudBeesFlowAgent-x64-* | head -1`"
-    elif [ "$1" = "agent64p" ] || [ "$1" = "agent" ]; then
-        BLD="`/bin/ls -t -1 /net/chronic3build/commander-git-main-full-*/out/x86_64_Linux/nimbus/install/CloudBeesFlowAgent-x64-* | head -1`"
-    elif [ "$1" = "dois" ]; then
-        BLD="`/bin/ls -t -1 /net/chronic3build/commander-git-main-full-*/out/i686_Linux/nimbus/install/CloudBeesFlowDevOpsInsightServer-x64-* | head -1`"
-    elif [ "$1" = "dofs" ]; then
-        BLD="`/bin/ls -t -1 /net/chronic3build/commander-git-main-full-*/out/x86_64_Linux/nimbus/install/CloudBeesFlowDevOpsForesightServer-x64-* | head -1`"
-    else
-        echo 'Usage: lastbuild [common|common32|agent|agent32|agent64|agent64p|dois|dofs]' >&2
-        exit 1
+
+    local BLD
+    local MSK
+    local BAS
+    local LST
+    local BID
+
+    if [ -n "$1" ] && [ "$1" = "list" ]; then
+        LST=1
+        shift
     fi
+
+    if [ -n "$LST" ] && [ -n "$1" ]; then
+        ectool --server artemis.nimbus.beescloud.com getProperties --path '/server/CommanderReleases' \
+            | grep -oP '<propertyName>\K[^<]+' \
+            | sort --version-sort
+        return $?
+    fi
+
+    if [ -n "$1" ] && [ "$(echo "$1" | cut -d- -f1)" = "commander" ]; then
+        BID="$1"
+        shift
+    # if $1 is a number (and no ".")
+    elif [ -n "$1" ] && [ "$1" -eq "$1" ] 2>/dev/null && [ "$1" = "${1#*.}" ]; then
+        BID="commander-*.$1-*"
+        shift
+    # if $1 is a version
+    elif echo "$1" | grep --silent -P '^(\d\.?)+$'; then
+        BID="$(ectool --server artemis.nimbus.beescloud.com getProperty "/server/CommanderReleases/$1")"
+        shift
+    else
+        BID='commander-main.*'
+    fi
+
+    BLD="$BID/out/x86_64_Linux/nimbus/install"
+
+    if [ -z "$1" ] || [ "$1" = "common64" ] || [ "$1" = "common" ]; then
+        MSK="CloudBeesFlow-x64-*"
+    elif [ "$1" = "agent" ]; then
+        MSK="CloudBeesFlowAgent-x64-*"
+    elif [ "$1" = "dois" ]; then
+        MSK="CloudBeesFlowDevOpsInsightServer-x64-*"
+    elif [ "$1" = "dofs" ]; then
+        MSK="CloudBeesFlowDevOpsForesightServer-x64-*"
+    else
+        echo 'Usage: lastbuild [list] [<build>] [common|agent|dois|dofs]' >&2
+        return 1
+    fi
+
+    if [ -e /net/chronic3build ] || [ -e /mnt/chronic3build ]; then
+        if [ -e /net/chronic3build ]; then
+            BLD="/net/chronic3build/$BLD/$MSK"
+        else
+            BLD="/mnt/chronic3build/$BLD/$MSK"
+        fi
+        if [ -n "$LST" ]; then
+            /bin/ls -t -1 $BLD | grep -v md5 | cut -d/ -f 4
+            return 0
+        fi
+        BLD="$(/bin/ls -t -1 $BLD | grep -v md5 | head -1)"
+    else
+        if [ -n "$LST" ]; then
+            ssh build@gw.nimbus.beescloud.com "/bin/ls -t -1 /mnt/chronic3build/$BLD/$MSK | grep -v md5 | cut -d/ -f 4"
+            return 0
+        fi
+        echo "* Looking for the build on remote side..." >&2
+        BLD="$(ssh build@gw.nimbus.beescloud.com "/bin/ls -t -1 /mnt/chronic3build/$BLD/$MSK | grep -v md5 | head -1")"
+        BAS="$(echo "$BLD" | sed 's#^/[^/]\+/#/tmp/#')"
+        if [ ! -e "$BAS" ]; then
+            mkdir -p "$(dirname "$BAS")"
+            echo "* Copying the build from remote side..." >&2
+            scp "build@gw.nimbus.beescloud.com:$BLD" "$(dirname "$BAS")" >&2
+        fi
+        BLD="$BAS"
+    fi
+
     echo "Using build: `echo "$BLD" | cut -d/ -f4`" >&2
     echo "File: `basename "$BLD"`" >&2
     echo "$BLD"
@@ -1408,7 +1707,7 @@ kube() {
                 echo "Usage: kube ns <namespace>"
                 return 1
             fi
-            kubectl config set-context --current --namespace "$2"
+            kubectl config set-context $(kubectl config current-context) --namespace "$2"
         ;;
         *)
             [ -n "$1" ] && echo "Unknown command '$1'"
@@ -1480,7 +1779,33 @@ aws() {
 myssh() {
    ssh -t $* "IAM=\"$IAM\" && export IAM && \
               SSH_PUB_KEY=\"$SSH_PUB_KEY\" && export SSH_PUB_KEY && \
-              IAM_HOME=\"\$HOME/.${IAM}_home\" && export IAM_HOME &&
+              IAM_HOME=\"\$HOME/.${IAM}_home\" && export IAM_HOME && \
+              _GIT_USER_NAME=\"$_GIT_USER_NAME\" && export _GIT_USER_NAME && \
+              _GIT_USER_EMAIL=\"$_GIT_USER_EMAIL\" && export _GIT_USER_EMAIL && \
+              rm -rf \"\$HOME/.${IAM}_terminfo\" && \
+              rm -f \"\$HOME/.${IAM}_startup\" && \
+              if [ ! -d \"\$IAM_HOME\" ]; then mkdir \"\$IAM_HOME\"; fi && \
+              rm -rf \"\$IAM_HOME/terminfo\" && \
+              mkdir \"\$IAM_HOME/terminfo\" && \
+              echo \"$(cat ${IAM_HOME}/terminfo/.terminfo | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/terminfo/.terminfo\" &&
+              TERMINFO=\"\$IAM_HOME/terminfo\" && \
+              export TERMINFO && \
+              tic \"\$IAM_HOME/terminfo/.terminfo\" && \
+              echo \"$(cat ${IAM_HOME}/gitconfig | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/gitconfig\" && \
+              echo \"$(cat ${IAM_HOME}/vimrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/vimrc\" && \
+              echo \"$(cat ${HOME}/.tclshrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$HOME/.tclshrc\" && \
+              echo \"$(cat ${IAM_HOME}/bashrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/bashrc\"; exec bash --rcfile \"\$IAM_HOME/bashrc\" -i || exec \$SHELL -i"
+}
+gssh() {
+   host="$1"
+   shift
+   # --internal-ip
+   # --tunnel-through-iap
+   gcloud compute ssh --internal-ip "$host" "$@" -- -t "IAM=\"$IAM\" && export IAM && \
+              SSH_PUB_KEY=\"$SSH_PUB_KEY\" && export SSH_PUB_KEY && \
+              IAM_HOME=\"\$HOME/.${IAM}_home\" && export IAM_HOME && \
+              _GIT_USER_NAME=\"$_GIT_USER_NAME\" && export _GIT_USER_NAME && \
+              _GIT_USER_EMAIL=\"$_GIT_USER_EMAIL\" && export _GIT_USER_EMAIL && \
               rm -rf \"\$HOME/.${IAM}_terminfo\" && \
               rm -f \"\$HOME/.${IAM}_startup\" && \
               if [ ! -d \"\$IAM_HOME\" ]; then mkdir \"\$IAM_HOME\"; fi && \
@@ -1498,7 +1823,9 @@ myssh() {
 mydocker() {
    docker exec -ti $1 /bin/bash -c "IAM=\"$IAM\" && export IAM && \
               SSH_PUB_KEY=\"$SSH_PUB_KEY\" && export SSH_PUB_KEY && \
-              IAM_HOME=\"\$HOME/.${IAM}_home\" && export IAM_HOME &&
+              IAM_HOME=\"\$HOME/.${IAM}_home\" && export IAM_HOME && \
+              _GIT_USER_NAME=\"$_GIT_USER_NAME\" && export _GIT_USER_NAME && \
+              _GIT_USER_EMAIL=\"$_GIT_USER_EMAIL\" && export _GIT_USER_EMAIL && \
               rm -rf \"\$HOME/.${IAM}_terminfo\" && \
               rm -f \"\$HOME/.${IAM}_startup\" && \
               if [ ! -d \"\$IAM_HOME\" ]; then mkdir \"\$IAM_HOME\"; fi && \
@@ -1522,7 +1849,9 @@ mysudo() {
     fi
     $sudo_cmd -H bash -c "IAM=\"$IAM\" && export IAM && \
               SSH_PUB_KEY=\"$SSH_PUB_KEY\" && export SSH_PUB_KEY && \
-              IAM_HOME=\"\$HOME/.${IAM}_home\" && export IAM_HOME &&
+              IAM_HOME=\"\$HOME/.${IAM}_home\" && export IAM_HOME && \
+              _GIT_USER_NAME=\"$_GIT_USER_NAME\" && export _GIT_USER_NAME && \
+              _GIT_USER_EMAIL=\"$_GIT_USER_EMAIL\" && export _GIT_USER_EMAIL && \
               rm -rf \"\$HOME/.${IAM}_terminfo\" && \
               rm -f \"\$HOME/.${IAM}_startup\" && \
               if [ ! -d \"\$IAM_HOME\" ]; then mkdir \"\$IAM_HOME\"; fi && \
@@ -1537,6 +1866,79 @@ mysudo() {
               echo \"$(cat ${HOME}/.tclshrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$HOME/.tclshrc\" && \
               echo \"$(cat ${IAM_HOME}/bashrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/bashrc\"; exec bash --rcfile \"\$IAM_HOME/bashrc\" -i || exec \$SHELL -i"
 }
+wsl() {
+    if [ -n "$1" ]; then
+        command wsl "$@"
+    else
+
+        echo "IAM=\"$IAM\" && export IAM && \
+              SSH_PUB_KEY=\"$SSH_PUB_KEY\" && export SSH_PUB_KEY && \
+              IAM_HOME=\"\$HOME/.${IAM}_home\" && export IAM_HOME && \
+              _GIT_USER_NAME=\"$_GIT_USER_NAME\" && export _GIT_USER_NAME && \
+              _GIT_USER_EMAIL=\"$_GIT_USER_EMAIL\" && export _GIT_USER_EMAIL && \
+              rm -rf \"\$HOME/.${IAM}_terminfo\" && \
+              rm -f \"\$HOME/.${IAM}_startup\" && \
+              if [ ! -d \"\$IAM_HOME\" ]; then mkdir \"\$IAM_HOME\"; fi && \
+              rm -rf \"\$IAM_HOME/terminfo\" && \
+              mkdir \"\$IAM_HOME/terminfo\" && \
+              echo \"$(cat ${IAM_HOME}/terminfo/.terminfo | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/terminfo/.terminfo\" &&
+              TERMINFO=\"\$IAM_HOME/terminfo\" && \
+              export TERMINFO && \
+              tic \"\$IAM_HOME/terminfo/.terminfo\" && \
+              echo \"$(cat ${IAM_HOME}/gitconfig | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/gitconfig\" && \
+              echo \"$(cat ${IAM_HOME}/vimrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/vimrc\" && \
+              echo \"$(cat ${HOME}/.tclshrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$HOME/.tclshrc\" && \
+              echo \"$(cat ${IAM_HOME}/bashrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/bashrc\"" \
+        | wsl -d Ubuntu
+
+        wsl -d Ubuntu /bin/bash -c "IAM=\"$IAM\" && export IAM && \
+              SSH_PUB_KEY=\"$SSH_PUB_KEY\" && export SSH_PUB_KEY && \
+              IAM_HOME=\"\$HOME/.${IAM}_home\" && export IAM_HOME && \
+              _GIT_USER_NAME=\"$_GIT_USER_NAME\" && export _GIT_USER_NAME && \
+              _GIT_USER_EMAIL=\"$_GIT_USER_EMAIL\" && export _GIT_USER_EMAIL && \
+              rm -rf \"\$HOME/.${IAM}_terminfo\" && \
+              rm -f \"\$HOME/.${IAM}_startup\" && \
+              if [ ! -d \"\\\$IAM_HOME\" ]; then mkdir \"\\\$IAM_HOME\"; fi && \
+              rm -rf \"\\\$IAM_HOME/terminfo\" && \
+              mkdir \"\\\$IAM_HOME/terminfo\" && \
+              echo \"$(cat $IAM_HOME/terminfo/.terminfo | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\\\$IAM_HOME/terminfo/.terminfo\" &&
+              TERMINFO=\"\\\$IAM_HOME/terminfo\" && \
+              export TERMINFO && \
+              tic \"\\\$IAM_HOME/terminfo/.terminfo\" && \
+              exec bash --rcfile \"\\\$IAM_HOME/bashrc\" -i || exec \\\$SHELL -i"
+
+    fi
+}
+
+__mydocker_complete() {
+
+    local __VAR
+
+    COMPREPLY=()
+
+    if [ $COMP_CWORD -eq 1 ] && [ -z "${COMP_WORDS[1]}" ]; then
+        echo
+        printf '%s' "$(docker ps)"
+        COMPREPLY=('~=~=~=~=~=~' '=~=~=~=~=~=')
+        return
+    fi
+
+    if [ $COMP_CWORD -gt 1 ]; then
+        compopt -o default
+        return
+    fi
+
+    if ! __VAR="$(docker ps --quiet 2>&1)"; then
+        echo
+        printf '%s' "${COLOR_RED}ERROR${COLOR_GRAY}:$COLOR_DEFAULT $__VAR"
+        COMPREPLY=('~=~=~=~=~=~' '=~=~=~=~=~=')
+    else
+        COMPREPLY=($(compgen -W "$__VAR" "${COMP_WORDS[1]}"))
+    fi
+
+}
+
+complete -F __mydocker_complete mydocker
 
 # one-liner:
 # export ROLE=arn:aws:iam::<AWS ACCOUNT>:role/<AWS ROLE> && unset AWS_ACCESS_KEY_ID && unset AWS_SECRET_ACCESS_KEY && unset AWS_SESSION_TOKEN && set -- $(SESS_NAME=$(hostname -s); set -x; aws sts assume-role --role-arn "$ROLE" --role-session-name $SESS_NAME --output text --query '[Credentials.AccessKeyId,Credentials.SecretAccessKey,Credentials.SessionToken]') && unset ROLE && export AWS_ACCESS_KEY_ID="$1" && export AWS_SECRET_ACCESS_KEY="$2" && export AWS_SESSION_TOKEN="$3" && export AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-us-east-1}" && set --
@@ -1635,14 +2037,37 @@ HISTIGNORE="&:[bf]g:exit"
 # history file
 HISTFILE="$HOME/.${IAM}_history"
 
-(set +e; command -v git >/dev/null 2>&1)
-__GIT_NOT_AVAILABLE=$?
-
-(set +e; command -v kubectl >/dev/null 2>&1)
-__K8S_NOT_AVAILABLE=$?
-
-(set +e; command -v aws >/dev/null 2>&1)
-__AWS_NOT_AVAILABLE=$?
+# based on https://stackoverflow.com/a/4025065/1980049
+__checkMinVer () {
+    if [[ $1 == $2 ]]
+    then
+        return 1
+    fi
+    local IFS=.
+    local i ver1=($1) ver2=($2)
+    # fill empty fields in ver1 with zeros
+    for ((i=${#ver1[@]}; i<${#ver2[@]}; i++))
+    do
+        ver1[i]=0
+    done
+    for ((i=0; i<${#ver1[@]}; i++))
+    do
+        if [[ -z ${ver2[i]} ]]
+        then
+            # fill empty fields in ver2 with zeros
+            ver2[i]=0
+        fi
+        if ((10#${ver1[i]} > 10#${ver2[i]}))
+        then
+            return 1
+        fi
+        if ((10#${ver1[i]} < 10#${ver2[i]}))
+        then
+            return 0
+        fi
+    done
+    return 1
+}
 
 __kubectl_status() {
 
@@ -1754,14 +2179,31 @@ __aws_status() {
 # based on: https://github.com/magicmonty/bash-git-prompt
 __git_status() {
 
+    local __GIT_BROKEN_STATUS
+    local TMP_VAL
+
     if [ "$__GIT_NOT_AVAILABLE" != 0 ]; then
         return
     fi
 
-    __GIT_STATUS="$(LC_ALL=C git status --porcelain --branch 2>/dev/null)"
-    if [ "$?" -ne 0 ]; then
-        unset __GIT_STATUS
-        return
+    if __checkMinVer $__GIT_VERSION 1.8.0; then
+        __GIT_BROKEN_STATUS=1
+    else
+        __GIT_BROKEN_STATUS=0
+    fi
+
+    if [ "$__GIT_BROKEN_STATUS" = "1" ]; then
+        __GIT_STATUS="$(LC_ALL=C git status --porcelain 2>/dev/null)"
+        if [ "$?" -ne 0 ]; then
+            unset __GIT_STATUS
+            return
+        fi
+    else
+        __GIT_STATUS="$(LC_ALL=C git status --porcelain --branch 2>/dev/null)"
+        if [ "$?" -ne 0 ]; then
+            unset __GIT_STATUS
+            return
+        fi
     fi
 
     __GIT_REPO_ROOT="$(git rev-parse --git-dir)"
@@ -1770,6 +2212,40 @@ __git_status() {
         __GIT_REPO_ROOT="$(pwd)"
     else
         __GIT_REPO_ROOT="$(dirname "$__GIT_REPO_ROOT")"
+    fi
+
+    __GIT_IN_SUBMODULE=0
+    # try to detect if we are inside submodule. This command may fail
+    # on old git version.
+    if __GIT_TEMP="$(git rev-parse --show-superproject-working-tree 2>&1)"; then
+        # the command didn't fail
+        if [ -n "$__GIT_TEMP" ]; then
+            __GIT_IN_SUBMODULE=1
+        fi
+    else
+        # try another method
+        if [ "${__GIT_REPO_ROOT%*/.git/modules}" != "$__GIT_REPO_ROOT" ]; then
+            __GIT_IN_SUBMODULE=1
+        fi
+    fi
+    unset __GIT_TEMP
+
+    # check configuration
+    if [ "$(set +e; LC_ALL=C git config --get core.editor)" != "vim" ]; then
+        git config core.editor vim
+    fi
+    if [ "$(set +e; LC_ALL=C git config --get core.autocrlf)" != "false" ]; then
+        git config core.autocrlf false
+    fi
+    if [ "$(set +e; LC_ALL=C git config --get color.ui)" != "auto" ]; then
+        git config color.ui auto
+    fi
+
+    # don't check for author in submodules
+    if [ "$__GIT_IN_SUBMODULE" -eq 0 ]; then
+        if [ "$(set +e; LC_ALL=C git config --get user.name)" != "$_GIT_USER_NAME" ]; then
+            echo "${COLOR_ERROR}WARNING: git author is wrong '$(set +e; LC_ALL=C git config --get user.name)'. Run: gitconfig [<email>]${COLOR_DEFAULT}"
+        fi
     fi
 
     __GIT_BRANCH="!ERROR!"
@@ -1799,6 +2275,12 @@ __git_status() {
         done
     done <<< "${__GIT_STATUS}"
 
+    if [ "$__GIT_BRANCH" = "!ERROR!" ]; then
+        if TMP_VAL="$(git rev-parse --abbrev-ref HEAD)"; then
+            __GIT_BRANCH="$TMP_VAL"
+        fi
+    fi
+
     unset line
     unset status
 
@@ -1806,6 +2288,9 @@ __git_status() {
     __GIT_BRANCH="${__GIT_BRANCH_FIELDS[0]}"
 
     __GIT_OUTPUT="${COLOR_GRAY}[${COLOR_WHITE}GIT${COLOR_GRAY}: $COLOR_CYAN$(prompt_workingdir "$__GIT_REPO_ROOT")"
+    if [ "$__GIT_IN_SUBMODULE" -eq 1 ]; then
+        __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}(${COLOR_DEFAULT}submodule${COLOR_GRAY})"
+    fi
     __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}branch${COLOR_GRAY}: $COLOR_PURPLE$__GIT_BRANCH"
 
     if [ "$__GIT_NUM_CONFLICT" -ne 0 ]; then
@@ -1838,8 +2323,14 @@ __git_status() {
     unset __GIT_OUTPUT
 }
 
+# "stat -c" is used to detect a zombie directories
+if stat -c '%i' . >/dev/null 2>&1; then
+    MY_STATC="stat -c"
+fi
+
 # Function to set prompt_command to.
 function promptcmd () {
+
     # Exit status of the last command run.
     let exitcode=$?
 
@@ -1852,14 +2343,12 @@ function promptcmd () {
        echo "${COLOR_RED}Exit code: $exitcode${COLOR_DEFAULT}"
     fi
 
-    # if inside of zombie directory
-    if [ ! -z "$MY_STATC" ]; then
-        if [ ! -d "$PWD" ]; then
-            echo "${COLOR_RED}Warning: Current directory doesn't exist${COLOR_DEFAULT}"
-        elif [ "`$MY_STATC '%i' .`" != "`$MY_STATC '%i' "$PWD"`" ]; then
-            echo "${COLOR_BROWN}Current directory is a zombie. Fixing it.${COLOR_DEFAULT}"
-            cd ../"`basename "$PWD"`"
-        fi
+    if [ ! -d "$PWD" ]; then
+        echo "${COLOR_RED}Warning: Current directory doesn't exist${COLOR_DEFAULT}"
+    elif [ ! -z "$MY_STATC" ] && [ ! -L "$PWD" ] && [ "$($MY_STATC '%i' . 2>&1)" != "$($MY_STATC '%i' "$PWD")" ]; then
+        # if inside of zombie directory
+        echo "${COLOR_BROWN}Current directory is a zombie. Fixing it.${COLOR_DEFAULT}"
+        cd ../"`basename "$PWD"`"
     fi
 
     # update history file
@@ -1920,6 +2409,16 @@ function promptcmd () {
 
     # Host
     PS1="${PS1}\[${COLOR_LIGHTBLUE}\]\h\[${COLOR_DEFAULT}\]"
+
+    # WSL?
+    if [ "$__WSL_NOT_AVAILABLE" -eq 0 ]; then
+        PS1="${PS1}\[${COLOR_GRAY}\][\[${COLOR_DEFAULT}\]WSL\[${COLOR_GRAY}\]]\[${COLOR_DEFAULT}\]"
+    fi
+
+    # Docker?
+    if [ -f /.dockerenv ]; then
+        PS1="${PS1}\[${COLOR_GRAY}\][\[${COLOR_DEFAULT}\]docker\[${COLOR_GRAY}\]]\[${COLOR_DEFAULT}\]"
+    fi
 
     # :
     PS1="${PS1}\[${COLOR_GRAY}${COLOR_BOLD}\]:\[${COLOR_DEFAULT}\]"
@@ -2097,11 +2596,18 @@ esac
 # Try to detect and add path to tools-only install
 if [ "${#EFAG[*]}" -eq 0 ]; then
 
-    if [ "$(uname -o)" == "Cygwin" ]; then
-        EFAG_STD="$(cygpath -u "c:/Program Files/Electric Cloud/ElectricCommander/bin")"
+    if [ "$(uname -o 2>&1)" == "Cygwin" ]; then
+        if [ -e "/c/Program Files/Electric Cloud/ElectricCommander/bin" ]; then
+            EFAG_STD="$(cygpath -u "c:/Program Files/Electric Cloud/ElectricCommander/bin")"
+        else
+            EFAG_STD="$(cygpath -u "c:/Program Files/CloudBees/Software Delivery Automation/bin")"
+        fi
     else
-        EFAG_STD="/opt/electriccloud/electriccommander/bin"
-
+        if [ -e "/opt/electriccloud/electriccommander/bin" ]; then
+            EFAG_STD="/opt/electriccloud/electriccommander/bin"
+        else
+            EFAG_STD="/opt/cloudbees/sda/bin"
+        fi
     fi
 
     if [ -d "$EFAG_STD" ]; then
@@ -2163,6 +2669,15 @@ elif [ -f /usr/share/bash-completion/bash_completion ]; then
     . /usr/share/bash-completion/bash_completion
 fi
 
+# show warning if docker group exists, but current user is not in the group
+if getent group docker >/dev/null 2>&1; then
+    if ! id -nG | grep -qw "docker"; then
+        echo "${COLOR_RED}Current user is not in docker group. Run: sudo usermod -a -G docker $(id --user --name)${COLOR_DEFAULT}"
+        echo ""
+    fi
+fi
+
+
 if ! type _init_completion >/dev/null 2>&1; then
     echo "${COLOR_RED}The original bash completion package is not installed on this machine. Some of the completions may not be available.${COLOR_DEFAULT}"
     echo ""
@@ -2193,20 +2708,23 @@ else
     echo ""
 fi
 
+if [ -f ~/gcloud/google-cloud-sdk/completion.bash.inc ]; then
+    . ~/gcloud/google-cloud-sdk/completion.bash.inc
+fi
+
 if [ "$__K8S_NOT_AVAILABLE" = 0 ]; then
 
-    alias kc=kubectl
+    alias k=kubectl
 
     if type __start_kubectl >/dev/null 2>&1; then
         if [ "$(type -t compopt)" = "builtin" ]; then
-            complete -o default -F __start_kubectl kc
+            complete -o default -F __start_kubectl k
         else
-            complete -o default -o nospace -F __start_kubectl kc
+            complete -o default -o nospace -F __start_kubectl k
         fi
     fi
 
 fi
-
 
 SSH_PUB_KEY_ONLY="`echo $SSH_PUB_KEY | awk '{print $2}'`"
 
