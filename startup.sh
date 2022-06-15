@@ -853,6 +853,18 @@ fi
 PATH="$PATH:/usr/local/bin"
 export PATH
 
+# Add user PATH in cygwin
+if [ -e /proc/registry/HKEY_CURRENT_USER/Environment/Path ]; then
+    __val="$(cat /proc/registry/HKEY_CURRENT_USER/Environment/Path | tr -d '\0')"
+    while read -r -d ';' p; do
+        p="$(cygpath -u "$p")"
+        PATH="$PATH:$p"
+    done <<< "$__val;"
+    unset p
+    unset __val
+    export PATH
+fi
+
 (set +e; command -v git >/dev/null 2>&1)
 __GIT_NOT_AVAILABLE=$?
 
@@ -1709,15 +1721,20 @@ kube() {
             fi
             kubectl config set-context $(kubectl config current-context) --namespace "$2"
         ;;
+        events)
+            shift
+            kubectl get events --sort-by='.metadata.creationTimestamp' "$@"
+        ;;
         *)
             [ -n "$1" ] && echo "Unknown command '$1'"
             echo "Usage: kube <command>"
             echo
             echo "Available commands:"
-            echo "  conf - set the current kubeconfig"
-            echo "  ns   - set the current namespace"
-            echo "  on   - turn on k8s bash prompt"
-            echo "  off  - turn off k8s bash prompt"
+            echo "  conf   - set the current kubeconfig"
+            echo "  ns     - set the current namespace"
+            echo "  on     - turn on k8s bash prompt"
+            echo "  off    - turn off k8s bash prompt"
+            echo "  events - show k8s events"
             return 1
         ;;
     esac
@@ -1731,7 +1748,7 @@ __kube_complete() {
     COMPREPLY=()
 
     if [ $COMP_CWORD -lt 2 ]; then
-        COMPREPLY=($(compgen -W "on off conf ns" "${COMP_WORDS[1]}"))
+        COMPREPLY=($(compgen -W "on off conf ns events" "${COMP_WORDS[1]}"))
         return
     fi
 
@@ -2506,6 +2523,14 @@ case `uname -s` in
         bind "set convert-meta off"
         bind "set output-meta on"
 
+        # KUBECONFIG should be compatible with native kubectl
+        KUBECONFIG=$(cygpath -m "$KUBECONFIG")
+        export KUBECONFIG
+
+        # use GKE plugin for GCP
+        USE_GKE_GCLOUD_AUTH_PLUGIN=True
+        export USE_GKE_GCLOUD_AUTH_PLUGIN
+
         # Initialize environment variables
         # http://www.smithii.com/node/44
         if [ "$SSH_TTY" ]; then
@@ -2536,6 +2561,7 @@ case `uname -s` in
                         __val="${__val/\%ProgramFiles\%/$PROGRAMFILES}"
                         __val="${__val/\%USERPROFILE\%/$USERPROFILE}"
                         __val="${__val/\%ProgramFiles(x86)\%/$PROGRAMFILESX86}"
+                        __val="${__val/\%HomeDrive\%\%HomePath\%/$USERPROFILE}"
                         echo "Adding environment variable '${__var}'"
                         if [ "${__val/\%/}" != "$__val" ]; then
                             echo "Warning! Percent in environment variable '${__var}': '${__val}'"
@@ -2573,7 +2599,7 @@ fi
 
 EFAG=()
 
-case `uname -s` in
+case "$(uname -s)" in
     Linux)
         while IFS= read -r line; do
             # workaround for old bash: https://unix.stackexchange.com/questions/64427/bash-3-0-not-supporting-lists
