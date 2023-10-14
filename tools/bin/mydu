@@ -1,0 +1,117 @@
+#!/usr/bin/env bash
+
+set -e
+
+COLOR_WHITE=$'\e[1;37m'
+COLOR_LIGHTGRAY=$'\e[0;37m'
+COLOR_GRAY=$'\e[1;30m'
+COLOR_BLACK=$'\e[0;30m'
+COLOR_RED=$'\e[0;31m'
+COLOR_LIGHTRED=$'\e[1;31m'
+COLOR_GREEN=$'\e[0;32m'
+COLOR_LIGHTGREEN=$'\e[1;32m'
+COLOR_BROWN=$'\e[0;33m'
+COLOR_YELLOW=$'\e[1;33m'
+COLOR_BLUE=$'\e[0;34m'
+COLOR_LIGHTBLUE=$'\e[1;34m'
+COLOR_PURPLE=$'\e[0;35m'
+COLOR_PINK=$'\e[1;35m'
+COLOR_CYAN=$'\e[0;36m'
+COLOR_LIGHTCYAN=$'\e[1;36m'
+COLOR_DEFAULT=$'\e[0m'
+COLOR_BOLD=$'\e[1m'
+
+COLOR_ERROR=$'\e[41m\e[1m\e[97m'
+COLOR_SIGN=$'\e[38;5;136m'
+
+mydu() {
+
+    local PARAM="$1"
+    local SIZE
+    local SIZE_TOTAL
+    local COUNT_TOTAL
+    local COUNT
+
+    local i
+    local BLANK="$(printf "\r%$(tput cols)s\r")"
+
+    local UNSORTED
+    local SORTED
+
+    declare -A UNSORTED
+    declare -A SORTED
+
+    set --
+
+    while IFS=$' \r\n' read a b c d; do
+        if [ "$c" != "/" ]; then
+            set -- "$@" "--exclude=$c"
+        fi
+    done < <(mount)
+
+    if [ -z "$PARAM" ]; then
+        PARAM="."
+    fi
+
+    COUNT_TOTAL=0
+    while IFS= read -r -d '' a; do
+        COUNT_TOTAL=$(( $COUNT_TOTAL + 1 ))
+    done < <(find "$PARAM" -maxdepth 1 -mindepth 1 -print0)
+
+    COUNT=1
+    SIZE_TOTAL=0
+    while IFS= read -r -d '' a; do
+        a="${a#./*}"
+        printf "[%3i/%3i]: %s ..." "$COUNT" "$COUNT_TOTAL" "$a"
+        SIZE="$(sudo du --one-file-system --block-size=1M --summarize "$@" "$a" | awk '{print $1}')"
+        printf "$BLANK"
+        if [ -n "$SIZE" ]; then
+            if [ "$SIZE" -gt 1 ]; then
+                UNSORTED["$a"]="$SIZE"
+                SIZE_TOTAL=$(( $SIZE_TOTAL + $SIZE ))
+            fi
+        fi
+        COUNT=$(( $COUNT + 1 ))
+    done < <(find "$PARAM" -maxdepth 1 -mindepth 1 -print0)
+
+    while IFS=' ' read a b; do
+
+        if [ "$a" -gt 1023 ]; then
+            a="$(( 100 * $a / 1024 ))e-2"
+            a="$(printf '%.2f GB' "$a")"
+        else
+            a="${a} MB"
+        fi
+
+        if [ -f "$b" ]; then
+            i="F"
+        elif [ -d "$b" ]; then
+            i="D"
+        else
+            i="?"
+        fi
+
+        printf '%10s [%s] %s\n' "$a" "$i" "$b" | sed \
+            -e "s/ MB /${COLOR_GREEN} MB ${COLOR_DEFAULT}/" \
+            -e "s/ GB /${COLOR_RED} GB ${COLOR_DEFAULT}/" \
+            -e "s/\[F\] /${COLOR_GRAY}[${COLOR_DEFAULT}F${COLOR_GRAY}] ${COLOR_DEFAULT}/" \
+            -e "s/\[D\] /${COLOR_GRAY}[${COLOR_WHITE}D${COLOR_GRAY}] ${COLOR_DEFAULT}/"
+
+    done < <(for i in "${!UNSORTED[@]}"; do echo ${UNSORTED["$i"]} $i; done | sort --numeric-sort)
+
+    echo "${COLOR_GRAY}--------------------${COLOR_DEFAULT}"
+
+    if [ "$SIZE_TOTAL" -gt 1023 ]; then
+        SIZE_TOTAL="$(( 100 * $SIZE_TOTAL / 1024 ))e-2"
+        SIZE_TOTAL="$(printf '%.2f GB ' "$SIZE_TOTAL")"
+    else
+        SIZE_TOTAL="${SIZE_TOTAL} MB "
+    fi
+
+    echo "Total: $SIZE_TOTAL" | sed \
+        -e "s/ MB /${COLOR_GREEN} MB ${COLOR_DEFAULT}/" \
+        -e "s/ GB /${COLOR_RED} GB ${COLOR_DEFAULT}/"
+
+}
+
+mydu "$@"
