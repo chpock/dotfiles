@@ -15,7 +15,7 @@ zip
 EOF
 )"
 
-if CUR_VERSION="$("$BIN_PATH"/shellcheck --version 2>/dev/null | grep version: | awk '{print $2}')"; then
+if CUR_VERSION="$("$BIN_PATH"/shellcheck --version 2>/dev/null | tr -d '\r' | grep version: | awk '{print $2}')"; then
     [ "$CUR_VERSION" != "$VERSION" ] || exit 0
     [ -z "$CUR_VERSION" ] || echo "The current shellcheck version '$CUR_VERSION' does not match the desired version '$VERSION'" >&2
 fi
