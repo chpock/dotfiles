@@ -1,6 +1,7 @@
 #!/bin/sh
 
 set -e
+set -x
 
 BIN_PATH="$1"
 VERSION="0.9.0"
@@ -15,12 +16,12 @@ zip
 EOF
 )"
 
-if CUR_VERSION="$("$BIN_PATH"/shellcheck --version 2>/dev/null | grep -oP 'version: \K.+')"; then
+if CUR_VERSION="$("$BIN_PATH"/shellcheck --version 2>/dev/null | grep version: | awk '{print $2}')"; then
     [ "$CUR_VERSION" != "$VERSION" ] || exit 0
-    echo "The current shellcheck version '$CUR_VERSION' does not match the desired version '$VERSION'" >&2
+    [ -z "$CUR_VERSION" ] || echo "The current shellcheck version '$CUR_VERSION' does not match the desired version '$VERSION'" >&2
 fi
 
-SUFFIX="$(echo "$SUFFIX" | sed -n -E "/$(echo "$(uname --operating-system)" | tr '/' '_'):$(uname --machine)/{n;p}")"
+SUFFIX="$(echo "$SUFFIX" | sed -n -E "/$(echo "$(uname --operating-system)" | tr '/' '_'):$(uname --machine)/{n;p;}")"
 if [ -z "$SUFFIX" ]; then
     echo "$0: Error: unknown platform for shellcheck" >&2
     exit 1
