@@ -1,0 +1,98 @@
+#!/bin/sh
+
+echo
+echo "Standard colors:"
+for i in 0:BLACK 1:RED 2:GREEN 3:YELLOW 4:BLUE 5:MAGENTA 6:CYAN 7:WHITE; do
+    NAME="${i#*:}"
+    CODE="${i%:*}"
+    F_CODE=$(( CODE + 30 ))
+    B_CODE=$(( CODE + 40 ))
+    FB_CODE=$(( CODE + 90 ))
+    BB_CODE=$(( CODE + 100 ))
+    printf '\e[0;%im %-7s \e[0m \e[0;%im %-7s \e[0m \e[0;%im %-7s \e[0m \e[0;%im %-7s \e[0m\n' "$F_CODE" "$NAME" "$FB_CODE" "$NAME" "$B_CODE" "$NAME" "$BB_CODE" "$NAME"
+done
+
+echo
+echo "Backgrounds:"
+for i in 0:BLACK 1:RED 2:GREEN 3:YELLOW 4:BLUE 5:MAGENTA 6:CYAN 7:WHITE; do
+    NAME="${i#*:}"
+    CODE="${i%:*}"
+    F_CODE=$(( CODE + 30 ))
+    FB_CODE=$(( CODE + 90 ))
+    FORMAT=""; set --
+    for BG in 0 1 2 3 4 5 6 7; do
+        BG_CODE=$(( BG + 40 ))
+        FORMAT="${FORMAT}\\e[0;%i;%im %-7s \\e[0m \\e[0;%i;%im %-7s \\e[0m "
+        set -- "$@" "$BG_CODE" "$F_CODE" "$NAME" "$BG_CODE" "$FB_CODE" "$NAME"
+    done
+    printf "$FORMAT\n" "$@"
+done
+echo
+for i in 0:BLACK 1:RED 2:GREEN 3:YELLOW 4:BLUE 5:MAGENTA 6:CYAN 7:WHITE; do
+    NAME="${i#*:}"
+    CODE="${i%:*}"
+    F_CODE=$(( CODE + 30 ))
+    FB_CODE=$(( CODE + 90 ))
+    FORMAT=""; set --
+    for BG in 0 1 2 3 4 5 6 7; do
+        BGB_CODE=$(( BG + 100 ))
+        FORMAT="${FORMAT}\\e[0;%i;%im %-7s \\e[0m \\e[0;%i;%im %-7s \\e[0m "
+        set -- "$@" "$BGB_CODE" "$F_CODE" "$NAME" "$BGB_CODE" "$FB_CODE" "$NAME"
+    done
+    printf "$FORMAT\n" "$@"
+done
+
+echo
+echo "256 colors:"
+echo
+echo "Standard colors:"
+FORMAT=""; set --
+for i in $(seq 0 15); do
+    FORMAT="${FORMAT}\\e[38;5;%im %-3s\\e[0m "
+    set -- "$@" $i $i
+done
+printf "$FORMAT\n" "$@"
+
+echo
+echo "3-byte colors:"
+if [ 1 -eq 1 ]; then
+    for row in 0 1; do
+        for j in $(seq 0 5); do
+            FORMAT=""; set --
+            for cube in 0 1 2; do
+                for i in $(seq 0 5); do
+                    CODE=$(( 16 + row * 108 + cube * 36 + i + j * 6 ))
+                    FORMAT="${FORMAT}\\e[38;5;%im %03i\\e[0m"
+                    set -- "$@" "$CODE" "$CODE"
+                done
+                FORMAT="${FORMAT} "
+            done
+            printf "$FORMAT\n" "$@"
+        done
+        echo
+    done
+else
+    for row in 0; do
+        for j in $(seq 0 5); do
+            FORMAT=""; set --
+            for cube in 0 1 2 3 4 5; do
+                for i in $(seq 0 5); do
+                    CODE=$(( 16 + row * 108 + cube * 36 + i + j * 6 ))
+                    FORMAT="${FORMAT}\\e[38;5;%im %03i\\e[0m"
+                    set -- "$@" "$CODE" "$CODE"
+                done
+                FORMAT="${FORMAT} "
+            done
+            printf "$FORMAT\n" "$@"
+        done
+        echo
+    done
+fi
+
+echo "Grayscale colors:"
+FORMAT=""; set --
+for i in $(seq 232 255); do
+    FORMAT="${FORMAT}\\e[38;5;%im %03i\\e[0m"
+    set -- "$@" "$i" "$i"
+done
+printf "$FORMAT\n" "$@"
