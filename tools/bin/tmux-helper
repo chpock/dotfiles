@@ -1,0 +1,144 @@
+#!/bin/bash
+
+set -eo pipefail
+
+LOG_FILE="$IAM_HOME/tmux-helper/debug.log"
+# -3 - none
+# -2 - crit
+# -1 - error/crit
+#  0 - warning
+#  1 - info
+#  2 - debug
+#  3 - trace
+LOG_LEVEL=2
+
+log() {
+    # disable possible stdour/stderr messages to avoid deadlocks, since
+    # this script redirects stdout/stderr to this function
+    {
+        local LEVEL="info"
+        [ "$#" -eq 1 ] || { LEVEL="$1"; shift; }
+        local MSG="$1"
+        case "$LEVEL" in
+            crit*) [ "$LOG_LEVEL" -ge -2 ] || return 0; MSG="* CRITICAL: $MSG";;
+            err*)  [ "$LOG_LEVEL" -ge -1 ] || return 0; MSG="* ERROR: $MSG";;
+            warn*) [ "$LOG_LEVEL" -ge  0 ] || return 0; MSG="* WARNING: $MSG";;
+            info)  [ "$LOG_LEVEL" -ge  1 ] || return 0; MSG="* $MSG";;
+            debug) [ "$LOG_LEVEL" -ge  2 ] || return 0; MSG="* DEBUG: $MSG";;
+            trace) [ "$LOG_LEVEL" -ge  3 ] || return 0; MSG="* TRACE: $MSG";;
+            *)     [ "$LOG_LEVEL" -ge  1 ] || return 0;;
+        esac
+        local TS="$(date --iso-8601=ns | sed 's/[,\.]\([0-9][0-9][0-9]\).\+$/.\1/')"
+        [ -d "${LOG_FILE%/*}" ] || mkdir -p "${LOG_FILE%/*}"
+        echo "[$TS] $MSG" >>"$LOG_FILE"
+    } >/dev/null 2>&1
+}
+
+# This script can be started from tmux. Redirect all possible messages to the log file.
+exec > >(while read -r line; do [ -z "$line" ] || log warning "[stdout] $line"; done)
+exec 2> >(while read -r line; do [ -z "$line" ] || log error "[stderr] $line"; done)
+
+trap 'log critical "unexpected exit with code: $?"; trap - EXIT' EXIT
+
+tmux() {
+    local R E
+    log - "[call tmux] tmux $*"
+    if ! R="$(command tmux "$@" 2>&1)"; then
+        E=$?
+        log error "[call tmux] error exit code: $E; message: $R"
+        return $E
+    fi
+    echo "$R"
+}
+
+get-tmux-opt() {
+    local val
+    val="$(tmux show-option -qv "$1")"
+    [ -n "$val" ] || val="$(tmux show-option -gqv "$1")"
+    [ -n "$val" ] && echo "$val" || echo "$2"
+}
+
+get-tmux-win-opt() {
+    [ -z "$CURRENT_TARGET" ] || set -- -t "$CURRENT_TARGET" "$@"
+    tmux show-option -qvw "$@"
+}
+
+set-tmux-win-opt() {
+    [ -z "$CURRENT_TARGET" ] || set -- -t "$CURRENT_TARGET" "$@"
+    tmux set-option -w "$@"
+}
+
+get-tmux-var() {
+    local V="$1"
+    set -- "#{${1}}"
+    [ -z "$CURRENT_TARGET" ] || set -- -t "$CURRENT_TARGET" "$@"
+    tmux display-message -p "$@"
+}
+
+# get cmd arguments: https://github.com/tmux/tmux/issues/733
+
+_cut_path() {
+    local max trunc_label='...' path="$1"
+    if [ -z "$COLUMNS" ] || ! max=$(( COLUMNS / 6 )) || [ $max -le 0 ]; then
+        max=20
+    fi
+    if [ "$path" = "$HOME" ]; then
+        path="~"
+    elif [ "${path:0:$(( ${#HOME} + 1 ))}" = "${HOME}/" ]; then
+        path="~${path:${#HOME}}"
+    fi
+    if [ "${#path}" -gt $max ]; then
+        path="${trunc_label}${path:$(( ${#path} - $max + ${#trunc_label} ))}"
+    fi
+    echo "$path"
+}
+
+update-automatic-rename-append() {
+    log debug "prev @update-automatic-rename-append: '$(get-tmux-win-opt @automatic-rename-append)'"
+    log debug "current command:$(get-tmux-var pane_current_command) current path:$(get-tmux-var pane_current_path) pid:$(get-tmux-var pane_pid) tty:$(get-tmux-var pane_tty)"
+    local info
+    case "$(get-tmux-var pane_current_command)" in
+        bash)
+            local cwd="$(get-tmux-var pane_current_path)"
+            info="$(_cut_path "$cwd")"
+            ;;
+    esac
+    log "now @update-automatic-rename-append: '$info'"
+    set-tmux-win-opt "@automatic-rename-append" "$info"
+}
+
+CMD="$1"
+shift
+
+log - "$(printf '%80s' | tr ' ' '=')"
+log "Started with cmd '$CMD' and args: $*"
+
+while getopts "w:p:t:" opt; do
+    case $opt in
+        w) CURRENT_WINDOW="$OPTARG" ;;
+        p) CURRENT_PANE="$OPTARG" ;;
+        t) CURRENT_TARGET="$OPTARG" ;;
+    esac
+done
+
+if [ -n "$CURRENT_TARGET" ]; then
+    log "  - using the specified target: $CURRENT_TARGET"
+elif [ -n "$CURRENT_PANE" ]; then
+    log "  - using the specified pane as a target: $CURRENT_PANE"
+    CURRENT_TARGET="$CURRENT_PANE"
+elif [ -n "$CURRENT_WINDOW" ]; then
+    log "  - using the specified window as a target: $CURRENT_WINDOW"
+    CURRENT_TARGET="$CURRENT_WINDOW"
+else
+    log "  - The window/pane/target was not specified. The current one will be used."
+fi
+
+log "call cmd: $CMD"
+if ! "$CMD"; then
+    log critical "Error: Failed with exit code: $?"
+else
+    log "Finished."
+fi
+
+trap - EXIT
+
