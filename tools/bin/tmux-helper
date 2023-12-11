@@ -130,6 +130,10 @@ reset-options-to-default() {
         [ -n "$opt" ] || continue
         echo "set-hook -gu $opt" >>"$TEMP_FILE"
     done < <(tmux show-hooks -g | awk '{print $1}' | sed -E 's/\[[[:digit:]]+\]$//' | uniq)
+    while read -r opt; do
+        [ -n "$opt" ] || continue
+        echo "set-hook -gwu $opt" >>"$TEMP_FILE"
+    done < <(tmux show-hooks -gw | awk '{print $1}' | sed -E 's/\[[[:digit:]]+\]$//' | uniq)
     tmux source-file "$TEMP_FILE"
     rm -f "$TEMP_FILE"
 }
