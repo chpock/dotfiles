@@ -107,6 +107,33 @@ update-automatic-rename-append() {
     set-tmux-win-opt "@automatic-rename-append" "$info"
 }
 
+reset-options-to-default() {
+    local TEMP_FILE opt
+    TEMP_FILE="$(mktemp)"
+    while read -r opt; do
+        [ -n "$opt" ] || continue
+        echo "set-option -pgu $opt" >>"$TEMP_FILE"
+    done < <(tmux show-option -pg | awk '{print $1}' | sed -E 's/\[[[:digit:]]+\]$//' | uniq)
+    while read -r opt; do
+        [ -n "$opt" ] || continue
+        echo "set-option -wgu $opt" >>"$TEMP_FILE"
+    done < <(tmux show-option -wg | awk '{print $1}' | sed -E 's/\[[[:digit:]]+\]$//' | uniq)
+    while read -r opt; do
+        [ -n "$opt" ] || continue
+        echo "set-option -sgu $opt" >>"$TEMP_FILE"
+    done < <(tmux show-option -sg | awk '{print $1}' | sed -E 's/\[[[:digit:]]+\]$//' | uniq)
+    while read -r opt; do
+        [ -n "$opt" ] || continue
+        echo "set-option -gu $opt" >>"$TEMP_FILE"
+    done < <(tmux show-option -g | awk '{print $1}' | sed -E 's/\[[[:digit:]]+\]$//' | uniq)
+    while read -r opt; do
+        [ -n "$opt" ] || continue
+        echo "set-hook -gu $opt" >>"$TEMP_FILE"
+    done < <(tmux show-hooks -g | awk '{print $1}' | sed -E 's/\[[[:digit:]]+\]$//' | uniq)
+    tmux source-file "$TEMP_FILE"
+    rm -f "$TEMP_FILE"
+}
+
 CMD="$1"
 shift
 
