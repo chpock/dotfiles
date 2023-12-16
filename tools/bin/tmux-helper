@@ -107,6 +107,14 @@ update-automatic-rename-append() {
     set-tmux-win-opt "@automatic-rename-append" "$info"
 }
 
+cleanup-stale-panes() {
+    local pane
+    for pane in $(tmux list-windows -F '#{window_panes}!#{pane_dead} #{pane_id}' | grep '^1!1 ' | awk '{print $2}'); do
+        log debug "  killing empty pane: $pane"
+        tmux kill-pane -t "$pane"
+    done
+}
+
 reset-options-to-default() {
     local TEMP_FILE opt
     TEMP_FILE="$(mktemp)"
@@ -130,10 +138,6 @@ reset-options-to-default() {
         [ -n "$opt" ] || continue
         echo "set-hook -gu $opt" >>"$TEMP_FILE"
     done < <(tmux show-hooks -g | awk '{print $1}' | sed -E 's/\[[[:digit:]]+\]$//' | uniq)
-    while read -r opt; do
-        [ -n "$opt" ] || continue
-        echo "set-hook -gwu $opt" >>"$TEMP_FILE"
-    done < <(tmux show-hooks -gw | awk '{print $1}' | sed -E 's/\[[[:digit:]]+\]$//' | uniq)
     tmux source-file "$TEMP_FILE"
     rm -f "$TEMP_FILE"
 }
