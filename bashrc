@@ -185,7 +185,7 @@ $IAM_HOME/tools/bash_completion/makefile.completion.bash
 bash completion
 https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash
 $IAM_HOME/tools/bash_completion/git-completion.bash
-82511
+87287
 
 bash completion
 https://raw.githubusercontent.com/imomaliev/tmux-bash-completion/master/completions/tmux
@@ -2161,11 +2161,11 @@ elif [ "update" = "$CMD" ]; then
 [ "$PARAM" != "force" ] && [ "$SIZE" -eq "$I_SIZE" ] && continue || true
 printf "Download: %s '%s'..." "$I_DESC" "${I_FILE##*/}"
 mkdir -p "${I_FILE%/*}"
-IS_ERROR=1
+IS_ERROR=0
 if _has curl; then
-! curl -s -k -L "$I_URL" > "$I_FILE" || IS_ERROR=0
+curl --fail --silent -k -L "$I_URL" > "$I_FILE" || IS_ERROR=$?
 elif _has wget; then
-! wget -q -O - "$I_URL" > "$I_FILE" || IS_ERROR=0
+wget -q -O - "$I_URL" > "$I_FILE" || IS_ERROR=$?
 fi
 if [ "$IS_ERROR" -ne 0 ]; then
 echo " ${COLOR_LIGHTRED}ERROR${COLOR_DEFAULT}"
