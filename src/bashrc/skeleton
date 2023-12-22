@@ -1,0 +1,68 @@
+IAM="kk" && \
+SSH_PUB_KEY="ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEApJEHtvysrpZeN7xfBS5GY0JjFD8eL5UCYZFbwcUhKXKNXsjtLl9FtwA9sS0cJhqM8CSSGAcceSirACC5L5PSLckeUh2eofYlqJPBkNzU2Uycwc7CSKJRaVTY+yNAJrdpO+7fJPxzis5H3CEB6roguEr+ZqDF9BSEZ0CO8l4wTGgsmqZ2UJuEKfVpPMg6cqGCUj6NvoADavMyrOPRKVCvKikJaWd3NJK4UXueLW0pc/lNoKvbVYRyXO0VruwsAAeciPtn/M1po/iz3+pQW9fk6uM1YContqmR3Ga7TfF249cSyml2gSO8VeNoPbm3RM/KPMZ8F9eyfwQUf6bic2IRoQ== kkushnir" && \
+_GIT_USER_NAME="Konstantin Kushnir" && \
+_GIT_USER_EMAIL="chpock@gmail.com" && \
+export IAM && \
+export SSH_PUB_KEY && \
+export _GIT_USER_NAME && \
+export _GIT_USER_EMAIL && \
+IAM_HOME="$HOME/.${IAM}_home" && \
+export IAM_HOME && \
+rm -rf "$HOME/.${IAM}_terminfo" && \
+if [ ! -d "$IAM_HOME" ]; then mkdir "$IAM_HOME"; fi && \
+rm -rf "$IAM_HOME/terminfo" && \
+mkdir "$IAM_HOME/terminfo" && \
+mkdir -p "$IAM_HOME/vim_swap" && \
+cat <<'EOF' > "$IAM_HOME/terminfo/.terminfo"
+@include xterm-256color.terminfo
+EOF
+
+if [ "$TERM" = "xterm-256color" ]; then
+    TERMINFO="$IAM_HOME/terminfo"
+    export TERMINFO
+    tic "$IAM_HOME/terminfo/.terminfo" >/dev/null 2>&1 || true
+fi
+
+cat <<'EOF' > "$HOME/.tclshrc"
+@include tclshrc.tcl
+EOF
+
+cat <<'EOF' > "$IAM_HOME/tmux.conf.template"
+@include tmux.conf
+EOF
+
+cat <<'EOF' > "$IAM_HOME/local_tools"
+@include tools.list
+EOF
+
+cat <<'EOF' > "$IAM_HOME/vimrc"
+@include vimrc
+EOF
+
+# avoid issue with some overflow when the file is more than 65536 bytes
+cat <<'EOF' > "$IAM_HOME/bashrc"
+@include part 0 bashrc.sh
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
+@include part 1 bashrc.sh
+EOF
+
+# Magic: try to restore current directory. Only for SSH.
+if [ -n "$SSH_CLIENT" ]; then
+    # get win title
+    printf "\033]0;__ti\007"
+    read __WIN_TITLE_1
+    # cursor up & erase line
+    printf "\033[1A\033[K"
+    __WIN_TITLE_2="${__WIN_TITLE_1#*KITTYID:}"
+    # if KITTEID: found
+    if [ "$__WIN_TITLE_1" != "$__WIN_TITLE_2" ]; then
+        # strip quote "
+        __KITTY_ID="${__WIN_TITLE_2%\"*}"
+        export __KITTY_ID
+    fi
+    unset __WIN_TITLE_1
+    unset __WIN_TITLE_2
+fi
+
+exec bash --rcfile "$IAM_HOME/bashrc" -i || exec $SHELL -i

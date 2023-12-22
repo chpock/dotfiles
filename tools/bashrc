@@ -1,0 +1,71 @@
+#!/bin/bash
+
+set -eo pipefail
+
+SELF_FILE="${BASH_SOURCE:-$0}"
+SELF_HOME="$(cd "$(dirname "$SELF_FILE")"; pwd)"
+SELF_FILE="$SELF_HOME/$(basename "$SELF_FILE")"
+BASHRC_SRC="$SELF_HOME/../src/bashrc"
+
+__bashrc_completion() {
+    local BASHRC_SRC='!BASHRC_SRC!'
+    if [ "$1" = "--install" ]; then
+        complete -F __bashrc_completion bashrc
+        return
+    fi
+    COMPREPLY=()
+    local CUR="${COMP_WORDS[COMP_CWORD]}"
+    if [ "${COMP_CWORD}" -eq 1 ]; then
+        COMPREPLY=($(compgen -W "$(cd "$BASHRC_SRC"; echo *)" -- "${CUR}"))
+        return 0
+    fi
+    local CMD="${COMP_WORDS[1]}"
+    if [ "$CMD" = "-generate" ]; then
+        COMPREPLY=($(compgen -W "bash-completion bash-rc" -- "${CUR}"))
+    fi
+    return 0
+}
+
+generate() {
+    if [ "$1" = "bash-completion" ]; then
+        type __bashrc_completion | tail -n+2 | sed -E -e "s:!BASHRC_SRC!:${BASHRC_SRC/\'/\'\"\'\"\'/}:"
+        echo "__bashrc_completion --install"
+    elif [ "$1" = "bash-rc" ]; then
+        echo "alias bashrc=\"$SELF_FILE\""
+        echo "type -t __bashrc_completion >/dev/null 2>&1 || source <(\"$SELF_FILE\" -generate bash-completion)"
+    else
+        echo "Error: unknown target to generate '$1'." >&2
+        exit 1
+    fi
+    exit 0
+}
+
+build() {
+    "$BASHRC_SRC/rebuild.sh" "${@:1}"
+    exit 0
+}
+
+[ "$1" != "-generate" ] || generate "${@:2}"
+[ "$1" != "-build" ] || build "${@:2}"
+
+# install watchdog
+TIMESTAMP="$(stat --format '%Y' "$BASHRC_SRC")"
+(
+    while true; do
+        NEW_TIMESTAMP="$(stat --format '%Y' "$BASHRC_SRC")"
+        if [ "$TIMESTAMP" != "$NEW_TIMESTAMP" ]; then
+            "$SELF_FILE" -build silent
+            TIMESTAMP="$NEW_TIMESTAMP"
+        fi
+        sleep 1
+    done
+) &
+watchdog=$!
+
+$EDITOR "$BASHRC_SRC/$1" && R=0 || R=$?
+
+kill $watchdog
+
+"$SELF_FILE" -build silent
+
+exit $R

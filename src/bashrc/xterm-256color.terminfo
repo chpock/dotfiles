@@ -1,0 +1,378 @@
+xterm-256color|xterm with 256 colors,
+#  auto_right_margin: Terminal has automatic margins
+  am,
+#  back_color_erase: Screen erased with background colour
+  bce,
+#  can_change: Terminal can re-define existing colour
+  ccc,
+#  eat_newline_glitch: Newline ignored after 80 columns (Concept)
+  xenl,
+#  has_meta_key: Has a meta key (shift, sets parity bit)
+  km,
+#  has_status_line: Has extra "status line"
+  hs,
+#  move_insert_mode: Safe to move while in insert mode
+  mir,
+#  move_standout_mode: Safe to move in standout modes
+  msgr,
+#  xon_xoff: Terminal uses xon/xoff handshaking
+  xon,
+#  no_pad_char: Pad character doesn't exist
+  npc,
+#  prtr_silent: Printer won't echo on screen
+  mc5i,
+#  init_tabs : Tabs initially every # spaces
+  it#8,
+#  max_colors : Maximum number of colours on the screen
+  colors#256,
+#  max_pairs : Maximum number of colour-pairs on the screen
+  pairs#32767,
+#  acs_chars : Graphic charset pairs aAbBcC
+  acsc=``aaffggiijjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}}~~,
+#  back_tab : Back tab
+  cbt=\E[Z,
+#  bell : Audible signal (bell)
+  bel=^G,
+#  carriage_return : Carriage return
+  cr=^M,
+#  change_scroll_region : Change to lines #1 through #2 (VT100)
+  csr=\E[%i%p1%d;%p2%dr,
+#  clear_all_tabs : Clear all tab stops
+  tbc=\E[3g,
+#  clear_screen : Clear screen and home cursor
+  clear=\E[H\E[J,
+#  clr_bol : Clear to beginning of line, inclusive
+  el1=\E[1K,
+#  clr_eol : Clear to end of line
+  el=\E[K,
+#  clr_eos : Clear to end of display
+  ed=\E[J,
+#  column_address : Set horizontal position to absolute #1
+  hpa=\E[%i%p1%dG,
+# cursor_address : Move to row #1 col #2
+  cup=\E[%i%p1%d;%p2%dH,
+# cursor_home : Home cursor (if no cup)
+  home=\E[H,
+# cursor_invisible : Make cursor invisible
+  civis=\E[?25l,
+# cursor_left : Move left one space.
+  cub1=^H,
+# cursor_normal : Make cursor appear normal
+  cnorm=\E[34h\E[?25h,
+# cursor_down : Down one line
+  cud1=\E[B,
+# cursor_right : Non-destructive space (cursor or carriage right)
+  cuf1=\E[C,
+# cursor_up : Upline (cursor up)
+  cuu1=\E[A,
+# cursor_visible : Make cursor very visible
+  cvvis=\E[34l\E[?25h,
+# delete_character : Delete character
+  dch1=\E[P,
+# delete_line : Delete line
+  dl1=\E[M,
+# dis_status_line : Disable status line
+  dsl=\E]0;\007,
+# display_pc_char : Display PC character
+  dispc=
+    %?
+      %p1%{8}%=
+      %t\E%%G\342\227\230\E%%@
+    %e
+      %p1%{10}%=
+      %t\E%%G\342\227\231\E%%@
+    %e
+      %p1%{12}%=
+      %t\E%%G\342\231\0\E%%@
+    %e
+      %p1%{13}%=
+      %t\E%%G\342\231\252\E%%@
+    %e
+      %p1%{14}%=
+      %t\E%%G\342\231\253\E%%@
+    %e
+      %p1%{15}%=
+      %t\E%%G\342\230\274\E%%@
+    %e
+      %p1%{27}%=
+      %t\E%%G\342\206\220\E%%@
+    %e
+      %p1%{155}%=
+      %t\E%%G\340\202\242\E%%@
+    %e
+      %p1%c
+    %;,
+# ena_acs : Enable alternate character set
+  enacs=\E(B\E)0,
+# enter_alt_charset_mode : Start alternate character set
+  smacs=\E(0,
+# enter_am_mode : Turn on automatic margins
+  smam=\E[?7h,
+# enter_blink_mode : Turn on blinking
+  blink=\E[5m,
+# enter_bold_mode : Turn on bold (extra bright) mode
+  bold=\E[1m,
+# enter_ca_mode : String to begin programs that use cup
+  smcup=\E[?1049h,
+# enter_doublewide_mode : Enable double wide printing
+  swidm=\E#6,
+# enter_insert_mode : Insert mode (enter)
+  smir=\E[4h,
+# enter_pc_charset_mode : Enter PC character display mode
+  smpch=\E[11m,
+# enter_reverse_mode : Turn on reverse video mode
+  rev=\E[7m,
+# enter_standout_mode : Begin standout mode
+  smso=\E[7m,
+# enter_underline_mode : Start underscore mode
+  smul=\E[4m,
+# erase_chars : Erase #1 characters
+  ech=\E[%p1%dX,
+# exit_alt_charset_mode : End alternate character set
+  rmacs=\E(B,
+# exit_am_mode : Turn off automatic margins
+  rmam=\E[?7l,
+# exit_attribute_mode : Turn off all attributes
+  sgr0=\E[m\E(B,
+# exit_ca_mode : String to end programs that use cup
+  rmcup=\E[?1049l,
+# exit_insert_mode : End insert mode
+  rmir=\E[4l,
+# exit_pc_charset_mode : Disable PC character display mode
+  rmpch=\E[10m,
+# exit_standout_mode : End standout mode
+  rmso=\E[27m,
+# exit_underline_mode : End underscore mode
+  rmul=\E[24m,
+# flash_screen : Visible bell (may move cursor)
+  flash=\E[?5h$<100/>\E[?5l,
+# from_status_line : Return from status line
+  fsl=^G,
+# init_2string : Terminal or printer initialisation string
+  is2=\E[34h\E[?25h\E[4l\E[?7h\E[?1;4;6;1047l\E[2J\E[H\E>\E[r\E[m\E]R\E[?1000l\E[?1002l,
+# initialize_color : Set colour #1 to RGB #2, #3, #4
+  initc@,
+# insert_character : Insert character
+  ich1=\E[@,
+# insert_line : Add new blank line
+  il1=\E[L,
+# key_a1 : upper left of keypad
+  ka1=\EOw,
+# key_a3 : upper right of keypad
+  ka3=\EOy,
+# key_b2 : center of keypad
+  kb2=\EOu,
+# key_c1 : lower left of keypad
+  kc1=\EOq,
+# key_c3 : lower right of keypad
+  kc3=\EOs,
+# key_backspace : sent by backspace key
+  kbs=\177,
+# key_btab : sent by back-tab key
+  kcbt=\E[Z,
+# key_dc : sent by delete-character key
+  kdch1=\E[3~,
+# key_end : 7
+  kend=\E[4~,
+# key_enter : 8
+  kent=\EOM,
+# key_fX : sent by function key f0..63
+  kf1=\E[11~,
+  kf2=\E[12~,
+  kf3=\E[13~,
+  kf4=\E[14~,
+  kf5=\E[15~,
+  kf6=\E[17~,
+  kf7=\E[18~,
+  kf8=\E[19~,
+  kf9=\E[20~,
+  kf10=\E[21~,
+  kf11=\E[23~,
+  kf12=\E[24~,
+  kf13=\E[25~,
+  kf14=\E[26~,
+  kf15=\E[28~,
+  kf16=\E[29~,
+  kf17=\E[31~,
+  kf18=\E[32~,
+  kf19=\E[33~,
+  kf20=\E[34~,
+  kf21=\E[20;2~,
+  kf22=\E[21;2~,
+  kf23=\E[23;2~,
+  kf24=\E[24;2~,
+  kf25=\EO5P,
+  kf26=\EO5Q,
+  kf27=\EO5R,
+  kf28=\EO5S,
+  kf29=\E[15;5~,
+  kf30=\E[17;5~,
+  kf31=\E[18;5~,
+  kf32=\E[19;5~,
+  kf33=\E[20;5~,
+  kf34=\E[21;5~,
+  kf35=\E[23;5~,
+  kf36=\E[24;5~,
+  kf37=\EO6P,
+  kf38=\EO6Q,
+  kf39=\EO6R,
+  kf40=\EO6S,
+  kf41=\E[15;6~,
+  kf42=\E[17;6~,
+  kf43=\E[18;6~,
+  kf44=\E[19;6~,
+  kf45=\E[20;6~,
+  kf46=\E[21;6~,
+  kf47=\E[23;6~,
+  kf48=\E[24;6~,
+  kf49=\EO3P,
+  kf50=\EO3Q,
+  kf51=\EO3R,
+  kf52=\EO3S,
+  kf53=\E[15;3~,
+  kf54=\E[17;3~,
+  kf55=\E[18;3~,
+  kf56=\E[19;3~,
+  kf57=\E[20;3~,
+  kf58=\E[21;3~,
+  kf59=\E[23;3~,
+  kf60=\E[24;3~,
+  kf61=\EO4P,
+  kf62=\EO4Q,
+  kf63=\EO4R,
+# key_home : sent by home key
+  khome=\E[1~,
+# key_ic : sent by ins-char/enter ins-mode key
+  kich1=\E[2~,
+################## key_left, key_right, key_up, key_down were \E[D,\E[C,\E[A,\E[B
+################## and they are correct codes from putty
+################## but they don't work with some ncurses apps
+################## so, I changed them to \EOD,\EOC,\EOA,\EOB
+# key_left : sent by terminal left-arrow key
+  kcub1=\EOD,
+# key_right : sent by terminal right-arrow key
+  kcuf1=\EOC,
+# key_up : sent by terminal up-arrow key
+  kcuu1=\EOA,
+# key_down : sent by terminal down-arrow key
+  kcud1=\EOB,
+# key_mouse : 0631, Mouse event has occured
+  kmous=\E[M,
+# key_npage : sent by next-page key
+  knp=\E[6~,
+# key_ppage : sent by previous-page key
+  kpp=\E[5~,
+# keypad_local : Out of "keypad-transmit" mode
+  rmkx=\E[?1l\E>,
+# keypad_xmit : Put terminal in "keypad-transmit" mode
+  smkx=\E[?1h\E=,
+# orig_colors : Set all colour(-pair)s to the original ones
+  oc=\E]R,
+# orig_pair : Set default colour-pair to the original one
+  op=\E[39;49m,
+# parm_dch : Delete #1 chars
+  dch=\E[%p1%dP,
+# parm_delete_line : Delete #1 lines
+  dl=\E[%p1%dM,
+# parm_down_cursor : Move down #1 lines.
+  cud=\E[%p1%dB,
+# parm_ich : Insert #1 blank chars
+  ich=\E[%p1%d@,
+# parm_index : Scroll forward #1 lines.
+  indn=\E[%p1%dS,
+# parm_insert_line : Add #1 new blank lines
+  il=\E[%p1%dL,
+# parm_left_cursor : Move cursor left #1 spaces
+  cub=\E[%p1%dD,
+# parm_right_cursor : Move right #1 spaces.
+  cuf=\E[%p1%dC,
+# parm_rindex : Scroll backward #1 lines.
+  rin=\E[%p1%dT,
+# parm_up_cursor : Move cursor up #1 lines.
+  cuu=\E[%p1%dA,
+# print_screen : Print contents of the screen
+  mc0=\E[i,
+# prtr_off : Turn off the printer
+  mc4=\E[4i,
+# prtr_on : Turn on the printer
+  mc5=\E[5i,
+# reset_1string : Reset terminal completely to sane modes
+  rs1=\Ec,
+# reset_2string : Reset terminal completely to sane modes
+  rs2=\E<\E["p\E[50;6"p\Ec\E[?3l\E]R\E[?1000l,
+# restore_cursor : Restore cursor to position of last sc
+  rc=\E8,
+# row_address : Set vertical position to absolute #1
+  vpa=\E[%i%p1%dd,
+# save_cursor : Save cursor position
+  sc=\E7,
+# scroll_forward : Scroll text up
+  ind=^J,
+# scroll_reverse : Scroll text down
+  ri=\EM,
+# set0_des_seq : Shift into codeset 0 (EUC set 0, ASCII)
+  s0ds=\E[10m,
+# set1_des_seq : Shift into codeset 1
+  s1ds=\E[11m,
+# set2_des_seq : Shift into codeset 2
+  s2ds=\E[12m,
+# set_a_background : Set background colour to #1 using ANSI escape
+  setab=\E[
+    %?
+      %p1%{8}%<
+      %t4%p1%d
+    %e
+      %p1%{16}%<
+      %t10%p1%{8}%-%d
+    %e48;5;
+      %p1%d
+    %;
+    m,
+# set_a_foreground : Set foreground colour to #1 using ANSI escape
+  setaf=\E[
+    %?
+      %p1%{8}%<
+      %t3%p1%d
+    %e
+      %p1%{16}%<
+      %t9%p1%{8}%-%d
+    %e38;5;
+      %p1%d
+    %;
+    m,
+# set_attributes : Define first set of video attributes #1-#9
+  sgr=\E[0
+    %?
+      %p1%p6%|
+      %t;1
+    %;
+    %?
+      %p2
+      %t;4
+    %;
+    %?
+      %p1%p3%|
+      %t;7
+    %;
+    %?
+      %p4
+      %t;5
+    %;
+    m
+    %?
+      %p9
+      %t\016
+    %e
+      \017
+    %;,
+# set_tab : Set a tab in all rows, current column
+  hts=\EH,
+# tab : Tab to next 8-space hardware tab stop
+  ht=^I,
+# to_status_line : Go to status line, col #1
+  tsl=\E]0;,
+# userX : User string 0..9
+  u6=\E[%i%d;%dR,
+  u7=\E[6n,
+  u8=\E[?6c,
+  u9=\E[c,

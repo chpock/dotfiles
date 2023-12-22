@@ -1,0 +1,60 @@
+%%	a literal "%" 	 $(date "+%%")
+%a	locale's abbreviated weekday name 	 $(date "+%a")
+%A	locale's full weekday name 	 $(date "+%a")
+%b	locale's abbreviated month name 	 $(date "+%b")
+%B	locale's full month name 	 $(date "+%B")
+%c	locale's date and time 	 $(date "+%c")
+%C	century; like %Y, except omit last 2 digits 	 $(date "+%C")
+%d	day of month 	 $(date "+%d")
+%D	date; same as "%m/%d/%y" 	 $(date "+D")
+%e	day of month, space padded; same as "%_d" 	 $(date "+%e")
+%F	full date; same as "%Y-%m-%d"	 $(date "+%F")
+%g	last two digits of year of ISO week (see "%G") 	 $(date "+%g")
+%G	year of ISO week number (see "%V"); norm useful w/ "%V" 	 $(date "+%G")
+%h	same as "%b" 	 $(date "+%a")
+%H	hour (00..23) 	 $(date "+%H")
+%I	hour (01..12) 	 $(date "+%I")
+%j	day of year (001..366) 	 $(date "+%j")
+%k	hour, space padded ( 0..23); same as "%_H" 	 $(date "+%k")
+%l	hour, space padded ( 1..12); same as "%_I" 	 $(date "+%l")
+%m	month (01..12) 	 $(date "+%m")
+%M	minute (00..59) 	 $(date "+%M")
+%n	a newline 	  ${(j. .)${(@f)$(date "+%H%n%S")}}
+%N	nanoseconds (000000000..999999999) 	 $(date "+%N")
+%p	locale's equivalent to AM or PM 	 $(date "+%p")
+%P	like "%p", but lower case 	 $(date "+%P")
+%r	locale's 12-hour clock time 	 $(date "+%r")
+%R	24-hour hour and minute; same as "%H:%M" 	 $(date "+%R")
+%s	seconds since 1970-01-01 00:00:00 UTC 	 $(date "+%s")
+%S	second (00..60)  	 $(date "+%S")
+%t	a tab 	 $(date "+%H%t:%t:%S")
+%T	time; same as "%H:%M:%S" 	 $(date "+%T")
+%u	day of week (1..7); 1 = Monday 	 $(date "+%u")
+%U	week number of year, Sunday = first day of week 	 $(date "+%U")
+%V	ISO week number, with Monday = first day of week (01..53) 	 $(date "+%V")
+%w	day of week (0..6); 0 is Sunday 	 $(date "+%w")
+%W	week number of year, Monday = first day of week (00..53) 	 $(date "+%W")
+%x	locale's date representation 	 $(date "+%x")
+%X	locale's time representation 	 $(date "+%X")
+%y	last two digits of year (00..99) 	 $(date "+%y")
+%Y	year 	 $(date "+%Y")
+%z	+hhmm numeric time zone 	 $(date "+%z")
+%:z	+hh:mm numeric time zone 	 $(date "+%:z")
+%::z	+hh:mm:ss numeric time zone 	 $(date "+%::z")
+%:::z	numeric time zone with : to necessary precision 	 $(date "+%::z")
+
+[[ "$1" == "-h" ]] && {
+    echo "$format"
+    exit 1
+}
+
+echo "date        : $(date +'%Y/%m/%d')"
+echo "time        : $(date +'%T')"
+echo "timezone    : $(date +'%:z')"
+echo
+echo "month       : $(date +'%B')"
+echo "day of week : $(date +'%A')"
+echo "week        : $(date +'%V or %U')"
+echo "day of year : $(date +'%j')"
+echo "nanoseconds : $(date +'%N')"
+echo "epoch       : $(date +'%s')"

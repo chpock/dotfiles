@@ -1,1096 +1,4 @@
-IAM="kk" && \
-SSH_PUB_KEY="ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEApJEHtvysrpZeN7xfBS5GY0JjFD8eL5UCYZFbwcUhKXKNXsjtLl9FtwA9sS0cJhqM8CSSGAcceSirACC5L5PSLckeUh2eofYlqJPBkNzU2Uycwc7CSKJRaVTY+yNAJrdpO+7fJPxzis5H3CEB6roguEr+ZqDF9BSEZ0CO8l4wTGgsmqZ2UJuEKfVpPMg6cqGCUj6NvoADavMyrOPRKVCvKikJaWd3NJK4UXueLW0pc/lNoKvbVYRyXO0VruwsAAeciPtn/M1po/iz3+pQW9fk6uM1YContqmR3Ga7TfF249cSyml2gSO8VeNoPbm3RM/KPMZ8F9eyfwQUf6bic2IRoQ== kkushnir" && \
-_GIT_USER_NAME="Konstantin Kushnir" && \
-_GIT_USER_EMAIL="chpock@gmail.com" && \
-export IAM && \
-export SSH_PUB_KEY && \
-export _GIT_USER_NAME && \
-export _GIT_USER_EMAIL && \
-IAM_HOME="$HOME/.${IAM}_home" && \
-export IAM_HOME && \
-rm -rf "$HOME/.${IAM}_terminfo" && \
-rm -f "$HOME/.${IAM}_startup" && \
-if [ ! -d "$IAM_HOME" ]; then mkdir "$IAM_HOME"; fi && \
-rm -rf "$IAM_HOME/terminfo" && \
-mkdir "$IAM_HOME/terminfo" && \
-mkdir -p "$IAM_HOME/vim_swap" && \
-cat <<'EOF' > "$IAM_HOME/terminfo/.terminfo"
-xterm-256color|xterm with 256 colors,
-#  auto_right_margin: Terminal has automatic margins
-  am,
-#  back_color_erase: Screen erased with background colour
-  bce,
-#  can_change: Terminal can re-define existing colour
-  ccc,
-#  eat_newline_glitch: Newline ignored after 80 columns (Concept)
-  xenl,
-#  has_meta_key: Has a meta key (shift, sets parity bit)
-  km,
-#  has_status_line: Has extra "status line"
-  hs,
-#  move_insert_mode: Safe to move while in insert mode
-  mir,
-#  move_standout_mode: Safe to move in standout modes
-  msgr,
-#  xon_xoff: Terminal uses xon/xoff handshaking
-  xon,
-#  no_pad_char: Pad character doesn't exist
-  npc,
-#  prtr_silent: Printer won't echo on screen
-  mc5i,
-#  init_tabs : Tabs initially every # spaces
-  it#8,
-#  max_colors : Maximum number of colours on the screen
-  colors#256,
-#  max_pairs : Maximum number of colour-pairs on the screen
-  pairs#32767,
-#  acs_chars : Graphic charset pairs aAbBcC
-  acsc=``aaffggiijjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}}~~,
-#  back_tab : Back tab
-  cbt=\E[Z,
-#  bell : Audible signal (bell)
-  bel=^G,
-#  carriage_return : Carriage return
-  cr=^M,
-#  change_scroll_region : Change to lines #1 through #2 (VT100)
-  csr=\E[%i%p1%d;%p2%dr,
-#  clear_all_tabs : Clear all tab stops
-  tbc=\E[3g,
-#  clear_screen : Clear screen and home cursor
-  clear=\E[H\E[J,
-#  clr_bol : Clear to beginning of line, inclusive
-  el1=\E[1K,
-#  clr_eol : Clear to end of line
-  el=\E[K,
-#  clr_eos : Clear to end of display
-  ed=\E[J,
-#  column_address : Set horizontal position to absolute #1
-  hpa=\E[%i%p1%dG,
-# cursor_address : Move to row #1 col #2
-  cup=\E[%i%p1%d;%p2%dH,
-# cursor_home : Home cursor (if no cup)
-  home=\E[H,
-# cursor_invisible : Make cursor invisible
-  civis=\E[?25l,
-# cursor_left : Move left one space.
-  cub1=^H,
-# cursor_normal : Make cursor appear normal
-  cnorm=\E[34h\E[?25h,
-# cursor_down : Down one line
-  cud1=\E[B,
-# cursor_right : Non-destructive space (cursor or carriage right)
-  cuf1=\E[C,
-# cursor_up : Upline (cursor up)
-  cuu1=\E[A,
-# cursor_visible : Make cursor very visible
-  cvvis=\E[34l\E[?25h,
-# delete_character : Delete character
-  dch1=\E[P,
-# delete_line : Delete line
-  dl1=\E[M,
-# dis_status_line : Disable status line
-  dsl=\E]0;\007,
-# display_pc_char : Display PC character
-  dispc=
-    %?
-      %p1%{8}%=
-      %t\E%%G\342\227\230\E%%@
-    %e
-      %p1%{10}%=
-      %t\E%%G\342\227\231\E%%@
-    %e
-      %p1%{12}%=
-      %t\E%%G\342\231\0\E%%@
-    %e
-      %p1%{13}%=
-      %t\E%%G\342\231\252\E%%@
-    %e
-      %p1%{14}%=
-      %t\E%%G\342\231\253\E%%@
-    %e
-      %p1%{15}%=
-      %t\E%%G\342\230\274\E%%@
-    %e
-      %p1%{27}%=
-      %t\E%%G\342\206\220\E%%@
-    %e
-      %p1%{155}%=
-      %t\E%%G\340\202\242\E%%@
-    %e
-      %p1%c
-    %;,
-# ena_acs : Enable alternate character set
-  enacs=\E(B\E)0,
-# enter_alt_charset_mode : Start alternate character set
-  smacs=\E(0,
-# enter_am_mode : Turn on automatic margins
-  smam=\E[?7h,
-# enter_blink_mode : Turn on blinking
-  blink=\E[5m,
-# enter_bold_mode : Turn on bold (extra bright) mode
-  bold=\E[1m,
-# enter_ca_mode : String to begin programs that use cup
-  smcup=\E[?1049h,
-# enter_doublewide_mode : Enable double wide printing
-  swidm=\E#6,
-# enter_insert_mode : Insert mode (enter)
-  smir=\E[4h,
-# enter_pc_charset_mode : Enter PC character display mode
-  smpch=\E[11m,
-# enter_reverse_mode : Turn on reverse video mode
-  rev=\E[7m,
-# enter_standout_mode : Begin standout mode
-  smso=\E[7m,
-# enter_underline_mode : Start underscore mode
-  smul=\E[4m,
-# erase_chars : Erase #1 characters
-  ech=\E[%p1%dX,
-# exit_alt_charset_mode : End alternate character set
-  rmacs=\E(B,
-# exit_am_mode : Turn off automatic margins
-  rmam=\E[?7l,
-# exit_attribute_mode : Turn off all attributes
-  sgr0=\E[m\E(B,
-# exit_ca_mode : String to end programs that use cup
-  rmcup=\E[?1049l,
-# exit_insert_mode : End insert mode
-  rmir=\E[4l,
-# exit_pc_charset_mode : Disable PC character display mode
-  rmpch=\E[10m,
-# exit_standout_mode : End standout mode
-  rmso=\E[27m,
-# exit_underline_mode : End underscore mode
-  rmul=\E[24m,
-# flash_screen : Visible bell (may move cursor)
-  flash=\E[?5h$<100/>\E[?5l,
-# from_status_line : Return from status line
-  fsl=^G,
-# init_2string : Terminal or printer initialisation string
-  is2=\E[34h\E[?25h\E[4l\E[?7h\E[?1;4;6;1047l\E[2J\E[H\E>\E[r\E[m\E]R\E[?1000l\E[?1002l,
-# initialize_color : Set colour #1 to RGB #2, #3, #4
-  initc@,
-# insert_character : Insert character
-  ich1=\E[@,
-# insert_line : Add new blank line
-  il1=\E[L,
-# key_a1 : upper left of keypad
-  ka1=\EOw,
-# key_a3 : upper right of keypad
-  ka3=\EOy,
-# key_b2 : center of keypad
-  kb2=\EOu,
-# key_c1 : lower left of keypad
-  kc1=\EOq,
-# key_c3 : lower right of keypad
-  kc3=\EOs,
-# key_backspace : sent by backspace key
-  kbs=\177,
-# key_btab : sent by back-tab key
-  kcbt=\E[Z,
-# key_dc : sent by delete-character key
-  kdch1=\E[3~,
-# key_end : 7
-  kend=\E[4~,
-# key_enter : 8
-  kent=\EOM,
-# key_fX : sent by function key f0..63
-  kf1=\E[11~,
-  kf2=\E[12~,
-  kf3=\E[13~,
-  kf4=\E[14~,
-  kf5=\E[15~,
-  kf6=\E[17~,
-  kf7=\E[18~,
-  kf8=\E[19~,
-  kf9=\E[20~,
-  kf10=\E[21~,
-  kf11=\E[23~,
-  kf12=\E[24~,
-  kf13=\E[25~,
-  kf14=\E[26~,
-  kf15=\E[28~,
-  kf16=\E[29~,
-  kf17=\E[31~,
-  kf18=\E[32~,
-  kf19=\E[33~,
-  kf20=\E[34~,
-  kf21=\E[20;2~,
-  kf22=\E[21;2~,
-  kf23=\E[23;2~,
-  kf24=\E[24;2~,
-  kf25=\EO5P,
-  kf26=\EO5Q,
-  kf27=\EO5R,
-  kf28=\EO5S,
-  kf29=\E[15;5~,
-  kf30=\E[17;5~,
-  kf31=\E[18;5~,
-  kf32=\E[19;5~,
-  kf33=\E[20;5~,
-  kf34=\E[21;5~,
-  kf35=\E[23;5~,
-  kf36=\E[24;5~,
-  kf37=\EO6P,
-  kf38=\EO6Q,
-  kf39=\EO6R,
-  kf40=\EO6S,
-  kf41=\E[15;6~,
-  kf42=\E[17;6~,
-  kf43=\E[18;6~,
-  kf44=\E[19;6~,
-  kf45=\E[20;6~,
-  kf46=\E[21;6~,
-  kf47=\E[23;6~,
-  kf48=\E[24;6~,
-  kf49=\EO3P,
-  kf50=\EO3Q,
-  kf51=\EO3R,
-  kf52=\EO3S,
-  kf53=\E[15;3~,
-  kf54=\E[17;3~,
-  kf55=\E[18;3~,
-  kf56=\E[19;3~,
-  kf57=\E[20;3~,
-  kf58=\E[21;3~,
-  kf59=\E[23;3~,
-  kf60=\E[24;3~,
-  kf61=\EO4P,
-  kf62=\EO4Q,
-  kf63=\EO4R,
-# key_home : sent by home key
-  khome=\E[1~,
-# key_ic : sent by ins-char/enter ins-mode key
-  kich1=\E[2~,
-################## key_left, key_right, key_up, key_down were \E[D,\E[C,\E[A,\E[B
-################## and they are correct codes from putty
-################## but they don't work with some ncurses apps
-################## so, I changed them to \EOD,\EOC,\EOA,\EOB
-# key_left : sent by terminal left-arrow key
-  kcub1=\EOD,
-# key_right : sent by terminal right-arrow key
-  kcuf1=\EOC,
-# key_up : sent by terminal up-arrow key
-  kcuu1=\EOA,
-# key_down : sent by terminal down-arrow key
-  kcud1=\EOB,
-# key_mouse : 0631, Mouse event has occured
-  kmous=\E[M,
-# key_npage : sent by next-page key
-  knp=\E[6~,
-# key_ppage : sent by previous-page key
-  kpp=\E[5~,
-# keypad_local : Out of "keypad-transmit" mode
-  rmkx=\E[?1l\E>,
-# keypad_xmit : Put terminal in "keypad-transmit" mode
-  smkx=\E[?1h\E=,
-# orig_colors : Set all colour(-pair)s to the original ones
-  oc=\E]R,
-# orig_pair : Set default colour-pair to the original one
-  op=\E[39;49m,
-# parm_dch : Delete #1 chars
-  dch=\E[%p1%dP,
-# parm_delete_line : Delete #1 lines
-  dl=\E[%p1%dM,
-# parm_down_cursor : Move down #1 lines.
-  cud=\E[%p1%dB,
-# parm_ich : Insert #1 blank chars
-  ich=\E[%p1%d@,
-# parm_index : Scroll forward #1 lines.
-  indn=\E[%p1%dS,
-# parm_insert_line : Add #1 new blank lines
-  il=\E[%p1%dL,
-# parm_left_cursor : Move cursor left #1 spaces
-  cub=\E[%p1%dD,
-# parm_right_cursor : Move right #1 spaces.
-  cuf=\E[%p1%dC,
-# parm_rindex : Scroll backward #1 lines.
-  rin=\E[%p1%dT,
-# parm_up_cursor : Move cursor up #1 lines.
-  cuu=\E[%p1%dA,
-# print_screen : Print contents of the screen
-  mc0=\E[i,
-# prtr_off : Turn off the printer
-  mc4=\E[4i,
-# prtr_on : Turn on the printer
-  mc5=\E[5i,
-# reset_1string : Reset terminal completely to sane modes
-  rs1=\Ec,
-# reset_2string : Reset terminal completely to sane modes
-  rs2=\E<\E["p\E[50;6"p\Ec\E[?3l\E]R\E[?1000l,
-# restore_cursor : Restore cursor to position of last sc
-  rc=\E8,
-# row_address : Set vertical position to absolute #1
-  vpa=\E[%i%p1%dd,
-# save_cursor : Save cursor position
-  sc=\E7,
-# scroll_forward : Scroll text up
-  ind=^J,
-# scroll_reverse : Scroll text down
-  ri=\EM,
-# set0_des_seq : Shift into codeset 0 (EUC set 0, ASCII)
-  s0ds=\E[10m,
-# set1_des_seq : Shift into codeset 1
-  s1ds=\E[11m,
-# set2_des_seq : Shift into codeset 2
-  s2ds=\E[12m,
-# set_a_background : Set background colour to #1 using ANSI escape
-  setab=\E[
-    %?
-      %p1%{8}%<
-      %t4%p1%d
-    %e
-      %p1%{16}%<
-      %t10%p1%{8}%-%d
-    %e48;5;
-      %p1%d
-    %;
-    m,
-# set_a_foreground : Set foreground colour to #1 using ANSI escape
-  setaf=\E[
-    %?
-      %p1%{8}%<
-      %t3%p1%d
-    %e
-      %p1%{16}%<
-      %t9%p1%{8}%-%d
-    %e38;5;
-      %p1%d
-    %;
-    m,
-# set_attributes : Define first set of video attributes #1-#9
-  sgr=\E[0
-    %?
-      %p1%p6%|
-      %t;1
-    %;
-    %?
-      %p2
-      %t;4
-    %;
-    %?
-      %p1%p3%|
-      %t;7
-    %;
-    %?
-      %p4
-      %t;5
-    %;
-    m
-    %?
-      %p9
-      %t\016
-    %e
-      \017
-    %;,
-# set_tab : Set a tab in all rows, current column
-  hts=\EH,
-# tab : Tab to next 8-space hardware tab stop
-  ht=^I,
-# to_status_line : Go to status line, col #1
-  tsl=\E]0;,
-# userX : User string 0..9
-  u6=\E[%i%d;%dR,
-  u7=\E[6n,
-  u8=\E[?6c,
-  u9=\E[c,
-EOF
-
-if [ "$TERM" = "xterm-256color" ]; then
-    TERMINFO="$IAM_HOME/terminfo"
-    export TERMINFO
-    tic "$IAM_HOME/terminfo/.terminfo" >/dev/null 2>&1 || true
-fi
-
-cat <<'EOF' > "$HOME/.tclshrc"
-
-if { !$::tcl_interactive } return
-
-puts "Tcl $tcl_patchLevel"
-
-if { [file exists [file join $::env(IAM_HOME) tools tcl TclReadLine]] } {
-
-    lappend auto_path [file join $::env(IAM_HOME) tools tcl TclReadLine]
-
-    package require TclReadLine
-
-    set ::TclReadLine::HISTFILE     [file join $::env(IAM_HOME) tclline_history]
-    set ::TclReadLine::HISTORY_SIZE 99999
-
-    TclReadLine::interact
-
-}
-
-EOF
-
-cat <<'EOF' > "$IAM_HOME/tmux.conf.template"
-
-# keep the magic
-set -g default-command "exec bash --rcfile \"$IAM_HOME/bashrc\" -i"
-
-# good practice: don't use different aliases for the same command
-#   set    -> set-option / set-window-option
-#   run    -> run-shell
-#   bind   -> bind-key
-#       -r flag: enable keep hitting bind key without prefix
-#       -n flag: enable bind key without prefix
-#       -g flag: global
-#   send   -> send-keys
-#   unbind -> unbind-key
-#   if     -> if-shell
-
-# remap prefix from 'C-b' to 'C-a'
-unbind C-b
-set -g prefix C-a
-# C-a a <command> sends commands to a TMUX session inside another TMUX session
-bind C-a send-prefix
-
-# reload config file
-bind r run '"$IAM_HOME/tools/bin/tmux-helper" reset-options-to-default' \; \
-    source-file "$IAM_HOME/tmux.conf" \; \
-    display-message "$IAM_HOME/tmux.conf reloaded."
-
-# switch between the last active window
-bind Tab last-window
-
-# kill current pane/window
-bind q confirm-before kill-pane
-bind Q confirm-before kill-window
-
-# pane: arrow Movements
-bind Up select-pane -U
-bind Down select-pane -D
-bind Left select-pane -L
-bind Right select-pane -R
-
-# start Window Numbering at 1
-set -g base-index 1
-# make pane numbering consistent with windows
-set -g pane-base-index 1
-
-# faster command sequences (default is 500 milliseconds)
-set -s escape-time 50
-
-# increase scrollback buffer size
-set -g history-limit 1000000
-
-# rename window to reflect current program
-set -g automatic-rename on
-# renumber windows when a window is closed
-set -g renumber-windows on
-
-# set terminal title
-set -g set-titles on
-# wm window title string (uses statusbar variables)
-set -g set-titles-string '#h:#{pane_current_path}'
-
-# redraw status line every 10 seconds (default 15 seconds)
-set -g status-interval 10
-
-# set time for message display
-set -g display-time 2000
-
-# visual notification of activity in other windows
-set -g monitor-activity on
-# display status line messages upon activity (Activity in window <n>)
-set -g visual-activity off
-
-# When a smaller terminal connects to a tmux client, it shrinks to fit it.
-set -g aggressive-resize on
-
-# make keys predictable
-set -g status-keys vi
-set -g mode-keys vi
-
-# +__KITTY_ID
-set -ug update-environment
-set -ag update-environment "__KITTY_ID"
-
--2.1:# UTF status bar for tmux < 2.2
--2.1:set -g status-utf8 on
-
-# enable mouse mode
-2.1+:set -g mouse on
--2.0:set -g mode-mouse on
--2.0:set -g mouse-resize-pane on
--2.0:set -g mouse-select-pane on
--2.0:set -g mouse-select-window on
-# disable right-click menu
-unbind -n MouseDown3Pane
-
-# New window / pane
-bind - split-window -v -c "#{pane_current_path}"
-bind \\ split-window -h -c "#{pane_current_path}"
-bind c new-window -c "#{pane_current_path}"
-
-bind i set monitor-activity \; display-message "Monitor activity for windows #I is #{?monitor-activity,on,off}"
-
-# mode indicator
-# the idea is from: https://github.com/MunifTanjim/tmux-mode-indicator
-set -g @ind_t_prefix ' WAIT '
-set -g @ind_s_prefix 'bg=blue,fg=white'
-set -g @ind_t_copy   ' COPY '
-set -g @ind_s_copy   'bg=yellow,fg=black'
-set -g @ind_t_none   ' TMUX '
-set -g @ind_s_none   'bg=cyan,fg=black'
-
-# better windows auto-names
-set -g @automatic-rename-append-format "#[nobold,fg=white]:#[fg=yellow]"
-# the default format is:
-# "#{?pane_in_mode,[tmux],#{pane_current_command}}#{?pane_dead,[dead],}"
-set -g automatic-rename-format "#{?pane_in_mode,[tmux],#{pane_current_command}#{?#{!=:#{@automatic-rename-append},},#{@automatic-rename-append-format}#{@automatic-rename-append},}}#{?pane_dead,[dead],}"
-# run helper to set a prefix for windows names, silently ignoring any errors
-set-hook -ug window-renamed
-set-hook -ag window-renamed 'run "$IAM_HOME/tools/bin/tmux-helper update-automatic-rename-append -w \"#{hook_window}\" 2>/dev/null"'
-# other things related to windows auto-names are in the bashrc and in the tmux-helper command
-
-# tmux clock
-set -g clock-mode-colour colour135
-
-# modes
-set -g mode-style 'fg=colour196,bg=colour238,bold'
-
-# panes
-set -g pane-border-style 'bg=colour235,fg=colour238'
-set -g pane-active-border-style 'bg=colour236,fg=colour51'
-# the pane style
-#set -g window-style 'default'
-# the pane style when it is the active pane
-#set -g window-active-style 'default'
-
-# statusbar
-set -g status-position top
-set -g status-style 'bg=colour234,fg=colour137,dim'
-# here is session name by default, but I use indicator
-set -g status-left '#{?client_prefix,#[#{@ind_s_prefix}]#{@ind_t_prefix},#{?pane_in_mode,#[#{@ind_s_copy}]#{@ind_t_copy},#[#{@ind_s_none}]#{@ind_t_none}}}'
-set -g status-left-length 20
-set -g status-right ''
-# set -g status-right '#[fg=colour233,bg=colour241,bold] %d/%m #[fg=colour233,bg=colour245,bold] %H:%M:%S '
-set -g status-right-length 50
-
-# windows
-set -g window-status-current-format ' #I#[fg=colour250]:#[fg=colour255]#W#[fg=colour50]#F '
-set -g window-status-current-style  'fg=colour81,bg=colour238,bold'
-
-set -g window-status-format ' #I#[fg=colour237]:#[fg=colour250]#W#{?monitor-activity,,#[fg=colour250]##}#[fg=colour244]#F '
-set -g window-status-style  'fg=colour138,bg=colour235,none'
-
-# windows with a bell alert
-set -g window-status-bell-style 'fg=colour255,bg=colour1,bold'
-
-# windows with an activity alert
-#set -g window-status-activity-style 'reverse'
-# style for the last active window
-#set -g window-status-last-style 'default'
-# the separator drawn between windows
-#set -g window-status-separator ' '
-
-# messages
-set -g message-style 'fg=colour232,bg=colour166,bold'
-
-EOF
-
-cat <<'EOF' > "$IAM_HOME/local_tools"
-
-git functions
-https://raw.githubusercontent.com/chpock/ext.bash/master/shell.rc/functions-git.sh
-$IAM_HOME/shell.rc/functions-git.sh
-3983
-
-docker functions
-https://raw.githubusercontent.com/chpock/ext.bash/master/shell.rc/functions-docker.sh
-$IAM_HOME/shell.rc/functions-docker.sh
-2910
-
-AWS CLI functions
-https://raw.githubusercontent.com/chpock/ext.bash/master/shell.rc/functions-awscli.sh
-$IAM_HOME/shell.rc/functions-awscli.sh
-1862
-
-kubetcl function
-https://raw.githubusercontent.com/chpock/ext.bash/master/shell.rc/functions-kubectl.sh
-$IAM_HOME/shell.rc/functions-kubectl.sh
-3735
-
-bash completion
-https://raw.githubusercontent.com/chpock/.ini/master/bash_completion/custom/ecconfigure.bash
-$IAM_HOME/tools/bash_completion/ecconfigure.completion.bash
-3135
-
-bash completion
-https://raw.githubusercontent.com/chpock/.ini/master/bash_completion/custom/ectool.bash
-$IAM_HOME/tools/bash_completion/ectool.completion.bash
-290223
-
-bash completion
-https://raw.githubusercontent.com/chpock/.ini/master/bash_completion/custom/electricflow.bash
-$IAM_HOME/tools/bash_completion/electricflow.completion.bash
-12691
-
-bash completion
-https://raw.githubusercontent.com/docker/cli/master/contrib/completion/bash/docker
-$IAM_HOME/tools/bash_completion/docker.completion.bash
-114782
-
-bash completion
-https://raw.githubusercontent.com/docker/machine/master/contrib/completion/bash/docker-machine.bash
-$IAM_HOME/tools/bash_completion/docker-machine.completion.bash
-12211
-
-bash completion
-https://raw.githubusercontent.com/docker/compose/master/contrib/completion/bash/docker-compose
-$IAM_HOME/tools/bash_completion/docker-compose.completion.bash
-13500
-
-bash completion
-https://raw.githubusercontent.com/Bash-it/bash-it/master/completion/available/virtualbox.completion.bash
-$IAM_HOME/tools/bash_completion/virtualbox.completion.bash
-5467
-
-bash completion
-https://raw.githubusercontent.com/Bash-it/bash-it/master/completion/available/makefile.completion.bash
-$IAM_HOME/tools/bash_completion/makefile.completion.bash
-934
-
-bash completion
-https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash
-$IAM_HOME/tools/bash_completion/git-completion.bash
-82511
-
-bash completion
-https://raw.githubusercontent.com/imomaliev/tmux-bash-completion/master/completions/tmux
-$IAM_HOME/tools/bash_completion/tmux-completion.bash
-6055
-
-tcl readline
-https://raw.githubusercontent.com/suewonjp/tclsh-wrapper/master/TclReadLine/TclReadLine.tcl
-$IAM_HOME/tools/tcl/TclReadLine/TclReadLine.tcl
-40415
-
-tcl readline
-https://raw.githubusercontent.com/suewonjp/tclsh-wrapper/master/TclReadLine/pkgIndex.tcl
-$IAM_HOME/tools/tcl/TclReadLine/pkgIndex.tcl
-546
-
-mydu tool
-https://raw.githubusercontent.com/chpock/ext.bash/master/tools/bin/mydu
-$IAM_HOME/tools/bin/mydu
-2942
-
-colors tool
-https://raw.githubusercontent.com/chpock/ext.bash/master/tools/bin/colors
-$IAM_HOME/tools/bin/colors
-2789
-
-lastbuild tool
-https://raw.githubusercontent.com/chpock/ext.bash/master/tools/bin/lastbuild
-$IAM_HOME/tools/bin/lastbuild
-3213
-
-shellcheck tool
-https://raw.githubusercontent.com/chpock/ext.bash/master/tools/bin/install-shellcheck
-$IAM_HOME/tools/bin/install-shellcheck
-1438
-
-apt-cyg tool
-https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg
-$IAM_HOME/tools/bin/apt-cyg
-filter: cygwin
-73293
-
-upkg tool
-https://raw.githubusercontent.com/chpock/upkg/main/upkg
-$IAM_HOME/tools/bin/upkg
-on update: mkdir -p "$IAM_HOME"/shell.rc && "$IAM_HOME"/tools/bin/upkg supported silent && "$IAM_HOME"/tools/bin/upkg generate bash-rc >"$IAM_HOME"/shell.rc/upkg.rc.sh || true
-25613
-
-tmux-helper tool
-https://raw.githubusercontent.com/chpock/ext.bash/master/tools/bin/tmux-helper
-$IAM_HOME/tools/bin/tmux-helper
-5489
-
-EOF
-
-cat <<'EOF' > "$IAM_HOME/vimrc"
-set nocompatible
-set t_Co=256           " enable 256 colors
-set nowrap             " don't wrap lines
-set tabstop=4          " a tab is four spaces
-set backspace=indent,eol,start
-                       " allow backspacing over everything in insert mode
-set autoindent         " always set autoindenting on
-set copyindent         " copy the previous indentation on autoindenting
-set number             " always show line numbers
-set shiftwidth=4       " number of spaces to use for autoindenting
-set shiftround         " use multiple of shiftwidth when indenting with '<' and '>'
-set showmatch          " set show matching parenthesis
-set matchtime=3        " for 3 tenths of a second (mat)
-set ignorecase         " ignore case when searching
-set smartcase          " ignore case if search pattern is all lowercase,
-                       "    case-sensitive otherwise
-set smarttab           " insert tabs on the start of a line according to
-                       "    shiftwidth
-set expandtab          " insert space characters whenever the tab key is pressed
-
-set hlsearch           " highlight search terms
-set incsearch          " show search matches as you type
-
-" Use <C-L> to clear the highlighting of :set hlsearch.
-if maparg('<C-L>', 'n') ==# ''
-  nnoremap <silent> <C-L> :nohlsearch<C-R>=has('diff')?'<Bar>diffupdate':''<CR><CR><C-L>
-endif
-
-set history=1000       " remember more commands and search history
-set undolevels=1000    " use many muchos levels of undo
-set wildignore=*.swp,*.bak,*.pyc,*.class
-set notitle            " don't change the terminal's title
-set visualbell         " don't beep
-set noerrorbells       " don't beep
-
-set noshowmode         " don't display the current mode (-- INSERT --)
-                       " status line is used instead
-set ruler              " show the cursor position always (ru)
-set laststatus=2       " always display status line
-
-" store swap files in my home / temp directories, but not in current directory
-" Use // at the end of the filename makes vim use absolute file paths for
-" the swap file names so you don't get name collisions.
-set directory=$IAM_HOME/vim_swap//,~/tmp//,/var/tmp//,/tmp//,.
-
-if version >= 600
-    filetype plugin indent on
-else
-    filetype on
-endif
-
-set list
-set listchars=tab:>.,trail:.,extends:#,nbsp:.
-if has("autocmd")
-    autocmd filetype html,xml set listchars-=tab:>.
-endif
-
-nnoremap <silent> <special> <F2> :set invpaste invnumber invlist<CR>
-inoremap <silent> <special> <F2> <C-O>:set invpaste invnumber invlist<CR>
-set pastetoggle=<F2>
-
-if v:version > 703 || v:version == 703 && has("patch541")
-  set formatoptions+=j " Delete comment character when joining commented lines
-endif
-
-" Always show at least one line above/below the cursor
-if !&scrolloff
-  set scrolloff=1
-endif
-if !&sidescrolloff
-  set sidescrolloff=5
-endif
-set display+=lastline
-
-" Q command to exit
-command! Q :q
-command! Wq :wq
-command! Wqa :wqa
-
-" Status line
-" set statusline=%<%f\ %h%m%r%=%-20.(line=%l,col=%c%V,totlin=%L%)\%h%m%r%=%-40(,bytval=0x%B,%n%Y%)\%P
-" set statusline=%F%m%r%h%w\ [FORMAT=%{&ff}]\ [TYPE=%Y]\ [ASCII=\%03.3b]\ [HEX=\%02.2B]\ [POS=%04l,%04v][%p%%]\ [LEN=%L]
-set statusline=
-set statusline+=%#DiffAdd#%{(mode()=='n')?'\ \ NORMAL\ ':''}
-set statusline+=%#DiffChange#%{(mode()=='i')?'\ \ INSERT\ ':''}
-set statusline+=%#DiffDelete#%{(mode()=='r')?'\ \ RPLACE\ ':''}
-set statusline+=%#Cursor#%{(mode()=='v')?'\ \ VISUAL\ ':''}
-set statusline+=\ %n\                               " buffer number
-set statusline+=%#Visual#                           " colour
-set statusline+=%{&paste?'\ PASTE\ ':''}
-set statusline+=%{&spell?'\ SPELL\ ':''}
-set statusline+=%#CursorIM#                         " colour
-set statusline+=%R                                  " readonly flag
-set statusline+=%M                                  " modified [+] flag
-set statusline+=%#Cursor#                           " colour
-set statusline+=%#CursorLine#                       " colour
-set statusline+=\ %t\                               " short file name
-set statusline+=%=                                  " right align
-set statusline+=%#CursorLine#   " colour
-set statusline+=\ [FileType:%Y]\                    " file type
-set statusline+=%#CursorIM#     " colour
-set statusline+=\ [Line:%-3l\ Column:%-3c]\         " line + column
-set statusline+=%#Cursor#       " colour
-set statusline+=\ %3p%%\                            " percentage
-
-" Monokai theme
-set background=dark
-highlight clear
-
-if exists("syntax_on")
-  syntax reset
-endif
-
-let g:terminal_ansi_colors = [
-     \ '#1d2021', '#cc241d', '#98971a', '#d79921', '#458588', '#b16286', '#689d6a', '#bdae93',
-     \ '#7c6f64', '#fb4934', '#b8bb26', '#fabd2f', '#83a598', '#d3869b', '#8ec07c', '#ebdbb2']
-hi Normal ctermfg=187 ctermbg=234 guifg=#ebdbb2 guibg=#1d2021 guisp=NONE cterm=NONE gui=NONE
-hi CursorLineNr ctermfg=214 ctermbg=237 guifg=#fabd2f guibg=#3c3836 guisp=NONE cterm=NONE gui=NONE
-hi FoldColumn ctermfg=102 ctermbg=237 guifg=#928374 guibg=#3c3836 guisp=NONE cterm=NONE gui=NONE
-hi SignColumn ctermfg=187 ctermbg=237 guifg=#ebdbb2 guibg=#3c3836 guisp=NONE cterm=NONE gui=NONE
-hi VertSplit ctermfg=59 ctermbg=234 guifg=#665c54 guibg=#1d2021 guisp=NONE cterm=NONE gui=NONE
-hi ColorColumn ctermfg=NONE ctermbg=237 guifg=NONE guibg=#3c3836 guisp=NONE cterm=NONE gui=NONE
-hi Conceal ctermfg=109 ctermbg=NONE guifg=#83a598 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi Cursor ctermfg=NONE ctermbg=NONE guifg=NONE guibg=NONE guisp=NONE cterm=NONE,reverse gui=NONE,reverse
-hi! link CursorColumn CursorLine
-hi CursorLine ctermfg=NONE ctermbg=237 guifg=NONE guibg=#3c3836 guisp=NONE cterm=NONE gui=NONE
-hi DiffAdd ctermfg=142 ctermbg=234 guifg=#b8bb26 guibg=#1d2021 guisp=NONE cterm=NONE,reverse gui=NONE,reverse
-hi DiffChange ctermfg=107 ctermbg=234 guifg=#8ec07c guibg=#1d2021 guisp=NONE cterm=NONE,reverse gui=NONE,reverse
-hi DiffDelete ctermfg=203 ctermbg=234 guifg=#fb4934 guibg=#1d2021 guisp=NONE cterm=NONE,reverse gui=NONE,reverse
-hi DiffText ctermfg=214 ctermbg=234 guifg=#fabd2f guibg=#1d2021 guisp=NONE cterm=NONE,reverse gui=NONE,reverse
-hi Directory ctermfg=142 ctermbg=NONE guifg=#b8bb26 guibg=NONE guisp=NONE cterm=NONE,bold gui=NONE,bold
-hi EndOfBuffer ctermfg=234 ctermbg=NONE guifg=#1d2021 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi Error ctermfg=203 ctermbg=234 guifg=#fb4934 guibg=#1d2021 guisp=NONE cterm=NONE,bold,reverse gui=NONE,bold,reverse
-hi ErrorMsg ctermfg=234 ctermbg=203 guifg=#1d2021 guibg=#fb4934 guisp=NONE cterm=NONE,bold gui=NONE,bold
-hi Folded ctermfg=102 ctermbg=237 guifg=#928374 guibg=#3c3836 guisp=NONE cterm=NONE gui=NONE,italic
-hi IncSearch ctermfg=208 ctermbg=234 guifg=#fe8019 guibg=#1d2021 guisp=NONE cterm=NONE,reverse gui=NONE,reverse
-hi LineNr ctermfg=243 ctermbg=NONE guifg=#7c6f64 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi MatchParen ctermfg=NONE ctermbg=59 guifg=NONE guibg=#665c54 guisp=NONE cterm=NONE,bold gui=NONE,bold
-hi ModeMsg ctermfg=214 ctermbg=NONE guifg=#fabd2f guibg=NONE guisp=NONE cterm=NONE,bold gui=NONE,bold
-hi MoreMsg ctermfg=214 ctermbg=NONE guifg=#fabd2f guibg=NONE guisp=NONE cterm=NONE,bold gui=NONE,bold
-hi NonText ctermfg=239 ctermbg=NONE guifg=#504945 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi Pmenu ctermfg=187 ctermbg=239 guifg=#ebdbb2 guibg=#504945 guisp=NONE cterm=NONE gui=NONE
-hi PmenuSbar ctermfg=NONE ctermbg=239 guifg=NONE guibg=#504945 guisp=NONE cterm=NONE gui=NONE
-hi PmenuSel ctermfg=239 ctermbg=109 guifg=#504945 guibg=#83a598 guisp=NONE cterm=NONE,bold gui=NONE,bold
-hi PmenuThumb ctermfg=NONE ctermbg=243 guifg=NONE guibg=#7c6f64 guisp=NONE cterm=NONE gui=NONE
-hi Question ctermfg=208 ctermbg=NONE guifg=#fe8019 guibg=NONE guisp=NONE cterm=NONE,bold gui=NONE,bold
-hi! link QuickFixLine Search
-hi Search ctermfg=214 ctermbg=234 guifg=#fabd2f guibg=#1d2021 guisp=NONE cterm=NONE,reverse gui=NONE,reverse
-hi SpecialKey ctermfg=239 ctermbg=NONE guifg=#504945 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi SpellBad ctermfg=203 ctermbg=NONE guifg=#fb4934 guibg=NONE guisp=#fb4934 cterm=NONE,underline gui=NONE,italic,undercurl
-hi SpellCap ctermfg=109 ctermbg=NONE guifg=#83a598 guibg=NONE guisp=#83a598 cterm=NONE,underline gui=NONE,italic,undercurl
-hi SpellLocal ctermfg=107 ctermbg=NONE guifg=#8ec07c guibg=NONE guisp=#8ec07c cterm=NONE,underline gui=NONE,italic,undercurl
-hi SpellRare ctermfg=175 ctermbg=NONE guifg=#d3869b guibg=NONE guisp=#d3869b cterm=NONE,underline gui=NONE,italic,undercurl
-hi StatusLine ctermfg=239 ctermbg=187 guifg=#504945 guibg=#ebdbb2 guisp=NONE cterm=NONE,reverse gui=NONE,reverse
-hi StatusLineNC ctermfg=237 ctermbg=137 guifg=#3c3836 guibg=#a89984 guisp=NONE cterm=NONE,reverse gui=NONE,reverse
-hi! link StatusLineTerm StatusLine
-hi! link StatusLineTermNC StatusLineNC
-hi! link TabLine TabLineFill
-hi TabLineFill ctermfg=243 ctermbg=237 guifg=#7c6f64 guibg=#3c3836 guisp=NONE cterm=NONE gui=NONE
-hi TabLineSel ctermfg=142 ctermbg=237 guifg=#b8bb26 guibg=#3c3836 guisp=NONE cterm=NONE gui=NONE
-hi Title ctermfg=142 ctermbg=NONE guifg=#b8bb26 guibg=NONE guisp=NONE cterm=NONE,bold gui=NONE,bold
-hi Visual ctermfg=NONE ctermbg=59 guifg=NONE guibg=#665c54 guisp=NONE cterm=NONE gui=NONE
-hi! link VisualNOS Visual
-hi WarningMsg ctermfg=203 ctermbg=NONE guifg=#fb4934 guibg=NONE guisp=NONE cterm=NONE,bold gui=NONE,bold
-hi WildMenu ctermfg=109 ctermbg=239 guifg=#83a598 guibg=#504945 guisp=NONE cterm=NONE,bold gui=NONE,bold
-hi Boolean ctermfg=175 ctermbg=NONE guifg=#d3869b guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi Character ctermfg=175 ctermbg=NONE guifg=#d3869b guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi Comment ctermfg=102 ctermbg=NONE guifg=#928374 guibg=NONE guisp=NONE cterm=NONE gui=NONE,italic
-hi Conditional ctermfg=203 ctermbg=NONE guifg=#fb4934 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi Constant ctermfg=175 ctermbg=NONE guifg=#d3869b guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi Define ctermfg=107 ctermbg=NONE guifg=#8ec07c guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi Debug ctermfg=203 ctermbg=NONE guifg=#fb4934 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi Delimiter ctermfg=208 ctermbg=NONE guifg=#fe8019 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi Error ctermfg=203 ctermbg=234 guifg=#fb4934 guibg=#1d2021 guisp=NONE cterm=NONE,bold,reverse gui=NONE,bold,reverse
-hi Exception ctermfg=203 ctermbg=NONE guifg=#fb4934 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi Float ctermfg=175 ctermbg=NONE guifg=#d3869b guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi Function ctermfg=142 ctermbg=NONE guifg=#b8bb26 guibg=NONE guisp=NONE cterm=NONE,bold gui=NONE,bold
-hi Identifier ctermfg=109 ctermbg=NONE guifg=#83a598 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi Ignore ctermfg=fg ctermbg=NONE guifg=fg guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi Include ctermfg=107 ctermbg=NONE guifg=#8ec07c guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi Keyword ctermfg=203 ctermbg=NONE guifg=#fb4934 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi Label ctermfg=203 ctermbg=NONE guifg=#fb4934 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi Macro ctermfg=107 ctermbg=NONE guifg=#8ec07c guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi Number ctermfg=175 ctermbg=NONE guifg=#d3869b guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi! link Operator Normal
-hi PreCondit ctermfg=107 ctermbg=NONE guifg=#8ec07c guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi PreProc ctermfg=107 ctermbg=NONE guifg=#8ec07c guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi Repeat ctermfg=203 ctermbg=NONE guifg=#fb4934 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi SpecialChar ctermfg=203 ctermbg=NONE guifg=#fb4934 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi SpecialComment ctermfg=203 ctermbg=NONE guifg=#fb4934 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi Statement ctermfg=203 ctermbg=NONE guifg=#fb4934 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi StorageClass ctermfg=208 ctermbg=NONE guifg=#fe8019 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi Special ctermfg=208 ctermbg=NONE guifg=#fe8019 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi String ctermfg=142 ctermbg=NONE guifg=#b8bb26 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi Structure ctermfg=107 ctermbg=NONE guifg=#8ec07c guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi! link Tag Special
-hi Todo ctermfg=fg ctermbg=234 guifg=fg guibg=#1d2021 guisp=NONE cterm=NONE,bold gui=NONE,bold,italic
-hi Type ctermfg=214 ctermbg=NONE guifg=#fabd2f guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi Typedef ctermfg=214 ctermbg=NONE guifg=#fabd2f guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi Underlined ctermfg=109 ctermbg=NONE guifg=#83a598 guibg=NONE guisp=NONE cterm=NONE,underline gui=NONE,underline
-hi! link lCursor Cursor
-hi CursorIM ctermfg=NONE ctermbg=NONE guifg=NONE guibg=NONE guisp=NONE cterm=NONE,reverse gui=NONE,reverse
-hi ToolbarLine ctermfg=NONE ctermbg=59 guifg=NONE guibg=#665c54 guisp=NONE cterm=NONE gui=NONE
-hi ToolbarButton ctermfg=230 ctermbg=59 guifg=#fdf4c1 guibg=#665c54 guisp=NONE cterm=NONE,bold gui=NONE,bold
-
-" hi Comment cterm=italic
-" hi Folded cterm=italic
-" hi SpellBad cterm=italic,underline
-" hi SpellCap cterm=italic,underline
-" hi SpellLocal cterm=italic,underline
-" hi SpellRare cterm=italic,underline
-" hi Todo cterm=italic
-
-hi! link iCursor Cursor
-hi! link vCursor Cursor
-hi NormalMode ctermfg=137 ctermbg=234 guifg=#a89984 guibg=#1d2021 guisp=NONE cterm=NONE,reverse gui=NONE,reverse
-hi InsertMode ctermfg=109 ctermbg=234 guifg=#83a598 guibg=#1d2021 guisp=NONE cterm=NONE,reverse gui=NONE,reverse
-hi ReplaceMode ctermfg=107 ctermbg=234 guifg=#8ec07c guibg=#1d2021 guisp=NONE cterm=NONE,reverse gui=NONE,reverse
-hi VisualMode ctermfg=208 ctermbg=234 guifg=#fe8019 guibg=#1d2021 guisp=NONE cterm=NONE,reverse gui=NONE,reverse
-hi CommandMode ctermfg=175 ctermbg=234 guifg=#d3869b guibg=#1d2021 guisp=NONE cterm=NONE,reverse gui=NONE,reverse
-hi Warnings ctermfg=208 ctermbg=234 guifg=#fe8019 guibg=#1d2021 guisp=NONE cterm=NONE,reverse gui=NONE,reverse
-if has('nvim')
-  let g:terminal_color_0  = '#1d2021'
-  let g:terminal_color_8  = '#928374'
-  let g:terminal_color_1  = '#cc241d'
-  let g:terminal_color_9  = '#fb4934'
-  let g:terminal_color_2  = '#98971a'
-  let g:terminal_color_10 = '#b8bb26'
-  let g:terminal_color_3  = '#d79921'
-  let g:terminal_color_11 = '#fabd2f'
-  let g:terminal_color_4  = '#458588'
-  let g:terminal_color_12 = '#83a598'
-  let g:terminal_color_5  = '#b16286'
-  let g:terminal_color_13 = '#d3869b'
-  let g:terminal_color_6  = '#689d6a'
-  let g:terminal_color_14 = '#8ec07c'
-  let g:terminal_color_7  = '#a89984'
-  let g:terminal_color_15 = '#ebdbb2'
-  hi! link TermCursor Cursor
-  hi TermCursorNC ctermfg=237 ctermbg=187 guifg=#3c3836 guibg=#ebdbb2 guisp=NONE cterm=NONE gui=NONE
-endif
-
-hi diffAdded ctermfg=142 ctermbg=NONE guifg=#b8bb26 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi diffRemoved ctermfg=203 ctermbg=NONE guifg=#fb4934 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi diffChanged ctermfg=107 ctermbg=NONE guifg=#8ec07c guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi diffFile ctermfg=208 ctermbg=NONE guifg=#fe8019 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi diffNewFile ctermfg=214 ctermbg=NONE guifg=#fabd2f guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi diffLine ctermfg=109 ctermbg=NONE guifg=#83a598 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi htmlTag ctermfg=109 ctermbg=NONE guifg=#83a598 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi htmlEndTag ctermfg=109 ctermbg=NONE guifg=#83a598 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi htmlTagName ctermfg=107 ctermbg=NONE guifg=#8ec07c guibg=NONE guisp=NONE cterm=NONE,bold gui=NONE,bold
-hi htmlArg ctermfg=107 ctermbg=NONE guifg=#8ec07c guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi htmlScriptTag ctermfg=175 ctermbg=NONE guifg=#d3869b guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi htmlTagN ctermfg=187 ctermbg=NONE guifg=#ebdbb2 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi htmlSpecialTagName ctermfg=107 ctermbg=NONE guifg=#8ec07c guibg=NONE guisp=NONE cterm=NONE,bold gui=NONE,bold
-hi htmlLink ctermfg=137 ctermbg=NONE guifg=#a89984 guibg=NONE guisp=NONE cterm=NONE,underline gui=NONE,underline
-hi htmlSpecialChar ctermfg=208 ctermbg=NONE guifg=#fe8019 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi htmlBold ctermfg=fg ctermbg=234 guifg=fg guibg=#1d2021 guisp=NONE cterm=NONE,bold gui=NONE,bold
-hi htmlBoldUnderline ctermfg=fg ctermbg=234 guifg=fg guibg=#1d2021 guisp=NONE cterm=NONE,bold,underline gui=NONE,bold,underline
-hi htmlBoldItalic ctermfg=fg ctermbg=234 guifg=fg guibg=#1d2021 guisp=NONE cterm=NONE,bold,italic gui=NONE,bold,italic
-hi htmlBoldUnderlineItalic ctermfg=fg ctermbg=234 guifg=fg guibg=#1d2021 guisp=NONE cterm=NONE,bold,italic,underline gui=NONE,bold,italic,underline
-hi htmlUnderline ctermfg=fg ctermbg=234 guifg=fg guibg=#1d2021 guisp=NONE cterm=NONE,underline gui=NONE,underline
-hi htmlUnderlineItalic ctermfg=fg ctermbg=234 guifg=fg guibg=#1d2021 guisp=NONE cterm=NONE,italic,underline gui=NONE,italic,underline
-hi htmlItalic ctermfg=fg ctermbg=234 guifg=fg guibg=#1d2021 guisp=NONE cterm=NONE,italic gui=NONE,italic
-hi xmlTag ctermfg=109 ctermbg=NONE guifg=#83a598 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi xmlEndTag ctermfg=109 ctermbg=NONE guifg=#83a598 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi xmlTagName ctermfg=109 ctermbg=NONE guifg=#83a598 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi xmlEqual ctermfg=109 ctermbg=NONE guifg=#83a598 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi docbkKeyword ctermfg=107 ctermbg=NONE guifg=#8ec07c guibg=NONE guisp=NONE cterm=NONE,bold gui=NONE,bold
-hi xmlDocTypeDecl ctermfg=102 ctermbg=NONE guifg=#928374 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi xmlDocTypeKeyword ctermfg=175 ctermbg=NONE guifg=#d3869b guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi xmlCdataStart ctermfg=102 ctermbg=NONE guifg=#928374 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi xmlCdataCdata ctermfg=175 ctermbg=NONE guifg=#d3869b guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi dtdFunction ctermfg=102 ctermbg=NONE guifg=#928374 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi dtdTagName ctermfg=175 ctermbg=NONE guifg=#d3869b guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi xmlAttrib ctermfg=107 ctermbg=NONE guifg=#8ec07c guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi xmlProcessingDelim ctermfg=102 ctermbg=NONE guifg=#928374 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi dtdParamEntityPunct ctermfg=102 ctermbg=NONE guifg=#928374 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi dtdParamEntityDPunct ctermfg=102 ctermbg=NONE guifg=#928374 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi xmlAttribPunct ctermfg=102 ctermbg=NONE guifg=#928374 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi xmlEntity ctermfg=208 ctermbg=NONE guifg=#fe8019 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi xmlEntityPunct ctermfg=208 ctermbg=NONE guifg=#fe8019 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi vimCommentTitle ctermfg=137 ctermbg=NONE guifg=#a89984 guibg=NONE guisp=NONE cterm=NONE,bold gui=NONE,bold
-hi vimNotation ctermfg=208 ctermbg=NONE guifg=#fe8019 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi vimBracket ctermfg=208 ctermbg=NONE guifg=#fe8019 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi vimMapModKey ctermfg=208 ctermbg=NONE guifg=#fe8019 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi vimFuncSID ctermfg=144 ctermbg=NONE guifg=#bdae93 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi vimSetSep ctermfg=144 ctermbg=NONE guifg=#bdae93 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi vimSep ctermfg=144 ctermbg=NONE guifg=#bdae93 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi vimContinue ctermfg=144 ctermbg=NONE guifg=#bdae93 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi markdownItalic ctermfg=144 ctermbg=NONE guifg=#bdae93 guibg=NONE guisp=NONE cterm=NONE,italic gui=NONE,italic
-hi markdownH1 ctermfg=142 ctermbg=NONE guifg=#b8bb26 guibg=NONE guisp=NONE cterm=NONE,bold gui=NONE,bold
-hi markdownH2 ctermfg=142 ctermbg=NONE guifg=#b8bb26 guibg=NONE guisp=NONE cterm=NONE,bold gui=NONE,bold
-hi markdownH3 ctermfg=214 ctermbg=NONE guifg=#fabd2f guibg=NONE guisp=NONE cterm=NONE,bold gui=NONE,bold
-hi markdownH4 ctermfg=214 ctermbg=NONE guifg=#fabd2f guibg=NONE guisp=NONE cterm=NONE,bold gui=NONE,bold
-hi markdownH5 ctermfg=214 ctermbg=NONE guifg=#fabd2f guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi markdownH6 ctermfg=214 ctermbg=NONE guifg=#fabd2f guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi markdownCode ctermfg=107 ctermbg=NONE guifg=#8ec07c guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi markdownCodeBlock ctermfg=107 ctermbg=NONE guifg=#8ec07c guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi markdownCodeDelimiter ctermfg=107 ctermbg=NONE guifg=#8ec07c guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi markdownBlockquote ctermfg=102 ctermbg=NONE guifg=#928374 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi markdownListMarker ctermfg=102 ctermbg=NONE guifg=#928374 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi markdownOrderedListMarker ctermfg=102 ctermbg=NONE guifg=#928374 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi markdownRule ctermfg=102 ctermbg=NONE guifg=#928374 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi markdownHeadingRule ctermfg=102 ctermbg=NONE guifg=#928374 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi markdownUrlDelimiter ctermfg=144 ctermbg=NONE guifg=#bdae93 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi markdownLinkDelimiter ctermfg=144 ctermbg=NONE guifg=#bdae93 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi markdownLinkTextDelimiter ctermfg=144 ctermbg=NONE guifg=#bdae93 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi markdownHeadingDelimiter ctermfg=208 ctermbg=NONE guifg=#fe8019 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi markdownUrl ctermfg=175 ctermbg=NONE guifg=#d3869b guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi markdownUrlTitleDelimiter ctermfg=142 ctermbg=NONE guifg=#b8bb26 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi markdownLinkText ctermfg=102 ctermbg=NONE guifg=#928374 guibg=NONE guisp=NONE cterm=NONE,underline gui=NONE,underline
-hi! link markdownIdDeclaration markdownLinkText
-hi jsonKeyword ctermfg=142 ctermbg=NONE guifg=#b8bb26 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi jsonQuote ctermfg=142 ctermbg=NONE guifg=#b8bb26 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi jsonBraces ctermfg=187 ctermbg=NONE guifg=#ebdbb2 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-hi jsonString ctermfg=187 ctermbg=NONE guifg=#ebdbb2 guibg=NONE guisp=NONE cterm=NONE gui=NONE
-
-if has('syntax') && !exists('g:syntax_on')
-  syntax enable
-endif
-
-" highlight column 80
-if exists('+colorcolumn')
-  set colorcolumn=80
-endif
-
-nmap <leader>sp :call <SID>SynStack()<CR>
-function! <SID>SynStack()
-  if !exists("*synstack")
-    return
-  endif
-  echo map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
-endfunc
-
-" go to the position I was when last editing the file
-" based on: https://github.com/farmergreg/vim-lastplace
-function! <SID>lastplace()
-  if index(split("quickfix,nofile,help", ","), &buftype) != -1
-    return
-  endif
-
-  if index(split("gitcommit,gitrebase,svn,hgcommit", ","), &filetype) != -1
-    return
-  endif
-
-  try
-    if empty(glob(@%))
-      return
-    endif
-  catch
-    return
-  endtry
-
-  if line("'\"") > 0 && line("'\"") <= line("$")
-    if line("w$") == line("$")
-      execute "normal! g`\""
-    elseif line("$") - line("'\"") > ((line("w$") - line("w0")) / 2) - 1
-      execute "normal! g`\"zz"
-    else
-      execute "normal! \G'\"\<c-e>"
-    endif
-  endif
-
-  if foldclosed(".") != -1
-    execute "normal! zvzz"
-  endif
-endfunc
-au! BufWinEnter * call <SID>lastplace()
-
-" Special file types
-
-" YAML
-au! BufNewFile,BufReadPost *.{yaml,yml} set filetype=yaml
-" disable auto ident for keys: ':', '-', '#', '}', ']'
-au! FileType yaml setlocal ts=2 sts=2 sw=2 expandtab indentkeys-=0#,0},0],<:>,-
-
-EOF
-
-cat <<'EOF' > "$IAM_HOME/bashrc"
+#!/bin/bash
 
 COLOR_WHITE=$'\e[1;37m'
 COLOR_LIGHTGRAY=$'\e[0;37m'
@@ -1208,6 +116,21 @@ _addpath() {
     PATH=${PATH%:}
     PATH=${PATH#:}
     export PATH
+}
+
+_catch() {
+    local USE_V USE_X
+    # check "verbose" option, turn if off if enabled, and save restore status USE_V
+    [ "${-/v}" != "$-" ] && set +v && USE_V="-v" || USE_V="+v"
+    # check "xtrace" option, turn if off if enabled, and save restore status USE_X
+    [ "${-/x}" != "$-" ] && set +x && USE_X="-x" || USE_X="+x"
+    {
+        IFS=$'\n' read -r -d '' "${1}";
+        IFS=$'\n' read -r -d '' "${2}";
+        (IFS=$'\n' read -r -d '' _ERRNO_; return "${_ERRNO_}");
+    } < <( (printf '\0%s\0%d\0' "$( ((({ "${@:3}" ; echo "${?}" 1>&3-; } | tr -d '\0' 1>&4-) 4>&2- 2>&1- | tr -d '\0' 1>&4-) 3>&1- | exit "$(cat)") 4>&1-)" "${?}" 1>&2) 2>&1)
+    set $USE_X
+    set $USE_V
 }
 
 __uname_machine() { uname --machine 2>/dev/null || uname -m 2>/dev/null || uname -p 2>/dev/null || echo "Unknown"; }
@@ -1947,10 +870,13 @@ _hasnot ip || ip() {
 
 # GNU diffutils 3.4+ (2016-08-08)
 _hasnot diff || diff() {
-    # :ad=[ ANSI code] - added lines
-    # :de=[ ANSI code] - deleted lines
-    # :ln=[ ANSI code] - line numbers.
-    ! _check command diff --color=auto --version || set -- --palette=':ad=32:de=31:ln=35' --color=auto "$@"
+    # don't add color parameters if stdout is not terminal
+    if [ -t 1 ]; then
+        # :ad=[ ANSI code] - added lines
+        # :de=[ ANSI code] - deleted lines
+        # :ln=[ ANSI code] - line numbers.
+        ! _check command diff --color=auto --version || set -- --palette=':ad=32:de=31:ln=35' --color=auto "$@"
+    fi
     env diff "$@"
 }
 
@@ -1990,7 +916,7 @@ if _has vim; then
             rm -f "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim"
         fi
     }
-    EDITOR="vim -u \"$IAM_HOME/vimrc\" -i \"$IAM_HOME/viminfo\""
+    EDITOR="vim -u $IAM_HOME/vimrc -i $IAM_HOME/viminfo"
 elif _has vi; then
     EDITOR=vi
 else
@@ -2045,7 +971,6 @@ __magic_ssh() {
     _GIT_USER_NAME=\"$_GIT_USER_NAME\" && export _GIT_USER_NAME && \
     _GIT_USER_EMAIL=\"$_GIT_USER_EMAIL\" && export _GIT_USER_EMAIL && \
     rm -rf \"\$HOME/.${IAM}_terminfo\" && \
-    rm -f \"\$HOME/.${IAM}_startup\" && \
     if [ ! -d \"\$IAM_HOME\" ]; then mkdir \"\$IAM_HOME\"; fi && \
     rm -rf \"\$IAM_HOME/terminfo\" && \
     mkdir \"\$IAM_HOME/terminfo\" && \
@@ -2062,11 +987,7 @@ __magic_ssh() {
 }
 
 reload() {
-    if [ "$1" = "tmux" ]; then
-        if _isnot tmux; then
-            echo "Error: tmux is not active in this terminal."
-            return 1
-        fi
+    if _is tmux && [ "$1" != "current" ]; then
         local current_wid wid cmd
         current_wid="$(tmux display-message -p -t $TMUX_PANE '#{window_id}')"
         for wid in $(tmux list-windows -F '#{window_id}'); do
@@ -2081,7 +1002,7 @@ reload() {
         tmux source-file "$IAM_HOME/tmux.conf"
         for wid in $(tmux list-windows -F '#{window_id}'); do
             [ "$wid" != "$current_wid" ] || continue
-            tmux send-keys -t $wid 'reload' C-m
+            tmux send-keys -t $wid 'reload current' C-m
         done
     fi
     exec bash --rcfile "$IAM_HOME/bashrc" -i
@@ -2116,7 +1037,6 @@ wsl() {
               _GIT_USER_NAME=\"$_GIT_USER_NAME\" && export _GIT_USER_NAME && \
               _GIT_USER_EMAIL=\"$_GIT_USER_EMAIL\" && export _GIT_USER_EMAIL && \
               rm -rf \"\$HOME/.${IAM}_terminfo\" && \
-              rm -f \"\$HOME/.${IAM}_startup\" && \
               if [ ! -d \"\$IAM_HOME\" ]; then mkdir \"\$IAM_HOME\"; fi && \
               rm -rf \"\$IAM_HOME/terminfo\" && \
               mkdir \"\$IAM_HOME/terminfo\" && \
@@ -2137,7 +1057,6 @@ wsl() {
               _GIT_USER_NAME=\"$_GIT_USER_NAME\" && export _GIT_USER_NAME && \
               _GIT_USER_EMAIL=\"$_GIT_USER_EMAIL\" && export _GIT_USER_EMAIL && \
               rm -rf \"\$HOME/.${IAM}_terminfo\" && \
-              rm -f \"\$HOME/.${IAM}_startup\" && \
               if [ ! -d \"\\\$IAM_HOME\" ]; then mkdir \"\\\$IAM_HOME\"; fi && \
               rm -rf \"\\\$IAM_HOME/terminfo\" && \
               mkdir \"\\\$IAM_HOME/terminfo\" && \
@@ -2151,29 +1070,45 @@ wsl() {
     fi
 }
 
+_send_raw_term() {
+    if _is tmux; then
+        printf '\033Ptmux;'
+        # all \033 must be doubled: https://github.com/tmux/tmux/wiki/FAQ#what-is-the-passthrough-escape-sequence-and-how-do-i-use-it
+        sed -E 's/\x1B/&&/g'
+        printf '\033\\'
+    else
+        cat
+    fi
+}
+
 # KiTTY functions to receive file(s) and launch winscp
 get() {
-    printf "\033]0;__pw:"`pwd`"\007"
-    for file in $*
-    do
-        if [ -d "$file" ]; then
-            basename="`basename "$file"`"
-            rm -f "/tmp/{basename}.tar.gz"
-            tar czf "/tmp/${basename}.tar.gz" "$file"
-            printf "\033]0;__rv:"/tmp/${basename}.tar.gz"\007"
-        else
-            printf "\033]0;__rv:"${file}"\007"
-        fi
-    done
-    printf "\033]0;__ti\007"
+    local file
+    {
+        printf '\033]0;__pw:%s\007' "$PWD"
+        for file; do
+            if [ -d "$file" ]; then
+                basename="$(basename "$file")"
+                rm -f "/tmp/{basename}.tar.gz"
+                tar czf "/tmp/${basename}.tar.gz" "$file"
+                printf '\033]0;__rv:%s\007' "/tmp/${basename}.tar.gz"
+                rm -f "/tmp/{basename}.tar.gz"
+            else
+                printf '\033]0;__rv:%s\007' "$file"
+            fi
+        done
+        printf '\033]0;__ti\007'
+    } | _send_raw_term
 }
 winscp() {
-    echo -ne "\033];__ws:${PWD}\007"
+    printf '\033];__ws:%s\007' "$PWD" | _send_raw_term
 }
 clip() {
-    echo -ne '\e''[5i'
-    cat $*
-    echo -ne '\e''[4i'
+    {
+        printf '\033[5i'
+        cat $@
+        printf '\033[4i'
+    } | _send_raw_term
     echo "Copied to Windows clipboard" 1>&2
 }
 
@@ -2216,6 +1151,7 @@ __kubectl_status() {
     local __K8S_CONF
     local __K8S_OUTPUT
     local __K8S_NS
+    local __K8S_ERR
 
     if ! _has kubectl || [ ! -e "$IAM_HOME/state/on_kube" ]; then
         return 0
@@ -2235,13 +1171,15 @@ __kubectl_status() {
 
         __K8S_OUTPUT="${__K8S_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}cluster${COLOR_GRAY}: "
 
-        if ! __K8S_CONTEXT="$(kubectl config current-context 2>&1)"; then
+        if ! _catch __K8S_CONTEXT __K8S_ERR kubectl config current-context; then
             # convert from:
             #   error: current-context is not set
             # to:
             #   current-context is not set
-            __K8S_CONTEXT="${__K8S_CONTEXT#* }"
-            __K8S_OUTPUT="${__K8S_OUTPUT}${COLOR_LIGHTRED}$__K8S_CONTEXT"
+            __K8S_CONTEXT="${__K8S_ERR#* }"
+            __K8S_OUTPUT="${__K8S_OUTPUT}${COLOR_LIGHTRED}$__K8S_ERR"
+        elif [ -n "$__K8S_ERR" ]; then
+            __K8S_OUTPUT="${__K8S_OUTPUT}${COLOR_LIGHTRED}$__K8S_ERR"
         else
 
             __K8S_OUTPUT="${__K8S_OUTPUT}${COLOR_PURPLE}$__K8S_CONTEXT"
@@ -2256,7 +1194,7 @@ __kubectl_status() {
 
     __K8S_OUTPUT="${__K8S_OUTPUT}${COLOR_GRAY}]${COLOR_DEFAULT}"
 
-    echo "$__K8S_OUTPUT"
+    _ps1_show_status "$__K8S_OUTPUT"
 
 }
 
@@ -2313,7 +1251,7 @@ __aws_status() {
 
     __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}]${COLOR_DEFAULT}"
 
-    echo "$__AWS_OUTPUT"
+    _ps1_show_status "$__AWS_OUTPUT"
 
 }
 
@@ -2515,7 +1453,7 @@ __git_status() {
 
     __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}]${COLOR_DEFAULT}"
 
-    echo "$__GIT_OUTPUT"
+    _ps1_show_status "$__GIT_OUTPUT"
 
     unset TMP_VAL
     unset __GIT_SIGN_KEY
@@ -2536,6 +1474,35 @@ __git_status() {
 if stat -c '%i' . >/dev/null 2>&1; then
     MY_STATC="stat -c"
 fi
+
+_ps1_show_status() {
+    if _isnot tmux; then
+        echo "$1"
+        return
+    fi
+    [ -n "$_PS1_TMUX_CURRENT_WINDOW" ] || _PS1_TMUX_CURRENT_WINDOW="$(tmux display-message -p -t "$TMUX_PANE" '#{window_id}')"
+    if [ -z "$_PS1_TMUX_CURRENT_STATUS" ]; then
+        # we may have a status pane and lost its ID after reload
+        _PS1_TMUX_CURRENT_STATUS="$(tmux list-panes -t "$_PS1_TMUX_CURRENT_WINDOW" -F '#{pane_dead} #{pane_id}' | grep '^1 ' | awk '{print $2}' | tail -n 1)"
+        # no panes, create one
+        [ -n "$_PS1_TMUX_CURRENT_STATUS" ] || _PS1_TMUX_CURRENT_STATUS="$(tmux split-window -d -l 1 -v -t "$TMUX_PANE" -P -F '#{pane_id}' '')"
+        #tmux select-pane -t "$_PS1_TMUX_CURRENT_STATUS" -P 'bg=colour236'
+        #tmux select-pane -t "$TMUX_PANE"
+        # defaults are:
+        # pane-border-style bg=colour235,fg=colour238
+        # pane-active-border-style bg=colour236,fg=colour51
+        tmux set -p -t "$TMUX_PANE" pane-border-style 'bg=default,fg=colour238'
+        tmux set -p -t "$TMUX_PANE" pane-active-border-style 'bg=default,fg=colour238'
+        tmux set -p -t "$_PS1_TMUX_CURRENT_STATUS" pane-border-style 'bg=default,fg=colour238'
+        tmux set -p -t "$_PS1_TMUX_CURRENT_STATUS" pane-active-border-style 'bg=default,fg=colour238'
+        tmux set-hook -w -t "$TMUX_PANE" 'pane-exited[879]' "kill-pane -t \"$_PS1_TMUX_CURRENT_STATUS\""
+    fi
+    [ -z "${_PS1_STATUS_LINE}" ] && _PS1_STATUS_LINE=1 || _PS1_STATUS_LINE=$(( _PS1_STATUS_LINE + 1 ))
+    tmux resize-pane -y "$_PS1_STATUS_LINE" -t "$_PS1_TMUX_CURRENT_STATUS"
+    # "\033[?7l" / "\033[?7h" - disables/enables word wrap in tmux
+    # https://github.com/tmux/tmux/issues/969#issuecomment-307659989
+    printf "\n\033[?7l%s\033[?7h" "$1" | tmux display-message -t "$_PS1_TMUX_CURRENT_STATUS" -I
+}
 
 # Function to set prompt_command to.
 function promptcmd () {
@@ -2612,9 +1579,17 @@ function promptcmd () {
         done
     fi
 
+    unset _PS1_STATUS_LINE
+
     __aws_status
     __kubectl_status
     __git_status
+
+    if [ -z "$_PS1_STATUS_LINE" ] && [ -n "$_PS1_TMUX_CURRENT_STATUS" ]; then
+        tmux kill-pane -t "$_PS1_TMUX_CURRENT_STATUS"
+        tmux set-hook -u -w -t "$TMUX_PANE" 'pane-exited[879]'
+        unset _PS1_TMUX_CURRENT_STATUS
+    fi
 
     if _is tmux && [ -n "$TMUX_PANE" ]; then
         # Forcing the window name to be updated, since we may have changed the working directory.
@@ -2829,7 +1804,7 @@ if [ ! -z "$FOUND" ]; then
     unset FOUND
 fi
 
-# --------------
+# ---------------
 
 EFAG=()
 
@@ -3036,8 +2011,29 @@ tools() {
     local SIZE
     local CHECK_STATE
     local IS_ERROR
+    local IDX
+
+    if [ "lock" = "$CMD" ]; then
+        touch "$IAM_HOME/local_tools.locked"
+        echo "Tools are locked now."
+        return
+    fi
+
+    if [ "unlock" = "$CMD" ]; then
+        rm -f "$IAM_HOME/local_tools.locked"
+        echo "Tools are unlocked now."
+        return
+    fi
+
+    if [ "locked" = "$CMD" ]; then
+        [ -e "$IAM_HOME/local_tools.locked" ] && return 0 || return 1
+    fi
 
     if [ "update" = "$CMD" ]; then
+        if tools locked; then
+            echo "${COLOR_BROWN}WARNING:${COLOR_DEFAULT} Tools are locked now and will not be updated."
+            return
+        fi
         if ! _has curl && ! _has wget; then
             echo "${COLOR_RED}ERROR:${COLOR_DEFAULT} Could not update tools: curl/wget command not found"
             return 1
@@ -3049,6 +2045,8 @@ tools() {
         fi
     fi
 
+    local files=() recs=() recs_check=()
+
     while IFS= read -r LINE; do
         if [ -z "$LINE" ]; then
             unset I_DESC I_URL I_FILE I_SIZE I_FILTER I_ON_UPDATE
@@ -3057,7 +2055,8 @@ tools() {
         elif [ -z "$I_URL" ]; then
             I_URL="$LINE"
         elif [ -z "$I_FILE" ]; then
-            I_FILE="$(eval echo $LINE)"
+            printf -v LINE '%q' "$LINE"; # quote string            
+            eval "I_FILE=\"${LINE//\\\$/\$}\""; # enable $VAR
         elif [ -z "$I_SIZE" ]; then
             local P1="${LINE%:*}"
             if [ "$P1" = "$LINE" ]; then
@@ -3077,14 +2076,37 @@ tools() {
         # continue the loop if a tool record is incomplete
         [ -n "$I_SIZE" ] || continue
         if [ -n "$I_FILTER" ] && ! _is "$I_FILTER"; then continue; fi
-        # do something with a tool record
+        if [ -e "$I_FILE" ]; then
+            recs_check+=("$I_DESC" "$I_URL" "$I_FILE" "$I_SIZE" "$I_ON_UPDATE")
+            files+=("$I_FILE")
+        else
+            recs+=("$I_DESC" "$I_URL" "$I_FILE" "$I_SIZE" "$I_ON_UPDATE" 0)
+        fi
+        unset I_DESC I_URL I_FILE I_SIZE I_FILTER I_ON_UPDATE
+    done < "$IAM_HOME/local_tools"
+
+    if [ "${#files[@]}" -gt 0 ]; then
+        IDX=0
+        while read -r SIZE; do
+            recs+=("${recs_check[@]:$(( 5 * IDX++)):5}" "$SIZE")
+        done < <(_get_size "${files[@]}")
+    fi
+
+    # do something with a tool record
+    IDX=0
+    while [ $IDX -lt ${#recs[@]} ]; do
+        I_DESC="${recs[IDX++]}"
+        I_URL="${recs[IDX++]}"
+        I_FILE="${recs[IDX++]}"
+        I_SIZE="${recs[IDX++]}"
+        I_ON_UPDATE="${recs[IDX++]}"
+        SIZE="${recs[IDX++]}"
         if [ "check" = "$CMD" ]; then
-            if [ ! -e "$I_FILE" ]; then
+            if [ "$SIZE" -eq 0 ]; then
                 LINE="${COLOR_LIGHTRED}NOT FOUND${COLOR_GRAY}${COLOR_DEFAULT}"
                 SIZE="undef"
                 [ -n "$CHECK_STATE" ] || CHECK_STATE=1
             else
-                SIZE="$(_get_size "$I_FILE")"
                 if [ "$I_SIZE" != "$SIZE" ]; then
                     LINE="${COLOR_BROWN}OUTDATED ${COLOR_GRAY}${COLOR_DEFAULT}"
                     CHECK_STATE=2
@@ -3093,15 +2115,12 @@ tools() {
                 fi
             fi
             if [ "quick" != "$PARAM" ]; then
-                LINE="$(printf "%s ${COLOR_GRAY}[${COLOR_DEFAULT}Size current: %6s ${COLOR_GRAY}/${COLOR_DEFAULT} expected: %6s${COLOR_GRAY}]${COLOR_DEFAULT}" "$LINE" "$SIZE" "$I_SIZE")"
-                echo "$LINE ${I_FILE/$HOME/\~}"
+                printf "%s ${COLOR_GRAY}[${COLOR_DEFAULT}Size current: %6s ${COLOR_GRAY}/${COLOR_DEFAULT} expected: %6s${COLOR_GRAY}]${COLOR_DEFAULT} %s\n" "$LINE" "$SIZE" "$I_SIZE" "${I_FILE/$HOME/\~}"
             fi
         elif [ "update" = "$CMD" ]; then
-            if [ "$PARAM" != "force" ] && [ -e "$I_FILE" ]; then
-                [ "$(_get_size "$I_FILE")" != "$I_SIZE" ] || continue
-            fi
-            printf "Download: $I_DESC '$(basename "$I_FILE")'..."
-            mkdir -p "$(dirname "$I_FILE")"
+            [ "$PARAM" != "force" ] && [ "$SIZE" -eq "$I_SIZE" ] && continue || true
+            printf "Download: %s '%s'..." "$I_DESC" "${I_FILE##*/}"
+            mkdir -p "${I_FILE%/*}"
             IS_ERROR=1
             if _has curl; then
                 ! curl -s -k -L "$I_URL" > "$I_FILE" || IS_ERROR=0
@@ -3117,7 +2136,7 @@ tools() {
             [ -n "${I_FILE##*/bin/*}" ] || chmod +x "$I_FILE"
             [ -z "$I_ON_UPDATE" ] || eval "$I_ON_UPDATE"
         fi
-    done < <(printf '%s\n' "$(cat "$IAM_HOME/local_tools")")
+    done
 
     if [ "check" = "$CMD" ] && [ "quick" = "$PARAM" ] && [ -n "$CHECK_STATE" ]; then
         if [ "$PARAM_EX" = "update" ]; then
@@ -3142,7 +2161,8 @@ tools() {
 
 }
 
-complete -W "check update" tools
+
+complete -W "check update lock unlock" tools
 
 j() {
 
@@ -3338,26 +2358,10 @@ if _isnot tmux; then
         fi
     fi
 
-fi
-
-EOF
-
-# Magic: try to restore current directory. Only for SSH.
-if [ -n "$SSH_CLIENT" ]; then
-    # get win title
-    printf "\033]0;__ti\007"
-    read __WIN_TITLE_1
-    # cursor up & erase line
-    printf "\033[1A\033[K"
-    __WIN_TITLE_2="${__WIN_TITLE_1#*KITTYID:}"
-    # if KITTEID: found
-    if [ "$__WIN_TITLE_1" != "$__WIN_TITLE_2" ]; then
-        # strip quote "
-        __KITTY_ID="${__WIN_TITLE_2%\"*}"
-        export __KITTY_ID
+    if _has tmux && tmux list-sessions -F '#{session_attached}' 2>/dev/null | grep --silent --fixed-strings '0'; then
+        echo "${COLOR_GRAY}[${COLOR_CYAN}TMUX${COLOR_GRAY}] ${COLOR_DEFAULT}Current environment has the following unattached tmux sessions: \"$(tmux list-sessions -F '#{session_attached} #{session_name}' | grep '^0' | sed -E 's/^[[:digit:]][[:space:]]+//' | sed ':a;N;$!ba; s/\n/", "/g')\""
+        echo "${COLOR_GRAY}[${COLOR_CYAN}TMUX${COLOR_GRAY}] ${COLOR_DEFAULT}Type to attach: tmux attach-session -t <session name>"
     fi
-    unset __WIN_TITLE_1
-    unset __WIN_TITLE_2
+
 fi
 
-exec bash --rcfile "$IAM_HOME/bashrc" -i || exec $SHELL -i
