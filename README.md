@@ -3,14 +3,14 @@
 ## Linux
 1. Install the statup script:
 ```shell
-$ curl -s -o ~/.bashrc https://raw.githubusercontent.com/chpock/ext.bash/master/bashrc
+$ curl -s -o ~/.bashrc https://raw.githubusercontent.com/chpock/dotfiles/master/bashrc
 ```
 2. Edit variables as described in the [Variables](#Variables) section.
 3. Re-login to your shell.
 
 ## Windows
 This script can be used only with [kitty](http://www.9bis.net/kitty). This is port of [putty](https://www.putty.org/) but with some additional features. A critical additional feature is the ability to run some script during remote login.
-1. Download the [startup script](https://raw.githubusercontent.com/chpock/ext.bash/master/bashrc) and place it to some directory.
+1. Download the [startup script](https://raw.githubusercontent.com/chpock/dotfiles/master/bashrc) and place it to some directory.
 2. Edit variables as described in the [Variables](#Variables) section.
 3. Connect to remote machine using the command:
 ```
