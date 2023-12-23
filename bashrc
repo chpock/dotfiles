@@ -1435,6 +1435,8 @@ local __K8S_NS
 local __K8S_ERR
 if ! _has kubectl || [ ! -e "$IAM_HOME/state/on_kube" ]; then
 return 0
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 fi
 if [ -z "$KUBECONFIG" ]; then
 __K8S_CONF="$HOME/.kube/config"
@@ -1452,8 +1454,6 @@ __K8S_OUTPUT="${__K8S_OUTPUT}${COLOR_LIGHTRED}$__K8S_ERR"
 elif [ -n "$__K8S_ERR" ]; then
 __K8S_OUTPUT="${__K8S_OUTPUT}${COLOR_LIGHTRED}$__K8S_ERR"
 else
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 __K8S_OUTPUT="${__K8S_OUTPUT}${COLOR_PURPLE}$__K8S_CONTEXT"
 __K8S_NS="$(kubectl config view -o=jsonpath="{.contexts[?(@.name==\"$__K8S_CONTEXT\")].context.namespace}")"
 [ -z "$__K8S_NS" ] && __K8S_NS="default"
@@ -1505,7 +1505,7 @@ __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}]${COLOR_DEFAULT}"
 _ps1_show_status "$__AWS_OUTPUT"
 }
 __git_status() {
-local __GIT_STATUS
+local __GIT_STATUS __GIT_TEMP
 local TMP_VAL
 _has git || return 0
 if _check _vercomp 1.8.0 '<' "$__GIT_VERSION"; then
@@ -1514,13 +1514,13 @@ else
 __GIT_STATUS="$(LC_ALL=C command git status --porcelain --branch 2>/dev/null)" || return 0
 fi
 _check _git-config-check
-__GIT_REPO_ROOT="$(git rev-parse --git-dir 2>/dev/null)"
+local __GIT_REPO_ROOT="$(git rev-parse --git-dir 2>/dev/null)"
 if [ "$__GIT_REPO_ROOT" = ".git" ]; then
 __GIT_REPO_ROOT="$(pwd)"
 else
 __GIT_REPO_ROOT="$(dirname "$__GIT_REPO_ROOT")"
 fi
-__GIT_IN_SUBMODULE=0
+local __GIT_IN_SUBMODULE=0
 if __GIT_TEMP="$(git rev-parse --show-superproject-working-tree 2>/dev/null)"; then
 if [ -n "$__GIT_TEMP" ]; then
 __GIT_IN_SUBMODULE=1
@@ -1530,15 +1530,17 @@ if [ "${__GIT_REPO_ROOT%*/.git/modules}" != "$__GIT_REPO_ROOT" ]; then
 __GIT_IN_SUBMODULE=1
 fi
 fi
-unset __GIT_TEMP
+if _once "git check core.autocrlf in $PWD"; then
 if [ "$(set +e; LC_ALL=C git config --get core.autocrlf)" != "false" ]; then
 git config core.autocrlf false
 fi
-__GIT_BRANCH="!ERROR!"
-__GIT_NUM_STAGED=0
-__GIT_NUM_CHANGED=0
-__GIT_NUM_CONFLICT=0
-__GIT_NUM_UNTRACKED=0
+fi
+local __GIT_BRANCH="!ERROR!"
+local __GIT_NUM_STAGED=0
+local __GIT_NUM_CHANGED=0
+local __GIT_NUM_CONFLICT=0
+local __GIT_NUM_UNTRACKED=0
+local line status
 while IFS='' read -r line || [[ -n "${line}" ]]; do
 status="${line:0:2}"
 while [[ -n ${status} ]]; do
@@ -1564,15 +1566,16 @@ if TMP_VAL="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)"; then
 __GIT_BRANCH="$TMP_VAL"
 fi
 fi
-unset line
-unset status
+local __GIT_BRANCH_FIELDS
 IFS="^" read -ra __GIT_BRANCH_FIELDS <<< "${__GIT_BRANCH/\#\# }"
 __GIT_BRANCH="${__GIT_BRANCH_FIELDS[0]}"
+local __GIT_OUTPUT
 __GIT_OUTPUT="${COLOR_GRAY}[${COLOR_WHITE}GIT${COLOR_GRAY}: $COLOR_CYAN$(prompt_workingdir "$__GIT_REPO_ROOT")"
 if [ "$__GIT_IN_SUBMODULE" -eq 1 ]; then
 __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}(${COLOR_DEFAULT}submodule${COLOR_GRAY})"
 fi
 __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}branch${COLOR_GRAY}: $COLOR_PURPLE$__GIT_BRANCH"
+local __GIT_TAG
 if __GIT_TAG="$(git describe --exact-match --tags $(git rev-parse HEAD) 2>/dev/null)"; then
 __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}tag${COLOR_GRAY}: $COLOR_PURPLE$__GIT_TAG"
 fi
@@ -1590,6 +1593,7 @@ __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}untracked${COLOR_GRA
 fi
 __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}]${COLOR_DEFAULT}"
 __GIT_OUTPUT="${__GIT_OUTPUT} ${COLOR_GRAY}[${COLOR_DEFAULT}sign${COLOR_GRAY}:"
+local __GIT_SIGN
 if TMP_VAL="$(set +e; git config --local --get commit.gpgsign 2>/dev/null)"; then
 if [ "$TMP_VAL" = "true" ]; then
 TMP_VAL="${COLOR_GREEN}$TMP_VAL"
@@ -1606,6 +1610,7 @@ else
 TMP_VAL="${COLOR_RED}$TMP_VAL${COLOR_GRAY}(${COLOR_DEFAULT}G${COLOR_GRAY})"
 fi
 __GIT_OUTPUT="${__GIT_OUTPUT}$TMP_VAL"
+local __GIT_AUTHOR_EMAIL
 if [ "$__GIT_IN_SUBMODULE" -eq 0 ]; then
 __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY};${COLOR_DEFAULT} author${COLOR_GRAY}:"
 if TMP_VAL="$(set +e; LC_ALL=C git config --local --get user.email 2>/dev/null)"; then
@@ -1627,6 +1632,7 @@ TMP_VAL="${COLOR_BROWN}$TMP_VAL${COLOR_GRAY}(${COLOR_DEFAULT}G${COLOR_GRAY})"
 fi
 __GIT_OUTPUT="${__GIT_OUTPUT}$TMP_VAL"
 fi
+local __GIT_SIGN_KEY
 if [ -n "$__GIT_SIGN" ] && [ -n "$__GIT_AUTHOR_EMAIL" ]; then
 __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY};${COLOR_DEFAULT} gpg${COLOR_GRAY}:"
 if ! _has gpg; then
@@ -1657,23 +1663,7 @@ __GIT_OUTPUT="${__GIT_OUTPUT}$TMP_VAL"
 fi
 __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}]${COLOR_DEFAULT}"
 _ps1_show_status "$__GIT_OUTPUT"
-unset TMP_VAL
-unset __GIT_SIGN_KEY
-unset __GIT_SIGN
-unset __GIT_AUTHOR_EMAIL
-unset __GIT_REPO_ROOT
-unset __GIT_BRANCH
-unset __GIT_BRANCH_FIELDS
-unset __GIT_TAG
-unset __GIT_NUM_STAGED
-unset __GIT_NUM_CHANGED
-unset __GIT_NUM_CONFLICT
-unset __GIT_NUM_UNTRACKED
-unset __GIT_OUTPUT
 }
-if stat -c '%i' . >/dev/null 2>&1; then
-MY_STATC="stat -c"
-fi
 _ps1_show_status() {
 if _isnot tmux; then
 echo "$1"
@@ -1720,9 +1710,9 @@ echo "$MSG${COLOR_DEFAULT}"
 fi
 if [ ! -d "$PWD" ]; then
 echo "${COLOR_RED}Warning: Current directory doesn't exist${COLOR_DEFAULT}"
-elif [ ! -z "$MY_STATC" ] && [ ! -L "$PWD" ] && [ "$($MY_STATC '%i' . 2>&1)" != "$($MY_STATC '%i' "$PWD")" ]; then
+elif _check stat -c '%i' . && [ ! -L "$PWD" ] && [ "$(stat -c '%i' . 2>&1)" != "$(stat -c '%i' "$PWD")" ]; then
 echo "${COLOR_BROWN}Current directory is a zombie. Fixing it.${COLOR_DEFAULT}"
-cd ../"`basename "$PWD"`"
+cd ../"$(basename "$PWD")"
 fi
 if [ -n "$__KITTY_ID" ]; then
 [ -d "$IAM_HOME/kitty_sessions/$__KITTY_ID" ] || mkdir -p "$IAM_HOME/kitty_sessions/$__KITTY_ID"
@@ -1899,6 +1889,13 @@ echo ""
 unset FOUND
 fi
 EFAG=()
+if _is windows; then
+EFAG[${#EFAG[@]}]="c:/Program Files/Electric Cloud/ElectricCommander/bin"
+EFAG[${#EFAG[@]}]="c:/Program Files/CloudBees/Software Delivery Automation/bin"
+else
+EFAG[${#EFAG[@]}]="/opt/electriccloud/electriccommander/bin"
+EFAG[${#EFAG[@]}]="/opt/cloudbees/sda/bin"
+fi
 if _is linux; then
 if _has ps; then
 while IFS= read -r line; do
@@ -1908,62 +1905,25 @@ unset line
 fi
 elif _is windows; then
 while IFS= read -r line; do
-if [[ $line == ExecutablePath=* ]]; then
-line="$(dirname "$(cygpath -u "${line#*=}")")"
+if [ "${line%%=*}" = "ExecutablePath" ]; then
+line="${line#*=}"
+line="${line%\\*}"
 EFAG[${#EFAG[@]}]="$line"
 fi
 done < <(wmic process where "name='ecmdrAgent.exe'" get ExecutablePath /FORMAT:LIST 2>/dev/null)
 unset line
 fi
-if [ "${#EFAG[*]}" -eq 0 ]; then
 if _is windows; then
-if [ -e "/c/Program Files/Electric Cloud/ElectricCommander/bin" ]; then
-EFAG_STD="$(cygpath -u "c:/Program Files/Electric Cloud/ElectricCommander/bin")"
+EFAG[${#EFAG[@]}]="c:/Artemis/install/bin"
 else
-EFAG_STD="$(cygpath -u "c:/Program Files/CloudBees/Software Delivery Automation/bin")"
+EFAG[${#EFAG[@]}]="/opt/_cbcd-tools/bin"
+EFAG[${#EFAG[@]}]="/opt/chronic/install/bin"
 fi
-else
-if [ -e "/opt/electriccloud/electriccommander/bin" ]; then
-EFAG_STD="/opt/electriccloud/electriccommander/bin"
-else
-EFAG_STD="/opt/cloudbees/sda/bin"
-fi
-fi
-if [ -d "$EFAG_STD" ]; then
-EFAG[${#EFAG[@]}]="$EFAG_STD"
-fi
-unset EFAG_STD
-fi
-if [ "${#EFAG[*]}" -ge 1 ]; then
-EFAG_STD=
-EFAG_NSTD=
-idx=0; while [ $idx -lt ${#EFAG[*]} ]; do
-if [[ "${EFAG[$idx]}" == "/opt/electriccloud/electriccommander/"* ]] || [[ "${EFAG[$idx]}" == "/c/Electric Cloud/ElectricCommander/"* ]] || [[ "${EFAG[$idx]}" == "/c/Program Files/Electric Cloud/ElectricCommander/"* ]]; then
-EFAG_STD="${EFAG[$idx]}"
-else
-EFAG_NSTD="${EFAG[$idx]}"
-fi
-idx=$(( $idx + 1 ))
-done; unset idx
-if [ -z "$EFAG_NSTD" ]; then
-EFAG_TO_PATH="$EFAG_STD"
-else
-EFAG_TO_PATH="$EFAG_NSTD"
-fi
-unset EFAG_STD
-unset EFAG_NSTD
-idx=0; while [ $idx -lt ${#EFAG[*]} ]; do
-if [ "${EFAG[$idx]}" = "$EFAG_TO_PATH" ]; then
-ADDON=" ${COLOR_GRAY}(${COLOR_GREEN}Added to PATH${COLOR_GRAY})${COLOR_DEFAULT}"
-fi
-echo "${COLOR_GRAY}[${COLOR_GREEN}EF location${COLOR_GRAY}]${COLOR_DEFAULT} ${EFAG[$idx]}$ADDON"
-unset ADDON
-idx=$(( $idx + 1 ))
-done; unset idx
-_addpath "$EFAG_TO_PATH"
-unset EFAG_TO_PATH
-echo ""
-fi
+for (( idx=0; $idx < ${#EFAG[@]}; idx++ )); do
+[ -d "${EFAG[idx]}" ] || continue
+_is windows && _addpath "$(cygpath -u "${EFAG[idx]}")" || _addpath "${EFAG[idx]}"
+done
+unset idx
 unset EFAG
 if [ -f /etc/bash_completion ]; then
 . /etc/bash_completion

@@ -1258,7 +1258,7 @@ __aws_status() {
 # based on: https://github.com/magicmonty/bash-git-prompt
 __git_status() {
 
-    local __GIT_STATUS
+    local __GIT_STATUS __GIT_TEMP
     local TMP_VAL
 
     _has git || return 0
@@ -1272,7 +1272,7 @@ __git_status() {
     # run only once per session
     _check _git-config-check
 
-    __GIT_REPO_ROOT="$(git rev-parse --git-dir 2>/dev/null)"
+    local __GIT_REPO_ROOT="$(git rev-parse --git-dir 2>/dev/null)"
 
     if [ "$__GIT_REPO_ROOT" = ".git" ]; then
         __GIT_REPO_ROOT="$(pwd)"
@@ -1280,7 +1280,7 @@ __git_status() {
         __GIT_REPO_ROOT="$(dirname "$__GIT_REPO_ROOT")"
     fi
 
-    __GIT_IN_SUBMODULE=0
+    local __GIT_IN_SUBMODULE=0
     # try to detect if we are inside submodule. This command may fail
     # on old git version.
     if __GIT_TEMP="$(git rev-parse --show-superproject-working-tree 2>/dev/null)"; then
@@ -1294,19 +1294,21 @@ __git_status() {
             __GIT_IN_SUBMODULE=1
         fi
     fi
-    unset __GIT_TEMP
 
-    # check configuration
-    if [ "$(set +e; LC_ALL=C git config --get core.autocrlf)" != "false" ]; then
-        git config core.autocrlf false
+    # check configuration only once per session
+    if _once "git check core.autocrlf in $PWD"; then
+        if [ "$(set +e; LC_ALL=C git config --get core.autocrlf)" != "false" ]; then
+            git config core.autocrlf false
+        fi
     fi
 
-    __GIT_BRANCH="!ERROR!"
-    __GIT_NUM_STAGED=0
-    __GIT_NUM_CHANGED=0
-    __GIT_NUM_CONFLICT=0
-    __GIT_NUM_UNTRACKED=0
+    local __GIT_BRANCH="!ERROR!"
+    local __GIT_NUM_STAGED=0
+    local __GIT_NUM_CHANGED=0
+    local __GIT_NUM_CONFLICT=0
+    local __GIT_NUM_UNTRACKED=0
 
+    local line status
     while IFS='' read -r line || [[ -n "${line}" ]]; do
         status="${line:0:2}"
         while [[ -n ${status} ]]; do
@@ -1334,18 +1336,18 @@ __git_status() {
         fi
     fi
 
-    unset line
-    unset status
-
+    local __GIT_BRANCH_FIELDS
     IFS="^" read -ra __GIT_BRANCH_FIELDS <<< "${__GIT_BRANCH/\#\# }"
     __GIT_BRANCH="${__GIT_BRANCH_FIELDS[0]}"
 
+    local __GIT_OUTPUT
     __GIT_OUTPUT="${COLOR_GRAY}[${COLOR_WHITE}GIT${COLOR_GRAY}: $COLOR_CYAN$(prompt_workingdir "$__GIT_REPO_ROOT")"
     if [ "$__GIT_IN_SUBMODULE" -eq 1 ]; then
         __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}(${COLOR_DEFAULT}submodule${COLOR_GRAY})"
     fi
     __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}branch${COLOR_GRAY}: $COLOR_PURPLE$__GIT_BRANCH"
 
+    local __GIT_TAG
     if __GIT_TAG="$(git describe --exact-match --tags $(git rev-parse HEAD) 2>/dev/null)"; then
         __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}tag${COLOR_GRAY}: $COLOR_PURPLE$__GIT_TAG"
     fi
@@ -1372,6 +1374,8 @@ __git_status() {
 
     __GIT_OUTPUT="${__GIT_OUTPUT} ${COLOR_GRAY}[${COLOR_DEFAULT}sign${COLOR_GRAY}:"
 
+    local __GIT_SIGN
+
     if TMP_VAL="$(set +e; git config --local --get commit.gpgsign 2>/dev/null)"; then
         if [ "$TMP_VAL" = "true" ]; then
             TMP_VAL="${COLOR_GREEN}$TMP_VAL"
@@ -1389,6 +1393,8 @@ __git_status() {
     fi
 
     __GIT_OUTPUT="${__GIT_OUTPUT}$TMP_VAL"
+
+    local __GIT_AUTHOR_EMAIL
 
     # don't check for author in submodules
     if [ "$__GIT_IN_SUBMODULE" -eq 0 ]; then
@@ -1416,6 +1422,8 @@ __git_status() {
         __GIT_OUTPUT="${__GIT_OUTPUT}$TMP_VAL"
 
     fi
+
+    local __GIT_SIGN_KEY
 
     if [ -n "$__GIT_SIGN" ] && [ -n "$__GIT_AUTHOR_EMAIL" ]; then
 
@@ -1455,25 +1463,7 @@ __git_status() {
 
     _ps1_show_status "$__GIT_OUTPUT"
 
-    unset TMP_VAL
-    unset __GIT_SIGN_KEY
-    unset __GIT_SIGN
-    unset __GIT_AUTHOR_EMAIL
-    unset __GIT_REPO_ROOT
-    unset __GIT_BRANCH
-    unset __GIT_BRANCH_FIELDS
-    unset __GIT_TAG
-    unset __GIT_NUM_STAGED
-    unset __GIT_NUM_CHANGED
-    unset __GIT_NUM_CONFLICT
-    unset __GIT_NUM_UNTRACKED
-    unset __GIT_OUTPUT
 }
-
-# "stat -c" is used to detect a zombie directories
-if stat -c '%i' . >/dev/null 2>&1; then
-    MY_STATC="stat -c"
-fi
 
 _ps1_show_status() {
     if _isnot tmux; then
@@ -1553,10 +1543,10 @@ function promptcmd () {
 
     if [ ! -d "$PWD" ]; then
         echo "${COLOR_RED}Warning: Current directory doesn't exist${COLOR_DEFAULT}"
-    elif [ ! -z "$MY_STATC" ] && [ ! -L "$PWD" ] && [ "$($MY_STATC '%i' . 2>&1)" != "$($MY_STATC '%i' "$PWD")" ]; then
+    elif _check stat -c '%i' . && [ ! -L "$PWD" ] && [ "$(stat -c '%i' . 2>&1)" != "$(stat -c '%i' "$PWD")" ]; then
         # if inside of zombie directory
         echo "${COLOR_BROWN}Current directory is a zombie. Fixing it.${COLOR_DEFAULT}"
-        cd ../"`basename "$PWD"`"
+        cd ../"$(basename "$PWD")"
     fi
 
     if [ -n "$__KITTY_ID" ]; then
@@ -1808,6 +1798,15 @@ fi
 
 EFAG=()
 
+# Add known locations for temporary installations first
+if _is windows; then
+    EFAG[${#EFAG[@]}]="c:/Program Files/Electric Cloud/ElectricCommander/bin"
+    EFAG[${#EFAG[@]}]="c:/Program Files/CloudBees/Software Delivery Automation/bin"
+else
+    EFAG[${#EFAG[@]}]="/opt/electriccloud/electriccommander/bin"
+    EFAG[${#EFAG[@]}]="/opt/cloudbees/sda/bin"
+fi
+
 if _is linux; then
     if _has ps; then
         while IFS= read -r line; do
@@ -1818,8 +1817,9 @@ if _is linux; then
     fi
 elif _is windows; then
     while IFS= read -r line; do
-        if [[ $line == ExecutablePath=* ]]; then
-            line="$(dirname "$(cygpath -u "${line#*=}")")"
+        if [ "${line%%=*}" = "ExecutablePath" ]; then
+            line="${line#*=}"
+            line="${line%\\*}"
             # workaround for old bash: https://unix.stackexchange.com/questions/64427/bash-3-0-not-supporting-lists
             EFAG[${#EFAG[@]}]="$line"
         fi
@@ -1828,70 +1828,18 @@ elif _is windows; then
 fi
 
 # Try to detect and add path to tools-only install
-if [ "${#EFAG[*]}" -eq 0 ]; then
-
-    if _is windows; then
-        if [ -e "/c/Program Files/Electric Cloud/ElectricCommander/bin" ]; then
-            EFAG_STD="$(cygpath -u "c:/Program Files/Electric Cloud/ElectricCommander/bin")"
-        else
-            EFAG_STD="$(cygpath -u "c:/Program Files/CloudBees/Software Delivery Automation/bin")"
-        fi
-    else
-        if [ -e "/opt/electriccloud/electriccommander/bin" ]; then
-            EFAG_STD="/opt/electriccloud/electriccommander/bin"
-        else
-            EFAG_STD="/opt/cloudbees/sda/bin"
-        fi
-    fi
-
-    if [ -d "$EFAG_STD" ]; then
-        EFAG[${#EFAG[@]}]="$EFAG_STD"
-    fi
-
-    unset EFAG_STD
-
+if _is windows; then
+    EFAG[${#EFAG[@]}]="c:/Artemis/install/bin"
+else
+    EFAG[${#EFAG[@]}]="/opt/_cbcd-tools/bin"
+    EFAG[${#EFAG[@]}]="/opt/chronic/install/bin"
 fi
 
-if [ "${#EFAG[*]}" -ge 1 ]; then
-
-    EFAG_STD=
-    EFAG_NSTD=
-
-    idx=0; while [ $idx -lt ${#EFAG[*]} ]; do
-        if [[ "${EFAG[$idx]}" == "/opt/electriccloud/electriccommander/"* ]] || [[ "${EFAG[$idx]}" == "/c/Electric Cloud/ElectricCommander/"* ]] || [[ "${EFAG[$idx]}" == "/c/Program Files/Electric Cloud/ElectricCommander/"* ]]; then
-            EFAG_STD="${EFAG[$idx]}"
-        else
-            EFAG_NSTD="${EFAG[$idx]}"
-        fi
-        idx=$(( $idx + 1 ))
-    done; unset idx
-
-    if [ -z "$EFAG_NSTD" ]; then
-        EFAG_TO_PATH="$EFAG_STD"
-    else
-        EFAG_TO_PATH="$EFAG_NSTD"
-    fi
-
-    unset EFAG_STD
-    unset EFAG_NSTD
-
-    idx=0; while [ $idx -lt ${#EFAG[*]} ]; do
-        if [ "${EFAG[$idx]}" = "$EFAG_TO_PATH" ]; then
-            ADDON=" ${COLOR_GRAY}(${COLOR_GREEN}Added to PATH${COLOR_GRAY})${COLOR_DEFAULT}"
-        fi
-        echo "${COLOR_GRAY}[${COLOR_GREEN}EF location${COLOR_GRAY}]${COLOR_DEFAULT} ${EFAG[$idx]}$ADDON"
-        unset ADDON
-        idx=$(( $idx + 1 ))
-    done; unset idx
-
-    _addpath "$EFAG_TO_PATH"
-
-    unset EFAG_TO_PATH
-
-    echo ""
-
-fi
-
+for (( idx=0; $idx < ${#EFAG[@]}; idx++ )); do
+    [ -d "${EFAG[idx]}" ] || continue
+    _is windows && _addpath "$(cygpath -u "${EFAG[idx]}")" || _addpath "${EFAG[idx]}"
+done
+unset idx
 unset EFAG
 
 if [ -f /etc/bash_completion ]; then
