@@ -48,7 +48,7 @@ cd vim/src
 git checkout "$VIM_TAG"
 # gcc in cenos6 doesn't support -Wpedantic
 sed -E -i 's/[[:space:]]+-Wpedantic//' libvterm/Makefile
-LDFLAGS="-static -L$DIR_INSTALL/ncurses/lib" ./configure \
+LDFLAGS="-static-libgcc -L$DIR_INSTALL/ncurses/lib" ./configure \
     --prefix=$DIR_INSTALL/vim \
     --enable-multibyte \
     --enable-terminal \

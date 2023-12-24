@@ -36,7 +36,7 @@ cd "$DIR_BUILD"
 
 curl --silent --fail https://ftp.gnu.org/gnu/gzip/gzip-${GZIP_VERSION}.tar.gz | tar xz
 cd gzip-*
-LDFLAGS="-static" ./configure --prefix=$DIR_INSTALL/gzip
+LDFLAGS="-static-libgcc" ./configure --prefix=$DIR_INSTALL/gzip
 make -j8
 #make check
 make install-strip
