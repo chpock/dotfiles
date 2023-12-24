@@ -37,8 +37,9 @@ OWN="$(stat -c '%u' "$TEMP_DIR")"
 
 if [ ! -x "$TEMP_DIR/vim" ]; then
     [ "$(echo "$TEMP_DIR"/*)" = "$TEMP_DIR/*" ] || error "The temporary directory '$TEMP_DIR' is not empty. It may have been created in advance. Check its contents and delete it."
+    command -v tar >/dev/null 2>&1 && TAR=tar || TAR=tar-portable
     SKIP="$(awk '/^__ARCHIVE_HERE__/ { print NR + 1; exit 0; }' "$0")"
-    tail -n+$SKIP "$0" | tar xz -C "$TEMP_DIR"
+    tail -n+$SKIP "$0" | "$TAR" xz -C "$TEMP_DIR"
 fi
 
 [ -z "$TERMINFO_DIRS" ] || TERMINFO_DIRS=":${TERMINFO_DIRS}"
