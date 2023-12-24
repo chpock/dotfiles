@@ -116,3 +116,21 @@ https://raw.githubusercontent.com/chpock/dotfiles/master/tools/tmux-helper
 $IAM_HOME/tools/bin/tmux-helper
 5742
 
+vim-portable tool
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-vim-portable
+$IAM_HOME/tools/bin/install-vim-portable
+filter: linux
+1156
+
+tar-portable tool
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-tar-portable
+$IAM_HOME/tools/bin/install-tar-portable
+filter: linux
+1238
+
+gzip-portable tool
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-gzip-portable
+$IAM_HOME/tools/bin/install-gzip-portable
+filter: linux
+1157
+

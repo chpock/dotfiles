@@ -239,6 +239,24 @@ https://raw.githubusercontent.com/chpock/dotfiles/master/tools/tmux-helper
 $IAM_HOME/tools/bin/tmux-helper
 5742
 
+vim-portable tool
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-vim-portable
+$IAM_HOME/tools/bin/install-vim-portable
+filter: linux
+1156
+
+tar-portable tool
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-tar-portable
+$IAM_HOME/tools/bin/install-tar-portable
+filter: linux
+1238
+
+gzip-portable tool
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-gzip-portable
+$IAM_HOME/tools/bin/install-gzip-portable
+filter: linux
+1157
+
 EOF
 
 cat <<'EOF' > "$IAM_HOME/vimrc"
@@ -1207,7 +1225,7 @@ fi
 env diff "$@"
 }
 shellcheck() {
-if [ -e $IAM_HOME/tools/bin/install-shellcheck ]; then
+if [ -e "$IAM_HOME/tools/bin/install-shellcheck" ]; then
 "$IAM_HOME/tools/bin/install-shellcheck" "$IAM_HOME/tools/bin"
 fi
 env shellcheck "$@"
@@ -1221,7 +1239,22 @@ alias tailf='tail -F'
 alias ff='find . -name'
 if _has vim; then
 alias vi=vim
+EDITOR="vim -u $IAM_HOME/vimrc -i $IAM_HOME/viminfo"
+elif _has vi; then
+EDITOR=vi
+else
+echo "${COLOR_RED}Warning: vi/vim not found${COLOR_DEFAULT}"
+echo
+fi
+export EDITOR
 vim() {
+local CMD="vim"
+if _hasnot vim; then
+if [ -e "$IAM_HOME/tools/bin/install-vim-portable" ]; then
+"$IAM_HOME/tools/bin/install-vim-portable" "$IAM_HOME/tools/bin"
+fi
+CMD="vim-portable"
+fi
 if _isnot tmux; then
 if [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID" ]; then
 if [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim" ]; then
@@ -1231,19 +1264,11 @@ echo "$@" > "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim"
 fi
 fi
 fi
-command vim -u "$IAM_HOME/vimrc" -i "$IAM_HOME/viminfo" "$@"
+command "$CMD" -u "$IAM_HOME/vimrc" -i "$IAM_HOME/viminfo" "$@"
 if _isnot tmux && [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID" ]; then
 rm -f "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim"
 fi
 }
-EDITOR="vim -u $IAM_HOME/vimrc -i $IAM_HOME/viminfo"
-elif _has vi; then
-EDITOR=vi
-else
-echo "${COLOR_RED}Warning: vi/vim not found${COLOR_DEFAULT}"
-echo
-fi
-export EDITOR
 _has apt-get && apt-get() {
 if [ "$(id -u)" -ne 0 ]; then
 echo "${COLOR_RED}The 'sudo' prefix was added automatically for the 'apt-get' command${COLOR_DEFAULT}" >&2
@@ -1432,11 +1457,11 @@ local __K8S_CONTEXT
 local __K8S_CONF
 local __K8S_OUTPUT
 local __K8S_NS
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 local __K8S_ERR
 if ! _has kubectl || [ ! -e "$IAM_HOME/state/on_kube" ]; then
 return 0
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 fi
 if [ -z "$KUBECONFIG" ]; then
 __K8S_CONF="$HOME/.kube/config"

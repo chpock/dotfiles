@@ -881,7 +881,7 @@ _hasnot diff || diff() {
 }
 
 shellcheck() {
-    if [ -e $IAM_HOME/tools/bin/install-shellcheck ]; then
+    if [ -e "$IAM_HOME/tools/bin/install-shellcheck" ]; then
         "$IAM_HOME/tools/bin/install-shellcheck" "$IAM_HOME/tools/bin"
     fi
     env shellcheck "$@"
@@ -901,21 +901,6 @@ alias ff='find . -name'
 
 if _has vim; then
     alias vi=vim
-    vim() {
-        if _isnot tmux; then
-            if [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID" ]; then
-                if [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim" ]; then
-                    set -- $(cat "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim")
-                else
-                    echo "$@" > "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim"
-                fi
-            fi
-        fi
-        command vim -u "$IAM_HOME/vimrc" -i "$IAM_HOME/viminfo" "$@"
-        if _isnot tmux && [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID" ]; then
-            rm -f "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim"
-        fi
-    }
     EDITOR="vim -u $IAM_HOME/vimrc -i $IAM_HOME/viminfo"
 elif _has vi; then
     EDITOR=vi
@@ -924,6 +909,29 @@ else
     echo
 fi
 export EDITOR
+
+vim() {
+    local CMD="vim"
+    if _hasnot vim; then
+        if [ -e "$IAM_HOME/tools/bin/install-vim-portable" ]; then
+            "$IAM_HOME/tools/bin/install-vim-portable" "$IAM_HOME/tools/bin"
+        fi
+        CMD="vim-portable"
+    fi
+    if _isnot tmux; then
+        if [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID" ]; then
+            if [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim" ]; then
+                set -- $(cat "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim")
+            else
+                echo "$@" > "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim"
+            fi
+        fi
+    fi
+    command "$CMD" -u "$IAM_HOME/vimrc" -i "$IAM_HOME/viminfo" "$@"
+    if _isnot tmux && [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID" ]; then
+        rm -f "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim"
+    fi
+}
 
 _has apt-get && apt-get() {
     if [ "$(id -u)" -ne 0 ]; then
