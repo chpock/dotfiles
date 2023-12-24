@@ -55,7 +55,7 @@ docker() {
 
 __,docker() {
 
-    if [ "$i" = "--install-completion" ]; then
+    if [ "$1" = "--install-completion" ]; then
         complete -F __,docker ,docker
         return
     fi
@@ -84,10 +84,14 @@ __,docker() {
     elif [ "$CMD" = "exec" ]; then
         if [ $COMP_CWORD -eq 2 ] && [ -z "$CUR" ]; then
             if VAR="$(docker ps --format '{{.Names}}' 2>&1)" && [ "$(echo "$VAR" | wc -l)" -eq 1 ]; then
-                COMPREPLY=("$VAR")
+                if [ -z "$VAR" ]; then
+                    printf '\n%s' "There are no containers running"
+                    COMPREPLY=('~=~=~=~=~=~' '=~=~=~=~=~=')
+                else
+                    COMPREPLY=("$VAR")
+                fi
             else
-                echo
-                printf '%s' "$(docker ps)"
+                printf '\n%s' "$(docker ps)"
                 COMPREPLY=('~=~=~=~=~=~' '=~=~=~=~=~=')
             fi
             return
@@ -97,8 +101,7 @@ __,docker() {
             return
         fi
         if ! VAR="$(printf '%s\n%s' "$(docker ps --quiet 2>&1)" "$(docker ps --format '{{.Names}}' 2>&1)")"; then
-            echo
-            printf '%s' "${COLOR_RED}ERROR${COLOR_GRAY}:$COLOR_DEFAULT $VAR"
+            printf '\n%s' "${COLOR_RED}ERROR${COLOR_GRAY}:$COLOR_DEFAULT $VAR"
             COMPREPLY=('~=~=~=~=~=~' '=~=~=~=~=~=')
         else
             COMPREPLY=($(compgen -W "$VAR" -- "$CUR"))
