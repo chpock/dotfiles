@@ -35,63 +35,76 @@ docker() {
     command docker "$@"
 }
 
-xdocker-exec() {
-   docker exec -ti "$1" /bin/bash -c "$(__magic_ssh)"
+,docker() {
+    local CMD="$1"
+    shift
+
+    case "$CMD" in
+        exec)
+            docker exec -ti "$@" /bin/bash -c "$(__magic_ssh)"
+            ;;
+        run)
+            docker run -ti --entrypoint /bin/bash "$@" -c "$(__magic_ssh)"
+            ;;
+        *)
+            echo "Unknown cmd: '$CMD'"
+            return 1
+            ;;
+    esac
 }
 
-xdocker-run() {
-   docker run -ti --entrypoint /bin/bash "$1" -c "$(__magic_ssh)"
-}
+__,docker() {
 
-__xdocker-exec_complete() {
-
-    local __VAR
-
-    COMPREPLY=()
-
-    if [ $COMP_CWORD -eq 1 ] && [ -z "${COMP_WORDS[1]}" ]; then
-        if __VAR="$(docker ps --format '{{.Names}}' 2>&1)" && [ "$(echo "$__VAR" | wc -l)" -eq 1 ]; then
-            COMPREPLY=("$__VAR")
-        else
-            echo
-            printf '%s' "$(docker ps)"
-            COMPREPLY=('~=~=~=~=~=~' '=~=~=~=~=~=')
-        fi
+    if [ "$i" = "--install-completion" ]; then
+        complete -F __,docker ,docker
         return
     fi
 
-    if [ $COMP_CWORD -gt 1 ]; then
-        compopt -o default
-        return
-    fi
-
-    if ! __VAR="$(printf '%s\n%s' "$(docker ps --quiet 2>&1)" "$(docker ps --format '{{.Names}}' 2>&1)")"; then
-        echo
-        printf '%s' "${COLOR_RED}ERROR${COLOR_GRAY}:$COLOR_DEFAULT $__VAR"
-        COMPREPLY=('~=~=~=~=~=~' '=~=~=~=~=~=')
-    else
-        COMPREPLY=($(compgen -W "$__VAR" -- "${COMP_WORDS[1]}"))
-    fi
-
-}
-
-complete -F __xdocker-exec_complete xdocker-exec
-
-__xdocker-run_complete() {
-    :
-    : COMP_CWORD - $COMP_CWORD
-    : COMP_WORDS - ${COMP_WORDS[@]}
+    local CUR="${COMP_WORDS[COMP_CWORD]}"
     COMPREPLY=()
+
     if [ $COMP_CWORD -eq 1 ]; then
-        COMPREPLY=($(compgen -W "$(docker image ls --filter "dangling=false" --format '{{.Repository}}:{{.Tag}}')" -- "${COMP_WORDS[1]}"))
-    elif [ $COMP_CWORD -ge 2 ] && [ $COMP_CWORD -le 3 ] && [ "${COMP_WORDS[2]}" = ":" ]; then
+        COMPREPLY=($(compgen -W "exec run" -- "$CUR"))
+        return
+    fi
+
+    local CMD="${COMP_WORDS[1]}"
+    local VAR
+
+    if [ "$CMD" = "run" ]; then
         # This is a hack when we complete tag name. By default, completion also breaks the line by ':'.
         # E.g. "zookeeper:3.8." will be as:
         # COMP_CWORD - 3
         # COMP_WORDS - xdocker-run zookeeper : 3.8.
-        COMPREPLY=($(compgen -W "$(docker image ls --filter "dangling=false" --filter "reference=${COMP_WORDS[1]}" --format '{{.Tag}}')" -- "${COMP_WORDS[3]}"))
+        if [ "${COMP_WORDS[COMP_CWORD-1]}" = ":" ]; then
+            COMPREPLY=($(compgen -W "$(docker image ls --filter "dangling=false" --filter "reference=${COMP_WORDS[COMP_CWORD-2]}" --format '{{.Tag}}')" -- "$CUR"))
+        else
+            COMPREPLY=($(compgen -W "$(docker image ls --filter "dangling=false" --format '{{.Repository}}:{{.Tag}}')" -- "$CUR"))
+        fi
+    elif [ "$CMD" = "exec" ]; then
+        if [ $COMP_CWORD -eq 2 ] && [ -z "$CUR" ]; then
+            if VAR="$(docker ps --format '{{.Names}}' 2>&1)" && [ "$(echo "$VAR" | wc -l)" -eq 1 ]; then
+                COMPREPLY=("$VAR")
+            else
+                echo
+                printf '%s' "$(docker ps)"
+                COMPREPLY=('~=~=~=~=~=~' '=~=~=~=~=~=')
+            fi
+            return
+        fi
+        if [ $COMP_CWORD -gt 2 ]; then
+            compopt -o default
+            return
+        fi
+        if ! VAR="$(printf '%s\n%s' "$(docker ps --quiet 2>&1)" "$(docker ps --format '{{.Names}}' 2>&1)")"; then
+            echo
+            printf '%s' "${COLOR_RED}ERROR${COLOR_GRAY}:$COLOR_DEFAULT $VAR"
+            COMPREPLY=('~=~=~=~=~=~' '=~=~=~=~=~=')
+        else
+            COMPREPLY=($(compgen -W "$VAR" -- "$CUR"))
+        fi
     fi
+
 }
 
-complete -F __xdocker-run_complete xdocker-run
-
+__,docker --install-completion
