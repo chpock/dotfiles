@@ -1457,9 +1457,9 @@ local __K8S_CONTEXT
 local __K8S_CONF
 local __K8S_OUTPUT
 local __K8S_NS
+local __K8S_ERR
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
-local __K8S_ERR
 if ! _has kubectl || [ ! -e "$IAM_HOME/state/on_kube" ]; then
 return 0
 fi
@@ -1696,7 +1696,7 @@ return
 fi
 [ -n "$_PS1_TMUX_CURRENT_WINDOW" ] || _PS1_TMUX_CURRENT_WINDOW="$(tmux display-message -p -t "$TMUX_PANE" '#{window_id}')"
 if [ -z "$_PS1_TMUX_CURRENT_STATUS" ]; then
-_PS1_TMUX_CURRENT_STATUS="$(tmux list-panes -t "$_PS1_TMUX_CURRENT_WINDOW" -F '#{pane_dead} #{pane_id}' | grep '^1 ' | awk '{print $2}' | tail -n 1)"
+_PS1_TMUX_CURRENT_STATUS="$(tmux list-panes -t "$_PS1_TMUX_CURRENT_WINDOW" -F '#{pane_pid} #{pane_id}' | grep '^0 ' | awk '{print $2}' | tail -n 1)"
 [ -n "$_PS1_TMUX_CURRENT_STATUS" ] || _PS1_TMUX_CURRENT_STATUS="$(tmux split-window -d -l 1 -v -t "$TMUX_PANE" -P -F '#{pane_id}' '')"
 tmux set -p -t "$TMUX_PANE" pane-border-style 'bg=default,fg=colour238'
 tmux set -p -t "$TMUX_PANE" pane-active-border-style 'bg=default,fg=colour238'

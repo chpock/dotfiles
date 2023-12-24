@@ -109,7 +109,9 @@ update-automatic-rename-append() {
 
 cleanup-stale-panes() {
     local pane
-    for pane in $(tmux list-windows -F '#{window_panes}!#{pane_dead} #{pane_id}' | grep '^1!1 ' | awk '{print $2}'); do
+    # #{pane_dead} doesn't work in tmux 3.0a. Status pane is not marked as dead.
+    # However, #{pane_pid} works everywhere. Empty pane has 0 pane_pid.
+    for pane in $(tmux list-windows -F '#{window_panes}!#{pane_pid} #{pane_id}' | grep '^1!0 ' | awk '{print $2}'); do
         log debug "  killing empty pane: $pane"
         tmux kill-pane -t "$pane"
     done

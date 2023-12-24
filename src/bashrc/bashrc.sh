@@ -1480,8 +1480,10 @@ _ps1_show_status() {
     fi
     [ -n "$_PS1_TMUX_CURRENT_WINDOW" ] || _PS1_TMUX_CURRENT_WINDOW="$(tmux display-message -p -t "$TMUX_PANE" '#{window_id}')"
     if [ -z "$_PS1_TMUX_CURRENT_STATUS" ]; then
-        # we may have a status pane and lost its ID after reload
-        _PS1_TMUX_CURRENT_STATUS="$(tmux list-panes -t "$_PS1_TMUX_CURRENT_WINDOW" -F '#{pane_dead} #{pane_id}' | grep '^1 ' | awk '{print $2}' | tail -n 1)"
+        # we may have a status pane and lost its ID after reload.
+        # #{pane_dead} doesn't work in tmux 3.0a. Status pane is not marked as dead.
+        # However, #{pane_pid} works everywhere. Empty pane has 0 pane_pid.
+        _PS1_TMUX_CURRENT_STATUS="$(tmux list-panes -t "$_PS1_TMUX_CURRENT_WINDOW" -F '#{pane_pid} #{pane_id}' | grep '^0 ' | awk '{print $2}' | tail -n 1)"
         # no panes, create one
         [ -n "$_PS1_TMUX_CURRENT_STATUS" ] || _PS1_TMUX_CURRENT_STATUS="$(tmux split-window -d -l 1 -v -t "$TMUX_PANE" -P -F '#{pane_id}' '')"
         #tmux select-pane -t "$_PS1_TMUX_CURRENT_STATUS" -P 'bg=colour236'
