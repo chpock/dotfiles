@@ -12,6 +12,8 @@ LOG_FILE="$IAM_HOME/tmux-helper/debug.log"
 #  3 - trace
 LOG_LEVEL=2
 
+LOG4CMD="update-automatic-rename-append:0"
+
 log() {
     # disable possible stdour/stderr messages to avoid deadlocks, since
     # this script redirects stdout/stderr to this function
@@ -146,6 +148,12 @@ reset-options-to-default() {
 
 CMD="$1"
 shift
+
+for REC in $LOG4CMD; do
+    [ "$CMD" = "${REC%:*}" ] || continue
+    LOG_LEVEL="${REC#*:}"
+    break
+done
 
 log - "$(printf '%80s' | tr ' ' '=')"
 log "Started with cmd '$CMD' and args: $*"
