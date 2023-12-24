@@ -1335,7 +1335,7 @@ for wid in $(tmux list-windows -F '#{window_id}'); do
 cmd="$(tmux display-message -p -t "$wid" '#{pane_current_command}')"
 if [ "$cmd" != "bash" ]; then
 echo "Error: can't reload window '$(tmux display-message -p -t "$wid" '#{window_index}:#{window_name}')' as its command '$cmd' is not 'bash'."
-exit 1
+return 1
 fi
 done
 "$IAM_HOME/tools/bin/tmux-helper" reset-options-to-default >/dev/null 2>&1 || true
