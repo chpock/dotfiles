@@ -130,7 +130,7 @@ $IAM_HOME/shell.rc/functions-git.sh
 docker functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-docker.sh
 $IAM_HOME/shell.rc/functions-docker.sh
-2910
+3435
 
 AWS CLI functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-awscli.sh
@@ -243,7 +243,7 @@ vim-portable tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-vim-portable
 $IAM_HOME/tools/bin/install-vim-portable
 filter: linux
-1156
+1328
 
 tar-portable tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-tar-portable
