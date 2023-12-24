@@ -64,6 +64,7 @@ set -g display-time 2000
 set -g monitor-activity on
 set -g visual-activity off
 set -g aggressive-resize on
+set -g bell-action none
 set -g status-keys vi
 set -g mode-keys vi
 set -ug update-environment
@@ -91,6 +92,8 @@ bind -n M-8 select-window -t 8
 bind -n M-9 select-window -t 9
 set-hook -ug after-kill-pane
 set-hook -ag after-kill-pane 'run "$IAM_HOME/tools/bin/tmux-helper cleanup-stale-panes -w \"#{hook_window}\" 2>/dev/null"'
+set-hook -ug pane-exited
+set-hook -ag pane-exited 'run "$IAM_HOME/tools/bin/tmux-helper cleanup-stale-panes -w \"#{hook_window}\" 2>/dev/null"'
 set -g @ind_t_prefix ' WAIT '
 set -g @ind_s_prefix 'bg=blue,fg=white'
 set -g @ind_t_copy   ' COPY '
@@ -1702,7 +1705,6 @@ tmux set -p -t "$TMUX_PANE" pane-border-style 'bg=default,fg=colour238'
 tmux set -p -t "$TMUX_PANE" pane-active-border-style 'bg=default,fg=colour238'
 tmux set -p -t "$_PS1_TMUX_CURRENT_STATUS" pane-border-style 'bg=default,fg=colour238'
 tmux set -p -t "$_PS1_TMUX_CURRENT_STATUS" pane-active-border-style 'bg=default,fg=colour238'
-tmux set-hook -w -t "$TMUX_PANE" 'pane-exited[879]' "kill-pane -t \"$_PS1_TMUX_CURRENT_STATUS\""
 fi
 [ -z "${_PS1_STATUS_LINE}" ] && _PS1_STATUS_LINE=1 || _PS1_STATUS_LINE=$(( _PS1_STATUS_LINE + 1 ))
 tmux resize-pane -y "$_PS1_STATUS_LINE" -t "$_PS1_TMUX_CURRENT_STATUS"

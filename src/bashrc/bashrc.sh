@@ -1495,7 +1495,6 @@ _ps1_show_status() {
         tmux set -p -t "$TMUX_PANE" pane-active-border-style 'bg=default,fg=colour238'
         tmux set -p -t "$_PS1_TMUX_CURRENT_STATUS" pane-border-style 'bg=default,fg=colour238'
         tmux set -p -t "$_PS1_TMUX_CURRENT_STATUS" pane-active-border-style 'bg=default,fg=colour238'
-        tmux set-hook -w -t "$TMUX_PANE" 'pane-exited[879]' "kill-pane -t \"$_PS1_TMUX_CURRENT_STATUS\""
     fi
     [ -z "${_PS1_STATUS_LINE}" ] && _PS1_STATUS_LINE=1 || _PS1_STATUS_LINE=$(( _PS1_STATUS_LINE + 1 ))
     tmux resize-pane -y "$_PS1_STATUS_LINE" -t "$_PS1_TMUX_CURRENT_STATUS"
