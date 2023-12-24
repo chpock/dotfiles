@@ -237,7 +237,7 @@ on update: mkdir -p "$IAM_HOME"/shell.rc && "$IAM_HOME"/tools/bin/upkg supported
 tmux-helper tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/tmux-helper
 $IAM_HOME/tools/bin/tmux-helper
-5742
+5894
 
 vim-portable tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-vim-portable
