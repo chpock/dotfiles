@@ -1,0 +1,46 @@
+#!/bin/sh
+
+set -e
+
+BIN_PATH="$1"
+VERSION="v9.0.2094"
+VERSION_REPO="v0.0.0"
+BASE_URL="https://github.com/chpock/dotfiles/releases/download/${VERSION_REPO}/vim-portable.${VERSION}."
+SUFFIX="$(cat <<EOF
+GNU_Linux:x86_64
+linux.x86_64
+EOF
+)"
+
+# convert to absolute
+BIN_PATH="$(cd "$BIN_PATH"; pwd)"
+BIN="$BIN_PATH/vim-portable"
+
+if [ -x "$BIN" ]; then
+    if CUR_VERSION="$("$BIN" --portable-version)"; then
+        [ "$CUR_VERSION" != "$VERSION" ] || exit 0
+        echo "The current vim-portable version '$CUR_VERSION' does not match the desired version '$VERSION'" >&2
+    fi
+fi
+
+SUFFIX="$(echo "$SUFFIX" | sed -n -E "/$(echo "$(uname --operating-system)" | tr '/' '_'):$(uname --machine)/{n;p;}")"
+if [ -z "$SUFFIX" ]; then
+    echo "$0: Error: unknown platform for vim-portable" >&2
+    exit 1
+fi
+
+URL="$BASE_URL$SUFFIX"
+
+echo "Downloading vim-portable version $VERSION ..." >&2
+TEMP_DIR="$(mktemp --directory)"
+# run in subshell to preserve pwd
+(
+
+    cd "$TEMP_DIR"
+    curl --silent --fail --show-error -L "$URL" > vim-portable
+    echo "Copying vim-portable to $BIN_PATH ..." >&2
+    mv -f vim-portable "$BIN"
+    chmod +x "$BIN"
+)
+
+rm -rf "$TEMP_DIR"
