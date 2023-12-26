@@ -62,6 +62,8 @@ TIMESTAMP="$(stat --format '%Y' "$BASHRC_SRC")"
 ) &
 watchdog=$!
 
+[ -n "$1" ] || set -- "bashrc.sh"
+
 $EDITOR "$BASHRC_SRC/$1" && R=0 || R=$?
 
 kill $watchdog
