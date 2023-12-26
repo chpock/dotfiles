@@ -642,8 +642,16 @@ _glob_match() {
 eval "case \"\$2\" in ${1// /\\ }) return 0;; *) return 1;; esac"
 }
 _get_size() {
-_check command du --bytes /dev/null && set -- --bytes --summarize "$@" || set -- -A -B 1 -c "$@"
-command du "$@" | awk '{ print $1 }'
+if _check command stat --version; then
+command stat -c '%s' "$@"
+elif _check command stat -F /dev/null; then
+command stat -f '%z' "$@"
+elif _check command du --bytes /dev/null; then
+command du --bytes --summarize "$@" | awk '{ print $1 }'
+else
+local a
+for a; do echo "unknown"; done
+fi
 }
 _has() { _check command -v "$1" && return 0 || return 1; }
 _hasnot() { _has "$1" && return 1 || return 0; }
@@ -1350,15 +1358,15 @@ done
 fi
 exec bash --rcfile "$IAM_HOME/bashrc" -i
 }
-xssh() {
-ssh -t $* "$(__magic_ssh)"
+,ssh() {
+ssh -t "$@" "$(__magic_ssh)"
 }
 gssh() {
 host="$1"
 shift
 gcloud compute ssh --internal-ip "$host" "$@" -- -t "$(__magic_ssh)"
 }
-xsudo() {
+,sudo() {
 local sudo_cmd
 if [ -z "$1" ]; then
 sudo_cmd="sudo"
@@ -1868,6 +1876,9 @@ PROMPT_COMMAND="{ __debug_trap off \$? && __EC=0 || __EC=\$?; promptcmd \$__EC; 
 trap '{ __debug_trap; } 2>/dev/null' DEBUG
 if _is hpux; then
 stty intr '^C' kill '^U' susp '^Z'
+elif _is macos; then
+BASH_SILENCE_DEPRECATION_WARNING=1
+export BASH_SILENCE_DEPRECATION_WARNING
 elif _is windows; then
 shopt -s nocaseglob
 bind "set completion-ignore-case on"

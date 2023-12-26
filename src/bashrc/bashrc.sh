@@ -67,17 +67,22 @@ _glob_match() {
     eval "case \"\$2\" in ${1// /\\ }) return 0;; *) return 1;; esac"
 }
 
-# Returns the size of the file in bytes. The command du can take a variety of options.
-# With GNU du we use:
-#     -b,--bytes: equivalent to '--apparent-size --block-size=1'
-#     -s,--summarize: display only a total for each argument
-# With BSD du we use:
-#     -A: Display the apparent size instead of the disk usage.  This can be helpful when operating on compressed volumes or sparse files.
-#     -B blocksize: Calculate block counts in blocksize byte blocks.
-#     -c:Display a grand total.
+# Returns the size of the file(s) in bytes.
+# Use GNU stat with "-c '%s'" if available.
+# Use BSD stat with "-f '%z'" is available. BSD stat has the -F option, which is not present in GNU stat.
+# Use GNU du with "--bytes --summarize" if available.
+# print 'unknown' otherwise.
 _get_size() {
-    _check command du --bytes /dev/null && set -- --bytes --summarize "$@" || set -- -A -B 1 -c "$@"
-    command du "$@" | awk '{ print $1 }'
+    if _check command stat --version; then
+        command stat -c '%s' "$@"
+    elif _check command stat -F /dev/null; then
+        command stat -f '%z' "$@"
+    elif _check command du --bytes /dev/null; then
+        command du --bytes --summarize "$@" | awk '{ print $1 }'
+    else
+        local a
+        for a; do echo "unknown"; done
+    fi
 }
 
 _has() { _check command -v "$1" && return 0 || return 1; }
@@ -1020,8 +1025,8 @@ reload() {
     fi
     exec bash --rcfile "$IAM_HOME/bashrc" -i
 }
-xssh() {
-    ssh -t $* "$(__magic_ssh)"
+,ssh() {
+    ssh -t "$@" "$(__magic_ssh)"
 }
 gssh() {
     host="$1"
@@ -1030,7 +1035,7 @@ gssh() {
     # --tunnel-through-iap
     gcloud compute ssh --internal-ip "$host" "$@" -- -t "$(__magic_ssh)"
 }
-xsudo() {
+,sudo() {
     local sudo_cmd
     if [ -z "$1" ]; then
         sudo_cmd="sudo"
@@ -1741,6 +1746,11 @@ trap '{ __debug_trap; } 2>/dev/null' DEBUG
 if _is hpux; then
     # added support for ctrl-C / ctrl-U / ctrl-Z
     stty intr '^C' kill '^U' susp '^Z'
+elif _is macos; then
+    # Disable warning for zsh migration on Catalina
+    # https://support.apple.com/en-us/102360
+    BASH_SILENCE_DEPRECATION_WARNING=1
+    export BASH_SILENCE_DEPRECATION_WARNING
 elif _is windows; then
     # Ignore case for filenames
     shopt -s nocaseglob
