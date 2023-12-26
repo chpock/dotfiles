@@ -1,23 +1,16 @@
-IAM="kk" && \
-SSH_PUB_KEY="ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEApJEHtvysrpZeN7xfBS5GY0JjFD8eL5UCYZFbwcUhKXKNXsjtLl9FtwA9sS0cJhqM8CSSGAcceSirACC5L5PSLckeUh2eofYlqJPBkNzU2Uycwc7CSKJRaVTY+yNAJrdpO+7fJPxzis5H3CEB6roguEr+ZqDF9BSEZ0CO8l4wTGgsmqZ2UJuEKfVpPMg6cqGCUj6NvoADavMyrOPRKVCvKikJaWd3NJK4UXueLW0pc/lNoKvbVYRyXO0VruwsAAeciPtn/M1po/iz3+pQW9fk6uM1YContqmR3Ga7TfF249cSyml2gSO8VeNoPbm3RM/KPMZ8F9eyfwQUf6bic2IRoQ== kkushnir" && \
-_GIT_USER_NAME="Konstantin Kushnir" && \
-_GIT_USER_EMAIL="chpock@gmail.com" && \
-export IAM && \
-export SSH_PUB_KEY && \
-export _GIT_USER_NAME && \
-export _GIT_USER_EMAIL && \
-IAM_HOME="$HOME/.${IAM}_home" && \
-export IAM_HOME && \
-rm -rf "$HOME/.${IAM}_terminfo" && \
-if [ ! -d "$IAM_HOME" ]; then mkdir "$IAM_HOME"; fi && \
-rm -rf "$IAM_HOME/terminfo" && \
-mkdir "$IAM_HOME/terminfo" && \
-mkdir -p "$IAM_HOME/vim_swap" && \
-cat <<'EOF' > "$IAM_HOME/terminfo/.terminfo"
+IAM="kk" && export IAM
+IAM_HOME="$HOME/.${IAM}_home" && export IAM_HOME
+SSH_PUB_KEY="ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEApJEHtvysrpZeN7xfBS5GY0JjFD8eL5UCYZFbwcUhKXKNXsjtLl9FtwA9sS0cJhqM8CSSGAcceSirACC5L5PSLckeUh2eofYlqJPBkNzU2Uycwc7CSKJRaVTY+yNAJrdpO+7fJPxzis5H3CEB6roguEr+ZqDF9BSEZ0CO8l4wTGgsmqZ2UJuEKfVpPMg6cqGCUj6NvoADavMyrOPRKVCvKikJaWd3NJK4UXueLW0pc/lNoKvbVYRyXO0VruwsAAeciPtn/M1po/iz3+pQW9fk6uM1YContqmR3Ga7TfF249cSyml2gSO8VeNoPbm3RM/KPMZ8F9eyfwQUf6bic2IRoQ== kkushnir" && export SSH_PUB_KEY
+_GIT_USER_NAME="Konstantin Kushnir" && export _GIT_USER_NAME
+_GIT_USER_EMAIL="chpock@gmail.com" && export _GIT_USER_EMAIL
+[ -d "$IAM_HOME" ] || mkdir -p "$IAM_HOME"
+
+if [ "$TERM" = "xterm-256color" ] && command -v tic >/dev/null 2>&1; then
+    rm -rf "$IAM_HOME/terminfo"
+    mkdir "$IAM_HOME/terminfo"
+    cat <<'EOF' > "$IAM_HOME/terminfo/.terminfo"
 @include xterm-256color.terminfo
 EOF
-
-if [ "$TERM" = "xterm-256color" ]; then
     TERMINFO="$IAM_HOME/terminfo"
     export TERMINFO
     tic "$IAM_HOME/terminfo/.terminfo" >/dev/null 2>&1 || true

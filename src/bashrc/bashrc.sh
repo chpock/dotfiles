@@ -900,7 +900,6 @@ alias tailf='tail -F'
 alias ff='find . -name'
 
 if _has vim; then
-    alias vi=vim
     EDITOR="vim -u $IAM_HOME/vimrc -i $IAM_HOME/viminfo"
 elif _has vi; then
     EDITOR=vi
@@ -910,6 +909,7 @@ else
 fi
 export EDITOR
 
+alias vi=vim
 vim() {
     local CMD="vim"
     if _hasnot vim; then
@@ -932,6 +932,8 @@ vim() {
         rm -f "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim"
     fi
 }
+
+[ -d "$IAM_HOME/vim_swap" ] || mkdir -p "$IAM_HOME/vim_swap"
 
 _has apt-get && apt-get() {
     if [ "$(id -u)" -ne 0 ]; then
@@ -973,25 +975,28 @@ man() {
 #magic
 
 __magic_ssh() {
-    echo "IAM=\"$IAM\" && export IAM && \
-    SSH_PUB_KEY=\"$SSH_PUB_KEY\" && export SSH_PUB_KEY && \
-    IAM_HOME=\"\$HOME/.${IAM}_home\" && export IAM_HOME && \
-    _GIT_USER_NAME=\"$_GIT_USER_NAME\" && export _GIT_USER_NAME && \
-    _GIT_USER_EMAIL=\"$_GIT_USER_EMAIL\" && export _GIT_USER_EMAIL && \
-    rm -rf \"\$HOME/.${IAM}_terminfo\" && \
-    if [ ! -d \"\$IAM_HOME\" ]; then mkdir \"\$IAM_HOME\"; fi && \
-    rm -rf \"\$IAM_HOME/terminfo\" && \
-    mkdir \"\$IAM_HOME/terminfo\" && \
-    mkdir -p \"\$IAM_HOME/vim_swap\" && \
-    echo \"$(grep -v '^#' ${IAM_HOME}/terminfo/.terminfo | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/terminfo/.terminfo\" &&
-    TERMINFO=\"\$IAM_HOME/terminfo\" && \
-    export TERMINFO && \
-    (tic \"\$IAM_HOME/terminfo/.terminfo\" >/dev/null 2>&1 || true) && \
-    echo \"$(cat ${IAM_HOME}/tmux.conf.template | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/tmux.conf.template\" && \
-    echo \"$(cat ${IAM_HOME}/vimrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/vimrc\" && \
-    echo \"$(cat ${IAM_HOME}/local_tools | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/local_tools\" && \
-    echo \"$(cat ${HOME}/.tclshrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$HOME/.tclshrc\" && \
-    echo \"$(cat ${IAM_HOME}/bashrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/bashrc\"; exec bash --rcfile \"\$IAM_HOME/bashrc\" -i || exec \$SHELL -i"
+    printf '%s\n' \
+        "IAM=\"$IAM\" && export IAM" \
+        "IAM_HOME=\"\$HOME/.${IAM}_home\" && export IAM_HOME" \
+        "SSH_PUB_KEY=\"$SSH_PUB_KEY\" && export SSH_PUB_KEY" \
+        "_GIT_USER_NAME=\"$_GIT_USER_NAME\" && export _GIT_USER_NAME" \
+        "_GIT_USER_EMAIL=\"$_GIT_USER_EMAIL\" && export _GIT_USER_EMAIL" \
+        "[ -d \"\$IAM_HOME\" ] || mkdir -p \"\$IAM_HOME\"" \
+        "if [ \"\$TERM\" = 'xterm' ]; then TERM='xterm-256color'; export TERM; fi" \
+        "if [ \"\$TERM\" = 'xterm-256color' ] && command -v tic >/dev/null 2>&1; then" \
+        "rm -rf \"\$IAM_HOME/terminfo\"" \
+        "mkdir \"\$IAM_HOME/terminfo\"" \
+        "echo \"$(cat ${IAM_HOME}/terminfo/.terminfo | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/terminfo/.terminfo\"" \
+        "TERMINFO=\"\$IAM_HOME/terminfo\"" \
+        "export TERMINFO" \
+        "tic \"\$IAM_HOME/terminfo/.terminfo\" >/dev/null 2>&1 || true" \
+        "fi" \
+        "echo \"$(cat ${IAM_HOME}/tmux.conf.template | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/tmux.conf.template\"" \
+        "echo \"$(cat ${IAM_HOME}/vimrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/vimrc\"" \
+        "echo \"$(cat ${IAM_HOME}/local_tools | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/local_tools\"" \
+        "echo \"$(cat ${HOME}/.tclshrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$HOME/.tclshrc\"" \
+        "echo \"$(cat ${IAM_HOME}/bashrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/bashrc\"" \
+        "exec bash --rcfile \"\$IAM_HOME/bashrc\" -i || exec \$SHELL -i"
 }
 
 reload() {
