@@ -15,7 +15,11 @@ terminfo() {
     # remove comments
     # delete spaces from the beginning of lines
     # join all lines
-    sed -E -e '/^[[:space:]]*#/d' -e 's/^[[:space:]]+//' | awk '{print}' ORS=''
+    #
+    # note: tic from ncurses 5.7.x (e.g. on macos) cannot parse terminfo as
+    # a single line. Name (and alias) must be separated by a new line, and
+    # the feature set line must start with a space.
+    sed -E -e '/^[[:space:]]*#/d' -e 's/^[[:space:]]+//' | awk 'NR==1{print $0 "\n "}NR!=1{print}' ORS=''
     echo
 }
 
