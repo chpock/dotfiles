@@ -657,6 +657,30 @@ local a
 for a; do echo "unknown"; done
 fi
 }
+_get_url() {
+if [ "$1" = "-check" ]; then
+if _has curl || _has wget || [ -x /usr/lib/apt/apt-helper ]; then
+return 0
+else
+return 1
+fi
+fi
+if _has curl; then
+curl --fail --silent -k -L "$1"
+elif _has wget; then
+wget -q -O - "$1"
+elif [ -x /usr/lib/apt/apt-helper ]; then
+local R OUT ERR TMP="$(mktemp)"
+_catch OUT ERR /usr/lib/apt/apt-helper -oAcquire::https::Verify-Peer=false download-file "$1" "$TMP" && R=0 || R=$?
+if [ $R -eq 0 ]; then
+cat "$TMP"
+else
+echo "$ERR" >&2
+fi
+rm -f "$TMP"
+return $R
+fi
+}
 _has() { _check command -v "$1" && return 0 || return 1; }
 _hasnot() { _has "$1" && return 1 || return 0; }
 __vercomp() {
@@ -692,16 +716,19 @@ PATH=${PATH#:}
 export PATH
 }
 _catch() {
-local USE_V USE_X
+local USE_V USE_X R STDOUT STDERR
 [ "${-/v}" != "$-" ] && set +v && USE_V="-v" || USE_V="+v"
 [ "${-/x}" != "$-" ] && set +x && USE_X="-x" || USE_X="+x"
-{
-IFS=$'\n' read -r -d '' "${1}";
-IFS=$'\n' read -r -d '' "${2}";
-(IFS=$'\n' read -r -d '' _ERRNO_; return "${_ERRNO_}");
-} < <( (printf '\0%s\0%d\0' "$( ((({ "${@:3}" ; echo "${?}" 1>&3-; } | tr -d '\0' 1>&4-) 4>&2- 2>&1- | tr -d '\0' 1>&4-) 3>&1- | exit "$(cat)") 4>&1-)" "${?}" 1>&2) 2>&1)
+eval "$({
+STDERR="$({ STDOUT="$("${@:3}")"; } 2>&1 && R=0 || R=$?; declare -p STDOUT >&2; exit $R)" && R=0 || R=$?
+declare -p STDERR
+declare -p R
+} 2>&1)"
+printf -v "$1" '%s' "$STDOUT"
+printf -v "$2" '%s' "$STDERR"
 set $USE_X
 set $USE_V
+return $R
 }
 __uname_machine() { uname --machine 2>/dev/null || uname -m 2>/dev/null || uname -p 2>/dev/null || echo "Unknown"; }
 __uname_kernel_name() { uname --kernel-name 2>/dev/null || uname -s 2>/dev/null || echo "Unknown"; }
@@ -1464,6 +1491,8 @@ export LESS
 shopt -s histappend
 shopt -s cmdhist
 unset HISTFILESIZE
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 HISTSIZE=1000000
 HISTCONTROL=ignoreboth
 HISTTIMEFORMAT='%F %T '
@@ -1473,8 +1502,6 @@ if [ -e "$HOME/.${IAM}_history" ] && [ ! -e "$HISTFILE" ]; then
 mv "$HOME/.${IAM}_history" "$HISTFILE"
 fi
 __kubectl_status() {
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 local __K8S_CONTEXT
 local __K8S_CONF
 local __K8S_OUTPUT
@@ -2085,7 +2112,7 @@ if tools locked; then
 echo "${COLOR_BROWN}WARNING:${COLOR_DEFAULT} Tools are locked now and will not be updated."
 return
 fi
-if ! _has curl && ! _has wget; then
+if ! _get_url -check; then
 echo "${COLOR_RED}ERROR:${COLOR_DEFAULT} Could not update tools: curl/wget command not found"
 return 1
 fi
@@ -2104,7 +2131,7 @@ I_DESC="$LINE"
 elif [ -z "$I_URL" ]; then
 I_URL="$LINE"
 elif [ -z "$I_FILE" ]; then
-printf -v LINE '%q' "$LINE"; # quote string            
+printf -v LINE '%q' "$LINE"; # quote string
 eval "I_FILE=\"${LINE//\\\$/\$}\""; # enable $VAR
 elif [ -z "$I_SIZE" ]; then
 local P1="${LINE%:*}"
@@ -2167,18 +2194,17 @@ elif [ "update" = "$CMD" ]; then
 printf "Download: %s '%s'..." "$I_DESC" "${I_FILE##*/}"
 mkdir -p "${I_FILE%/*}"
 IS_ERROR=0
-if _has curl; then
-curl --fail --silent -k -L "$I_URL" > "$I_FILE" || IS_ERROR=$?
-elif _has wget; then
-wget -q -O - "$I_URL" > "$I_FILE" || IS_ERROR=$?
-fi
+local TMP="$(mktemp)"
+_get_url "$I_URL" > "$TMP" || IS_ERROR=$?
 if [ "$IS_ERROR" -ne 0 ]; then
 echo " ${COLOR_LIGHTRED}ERROR${COLOR_DEFAULT}"
+rm -f "$TMP"
 else
 echo " ${COLOR_GREEN}OK${COLOR_DEFAULT}"
-fi
+mv -f "$TMP" "$I_FILE"
 [ -n "${I_FILE##*/bin/*}" ] || chmod +x "$I_FILE"
 [ -z "$I_ON_UPDATE" ] || eval "$I_ON_UPDATE"
+fi
 fi
 done
 if [ "check" = "$CMD" ] && [ "quick" = "$PARAM" ] && [ -n "$CHECK_STATE" ]; then
