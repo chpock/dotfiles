@@ -226,7 +226,7 @@ $IAM_HOME/tools/bin/lastbuild
 shellcheck tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-shellcheck
 $IAM_HOME/tools/bin/install-shellcheck
-1438
+1408
 
 apt-cyg tool
 https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg
@@ -249,19 +249,19 @@ vim-portable tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-vim-portable
 $IAM_HOME/tools/bin/install-vim-portable
 filter: linux
-1328
+1298
 
 tar-portable tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-tar-portable
 $IAM_HOME/tools/bin/install-tar-portable
 filter: linux
-1238
+1208
 
 gzip-portable tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-gzip-portable
 $IAM_HOME/tools/bin/install-gzip-portable
 filter: linux
-1157
+1127
 
 EOF
 
