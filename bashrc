@@ -614,6 +614,7 @@ COLOR_SIGN=$'\e[38;5;136m'
 _hash() {
 {
 local A=1 B=0 M="$@" C i
+[ -n "$M" ] || IFS= read -r -d '' M || :
 local L=${#M}
 for (( i = 0; i < $L; i++ )); do
 printf -v C '%d' "'${M:$i:1}"
@@ -666,7 +667,7 @@ return 1
 fi
 fi
 if _has curl; then
-curl --fail --silent -k -L "$1"
+curl --fail --silent --show-error -k -L "$1"
 elif _has wget; then
 wget -q -O - "$1"
 elif [ -x /usr/lib/apt/apt-helper ]; then
@@ -1491,10 +1492,10 @@ export LESS
 shopt -s histappend
 shopt -s cmdhist
 unset HISTFILESIZE
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 HISTSIZE=1000000
 HISTCONTROL=ignoreboth
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 HISTTIMEFORMAT='%F %T '
 HISTIGNORE="&:[bf]g:exit"
 HISTFILE="$IAM_HOME/bash_history"
@@ -2083,6 +2084,15 @@ echo ""
 fi
 fi
 unset SSH_PUB_KEY_ONLY
+fi
+if [ ! -x "$IAM_HOME/tools/bin/geturl" ]; then
+[ -d "$IAM_HOME/tools/bin" ] || mkdir -p "$IAM_HOME/tools/bin"
+{
+echo '#!/bin/bash'
+declare -f _hash _check _has _catch _get_url
+echo '_get_url "$@"'
+} > "$IAM_HOME/tools/bin/geturl"
+chmod +x "$IAM_HOME/tools/bin/geturl"
 fi
 tools() {
 local CMD="$1"

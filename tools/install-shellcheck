@@ -36,7 +36,7 @@ BIN_PATH="$(cd "$BIN_PATH"; pwd)"
 (
 
 cd "$TEMP_DIR"
-curl --silent --fail --show-error -L "$URL" > archive
+geturl "$URL" > archive
 echo "Extracting the archive ..." >&2
 
 if [ "$SUFFIX" = "zip" ]; then

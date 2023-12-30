@@ -36,7 +36,7 @@ TEMP_DIR="$(mktemp --directory)"
 # run in subshell to preserve pwd
 (
     cd "$TEMP_DIR"
-    curl --silent --fail --show-error -L "$URL" > gzip-portable
+    geturl "$URL" > gzip-portable
     echo "Copying gzip-portable to $BIN_PATH ..." >&2
     mv -f gzip-portable "$BIN"
     chmod +x "$BIN"

@@ -38,7 +38,7 @@ TEMP_DIR="$(mktemp --directory)"
 # run in subshell to preserve pwd
 (
     cd "$TEMP_DIR"
-    curl --silent --fail --show-error -L "$URL" > tar-portable
+    geturl "$URL" > tar-portable
     echo "Copying tar-portable to $BIN_PATH ..." >&2
     mv -f tar-portable "$BIN"
     chmod +x "$BIN"

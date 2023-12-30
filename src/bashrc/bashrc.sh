@@ -27,6 +27,7 @@ _hash() {
     # disable messages during -x
     {
         local A=1 B=0 M="$@" C i
+        [ -n "$M" ] || IFS= read -r -d '' M || :
         local L=${#M}
         for (( i = 0; i < $L; i++ )); do
             printf -v C '%d' "'${M:$i:1}"
@@ -94,7 +95,7 @@ _get_url() {
         fi
     fi
     if _has curl; then
-        curl --fail --silent -k -L "$1"
+        curl --fail --silent --show-error -k -L "$1"
     elif _has wget; then
         wget -q -O - "$1"
     elif [ -x /usr/lib/apt/apt-helper ]; then
@@ -1999,6 +2000,16 @@ if ! _is dockerenv; then
         fi
     fi
     unset SSH_PUB_KEY_ONLY
+fi
+
+if [ ! -x "$IAM_HOME/tools/bin/geturl" ]; then
+    [ -d "$IAM_HOME/tools/bin" ] || mkdir -p "$IAM_HOME/tools/bin"
+    {
+        echo '#!/bin/bash'
+        declare -f _hash _check _has _catch _get_url
+        echo '_get_url "$@"'
+    } > "$IAM_HOME/tools/bin/geturl"
+    chmod +x "$IAM_HOME/tools/bin/geturl"
 fi
 
 tools() {

@@ -39,7 +39,7 @@ TEMP_DIR="$(mktemp --directory)"
 # run in subshell to preserve pwd
 (
     cd "$TEMP_DIR"
-    curl --silent --fail --show-error -L "$URL" > vim-portable
+    geturl "$URL" > vim-portable
     echo "Copying vim-portable to $BIN_PATH ..." >&2
     mv -f vim-portable "$BIN"
     chmod +x "$BIN"
