@@ -1494,14 +1494,14 @@ shopt -s cmdhist
 unset HISTFILESIZE
 HISTSIZE=1000000
 HISTCONTROL=ignoreboth
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 HISTTIMEFORMAT='%F %T '
 HISTIGNORE="&:[bf]g:exit"
 HISTFILE="$IAM_HOME/bash_history"
 if [ -e "$HOME/.${IAM}_history" ] && [ ! -e "$HISTFILE" ]; then
 mv "$HOME/.${IAM}_history" "$HISTFILE"
 fi
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 __kubectl_status() {
 local __K8S_CONTEXT
 local __K8S_CONF
@@ -2246,6 +2246,7 @@ local NAME
 local DIR
 if [ -n "$COMP_CWORD" ]; then
 local CURRENT="${COMP_WORDS[COMP_CWORD]}"
+COMPREPLY=()
 if [ "$COMP_CWORD" -eq 1 ]; then
 case "$CURRENT" in
 -*)
@@ -2259,6 +2260,21 @@ case "$3" in
 return
 ;;
 esac
+compopt -o nospace -o filenames
+if [ -e "$JUMP_FILE" ]; then
+while IFS=$'\t' read -r NAME DIR; do
+[ "$NAME" != "${COMP_WORDS[1]}" ] || break
+unset DIR
+done < "$JUMP_FILE"
+fi
+[ -n "$DIR" ] || return
+local LINE
+while IFS=$'\n' read -r LINE; do
+LINE="${LINE:${#DIR}+1}"
+[ ! -d "$LINE" ] && [ "${LINE:${#LINE}-1}" != "/" ] && LINE+="/" || :
+COMPREPLY+=("$LINE")
+done < <(compgen -d -- "${DIR}/$CURRENT")
+return
 fi
 if [ "${COMP_WORDS[1]}" = "-rename" ] && [ $COMP_CWORD -gt 2 ]; then
 return
@@ -2393,7 +2409,7 @@ if [ -z "$JUMP" ]; then
 echo "JumpList: there is no directory '$1'"
 return 1
 fi
-cd "$JUMP"
+cd "$JUMP/$2"
 }
 complete -F j j
 if _isnot tmux; then

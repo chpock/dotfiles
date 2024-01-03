@@ -2183,6 +2183,7 @@ j() {
 
     if [ -n "$COMP_CWORD" ]; then
         local CURRENT="${COMP_WORDS[COMP_CWORD]}"
+        COMPREPLY=()
         if [ "$COMP_CWORD" -eq 1 ]; then
             case "$CURRENT" in
                 -*)
@@ -2197,6 +2198,23 @@ j() {
                     return
                     ;;
             esac
+            compopt -o nospace -o filenames
+            if [ -e "$JUMP_FILE" ]; then
+                while IFS=$'\t' read -r NAME DIR; do
+                    [ "$NAME" != "${COMP_WORDS[1]}" ] || break
+                    unset DIR
+                done < "$JUMP_FILE"
+            fi
+            [ -n "$DIR" ] || return
+            local LINE
+            while IFS=$'\n' read -r LINE; do
+                # strip base jump dir
+                LINE="${LINE:${#DIR}+1}"
+                # tralling / for existing dir will be added by readline
+                [ ! -d "$LINE" ] && [ "${LINE:${#LINE}-1}" != "/" ] && LINE+="/" || :
+                COMPREPLY+=("$LINE")
+            done < <(compgen -d -- "${DIR}/$CURRENT")
+            return
         fi
         # don't provide completions for 2nd argument for -rename
         if [ "${COMP_WORDS[1]}" = "-rename" ] && [ $COMP_CWORD -gt 2 ]; then
@@ -2345,7 +2363,7 @@ j() {
         return 1
     fi
 
-    cd "$JUMP"
+    cd "$JUMP/$2"
 
 }
 
