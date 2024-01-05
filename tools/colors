@@ -1,5 +1,9 @@
 #!/bin/sh
 
+if [ "$1" = "-bg" ]; then
+    DEFAULT_BG="$(printf '\033[48;5;%im' "$2")"
+fi
+
 echo
 echo "Standard colors:"
 for i in 0:BLACK 1:RED 2:GREEN 3:YELLOW 4:BLUE 5:MAGENTA 6:CYAN 7:WHITE; do
@@ -48,7 +52,7 @@ echo
 echo "Standard colors:"
 FORMAT=""; set --
 for i in $(seq 0 15); do
-    FORMAT="${FORMAT}\\e[38;5;%im %-3s\\e[0m "
+    FORMAT="${FORMAT}${DEFAULT_BG}\\e[38;5;%im %-3s \\e[0m"
     set -- "$@" $i $i
 done
 printf "$FORMAT\n" "$@"
@@ -62,10 +66,10 @@ if [ 1 -eq 1 ]; then
             for cube in 0 1 2; do
                 for i in $(seq 0 5); do
                     CODE=$(( 16 + row * 108 + cube * 36 + i + j * 6 ))
-                    FORMAT="${FORMAT}\\e[38;5;%im %03i\\e[0m"
+                    FORMAT="${FORMAT}${DEFAULT_BG}\\e[38;5;%im %03i\\e[0m"
                     set -- "$@" "$CODE" "$CODE"
                 done
-                FORMAT="${FORMAT} "
+                FORMAT="${FORMAT}${DEFAULT_BG} \\e[0m"
             done
             printf "$FORMAT\n" "$@"
         done
@@ -78,10 +82,10 @@ else
             for cube in 0 1 2 3 4 5; do
                 for i in $(seq 0 5); do
                     CODE=$(( 16 + row * 108 + cube * 36 + i + j * 6 ))
-                    FORMAT="${FORMAT}\\e[38;5;%im %03i\\e[0m"
+                    FORMAT="${FORMAT}${DEFAULT_BG}\\e[38;5;%im %03i\\e[0m"
                     set -- "$@" "$CODE" "$CODE"
                 done
-                FORMAT="${FORMAT} "
+                FORMAT="${FORMAT}${DEFAULT_BG} \\e[0m"
             done
             printf "$FORMAT\n" "$@"
         done
@@ -92,7 +96,233 @@ fi
 echo "Grayscale colors:"
 FORMAT=""; set --
 for i in $(seq 232 255); do
-    FORMAT="${FORMAT}\\e[38;5;%im %03i\\e[0m"
+    FORMAT="${FORMAT}${DEFAULT_BG}\\e[38;5;%im %03i\\e[0m"
     set -- "$@" "$i" "$i"
 done
 printf "$FORMAT\n" "$@"
+
+INSERT=$(cat <<EOF
+EOF
+)
+
+rgb() {
+    local R="$1" G="$2" B="$3" K="$4" C
+    if [ -n "$K" ]; then
+        [ "$K" -ge 0 ] && K=$(( ( 5 * K + 50 ) / 100 )) || K=$(( ( 5 * K - 50 ) / 100 ))
+        R=$(( R + K ))
+        G=$(( G + K ))
+        B=$(( B + K ))
+    fi
+    [ $R -le 5 ] || R=5
+    [ $G -le 5 ] || G=5
+    [ $B -le 5 ] || B=5
+    [ $R -ge 0 ] || R=0
+    [ $G -ge 0 ] || G=0
+    [ $B -ge 0 ] || B=0
+    C=$(( 16 + R*36 + G*6 + B ))
+    echo "$INSERT" | while read -r RGB _M; do
+        [ "$_M" = "$R$G$B" ] || continue
+        _R="${RGB%??}"
+        _B="${RGB#??}"
+        RGB="${RGB%?}"
+        _G="${RGB#?}"
+        rgb "$_R" "$_G" "$_B"
+    done
+    printf "$DEFAULT_BG"
+    #printf '\033[38;5;%im %i%i%i\033[0m' "$C" "$R" "$G" "$B"
+    printf '\033[38;5;%im %03i\033[0m' "$C" "$C"
+    echo "$C" >>rgbcolors
+}
+
+rgb_missed() {
+    local C=16 S=0 R G B W
+    printf "Missed:"
+    while [ $C -le 231 ]; do
+        if ! grep --silent "^$C\$" rgbcolors; then
+            S=$(( S + 1 ))
+            W=$(( C - 16 ))
+            R=$(( W / 36 ))
+            G=$(( ( W - R*36 ) / 6 ))
+            B=$(( W - R*36 - G*6 ))
+            printf " %s(\033[38;5;%im%s%s%s\033[0m)" "$C" "$C" "$R" "$G" "$B"
+        fi
+        C=$(( C + 1 ))
+    done
+    echo
+    echo "Total missed: $S"
+}
+
+vbar() {
+    printf "$DEFAULT_BG"
+    printf '\033[38;5;244m ║\033[0m'
+}
+hbar() {
+    printf "$DEFAULT_BG"
+    printf '\033[38;5;244m'
+    printf '═%.0s' $(seq 1 $1)
+    printf '\033[0m\n'
+}
+
+echo
+echo "Rainbow:"
+#for bright in 1 2 3 4 5; do
+#    rgb $bright 0 0
+#done
+#echo
+#for bright in 1 2 3 4 5; do
+#    rgb 0 $bright 0
+#done
+#echo
+#for bright in 1 2 3 4 5; do
+#    rgb 0 0 $bright
+#done
+#echo
+#for r in 5 4 3 2 1; do
+#    for b in 0 1 2 3 4 5; do
+#        rgb $r $(( 5 - r )) $b
+#    done
+#    echo
+#done
+#for g in 5 4 3 2 1; do
+#    for r in 0 1 2 3 4 5; do
+#        rgb $r $g $(( 5 - g ))
+#    done
+#    echo
+#done
+#for b in 5 4 3 2 1; do
+#    for g in 0 1 2 3 4 5; do
+#        rgb $(( 5 - b )) $g $b
+#    done
+#    echo
+#done
+
+#rm -f rgbcolors
+#
+#for g in 0 1 2 3 4 5; do
+#    for d in 0 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 40 50 60; do
+#        rgb $(( 5 * $d / 10 )) $(( ($g + 1) * $d / 10 - 1 )) $(( (0 + 1) * $d / 10 - 1 ))
+#    done
+#    echo
+#done
+#for r in 4 3 2 1 0; do
+#    for d in 0 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 40 50 60; do
+#        rgb $(( ($r + 1) * $d / 10 - 1 )) $(( 5 * $d / 10 )) $(( (0 + 1) * $d / 10 - 1 ))
+#    done
+#    echo
+#done
+#for b in 1 2 3 4 5; do
+#    for d in 0 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 40 50 60; do
+#        rgb $(( (0 + 1) * $d / 10 - 1 )) $(( 5 * $d / 10 )) $(( ($b + 1) * $d / 10 - 1 ))
+#    done
+#    echo
+#done
+#for g in 4 3 2 1 0; do
+#    for d in 0 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 40 50 60; do
+#        rgb $(( (0 + 1) * $d / 10 - 1 )) $(( ($g + 1) * $d / 10 - 1 )) $(( 5 * $d / 10 ))
+#    done
+#    echo
+#done
+#for r in 1 2 3 4 5; do
+#    for d in 0 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 40 50 60; do
+#        rgb $(( ($r + 1) * $d / 10 - 1 )) $(( (0 + 1) * $d / 10 - 1 )) $(( 5 * $d / 10 ))
+#    done
+#    echo
+#done
+#for b in 4 3 2 1 0; do
+#    for d in 0 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 40 50 60; do
+#        rgb $(( 5 * $d / 10 )) $(( (0 + 1) * $d / 10 - 1 )) $(( ($b + 1) * $d / 10 - 1 ))
+#    done
+#    echo
+#done
+#rgb_missed
+#echo
+
+rm -f rgbcolors
+
+#for d in -100 -80 -60 -40 -20 0 20 40 60 80 100; do
+#    [ $d -ne 0 ] || vbar
+#    printf '%4s' $d
+#    [ $d -ne 0 ] || vbar
+#done
+#echo
+
+for g in 0 1 2 3 4 5; do
+    #rgb 1 $g $g
+    [ $g -ne 5 ] || hbar 52
+    for d in -100 -80 -60 -40 -20 0 20 40 60 80 100; do
+        [ $d -ne 0 ] || vbar
+#        if [ $(( g + d * 5 / 100 )) -ge 6 ] && [ $d -gt 0 ]; then
+#            rgb $(( 5 - 1 )) $(( g - 1 )) $(( 0 + d * 5 / 100 ))
+#            printf " $r$g$b"
+#            printf "     "
+#        else
+            rgb 5 $g 0 $d
+#        fi
+        [ $d -ne 0 ] || vbar
+    done
+    echo
+    [ $g -ne 5 ] || hbar 52
+done
+for r in 4 3 2 1 0; do
+    for d in -100 -80 -60 -40 -20 0 20 40 60 80 100; do
+        [ $d -ne 0 ] || vbar
+        rgb $r 5 0 $d
+        [ $d -ne 0 ] || vbar
+    done
+    echo
+done
+for b in 1 2 3 4 5; do
+    [ $b -ne 5 ] || hbar 52
+    for d in -100 -80 -60 -40 -20 0 20 40 60 80 100; do
+        [ $d -ne 0 ] || vbar
+        rgb 0 5 $b $d
+        [ $d -ne 0 ] || vbar
+    done
+    echo
+    [ $b -ne 5 ] || hbar 52
+done
+for g in 4 3 2 1 0; do
+    for d in -100 -80 -60 -40 -20 0 20 40 60 80 100; do
+        [ $d -ne 0 ] || vbar
+        rgb 0 $g 5 $d
+        [ $d -ne 0 ] || vbar
+    done
+    echo
+done
+for r in 1 2 3 4 5; do
+    [ $r -ne 5 ] || hbar 52
+    for d in -100 -80 -60 -40 -20 0 20 40 60 80 100; do
+        [ $d -ne 0 ] || vbar
+        rgb $r 0 5 $d
+        [ $d -ne 0 ] || vbar
+    done
+    echo
+    [ $r -ne 5 ] || hbar 52
+done
+for b in 4 3 2 1 0; do
+    for d in -100 -80 -60 -40 -20 0 20 40 60 80 100; do
+        [ $d -ne 0 ] || vbar
+        rgb 5 0 $b $d
+        [ $d -ne 0 ] || vbar
+    done
+    echo
+done
+
+#-------------------------------------
+echo
+for r in 1 2 3 4; do
+    for g in 1 2 3 4; do
+        printf "$DEFAULT_BG"
+        printf '    '
+        for b in 1 2 3 4; do
+            rgb $r $g $b
+            #printf '=%i' $(( r + g + b ))
+        done
+        echo
+    done
+    echo
+done
+
+#rgb_missed
+
+rm -f rgbcolors
