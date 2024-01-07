@@ -316,6 +316,10 @@ _addpath "/usr/local/bin"
 if [ -e /proc/registry/HKEY_CURRENT_USER/Environment/Path ]; then
     IFS= read -d $'\0' -r __val < "/proc/registry/HKEY_CURRENT_USER/Environment/Path"
     while read -r -d ';' p; do
+        p="${p/\%SystemRoot\%/$SYSTEMROOT}"
+        p="${p/\%ProgramFiles\%/$PROGRAMFILES}"
+        p="${p/\%USERPROFILE\%/$USERPROFILE}"
+        p="${p/\%HomeDrive\%\%HomePath\%/$USERPROFILE}"
         _addpath "$(cygpath -u "$p")"
     done <<< "$__val;"
     unset p

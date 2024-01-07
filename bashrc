@@ -847,6 +847,10 @@ _addpath "/usr/local/bin"
 if [ -e /proc/registry/HKEY_CURRENT_USER/Environment/Path ]; then
 IFS= read -d $'\0' -r __val < "/proc/registry/HKEY_CURRENT_USER/Environment/Path"
 while read -r -d ';' p; do
+p="${p/\%SystemRoot\%/$SYSTEMROOT}"
+p="${p/\%ProgramFiles\%/$PROGRAMFILES}"
+p="${p/\%USERPROFILE\%/$USERPROFILE}"
+p="${p/\%HomeDrive\%\%HomePath\%/$USERPROFILE}"
 _addpath "$(cygpath -u "$p")"
 done <<< "$__val;"
 unset p
@@ -1499,9 +1503,9 @@ HISTIGNORE="&:[bf]g:exit"
 HISTFILE="$IAM_HOME/bash_history"
 if [ -e "$HOME/.${IAM}_history" ] && [ ! -e "$HISTFILE" ]; then
 mv "$HOME/.${IAM}_history" "$HISTFILE"
-fi
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
+fi
 __kubectl_status() {
 local __K8S_CONTEXT
 local __K8S_CONF
