@@ -778,12 +778,6 @@ MSYS2_ARG_CONV_EXCL="*"
 export MSYS2_ARG_CONV_EXCL
 MSYS2_ENV_CONV_EXCL="*"
 export MSYS2_ENV_CONV_EXCL
-if [ -e /proc/registry/HKEY_LOCAL_MACHINE/SYSTEM/CurrentControlSet/Control/Session\ Manager/Environment/Path ]; then
-while read -r -d ';' p; do
-_addpath "$(cygpath -u "$p")"
-done < <(cat /proc/registry/HKEY_LOCAL_MACHINE/SYSTEM/CurrentControlSet/Control/Session\ Manager/Environment/Path | tr -d '\0')
-unset p
-fi
 fi
 if [ "$LANG" != "en_US.UTF-8" ] && _has locale && [ "$(LANG=en_US.UTF-8 locale charmap 2>/dev/null)" = "UTF-8" ]; then
 LANG="en_US.UTF-8"
@@ -844,8 +838,12 @@ if [ -f ~/gcloud/google-cloud-sdk/path.bash.inc ]; then
 fi
 _addpath -start "$IAM_HOME/tools/bin"
 _addpath "/usr/local/bin"
-if [ -e /proc/registry/HKEY_CURRENT_USER/Environment/Path ]; then
-IFS= read -d $'\0' -r __val < "/proc/registry/HKEY_CURRENT_USER/Environment/Path"
+for fn in \
+"/proc/registry/HKEY_CURRENT_USER/Environment/Path" \
+"/proc/registry/HKEY_LOCAL_MACHINE/SYSTEM/CurrentControlSet/Control/Session Manager/Environment/Path"
+do
+if [ -e "$fn" ]; then
+IFS= read -d $'\0' -r __val < "$fn"
 while read -r -d ';' p; do
 p="${p/\%SystemRoot\%/$SYSTEMROOT}"
 p="${p/\%ProgramFiles\%/$PROGRAMFILES}"
@@ -856,6 +854,8 @@ done <<< "$__val;"
 unset p
 unset __val
 fi
+done
+unset fn
 hostinfo() {
 local UNAME_MACHINE UNAME_RELEASE UNAME_ALL
 local MSHELL="unknown"
@@ -1503,9 +1503,9 @@ HISTIGNORE="&:[bf]g:exit"
 HISTFILE="$IAM_HOME/bash_history"
 if [ -e "$HOME/.${IAM}_history" ] && [ ! -e "$HISTFILE" ]; then
 mv "$HOME/.${IAM}_history" "$HISTFILE"
+fi
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
-fi
 __kubectl_status() {
 local __K8S_CONTEXT
 local __K8S_CONF

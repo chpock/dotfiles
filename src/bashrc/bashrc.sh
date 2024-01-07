@@ -223,14 +223,6 @@ elif _is msys || _is mingw; then
     export MSYS2_ARG_CONV_EXCL
     MSYS2_ENV_CONV_EXCL="*"
     export MSYS2_ENV_CONV_EXCL
-    # Additional PATH for MSYS2, since it breaks it
-    # https://stackoverflow.com/a/51430239
-    if [ -e /proc/registry/HKEY_LOCAL_MACHINE/SYSTEM/CurrentControlSet/Control/Session\ Manager/Environment/Path ]; then
-        while read -r -d ';' p; do
-            _addpath "$(cygpath -u "$p")"
-        done < <(cat /proc/registry/HKEY_LOCAL_MACHINE/SYSTEM/CurrentControlSet/Control/Session\ Manager/Environment/Path | tr -d '\0')
-        unset p
-    fi
 fi
 
 # try to use en_US.UTF-8 locale if available
@@ -313,18 +305,25 @@ _addpath -start "$IAM_HOME/tools/bin"
 _addpath "/usr/local/bin"
 
 # Add user PATH in cygwin
-if [ -e /proc/registry/HKEY_CURRENT_USER/Environment/Path ]; then
-    IFS= read -d $'\0' -r __val < "/proc/registry/HKEY_CURRENT_USER/Environment/Path"
-    while read -r -d ';' p; do
-        p="${p/\%SystemRoot\%/$SYSTEMROOT}"
-        p="${p/\%ProgramFiles\%/$PROGRAMFILES}"
-        p="${p/\%USERPROFILE\%/$USERPROFILE}"
-        p="${p/\%HomeDrive\%\%HomePath\%/$USERPROFILE}"
-        _addpath "$(cygpath -u "$p")"
-    done <<< "$__val;"
-    unset p
-    unset __val
-fi
+# https://stackoverflow.com/a/51430239
+for fn in \
+    "/proc/registry/HKEY_CURRENT_USER/Environment/Path" \
+    "/proc/registry/HKEY_LOCAL_MACHINE/SYSTEM/CurrentControlSet/Control/Session Manager/Environment/Path"
+do
+    if [ -e "$fn" ]; then
+        IFS= read -d $'\0' -r __val < "$fn"
+        while read -r -d ';' p; do
+            p="${p/\%SystemRoot\%/$SYSTEMROOT}"
+            p="${p/\%ProgramFiles\%/$PROGRAMFILES}"
+            p="${p/\%USERPROFILE\%/$USERPROFILE}"
+            p="${p/\%HomeDrive\%\%HomePath\%/$USERPROFILE}"
+            _addpath "$(cygpath -u "$p")"
+        done <<< "$__val;"
+        unset p
+        unset __val
+    fi
+done
+unset fn
 
 hostinfo() {
 
