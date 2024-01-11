@@ -27,13 +27,26 @@ DIR_BUILD="/tmp/build"
 DIR_INSTALL="/tmp/install"
 DIR_DIST="/tmp/dist"
 
+MUSL_VERSION="1.2.4"
+
 set -x
 
 rm -f "$OUTPUT"
 
-yum install -y git make gcc libtool glibc-static
+yum install -y git make gcc libtool
 
 mkdir -p "$DIR_BUILD"
+cd "$DIR_BUILD"
+
+curl --silent --fail https://musl.libc.org/releases/musl-${MUSL_VERSION}.tar.gz | tar xz
+cd musl-*
+./configure --prefix=$DIR_INSTALL/musl --disable-shared
+make -j8
+make install
+
+CC=$DIR_INSTALL/musl/bin/musl-gcc
+export CC
+
 cd "$DIR_BUILD"
 
 curl --silent --fail https://ftp.gnu.org/gnu/ncurses/ncurses-${NCURSES_VERSION}.tar.gz | tar xz
@@ -48,7 +61,7 @@ cd vim/src
 git checkout "$VIM_TAG"
 # gcc in cenos6 doesn't support -Wpedantic
 sed -E -i 's/[[:space:]]+-Wpedantic//' libvterm/Makefile
-LDFLAGS="-static-libgcc -L$DIR_INSTALL/ncurses/lib" ./configure \
+LDFLAGS="-static -L$DIR_INSTALL/ncurses/lib" ./configure \
     --prefix=$DIR_INSTALL/vim \
     --enable-multibyte \
     --enable-terminal \

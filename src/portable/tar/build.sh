@@ -25,18 +25,31 @@ OUTPUT="${OUTPUT}.${TAR_VERSION}.${OS}.${ARCH}"
 DIR_BUILD="/tmp/build"
 DIR_INSTALL="/tmp/install"
 
+MUSL_VERSION="1.2.4"
+
 set -x
 
 rm -f "$OUTPUT"
 
-yum install -y make gcc libtool glibc-static
+yum install -y make gcc libtool
 
 mkdir -p "$DIR_BUILD"
 cd "$DIR_BUILD"
 
+curl --silent --fail https://musl.libc.org/releases/musl-${MUSL_VERSION}.tar.gz | tar xz
+cd musl-*
+./configure --prefix=$DIR_INSTALL/musl --disable-shared
+make -j8
+make install
+
+CC=$DIR_INSTALL/musl/bin/musl-gcc
+export CC
+
+cd "$DIR_BUILD"
+
 curl --silent --fail https://ftp.gnu.org/gnu/tar/tar-${TAR_VERSION}.tar.gz | tar xz
 cd tar-*
-LDFLAGS="-static-libgcc" FORCE_UNSAFE_CONFIGURE=1 ./configure --prefix=$DIR_INSTALL/tar --with-gzip=gzip-portable
+LDFLAGS="-static" FORCE_UNSAFE_CONFIGURE=1 ./configure --prefix=$DIR_INSTALL/tar --with-gzip=gzip-portable
 make -j8
 #make check
 make install-strip

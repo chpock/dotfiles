@@ -36,7 +36,6 @@ yum install -y make gcc bison libtool
 mkdir -p "$DIR_BUILD"
 cd "$DIR_BUILD"
 
-
 curl --silent --fail https://musl.libc.org/releases/musl-${MUSL_VERSION}.tar.gz | tar xz
 cd musl-*
 ./configure --prefix=$DIR_INSTALL/musl --disable-shared
