@@ -49,7 +49,7 @@ cd "$DIR_BUILD"
 
 curl --silent --fail https://ftp.gnu.org/gnu/tar/tar-${TAR_VERSION}.tar.gz | tar xz
 cd tar-*
-LDFLAGS="-static" FORCE_UNSAFE_CONFIGURE=1 ./configure --prefix=$DIR_INSTALL/tar --with-gzip=gzip-portable
+LDFLAGS="-static" FORCE_UNSAFE_CONFIGURE=1 ./configure --prefix=$DIR_INSTALL/tar
 make -j8
 #make check
 make install-strip
