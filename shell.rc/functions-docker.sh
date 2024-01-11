@@ -41,10 +41,10 @@ docker() {
 
     case "$CMD" in
         exec)
-            docker exec -ti "$@" /bin/bash -c "$(__magic_ssh)"
+            docker exec -ti "$@" /bin/sh -c "$(__magic_ssh)"
             ;;
         run)
-            docker run -ti --entrypoint /bin/bash "$@" -c "$(__magic_ssh)"
+            docker run -ti --entrypoint /bin/sh "$@" -c "$(__magic_ssh)"
             ;;
         *)
             echo "Unknown cmd: '$CMD'"
