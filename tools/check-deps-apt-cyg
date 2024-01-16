@@ -1,0 +1,31 @@
+#!/bin/sh
+
+set -e
+
+CYGWIN_HOME="$(cygpath -m /)"
+ARCH="$(uname -m)"
+ARCH="${ARCH/i686/x86}"
+EXE="setup-${ARCH}.exe"
+
+if [ ! -e "$CYGWIN_HOME"/setup-*.exe ]; then
+    printf '%s' "[apt-cyg deps] Downloading setup.exe ..." >&2
+    if ! geturl "https://cygwin.com/$EXE" > "$CYGWIN_HOME/$EXE"; then
+        echo "Error: something wrong." >&2
+        exit 1
+    fi
+    echo " OK" >&2
+fi
+
+if ! command -v wget >/dev/null 2>&1; then
+    [ -z "$REQ_PKG" ] && REQ_PKG="wget" || REQ_PKG="${REQ_PKG},wget"
+fi
+
+if ! command -v iconv >/dev/null 2>&1; then
+    [ -z "$REQ_PKG" ] && REQ_PKG="libiconv" || REQ_PKG="${REQ_PKG},libiconv"
+fi
+
+if [ -n "$REQ_PKG" ]; then
+    printf '%s' "[apt-cyg deps] Installing packages ..." >&2
+    "$CYGWIN_HOME/$EXE" --quiet-mode --packages $REQ_PKG >/dev/null
+    echo " OK" >&2
+fi
