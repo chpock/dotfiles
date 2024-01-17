@@ -47,6 +47,7 @@ bind Down  select-pane -D
 bind Left  select-pane -L
 bind Right select-pane -R
 set -g default-terminal "tmux-256color"
+set -g terminal-overrides ',xterm-256color:Tc'
 set -g base-index 1
 set -g pane-base-index 1
 set -s escape-time 50
@@ -136,7 +137,7 @@ $IAM_HOME/shell.rc/functions-git.sh
 docker functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-docker.sh
 $IAM_HOME/shell.rc/functions-docker.sh
-3435
+3431
 
 AWS CLI functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-awscli.sh
@@ -191,7 +192,7 @@ $IAM_HOME/tools/bash_completion/makefile.completion.bash
 bash completion
 https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash
 $IAM_HOME/tools/bash_completion/git-completion.bash
-87287
+88235
 
 bash completion
 https://raw.githubusercontent.com/imomaliev/tmux-bash-completion/master/completions/tmux
@@ -216,7 +217,7 @@ $IAM_HOME/tools/bin/mydu
 colors tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/colors
 $IAM_HOME/tools/bin/colors
-2789
+8262
 
 lastbuild tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/lastbuild
@@ -230,15 +231,21 @@ $IAM_HOME/tools/bin/install-shellcheck
 
 apt-cyg tool
 https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg
-$IAM_HOME/tools/bin/apt-cyg
+$IAM_HOME/tools/bin/orig-apt-cyg
 filter: cygwin
 73293
+
+dependency check for apt-cyg tool
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/apt-cyg
+$IAM_HOME/tools/bin/apt-cyg
+filter: cygwin
+802
 
 upkg tool
 https://raw.githubusercontent.com/chpock/upkg/main/upkg
 $IAM_HOME/tools/bin/upkg
 on update: mkdir -p "$IAM_HOME"/shell.rc && "$IAM_HOME"/tools/bin/upkg supported silent && "$IAM_HOME"/tools/bin/upkg generate bash-rc >"$IAM_HOME"/shell.rc/upkg.rc.sh || true
-25613
+27516
 
 tmux-helper tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/tmux-helper
@@ -660,19 +667,20 @@ fi
 }
 _get_url() {
 if [ "$1" = "-check" ]; then
-if _has curl || _has wget || [ -x /usr/lib/apt/apt-helper ]; then
+if _has curl || _has wget || _has openssl || [ -x /usr/lib/apt/apt-helper ]; then
 return 0
 else
 return 1
 fi
 fi
+local URL="$1"
 if _has curl; then
-curl --fail --silent --show-error -k -L "$1"
+curl --fail --silent --show-error -k -L "$URL"
 elif _has wget; then
-wget -q -O - "$1"
+wget -q -O - "$URL"
 elif [ -x /usr/lib/apt/apt-helper ]; then
 local R OUT ERR TMP="$(mktemp)"
-_catch OUT ERR /usr/lib/apt/apt-helper -oAcquire::https::Verify-Peer=false download-file "$1" "$TMP" && R=0 || R=$?
+_catch OUT ERR /usr/lib/apt/apt-helper -oAcquire::https::Verify-Peer=false download-file "$URL" "$TMP" && R=0 || R=$?
 if [ $R -eq 0 ]; then
 cat "$TMP"
 else
@@ -680,6 +688,36 @@ echo "$ERR" >&2
 fi
 rm -f "$TMP"
 return $R
+elif _has openssl; then
+local LOOP=1
+while [ -n "$LOOP" ]; do
+local X="$URL" HOST UPATH PORT=443 R="" S=""
+unset LOOP
+X="${X#https://}"
+HOST="${X%%/*}"
+UPATH="/${X#*/}"
+[ "$UPATH" != "/$X" ] || UPATH="/"
+while IFS= read -r line; do
+if [ -z "$R" ]; then
+R="${line#* }"
+S="${R%% *}"
+if [ "$S" != "200" -a "$S" != "301" -a "$S" != "302" ]; then
+echo "Error: $R" >&2
+return 1
+fi
+elif [ "${line%% *}" = "Location:" ]; then
+URL="${line#* }"
+URL="${URL%$'\r'}"
+[ "${URL#https://}" != "$URL" ] || URL="https://$HOST$URL"
+LOOP=1
+break
+elif [ "${#line}" -eq 1 ]; then
+cat
+fi
+done < <(printf '%s\r\n' "GET $UPATH HTTP/1.1" "Host: $HOST" "Connection: Close" "" | openssl s_client -quiet -connect "$HOST:443" 2>/dev/null)
+done
+else
+return 1
 fi
 }
 _has() { _check command -v "$1" && return 0 || return 1; }
@@ -709,6 +747,7 @@ shift
 fi
 PATH=":${PATH}:"
 for d; do
+d="${d%/}"
 PATH="${PATH//:${d}:/:}"
 [ "$pos" = "end" ] && PATH="$PATH${d}:" || PATH=":$d$PATH"
 done
@@ -845,6 +884,7 @@ do
 if [ -e "$fn" ]; then
 IFS= read -d $'\0' -r __val < "$fn"
 while read -r -d ';' p; do
+[ -n "$p" ] || continue
 p="${p/\%SystemRoot\%/$SYSTEMROOT}"
 p="${p/\%ProgramFiles\%/$PROGRAMFILES}"
 p="${p/\%USERPROFILE\%/$USERPROFILE}"
@@ -875,6 +915,8 @@ UNAME_ALL="$_CACHE"
 if _is linux; then
 if [ -f /etc/redhat-release ]; then
 UNAME_RELEASE="$(cat /etc/redhat-release)"
+elif [ -f /etc/alpine-release ]; then
+UNAME_RELEASE="$(grep 'PRETTY_NAME=' /etc/os-release | cut -d= -f2 | tr -d '"')"
 elif [ -f /etc/SuSE-release ]; then
 UNAME_RELEASE="SUSE Linux Enterprise Server $(grep VERSION /etc/SuSE-release | cut -d= -f2 | awk '{print $1}') SP$(grep PATCHLEVEL /etc/SuSE-release | cut -d= -f2 | awk '{print $1}')"
 elif [ -f /etc/lsb-release ]; then
@@ -1209,6 +1251,8 @@ fi
 shopt -s checkwinsize
 shopt -s cmdhist
 shopt -u mailwarn
+bind "set input-meta on"
+bind "set output-meta on"
 bind "set show-all-if-ambiguous on"
 bind "set skip-completed-text on"
 bind "set colored-completion-prefix on"
@@ -1218,6 +1262,10 @@ bind "set mark-symlinked-directories on"
 bind "set visible-stats on"
 bind "set blink-matching-paren on"
 bind "set page-completions off"
+bind '"\e[1~": beginning-of-line'
+bind '"\e[4~": end-of-line'
+bind '"\e[3~": delete-char'
+bind '"\e[2~": quoted-insert'
 bind '"\e[1;5D": backward-word'
 bind '"\e[1;5C": forward-word'
 ls() {
@@ -1373,7 +1421,9 @@ printf '%s\n' \
 "echo \"$(cat ${IAM_HOME}/local_tools | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/local_tools\"" \
 "echo \"$(cat ${HOME}/.tclshrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$HOME/.tclshrc\"" \
 "echo \"$(cat ${IAM_HOME}/bashrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/bashrc\"" \
-"exec bash --rcfile \"\$IAM_HOME/bashrc\" -i || exec \$SHELL -i"
+"echo \"$(cat ${IAM_HOME}/shellrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/shellrc\"" \
+"chmod +x \"\$IAM_HOME/shellrc\"" \
+"exec \"\$IAM_HOME/shellrc\""
 }
 reload() {
 if _is tmux && [ "$1" != "current" ]; then
@@ -1491,6 +1541,15 @@ printf '\033[4i'
 } | _send_raw_term
 echo "Copied to Windows clipboard" 1>&2
 }
+,fix-x-permission() {
+local fn T
+for fn; do
+cat "$fn" > "${fn}.fix-permissions"
+mv -f "${fn}.fix-permissions" "$fn"
+done
+}
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
 shopt -s histappend
@@ -1504,8 +1563,6 @@ HISTFILE="$IAM_HOME/bash_history"
 if [ -e "$HOME/.${IAM}_history" ] && [ ! -e "$HISTFILE" ]; then
 mv "$HOME/.${IAM}_history" "$HISTFILE"
 fi
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 __kubectl_status() {
 local __K8S_CONTEXT
 local __K8S_CONF
@@ -1977,10 +2034,17 @@ EFAG[${#EFAG[@]}]="/opt/cloudbees/sda/bin"
 fi
 if _is linux; then
 if _has ps; then
+if _check command ps --version; then
 while IFS= read -r line; do
 EFAG[${#EFAG[@]}]="$line"
 done < <(ps -o args= -C ecmdrAgent | grep -oP '^.*(?=/ecmdrAgent)')
 unset line
+else
+while IFS= read -r line; do
+EFAG[${#EFAG[@]}]="$line"
+done < <(ps -o args= | grep '^[^[:space:]]*/ecmdrAgent' | sed 's#/ecmdrAgent.*$##')
+unset line
+fi
 fi
 elif _is windows; then
 while IFS= read -r line; do
@@ -2092,7 +2156,7 @@ fi
 if [ ! -x "$IAM_HOME/tools/bin/geturl" ]; then
 [ -d "$IAM_HOME/tools/bin" ] || mkdir -p "$IAM_HOME/tools/bin"
 {
-echo '#!/bin/bash'
+echo '#!/usr/bin/env bash'
 declare -f _hash _check _has _catch _get_url
 echo '_get_url "$@"'
 } > "$IAM_HOME/tools/bin/geturl"
@@ -2452,4 +2516,42 @@ if [ -n "$SSH_CLIENT" ]; then
     unset __WIN_TITLE_2
 fi
 
-exec bash --rcfile "$IAM_HOME/bashrc" -i || exec $SHELL -i
+cat <<'EOF' > "$IAM_HOME/shellrc"
+#!/bin/sh
+if [ -x /bin/bash ]; then
+    BASH_BIN=/bin/bash
+elif [ -x /usr/bin/bash ]; then
+    BASH_BIN=/usr/bin/bash
+elif [ -x "$IAM_HOME/tools/bin/bash" ]; then
+    BASH_BIN="$IAM_HOME/tools/bin/bash"
+elif ! BASH_BIN="$(command -v bash 2>/dev/null)"; then
+    unset BASH_BIN
+    OS="$(uname -o):$(uname -m)"
+    if [ "$OS" = "GNU/Linux:x86_64" -o "$OS" = "Linux:x86_64" ]; then
+        [ -d "$IAM_HOME/tools/bin" ] || mkdir -p "$IAM_HOME/tools/bin"
+        BASH_BIN="$IAM_HOME/tools/bin/bash"
+        URL="https://github.com/chpock/dotfiles/releases/download/v0.0.0/bash-portable.5.2.21.linux.x86_64"
+        if command -v curl >/dev/null 2>&1 && curl --silent -L "$URL" -o "$BASH_BIN" >/dev/null 2>&1; then
+            SUCCESS=1
+        elif command -v wget >/dev/null 2>&1 && wget -q -O "$BASH_BIN" "$URL" >/dev/null 2>&1; then
+            SUCCESS=1
+        elif [ -x /usr/lib/apt/apt-helper ] && /usr/lib/apt/apt-helper -oAcquire::https::Verify-Peer=false download-file "$URL" "$BASH_BIN" >/dev/null 2>&1; then
+            SUCCESS=1
+        fi
+        if [ -z "$SUCCESS" ]; then
+            rm -f "$BASH_BIN"
+            unset BASH_BIN
+        else
+            chmod +x "$BASH_BIN"
+            unset SUCCESS
+        fi
+    fi
+fi
+[ -z "$BASH_BIN" ] || exec "$BASH_BIN" --rcfile "$IAM_HOME/bashrc" -i
+[ -z "$SHELL" ] || exec "$SHELL" -i
+exec /bin/sh -i
+EOF
+
+chmod +x "$IAM_HOME/shellrc"
+
+exec "$IAM_HOME/shellrc"

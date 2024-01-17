@@ -29,3 +29,5 @@ if [ -n "$REQ_PKG" ]; then
     "$CYGWIN_HOME/$EXE" --quiet-mode --packages $REQ_PKG >/dev/null
     echo " OK" >&2
 fi
+
+exec orig-apt-cyg "$@"

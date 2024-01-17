@@ -7,7 +7,7 @@ $IAM_HOME/shell.rc/functions-git.sh
 docker functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-docker.sh
 $IAM_HOME/shell.rc/functions-docker.sh
-3435
+3431
 
 AWS CLI functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-awscli.sh
@@ -62,7 +62,7 @@ $IAM_HOME/tools/bash_completion/makefile.completion.bash
 bash completion
 https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash
 $IAM_HOME/tools/bash_completion/git-completion.bash
-87287
+88235
 
 bash completion
 https://raw.githubusercontent.com/imomaliev/tmux-bash-completion/master/completions/tmux
@@ -87,7 +87,7 @@ $IAM_HOME/tools/bin/mydu
 colors tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/colors
 $IAM_HOME/tools/bin/colors
-2789
+8262
 
 lastbuild tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/lastbuild
@@ -101,15 +101,21 @@ $IAM_HOME/tools/bin/install-shellcheck
 
 apt-cyg tool
 https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg
-$IAM_HOME/tools/bin/apt-cyg
+$IAM_HOME/tools/bin/orig-apt-cyg
 filter: cygwin
 73293
+
+dependency check for apt-cyg tool
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/apt-cyg
+$IAM_HOME/tools/bin/apt-cyg
+filter: cygwin
+802
 
 upkg tool
 https://raw.githubusercontent.com/chpock/upkg/main/upkg
 $IAM_HOME/tools/bin/upkg
 on update: mkdir -p "$IAM_HOME"/shell.rc && "$IAM_HOME"/tools/bin/upkg supported silent && "$IAM_HOME"/tools/bin/upkg generate bash-rc >"$IAM_HOME"/shell.rc/upkg.rc.sh || true
-25613
+27516
 
 tmux-helper tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/tmux-helper
