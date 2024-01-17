@@ -140,3 +140,8 @@ $IAM_HOME/tools/bin/install-gzip-portable
 filter: linux
 1127
 
+tracer/debugger for perl
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/trace-perl
+$IAM_HOME/tools/bin/trace-perl
+3770
+
