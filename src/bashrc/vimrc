@@ -78,7 +78,25 @@ noremap <C-s>  :update<CR>
 vnoremap <C-s> <C-C>:update<CR>
 inoremap <C-s> <Esc>:update<CR>gi
 
-func! s:PasteChange()
+
+" There is no way to detect the paste mode changes in vim. That is why I use
+" here a hack to call this procedure on statusline update. It will detect
+" the paste mode change.
+func! PasteGuard()
+    if !exists("g:paste_prev") | let g:paste_prev = &paste | endif
+    if g:paste_prev != &paste 
+        let g:paste_prev = &paste 
+        " Changes are not applied immediately when we do them as a part of
+        " statusline update, thus we will do them after 1ms delay
+        call timer_start(1, { -> PasteChange() })
+    endif
+    return ''
+endfunc
+
+" This procedure actually handles the paste mode changes. It will be called in
+" background after a delay. This is necessary because the commands executed
+" as part of the statusline update are not applied immediately.
+func! PasteChange()
     if &paste
         if mode() == 'n'
              " If I use 'startinsert' here, vim will wait until the next
@@ -100,18 +118,8 @@ func! s:PasteChange()
     redrawstatus!
 endfunc
 
-func! s:PasteGuard()
-    if !exists("g:paste_prev") | let g:paste_prev = &paste | endif
-    if g:paste_prev != &paste 
-        let g:paste_prev = &paste 
-        " Changes are not applied immediately when we do them as a part of
-        " statusline update, thus we will do them after 1ms delay
-        call timer_start(1, { -> s:PasteChange() })
-    endif
-    return ''
-endfunc
-
-augroup pasteGuard
+" This autocommand turns the paste mode off when leaving INSERT mode.
+augroup PasteGuardAU
     au!
     " Turn off paste only for real NORMAL mode (when mode(1) returns "n"), 
     " but not for C-o in INSERT (when mode(1) returns "niI", "no", etc.)
@@ -127,7 +135,7 @@ set pastetoggle=<F2>
 " set statusline=%<%f\ %h%m%r%=%-20.(line=%l,col=%c%V,totlin=%L%)\%h%m%r%=%-40(,bytval=0x%B,%n%Y%)\%P
 " set statusline=%F%m%r%h%w\ [FORMAT=%{&ff}]\ [TYPE=%Y]\ [ASCII=\%03.3b]\ [HEX=\%02.2B]\ [POS=%04l,%04v][%p%%]\ [LEN=%L]
 set statusline=
-set statusline+=%{s:PasteGuard()}
+set statusline+=%{PasteGuard()}
 set statusline+=%#DiffText#%{(&paste&&mode()=='i')?'\ \ PASTE\ \ ':''}
 set statusline+=%#DiffChange#%{(!&paste&&mode()=='i')?'\ \ INSERT\ ':''}
 set statusline+=%#DiffAdd#%{(mode()=='n')?'\ \ NORMAL\ ':''}
@@ -415,6 +423,19 @@ function! <SID>lastplace()
   endif
 endfunc
 au! BufWinEnter * call <SID>lastplace()
+
+" Strip trailing whitespaces on save
+func! <SID>stripTrailingWhitespace()
+    normal mZ
+    let l:winview = winsaveview()
+    let l:chars = col("$")
+    %s/\s\+$//e
+    if (line("'Z") != line(".")) || (l:chars != col("$"))
+        echo "Warning: trailing whitespaces have been removed! Use UNDO to restore deleted whitespaces.\n"
+    endif
+    call winrestview(l:winview)
+endfunc
+au! BufWritePre * call <SID>stripTrailingWhitespace()
 
 " Special file types
 

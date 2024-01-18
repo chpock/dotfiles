@@ -335,7 +335,15 @@ command! Wqa :wqa
 noremap <C-s>  :update<CR>
 vnoremap <C-s> <C-C>:update<CR>
 inoremap <C-s> <Esc>:update<CR>gi
-func! s:PasteChange()
+func! PasteGuard()
+    if !exists("g:paste_prev") | let g:paste_prev = &paste | endif
+    if g:paste_prev != &paste 
+        let g:paste_prev = &paste 
+        call timer_start(1, { -> PasteChange() })
+    endif
+    return ''
+endfunc
+func! PasteChange()
     if &paste
         if mode() == 'n'
              call feedkeys("i")
@@ -352,21 +360,13 @@ func! s:PasteChange()
     endif
     redrawstatus!
 endfunc
-func! s:PasteGuard()
-    if !exists("g:paste_prev") | let g:paste_prev = &paste | endif
-    if g:paste_prev != &paste 
-        let g:paste_prev = &paste 
-        call timer_start(1, { -> s:PasteChange() })
-    endif
-    return ''
-endfunc
-augroup pasteGuard
+augroup PasteGuardAU
     au!
     au InsertLeave * if mode(1) == "n" && &paste | set nopaste | endif
 augroup END
 set pastetoggle=<F2>
 set statusline=
-set statusline+=%{s:PasteGuard()}
+set statusline+=%{PasteGuard()}
 set statusline+=%#DiffText#%{(&paste&&mode()=='i')?'\ \ PASTE\ \ ':''}
 set statusline+=%#DiffChange#%{(!&paste&&mode()=='i')?'\ \ INSERT\ ':''}
 set statusline+=%#DiffAdd#%{(mode()=='n')?'\ \ NORMAL\ ':''}
@@ -629,6 +629,17 @@ function! <SID>lastplace()
   endif
 endfunc
 au! BufWinEnter * call <SID>lastplace()
+func! <SID>stripTrailingWhitespace()
+    normal mZ
+    let l:winview = winsaveview()
+    let l:chars = col("$")
+    %s/\s\+$//e
+    if (line("'Z") != line(".")) || (l:chars != col("$"))
+        echo "Warning: trailing whitespaces have been removed! Use UNDO to restore deleted whitespaces.\n"
+    endif
+    call winrestview(l:winview)
+endfunc
+au! BufWritePre * call <SID>stripTrailingWhitespace()
 au! BufNewFile,BufReadPost *.{yaml,yml} set filetype=yaml
 au! FileType yaml setlocal ts=2 sts=2 sw=2 expandtab indentkeys-=0#,0},0],<:>,-
 EOF
