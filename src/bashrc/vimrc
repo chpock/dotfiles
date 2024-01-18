@@ -55,10 +55,6 @@ if has("autocmd")
     autocmd filetype html,xml set listchars-=tab:>.
 endif
 
-nnoremap <silent> <special> <F2> :set invpaste invnumber invlist<CR>
-inoremap <silent> <special> <F2> <C-O>:set invpaste invnumber invlist<CR>
-set pastetoggle=<F2>
-
 if v:version > 703 || v:version == 703 && has("patch541")
   set formatoptions+=j " Delete comment character when joining commented lines
 endif
@@ -77,17 +73,69 @@ command! Q :q
 command! Wq :wq
 command! Wqa :wqa
 
+" C-s - save
+noremap <C-s>  :update<CR>
+vnoremap <C-s> <C-C>:update<CR>
+inoremap <C-s> <Esc>:update<CR>gi
+
+func! s:PasteChange()
+    if &paste
+        if mode() == 'n'
+             " If I use 'startinsert' here, vim will wait until the next
+             " keystroke to change the mode
+             call feedkeys("i")
+        endif
+        let g:paste_num = &number
+        let g:paste_list = &list
+        set nonumber nolist
+    else
+        if mode() == 'i'
+             " If I use 'stopinsert' here, vim will wait until the next
+             " keystroke to change the mode
+             call feedkeys("\<C-\>\<C-n>")
+        endif
+        let &number = g:paste_num
+        let &list = g:paste_list
+    endif
+    redrawstatus!
+endfunc
+
+func! s:PasteGuard()
+    if !exists("g:paste_prev") | let g:paste_prev = &paste | endif
+    if g:paste_prev != &paste 
+        let g:paste_prev = &paste 
+        " Changes are not applied immediately when we do them as a part of
+        " statusline update, thus we will do them after 1ms delay
+        call timer_start(1, { -> s:PasteChange() })
+    endif
+    return ''
+endfunc
+
+augroup pasteGuard
+    au!
+    " Turn off paste only for real NORMAL mode (when mode(1) returns "n"), 
+    " but not for C-o in INSERT (when mode(1) returns "niI", "no", etc.)
+    au InsertLeave * if mode(1) == "n" && &paste | set nopaste | endif
+augroup END
+
+"nnoremap <silent> <special> <F2> :set paste<CR>i
+"nnoremap <silent> <special> <F2> :set invpaste invnumber invlist<CR>
+"inoremap <silent> <special> <F2> <C-O>:set invpaste invnumber invlist<CR>
+set pastetoggle=<F2>
+
 " Status line
 " set statusline=%<%f\ %h%m%r%=%-20.(line=%l,col=%c%V,totlin=%L%)\%h%m%r%=%-40(,bytval=0x%B,%n%Y%)\%P
 " set statusline=%F%m%r%h%w\ [FORMAT=%{&ff}]\ [TYPE=%Y]\ [ASCII=\%03.3b]\ [HEX=\%02.2B]\ [POS=%04l,%04v][%p%%]\ [LEN=%L]
 set statusline=
+set statusline+=%{s:PasteGuard()}
+set statusline+=%#DiffText#%{(&paste&&mode()=='i')?'\ \ PASTE\ \ ':''}
+set statusline+=%#DiffChange#%{(!&paste&&mode()=='i')?'\ \ INSERT\ ':''}
 set statusline+=%#DiffAdd#%{(mode()=='n')?'\ \ NORMAL\ ':''}
-set statusline+=%#DiffChange#%{(mode()=='i')?'\ \ INSERT\ ':''}
 set statusline+=%#DiffDelete#%{(mode()=='r')?'\ \ RPLACE\ ':''}
 set statusline+=%#Cursor#%{(mode()=='v')?'\ \ VISUAL\ ':''}
 set statusline+=\ %n                       " buffer number
 set statusline+=\ %#Visual#                " colour
-set statusline+=%{&paste?'\ PASTE\ ':''}
+set statusline+=%{(&paste&&mode()!='i')?'\ PASTE\ ':''}
 set statusline+=%{&spell?'\ SPELL\ ':''}
 set statusline+=%#CursorIM#                " colour
 set statusline+=%R                         " readonly flag

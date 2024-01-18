@@ -319,9 +319,6 @@ set listchars=tab:>.,trail:.,extends:#,nbsp:.
 if has("autocmd")
     autocmd filetype html,xml set listchars-=tab:>.
 endif
-nnoremap <silent> <special> <F2> :set invpaste invnumber invlist<CR>
-inoremap <silent> <special> <F2> <C-O>:set invpaste invnumber invlist<CR>
-set pastetoggle=<F2>
 if v:version > 703 || v:version == 703 && has("patch541")
   set formatoptions+=j " Delete comment character when joining commented lines
 endif
@@ -335,14 +332,49 @@ set display+=lastline
 command! Q :q
 command! Wq :wq
 command! Wqa :wqa
+noremap <C-s>  :update<CR>
+vnoremap <C-s> <C-C>:update<CR>
+inoremap <C-s> <Esc>:update<CR>gi
+func! s:PasteChange()
+    if &paste
+        if mode() == 'n'
+             call feedkeys("i")
+        endif
+        let g:paste_num = &number
+        let g:paste_list = &list
+        set nonumber nolist
+    else
+        if mode() == 'i'
+             call feedkeys("\<C-\>\<C-n>")
+        endif
+        let &number = g:paste_num
+        let &list = g:paste_list
+    endif
+    redrawstatus!
+endfunc
+func! s:PasteGuard()
+    if !exists("g:paste_prev") | let g:paste_prev = &paste | endif
+    if g:paste_prev != &paste 
+        let g:paste_prev = &paste 
+        call timer_start(1, { -> s:PasteChange() })
+    endif
+    return ''
+endfunc
+augroup pasteGuard
+    au!
+    au InsertLeave * if mode(1) == "n" && &paste | set nopaste | endif
+augroup END
+set pastetoggle=<F2>
 set statusline=
+set statusline+=%{s:PasteGuard()}
+set statusline+=%#DiffText#%{(&paste&&mode()=='i')?'\ \ PASTE\ \ ':''}
+set statusline+=%#DiffChange#%{(!&paste&&mode()=='i')?'\ \ INSERT\ ':''}
 set statusline+=%#DiffAdd#%{(mode()=='n')?'\ \ NORMAL\ ':''}
-set statusline+=%#DiffChange#%{(mode()=='i')?'\ \ INSERT\ ':''}
 set statusline+=%#DiffDelete#%{(mode()=='r')?'\ \ RPLACE\ ':''}
 set statusline+=%#Cursor#%{(mode()=='v')?'\ \ VISUAL\ ':''}
 set statusline+=\ %n
 set statusline+=\ %#Visual#
-set statusline+=%{&paste?'\ PASTE\ ':''}
+set statusline+=%{(&paste&&mode()!='i')?'\ PASTE\ ':''}
 set statusline+=%{&spell?'\ SPELL\ ':''}
 set statusline+=%#CursorIM#
 set statusline+=%R
