@@ -2,22 +2,22 @@
 git functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-git.sh
 $IAM_HOME/shell.rc/functions-git.sh
-3983
+@getSize REPO_ROOT/shell.rc/functions-git.sh
 
 docker functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-docker.sh
 $IAM_HOME/shell.rc/functions-docker.sh
-3431
+@getSize REPO_ROOT/shell.rc/functions-docker.sh
 
 AWS CLI functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-awscli.sh
 $IAM_HOME/shell.rc/functions-awscli.sh
-1862
+@getSize REPO_ROOT/shell.rc/functions-awscli.sh
 
 kubetcl function
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-kubectl.sh
 $IAM_HOME/shell.rc/functions-kubectl.sh
-3735
+@getSize REPO_ROOT/shell.rc/functions-kubectl.sh
 
 bash completion
 https://raw.githubusercontent.com/chpock/.ini/master/bash_completion/custom/ecconfigure.bash
@@ -82,22 +82,22 @@ $IAM_HOME/tools/tcl/TclReadLine/pkgIndex.tcl
 mydu tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/mydu
 $IAM_HOME/tools/bin/mydu
-2942
+@getSize REPO_ROOT/tools/mydu
 
 colors tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/colors
 $IAM_HOME/tools/bin/colors
-8262
+@getSize REPO_ROOT/tools/colors
 
 lastbuild tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/lastbuild
 $IAM_HOME/tools/bin/lastbuild
-3213
+@getSize REPO_ROOT/tools/lastbuild
 
 shellcheck tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-shellcheck
 $IAM_HOME/tools/bin/install-shellcheck
-1408
+@getSize REPO_ROOT/tools/install-shellcheck
 
 apt-cyg tool
 https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg
@@ -109,7 +109,7 @@ dependency check for apt-cyg tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/apt-cyg
 $IAM_HOME/tools/bin/apt-cyg
 filter: cygwin
-826
+@getSize REPO_ROOT/tools/apt-cyg
 
 upkg tool
 https://raw.githubusercontent.com/chpock/upkg/main/upkg
@@ -120,28 +120,28 @@ on update: mkdir -p "$IAM_HOME"/shell.rc && "$IAM_HOME"/tools/bin/upkg supported
 tmux-helper tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/tmux-helper
 $IAM_HOME/tools/bin/tmux-helper
-6045
+@getSize REPO_ROOT/tools/tmux-helper
 
 vim-portable tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-vim-portable
 $IAM_HOME/tools/bin/install-vim-portable
 filter: linux
-1298
+@getSize REPO_ROOT/tools/install-vim-portable
 
 tar-portable tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-tar-portable
 $IAM_HOME/tools/bin/install-tar-portable
 filter: linux
-1208
+@getSize REPO_ROOT/tools/install-tar-portable
 
 gzip-portable tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-gzip-portable
 $IAM_HOME/tools/bin/install-gzip-portable
 filter: linux
-1127
+@getSize REPO_ROOT/tools/install-gzip-portable
 
 tracer/debugger for perl
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/trace-perl
 $IAM_HOME/tools/bin/trace-perl
-3770
+@getSize REPO_ROOT/tools/trace-perl
 

@@ -2094,6 +2094,8 @@ tools() {
     local CHECK_STATE
     local IS_ERROR
     local IDX
+    local TOOLS_FILE="$IAM_HOME/local_tools"
+    local TOOLS_URL="https://raw.githubusercontent.com/chpock/dotfiles/master/tools.list"
 
     if [ "lock" = "$CMD" ]; then
         touch "$IAM_HOME/local_tools.locked"
@@ -2121,51 +2123,64 @@ tools() {
             return 1
         fi
         if [ "$PARAM" = "background" ]; then
-            tools update background-real >/dev/null &
+            tools update background-real >/dev/null 2>&1 &
             disown $!
             return
         fi
     fi
 
-    local files=() recs=() recs_check=()
+    local files=() recs=() recs_check=() TOOLS_EXISTS=1
 
-    while IFS= read -r LINE; do
-        if [ -z "$LINE" ]; then
-            unset I_DESC I_URL I_FILE I_SIZE I_FILTER I_ON_UPDATE
-        elif [ -z "$I_DESC" ]; then
-            I_DESC="$LINE"
-        elif [ -z "$I_URL" ]; then
-            I_URL="$LINE"
-        elif [ -z "$I_FILE" ]; then
-            printf -v LINE '%q' "$LINE"; # quote string
-            eval "I_FILE=\"${LINE//\\\$/\$}\""; # enable $VAR
-        elif [ -z "$I_SIZE" ]; then
-            local P1="${LINE%:*}"
-            if [ "$P1" = "$LINE" ]; then
-                I_SIZE="$LINE"
-            else
-                if [ "$P1" = "filter" ]; then
-                    I_FILTER="${LINE#*: }"
-                elif [ "$P1" = "on update" ]; then
-                    I_ON_UPDATE="${LINE#*: }"
+    if [ ! -f "$TOOLS_FILE" -o "$(_get_size "$TOOLS_FILE")" != "$LOCAL_TOOLS_FILE_SIZE" ]; then
+        local TMP="$(mktemp)"
+        if ! _get_url "$TOOLS_URL" >"$TMP" 2>/dev/null; then
+            rm -f "$TMP"
+            unset TOOLS_EXISTS
+            CHECK_STATE=1
+        else
+            mv -f "$TMP" "$TOOLS_FILE"
+        fi
+    fi
+
+    if [ -n "$TOOLS_EXISTS" ]; then
+        while IFS= read -r LINE; do
+            if [ -z "$LINE" ]; then
+                unset I_DESC I_URL I_FILE I_SIZE I_FILTER I_ON_UPDATE
+            elif [ -z "$I_DESC" ]; then
+                I_DESC="$LINE"
+            elif [ -z "$I_URL" ]; then
+                I_URL="$LINE"
+            elif [ -z "$I_FILE" ]; then
+                printf -v LINE '%q' "$LINE"; # quote string
+                eval "I_FILE=\"${LINE//\\\$/\$}\""; # enable $VAR
+            elif [ -z "$I_SIZE" ]; then
+                local P1="${LINE%:*}"
+                if [ "$P1" = "$LINE" ]; then
+                    I_SIZE="$LINE"
                 else
-                    echo "ERROR: unexpected line in tools list: $LINE"
+                    if [ "$P1" = "filter" ]; then
+                        I_FILTER="${LINE#*: }"
+                    elif [ "$P1" = "on update" ]; then
+                        I_ON_UPDATE="${LINE#*: }"
+                    else
+                        echo "ERROR: unexpected line in tools list: $LINE"
+                    fi
                 fi
+            else
+                echo "ERROR: unexpected line in tools list: $LINE"
             fi
-        else
-            echo "ERROR: unexpected line in tools list: $LINE"
-        fi
-        # continue the loop if a tool record is incomplete
-        [ -n "$I_SIZE" ] || continue
-        if [ -n "$I_FILTER" ] && ! _is "$I_FILTER"; then continue; fi
-        if [ -e "$I_FILE" ]; then
-            recs_check+=("$I_DESC" "$I_URL" "$I_FILE" "$I_SIZE" "$I_ON_UPDATE")
-            files+=("$I_FILE")
-        else
-            recs+=("$I_DESC" "$I_URL" "$I_FILE" "$I_SIZE" "$I_ON_UPDATE" 0)
-        fi
-        unset I_DESC I_URL I_FILE I_SIZE I_FILTER I_ON_UPDATE
-    done < "$IAM_HOME/local_tools"
+            # continue the loop if a tool record is incomplete
+            [ -n "$I_SIZE" ] || continue
+            if [ -n "$I_FILTER" ] && ! _is "$I_FILTER"; then continue; fi
+            if [ -e "$I_FILE" ]; then
+                recs_check+=("$I_DESC" "$I_URL" "$I_FILE" "$I_SIZE" "$I_ON_UPDATE")
+                files+=("$I_FILE")
+            else
+                recs+=("$I_DESC" "$I_URL" "$I_FILE" "$I_SIZE" "$I_ON_UPDATE" 0)
+            fi
+            unset I_DESC I_URL I_FILE I_SIZE I_FILTER I_ON_UPDATE
+        done < "$TOOLS_FILE"
+    fi
 
     if [ "${#files[@]}" -gt 0 ]; then
         IDX=0

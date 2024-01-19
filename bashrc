@@ -127,156 +127,6 @@ set -g window-status-bell-style 'fg=colour255,bg=colour1,bold'
 set -g message-style 'fg=colour232,bg=colour166,bold'
 EOF
 
-cat <<'EOF' > "$IAM_HOME/local_tools"
-
-git functions
-https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-git.sh
-$IAM_HOME/shell.rc/functions-git.sh
-3983
-
-docker functions
-https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-docker.sh
-$IAM_HOME/shell.rc/functions-docker.sh
-3431
-
-AWS CLI functions
-https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-awscli.sh
-$IAM_HOME/shell.rc/functions-awscli.sh
-1862
-
-kubetcl function
-https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-kubectl.sh
-$IAM_HOME/shell.rc/functions-kubectl.sh
-3735
-
-bash completion
-https://raw.githubusercontent.com/chpock/.ini/master/bash_completion/custom/ecconfigure.bash
-$IAM_HOME/tools/bash_completion/ecconfigure.completion.bash
-3135
-
-bash completion
-https://raw.githubusercontent.com/chpock/.ini/master/bash_completion/custom/ectool.bash
-$IAM_HOME/tools/bash_completion/ectool.completion.bash
-290223
-
-bash completion
-https://raw.githubusercontent.com/chpock/.ini/master/bash_completion/custom/electricflow.bash
-$IAM_HOME/tools/bash_completion/electricflow.completion.bash
-12691
-
-bash completion
-https://raw.githubusercontent.com/docker/cli/master/contrib/completion/bash/docker
-$IAM_HOME/tools/bash_completion/docker.completion.bash
-114566
-
-bash completion
-https://raw.githubusercontent.com/docker/machine/master/contrib/completion/bash/docker-machine.bash
-$IAM_HOME/tools/bash_completion/docker-machine.completion.bash
-12211
-
-bash completion
-https://raw.githubusercontent.com/docker/compose/master/contrib/completion/bash/docker-compose
-$IAM_HOME/tools/bash_completion/docker-compose.completion.bash
-13500
-
-bash completion
-https://raw.githubusercontent.com/Bash-it/bash-it/master/completion/available/virtualbox.completion.bash
-$IAM_HOME/tools/bash_completion/virtualbox.completion.bash
-5467
-
-bash completion
-https://raw.githubusercontent.com/Bash-it/bash-it/master/completion/available/makefile.completion.bash
-$IAM_HOME/tools/bash_completion/makefile.completion.bash
-934
-
-bash completion
-https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash
-$IAM_HOME/tools/bash_completion/git-completion.bash
-88235
-
-bash completion
-https://raw.githubusercontent.com/imomaliev/tmux-bash-completion/master/completions/tmux
-$IAM_HOME/tools/bash_completion/tmux-completion.bash
-6055
-
-tcl readline
-https://raw.githubusercontent.com/suewonjp/tclsh-wrapper/master/TclReadLine/TclReadLine.tcl
-$IAM_HOME/tools/tcl/TclReadLine/TclReadLine.tcl
-40415
-
-tcl readline
-https://raw.githubusercontent.com/suewonjp/tclsh-wrapper/master/TclReadLine/pkgIndex.tcl
-$IAM_HOME/tools/tcl/TclReadLine/pkgIndex.tcl
-546
-
-mydu tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/mydu
-$IAM_HOME/tools/bin/mydu
-2942
-
-colors tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/colors
-$IAM_HOME/tools/bin/colors
-8262
-
-lastbuild tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/lastbuild
-$IAM_HOME/tools/bin/lastbuild
-3213
-
-shellcheck tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-shellcheck
-$IAM_HOME/tools/bin/install-shellcheck
-1408
-
-apt-cyg tool
-https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg
-$IAM_HOME/tools/bin/orig-apt-cyg
-filter: cygwin
-73293
-
-dependency check for apt-cyg tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/apt-cyg
-$IAM_HOME/tools/bin/apt-cyg
-filter: cygwin
-826
-
-upkg tool
-https://raw.githubusercontent.com/chpock/upkg/main/upkg
-$IAM_HOME/tools/bin/upkg
-on update: mkdir -p "$IAM_HOME"/shell.rc && "$IAM_HOME"/tools/bin/upkg supported silent && "$IAM_HOME"/tools/bin/upkg generate bash-rc >"$IAM_HOME"/shell.rc/upkg.rc.sh || true
-27480
-
-tmux-helper tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/tmux-helper
-$IAM_HOME/tools/bin/tmux-helper
-6045
-
-vim-portable tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-vim-portable
-$IAM_HOME/tools/bin/install-vim-portable
-filter: linux
-1298
-
-tar-portable tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-tar-portable
-$IAM_HOME/tools/bin/install-tar-portable
-filter: linux
-1208
-
-gzip-portable tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-gzip-portable
-$IAM_HOME/tools/bin/install-gzip-portable
-filter: linux
-1127
-
-tracer/debugger for perl
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/trace-perl
-$IAM_HOME/tools/bin/trace-perl
-3770
-
-EOF
-
 cat <<'EOF' > "$IAM_HOME/vimrc"
 set nocompatible
 set t_Co=256
@@ -386,11 +236,16 @@ set statusline+=\ %=
 set statusline+=%#CursorLine#
 set statusline+=\ [FileType:%Y]
 set statusline+=\ %#CursorIM#
-set statusline+=\ [Line:%-3l\ Column:%-3c] " line + column
+set statusline+=\ [Line:%-3l\ Column:%-3c]  " line + column
 set statusline+=\ %#Cursor#
 set statusline+=\ %3p%%\ %##
 set background=dark
 highlight clear
+if exists('+termguicolors')
+    let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"  " Set foreground color
+    let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"  " Set background color
+    let &termguicolors = v:true
+endif
 if exists("syntax_on")
   syntax reset
 endif
@@ -646,6 +501,7 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
+LOCAL_TOOLS_FILE_SIZE=4453
 COLOR_WHITE=$'\e[1;37m'
 COLOR_LIGHTGRAY=$'\e[0;37m'
 COLOR_GRAY=$'\e[1;30m'
@@ -1596,10 +1452,10 @@ cat "$fn" > "${fn}.fix-permissions"
 mv -f "${fn}.fix-permissions" "$fn"
 done
 }
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 shopt -s histappend
 shopt -s cmdhist
 unset HISTFILESIZE
@@ -2220,6 +2076,8 @@ local SIZE
 local CHECK_STATE
 local IS_ERROR
 local IDX
+local TOOLS_FILE="$IAM_HOME/local_tools"
+local TOOLS_URL="https://raw.githubusercontent.com/chpock/dotfiles/master/tools.list"
 if [ "lock" = "$CMD" ]; then
 touch "$IAM_HOME/local_tools.locked"
 echo "Tools are locked now."
@@ -2243,12 +2101,23 @@ echo "${COLOR_RED}ERROR:${COLOR_DEFAULT} Could not update tools: curl/wget comma
 return 1
 fi
 if [ "$PARAM" = "background" ]; then
-tools update background-real >/dev/null &
+tools update background-real >/dev/null 2>&1 &
 disown $!
 return
 fi
 fi
-local files=() recs=() recs_check=()
+local files=() recs=() recs_check=() TOOLS_EXISTS=1
+if [ ! -f "$TOOLS_FILE" -o "$(_get_size "$TOOLS_FILE")" != "$LOCAL_TOOLS_FILE_SIZE" ]; then
+local TMP="$(mktemp)"
+if ! _get_url "$TOOLS_URL" >"$TMP" 2>/dev/null; then
+rm -f "$TMP"
+unset TOOLS_EXISTS
+CHECK_STATE=1
+else
+mv -f "$TMP" "$TOOLS_FILE"
+fi
+fi
+if [ -n "$TOOLS_EXISTS" ]; then
 while IFS= read -r LINE; do
 if [ -z "$LINE" ]; then
 unset I_DESC I_URL I_FILE I_SIZE I_FILTER I_ON_UPDATE
@@ -2284,7 +2153,8 @@ else
 recs+=("$I_DESC" "$I_URL" "$I_FILE" "$I_SIZE" "$I_ON_UPDATE" 0)
 fi
 unset I_DESC I_URL I_FILE I_SIZE I_FILTER I_ON_UPDATE
-done < "$IAM_HOME/local_tools"
+done < "$TOOLS_FILE"
+fi
 if [ "${#files[@]}" -gt 0 ]; then
 IDX=0
 while read -r SIZE; do
@@ -2546,6 +2416,42 @@ fi
 fi
 EOF
 
+cat <<'EOF' > "$IAM_HOME/shellrc"
+if [ -x /bin/bash ]; then
+BASH_BIN=/bin/bash
+elif [ -x /usr/bin/bash ]; then
+BASH_BIN=/usr/bin/bash
+elif [ -x "$IAM_HOME/tools/bin/bash" ]; then
+BASH_BIN="$IAM_HOME/tools/bin/bash"
+elif ! BASH_BIN="$(command -v bash 2>/dev/null)"; then
+unset BASH_BIN
+OS="$(uname -o):$(uname -m)"
+if [ "$OS" = "GNU/Linux:x86_64" -o "$OS" = "Linux:x86_64" ]; then
+[ -d "$IAM_HOME/tools/bin" ] || mkdir -p "$IAM_HOME/tools/bin"
+BASH_BIN="$IAM_HOME/tools/bin/bash"
+URL="https://github.com/chpock/dotfiles/releases/download/v0.0.0/bash-portable.5.2.21.linux.x86_64"
+if command -v curl >/dev/null 2>&1 && curl --silent -L "$URL" -o "$BASH_BIN" >/dev/null 2>&1; then
+SUCCESS=1
+elif command -v wget >/dev/null 2>&1 && wget -q -O "$BASH_BIN" "$URL" >/dev/null 2>&1; then
+SUCCESS=1
+elif [ -x /usr/lib/apt/apt-helper ] && /usr/lib/apt/apt-helper -oAcquire::https::Verify-Peer=false download-file "$URL" "$BASH_BIN" >/dev/null 2>&1; then
+SUCCESS=1
+fi
+if [ -z "$SUCCESS" ]; then
+rm -f "$BASH_BIN"
+unset BASH_BIN
+else
+chmod +x "$BASH_BIN"
+unset SUCCESS
+fi
+fi
+fi
+[ -z "$BASH_BIN" ] || exec "$BASH_BIN" --rcfile "$IAM_HOME/bashrc" -i
+[ -z "$SHELL" ] || exec "$SHELL" -i
+exec /bin/sh -i
+EOF
+chmod +x "$IAM_HOME/shellrc"
+
 # Magic: try to restore current directory. Only for SSH.
 if [ -n "$SSH_CLIENT" ]; then
     # get win title
@@ -2563,43 +2469,5 @@ if [ -n "$SSH_CLIENT" ]; then
     unset __WIN_TITLE_1
     unset __WIN_TITLE_2
 fi
-
-cat <<'EOF' > "$IAM_HOME/shellrc"
-#!/bin/sh
-if [ -x /bin/bash ]; then
-    BASH_BIN=/bin/bash
-elif [ -x /usr/bin/bash ]; then
-    BASH_BIN=/usr/bin/bash
-elif [ -x "$IAM_HOME/tools/bin/bash" ]; then
-    BASH_BIN="$IAM_HOME/tools/bin/bash"
-elif ! BASH_BIN="$(command -v bash 2>/dev/null)"; then
-    unset BASH_BIN
-    OS="$(uname -o):$(uname -m)"
-    if [ "$OS" = "GNU/Linux:x86_64" -o "$OS" = "Linux:x86_64" ]; then
-        [ -d "$IAM_HOME/tools/bin" ] || mkdir -p "$IAM_HOME/tools/bin"
-        BASH_BIN="$IAM_HOME/tools/bin/bash"
-        URL="https://github.com/chpock/dotfiles/releases/download/v0.0.0/bash-portable.5.2.21.linux.x86_64"
-        if command -v curl >/dev/null 2>&1 && curl --silent -L "$URL" -o "$BASH_BIN" >/dev/null 2>&1; then
-            SUCCESS=1
-        elif command -v wget >/dev/null 2>&1 && wget -q -O "$BASH_BIN" "$URL" >/dev/null 2>&1; then
-            SUCCESS=1
-        elif [ -x /usr/lib/apt/apt-helper ] && /usr/lib/apt/apt-helper -oAcquire::https::Verify-Peer=false download-file "$URL" "$BASH_BIN" >/dev/null 2>&1; then
-            SUCCESS=1
-        fi
-        if [ -z "$SUCCESS" ]; then
-            rm -f "$BASH_BIN"
-            unset BASH_BIN
-        else
-            chmod +x "$BASH_BIN"
-            unset SUCCESS
-        fi
-    fi
-fi
-[ -z "$BASH_BIN" ] || exec "$BASH_BIN" --rcfile "$IAM_HOME/bashrc" -i
-[ -z "$SHELL" ] || exec "$SHELL" -i
-exec /bin/sh -i
-EOF
-
-chmod +x "$IAM_HOME/shellrc"
 
 exec "$IAM_HOME/shellrc"

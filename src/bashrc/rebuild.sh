@@ -4,11 +4,17 @@ set -eo pipefail
 
 SRC_DIR="$(cd "$(dirname "$0")"; pwd)"
 OUT_DIR="$(cd "$SRC_DIR"/../..; pwd)"
-OUT_FILE="$OUT_DIR/bashrc"
-SRC_FILE="$SRC_DIR/skeleton"
+BASHRC_OUT_FILE="$OUT_DIR/bashrc"
+BASHRC_SRC_FILE="$SRC_DIR/skeleton"
+TOOLS_OUT_FILE="$OUT_DIR/tools.list"
+TOOLS_SRC_FILE="$SRC_DIR/tools.list"
 
 plain() {
     while IFS= read -r line; do echo "$line"; done
+}
+
+getSize() {
+    stat -c '%s' "$1"
 }
 
 terminfo() {
@@ -49,40 +55,58 @@ shell() {
     sed -E -e '/^[[:space:]]*#/d' -e '/^[[:space:]]*$/d' -e 's/^[[:space:]]+//'
 }
 
-[ "$1" = "silent" ] || printf "Build bashrc ..."
-
-while IFS= read -r line; do
-    if [ "${line%% *}" = "@include" ]; then
-        inc="${line#* }"
-        if [ "${inc%% *}" != "part" ]; then
-            unset part
-            start="1"
-            end='$'
-        else
-            inc="${inc#* }"
-            part="${inc%% *}"
-            inc="${inc#* }"
-            lines="$(wc -l "$SRC_DIR/$inc" | awk '{print $1}')"
-            if [ "$part" = 0 ]; then
+process() {
+    while IFS= read -r line; do
+        if [ "${line%% *}" = "@include" ]; then
+            inc="${line#* }"
+            if [ "${inc%% *}" != "part" ]; then
+                unset part
                 start="1"
-                end=$(( lines / 2 ))
+                end='$'
             else
-                start=$(( lines / 2 + 1 ))
-                end="$"
+                inc="${inc#* }"
+                part="${inc%% *}"
+                inc="${inc#* }"
+                lines="$(wc -l "$SRC_DIR/$inc" | awk '{print $1}')"
+                if [ "$part" = 0 ]; then
+                    start="1"
+                    end=$(( lines / 2 ))
+                else
+                    start=$(( lines / 2 + 1 ))
+                    end="$"
+                fi
             fi
+            case "$inc" in
+                *.terminfo) filter="terminfo";;
+                *.tcl)      filter="tcl";;
+                *.sh)       filter="shell";;
+                tmux.conf)  filter="tmux-conf";;
+                vimrc)      filter="vimrc";;
+                *)          filter="plain" ;;
+            esac
+            $filter < <(sed -n "${start},${end}p" "$SRC_DIR/$inc")
+        elif [ "${line%% *}" = "@setSize" ]; then
+            line="${line#* }"
+            var="${line%% *}"
+            fn="${line#* }"
+            fn="${fn/REPO_ROOT/..\/../}"
+            printf '%s=%s\n' "$var" "$(getSize "$SRC_DIR/$fn")"
+        elif [ "${line%% *}" = "@getSize" ]; then
+            fn="${line#* }"
+            fn="${fn/REPO_ROOT/..\/..\//}"
+            getSize "$SRC_DIR/$fn"
+        else
+            echo "$line"
         fi
-        case "$inc" in
-            *.terminfo) filter="terminfo";;
-            *.tcl)      filter="tcl";;
-            *.sh)       filter="shell";;
-            tmux.conf)  filter="tmux-conf";;
-            vimrc)      filter="vimrc";;
-            *)          filter="plain" ;;
-        esac
-        $filter < <(sed -n "${start},${end}p" "$SRC_DIR/$inc")
-    else
-        echo "$line"
-    fi
-done < "$SRC_FILE" > "$OUT_FILE"
+    done
+}
 
-[ "$1" = "silent" ] || echo " Done."
+[ "$1" = "silent" ] || printf "Build tools.list ..."
+process < "$TOOLS_SRC_FILE" > "$TOOLS_OUT_FILE"
+[ "$1" = "silent" ] || echo " OK"
+
+[ "$1" = "silent" ] || printf "Build bashrc ..."
+process < "$BASHRC_SRC_FILE" > "$BASHRC_OUT_FILE"
+[ "$1" = "silent" ] || echo " OK"
+
+[ "$1" = "silent" ] || echo "Done."
