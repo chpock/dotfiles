@@ -502,7 +502,7 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_SIZE=4453
+LOCAL_TOOLS_FILE_SIZE=4592
 COLOR_WHITE=$'\e[1;37m'
 COLOR_LIGHTGRAY=$'\e[0;37m'
 COLOR_GRAY=$'\e[1;30m'
@@ -2120,11 +2120,10 @@ mv -f "$TMP" "$TOOLS_FILE"
 fi
 fi
 if [ -n "$TOOLS_EXISTS" ]; then
-while IFS= read -r LINE; do
-if [ -z "$LINE" ]; then
-unset I_DESC I_URL I_FILE I_SIZE I_FILTER I_ON_UPDATE
-elif [ -z "$I_DESC" ]; then
-I_DESC="$LINE"
+while IFS= read -r LINE || [ -n "$LINE" ]; do
+if [ "${LINE:0:5}" = "tool:" ]; then
+I_DESC="${LINE#*: }"
+unset I_URL I_FILE I_SIZE I_FILTER I_ON_UPDATE
 elif [ -z "$I_URL" ]; then
 I_URL="$LINE"
 elif [ -z "$I_FILE" ]; then

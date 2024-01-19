@@ -55,6 +55,12 @@ shell() {
     sed -E -e '/^[[:space:]]*#/d' -e '/^[[:space:]]*$/d' -e 's/^[[:space:]]+//'
 }
 
+tools-list() {
+    # remove comments
+    # remove empty lines
+    sed -E -e '/^[[:space:]]*#/d' -e '/^[[:space:]]*$/d'
+}
+
 process() {
     while IFS= read -r line; do
         if [ "${line%% *}" = "@include" ]; then
@@ -102,7 +108,7 @@ process() {
 }
 
 [ "$1" = "silent" ] || printf "Build tools.list ..."
-process < "$TOOLS_SRC_FILE" > "$TOOLS_OUT_FILE"
+cat "$TOOLS_SRC_FILE" | tools-list | process > "$TOOLS_OUT_FILE"
 [ "$1" = "silent" ] || echo " OK"
 
 [ "$1" = "silent" ] || printf "Build bashrc ..."
