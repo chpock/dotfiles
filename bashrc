@@ -159,6 +159,7 @@ set noshowmode
 set ruler
 set laststatus=2
 set directory=$IAM_HOME/vim_swap//,~/tmp//,/var/tmp//,/tmp//,.
+set runtimepath=$IAM_HOME/vim_runtime,$VIMRUNTIME
 if version >= 600
     filetype plugin indent on
 else
@@ -187,8 +188,8 @@ vnoremap <C-s> <C-C>:update<CR>
 inoremap <C-s> <Esc>:update<CR>gi
 func! PasteGuard()
     if !exists("g:paste_prev") | let g:paste_prev = &paste | endif
-    if g:paste_prev != &paste 
-        let g:paste_prev = &paste 
+    if g:paste_prev != &paste
+        let g:paste_prev = &paste
         call timer_start(1, { -> PasteChange() })
     endif
     return ''
@@ -1270,6 +1271,7 @@ rm -f "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim"
 fi
 }
 [ -d "$IAM_HOME/vim_swap" ] || mkdir -p "$IAM_HOME/vim_swap"
+[ -d "$IAM_HOME/vim_runtime" ] || mkdir -p "$IAM_HOME/vim_runtime"
 _has apt-get && apt-get() {
 if [ "$(id -u)" -ne 0 ]; then
 echo "${COLOR_RED}The 'sudo' prefix was added automatically for the 'apt-get' command${COLOR_DEFAULT}" >&2

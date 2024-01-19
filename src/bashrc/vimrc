@@ -43,6 +43,9 @@ set laststatus=2       " always display status line
 " the swap file names so you don't get name collisions.
 set directory=$IAM_HOME/vim_swap//,~/tmp//,/var/tmp//,/tmp//,.
 
+" set my personal vim runtime
+set runtimepath=$IAM_HOME/vim_runtime,$VIMRUNTIME
+
 if version >= 600
     filetype plugin indent on
 else
@@ -84,8 +87,8 @@ inoremap <C-s> <Esc>:update<CR>gi
 " the paste mode change.
 func! PasteGuard()
     if !exists("g:paste_prev") | let g:paste_prev = &paste | endif
-    if g:paste_prev != &paste 
-        let g:paste_prev = &paste 
+    if g:paste_prev != &paste
+        let g:paste_prev = &paste
         " Changes are not applied immediately when we do them as a part of
         " statusline update, thus we will do them after 1ms delay
         call timer_start(1, { -> PasteChange() })
@@ -121,7 +124,7 @@ endfunc
 " This autocommand turns the paste mode off when leaving INSERT mode.
 augroup PasteGuardAU
     au!
-    " Turn off paste only for real NORMAL mode (when mode(1) returns "n"), 
+    " Turn off paste only for real NORMAL mode (when mode(1) returns "n"),
     " but not for C-o in INSERT (when mode(1) returns "niI", "no", etc.)
     au InsertLeave * if mode(1) == "n" && &paste | set nopaste | endif
 augroup END

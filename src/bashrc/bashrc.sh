@@ -1023,6 +1023,7 @@ vim() {
 }
 
 [ -d "$IAM_HOME/vim_swap" ] || mkdir -p "$IAM_HOME/vim_swap"
+[ -d "$IAM_HOME/vim_runtime" ] || mkdir -p "$IAM_HOME/vim_runtime"
 
 _has apt-get && apt-get() {
     if [ "$(id -u)" -ne 0 ]; then
