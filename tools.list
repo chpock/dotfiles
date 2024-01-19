@@ -1,0 +1,147 @@
+
+git functions
+https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-git.sh
+$IAM_HOME/shell.rc/functions-git.sh
+3983
+
+docker functions
+https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-docker.sh
+$IAM_HOME/shell.rc/functions-docker.sh
+3431
+
+AWS CLI functions
+https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-awscli.sh
+$IAM_HOME/shell.rc/functions-awscli.sh
+1862
+
+kubetcl function
+https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-kubectl.sh
+$IAM_HOME/shell.rc/functions-kubectl.sh
+3735
+
+bash completion
+https://raw.githubusercontent.com/chpock/.ini/master/bash_completion/custom/ecconfigure.bash
+$IAM_HOME/tools/bash_completion/ecconfigure.completion.bash
+3135
+
+bash completion
+https://raw.githubusercontent.com/chpock/.ini/master/bash_completion/custom/ectool.bash
+$IAM_HOME/tools/bash_completion/ectool.completion.bash
+290223
+
+bash completion
+https://raw.githubusercontent.com/chpock/.ini/master/bash_completion/custom/electricflow.bash
+$IAM_HOME/tools/bash_completion/electricflow.completion.bash
+12691
+
+bash completion
+https://raw.githubusercontent.com/docker/cli/master/contrib/completion/bash/docker
+$IAM_HOME/tools/bash_completion/docker.completion.bash
+114566
+
+bash completion
+https://raw.githubusercontent.com/docker/machine/master/contrib/completion/bash/docker-machine.bash
+$IAM_HOME/tools/bash_completion/docker-machine.completion.bash
+12211
+
+bash completion
+https://raw.githubusercontent.com/docker/compose/master/contrib/completion/bash/docker-compose
+$IAM_HOME/tools/bash_completion/docker-compose.completion.bash
+13500
+
+bash completion
+https://raw.githubusercontent.com/Bash-it/bash-it/master/completion/available/virtualbox.completion.bash
+$IAM_HOME/tools/bash_completion/virtualbox.completion.bash
+5467
+
+bash completion
+https://raw.githubusercontent.com/Bash-it/bash-it/master/completion/available/makefile.completion.bash
+$IAM_HOME/tools/bash_completion/makefile.completion.bash
+934
+
+bash completion
+https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash
+$IAM_HOME/tools/bash_completion/git-completion.bash
+88235
+
+bash completion
+https://raw.githubusercontent.com/imomaliev/tmux-bash-completion/master/completions/tmux
+$IAM_HOME/tools/bash_completion/tmux-completion.bash
+6055
+
+tcl readline
+https://raw.githubusercontent.com/suewonjp/tclsh-wrapper/master/TclReadLine/TclReadLine.tcl
+$IAM_HOME/tools/tcl/TclReadLine/TclReadLine.tcl
+40415
+
+tcl readline
+https://raw.githubusercontent.com/suewonjp/tclsh-wrapper/master/TclReadLine/pkgIndex.tcl
+$IAM_HOME/tools/tcl/TclReadLine/pkgIndex.tcl
+546
+
+mydu tool
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/mydu
+$IAM_HOME/tools/bin/mydu
+2942
+
+colors tool
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/colors
+$IAM_HOME/tools/bin/colors
+8262
+
+lastbuild tool
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/lastbuild
+$IAM_HOME/tools/bin/lastbuild
+3213
+
+shellcheck tool
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-shellcheck
+$IAM_HOME/tools/bin/install-shellcheck
+1408
+
+apt-cyg tool
+https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg
+$IAM_HOME/tools/bin/orig-apt-cyg
+filter: cygwin
+73293
+
+dependency check for apt-cyg tool
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/apt-cyg
+$IAM_HOME/tools/bin/apt-cyg
+filter: cygwin
+826
+
+upkg tool
+https://raw.githubusercontent.com/chpock/upkg/main/upkg
+$IAM_HOME/tools/bin/upkg
+on update: mkdir -p "$IAM_HOME"/shell.rc && "$IAM_HOME"/tools/bin/upkg supported silent && "$IAM_HOME"/tools/bin/upkg generate bash-rc >"$IAM_HOME"/shell.rc/upkg.rc.sh || true
+27480
+
+tmux-helper tool
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/tmux-helper
+$IAM_HOME/tools/bin/tmux-helper
+6045
+
+vim-portable tool
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-vim-portable
+$IAM_HOME/tools/bin/install-vim-portable
+filter: linux
+1298
+
+tar-portable tool
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-tar-portable
+$IAM_HOME/tools/bin/install-tar-portable
+filter: linux
+1208
+
+gzip-portable tool
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-gzip-portable
+$IAM_HOME/tools/bin/install-gzip-portable
+filter: linux
+1127
+
+tracer/debugger for perl
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/trace-perl
+$IAM_HOME/tools/bin/trace-perl
+3770
+
