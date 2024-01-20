@@ -147,37 +147,39 @@ set expandtab
 set hlsearch
 set incsearch
 if maparg('<C-L>', 'n') ==# ''
-  nnoremap <silent> <C-L> :nohlsearch<C-R>=has('diff')?'<Bar>diffupdate':''<CR><CR><C-L>
+nnoremap <silent> <C-L> :nohlsearch<C-R>=has('diff')?'<Bar>diffupdate':''<CR><CR><C-L>
 endif
 set history=1000
 set undolevels=1000
-set wildignore=*.swp,*.bak,*.pyc,*.class
 set notitle
 set visualbell
 set noerrorbells
 set noshowmode
 set ruler
 set laststatus=2
+set complete-=i
+set notimeout
+set ttimeout
+set ttimeoutlen=100
+set wildmenu
+set wildignore=*.swp,*.bak,*.pyc,*.class
 set directory=$IAM_HOME/vim_swap//,~/tmp//,/var/tmp//,/tmp//,.
 set runtimepath=$IAM_HOME/vim_runtime,$VIMRUNTIME
 if version >= 600
-    filetype plugin indent on
+filetype plugin indent on
 else
-    filetype on
+filetype on
 endif
 set list
-set listchars=tab:>.,trail:.,extends:#,nbsp:.
-if has("autocmd")
-    autocmd filetype html,xml set listchars-=tab:>.
-endif
+set listchars=tab:>.,trail:.,extends:>,precedes:<,nbsp:.
 if v:version > 703 || v:version == 703 && has("patch541")
-  set formatoptions+=j " Delete comment character when joining commented lines
+set formatoptions+=j " Delete comment character when joining commented lines
 endif
 if !&scrolloff
-  set scrolloff=1
+set scrolloff=1
 endif
 if !&sidescrolloff
-  set sidescrolloff=5
+set sidescrolloff=5
 endif
 set display+=lastline
 command! Q :q
@@ -187,34 +189,44 @@ noremap <C-s>  :update<CR>
 vnoremap <C-s> <C-C>:update<CR>
 inoremap <C-s> <Esc>:update<CR>gi
 func! PasteGuard()
-    if !exists("g:paste_prev") | let g:paste_prev = &paste | endif
-    if g:paste_prev != &paste
-        let g:paste_prev = &paste
-        call timer_start(1, { -> PasteChange() })
-    endif
-    return ''
+if !exists("g:paste_prev") | let g:paste_prev = &paste | endif
+if !exists("g:paste_guard") | let g:paste_guard = 0 | endif
+if g:paste_prev != &paste
+let g:paste_prev = &paste
+if &paste && g:paste_guard == 1
+let g:paste_guard = 2
+call timer_start(1, { -> PasteChange() })
+endif
+if !&paste && g:paste_guard == 2
+let g:paste_guard = 0
+call timer_start(1, { -> PasteChange() })
+endif
+endif
+return ''
 endfunc
 func! PasteChange()
-    if &paste
-        if mode() == 'n'
-             call feedkeys("i")
-        endif
-        let g:paste_num = &number
-        let g:paste_list = &list
-        set nonumber nolist
-    else
-        if mode() == 'i'
-             call feedkeys("\<C-\>\<C-n>")
-        endif
-        let &number = g:paste_num
-        let &list = g:paste_list
-    endif
-    redrawstatus!
+if &paste
+if mode() == 'n'
+call feedkeys("i")
+endif
+let g:paste_num = &number
+let g:paste_list = &list
+set nonumber nolist
+else
+if mode() == 'i'
+call feedkeys("\<C-\>\<C-n>")
+endif
+let &number = g:paste_num
+let &list = g:paste_list
+endif
+redrawstatus!
 endfunc
 augroup PasteGuardAU
-    au!
-    au InsertLeave * if mode(1) == "n" && &paste | set nopaste | endif
+au!
+au InsertLeave * if mode(1) == "n" && &paste | set nopaste | endif
 augroup END
+nnoremap <silent> <special> <F2> :let g:paste_guard=1<CR>:set invpaste<CR>
+inoremap <silent> <special> <F2> <C-O>:let g:paste_guard=1<CR><C-O>:set invpaste<CR>
 set pastetoggle=<F2>
 set statusline=
 set statusline+=%{PasteGuard()}
@@ -237,22 +249,32 @@ set statusline+=\ %=
 set statusline+=%#CursorLine#
 set statusline+=\ [FileType:%Y]
 set statusline+=\ %#CursorIM#
-set statusline+=\ [Line:%-3l\ Column:%-3c]  " line + column
+set statusline+=\ [Line:%-3l\ Column:%-3c]
 set statusline+=\ %#Cursor#
 set statusline+=\ %3p%%\ %##
 set background=dark
 highlight clear
+if !has('gui_running')
 if exists('+termguicolors')
-    let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"  " Set foreground color
-    let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"  " Set background color
-    let &termguicolors = v:true
+let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+let &termguicolors = v:true
+endif
+let &t_BE = "\<Esc>[?2004h"
+let &t_BD = "\<Esc>[?2004l"
+let &t_PS = "\<Esc>[200~"
+let &t_PE = "\<Esc>[201~"
+let &t_fe = "\<Esc>[?1004h"
+let &t_fd = "\<Esc>[?1004l"
+execute "set <FocusGained>=\<Esc>[I"
+execute "set <FocusLost>=\<Esc>[O"
 endif
 if exists("syntax_on")
-  syntax reset
+syntax reset
 endif
 let g:terminal_ansi_colors = [
-     \ '#1d2021', '#cc241d', '#98971a', '#d79921', '#458588', '#b16286', '#689d6a', '#bdae93',
-     \ '#7c6f64', '#fb4934', '#b8bb26', '#fabd2f', '#83a598', '#d3869b', '#8ec07c', '#ebdbb2']
+\ '#1d2021', '#cc241d', '#98971a', '#d79921', '#458588', '#b16286', '#689d6a', '#bdae93',
+\ '#7c6f64', '#fb4934', '#b8bb26', '#fabd2f', '#83a598', '#d3869b', '#8ec07c', '#ebdbb2']
 hi Normal ctermfg=187 ctermbg=234 guifg=#ebdbb2 guibg=#1d2021 guisp=NONE cterm=NONE gui=NONE
 hi CursorLineNr ctermfg=214 ctermbg=237 guifg=#fabd2f guibg=#3c3836 guisp=NONE cterm=NONE gui=NONE
 hi FoldColumn ctermfg=102 ctermbg=237 guifg=#928374 guibg=#3c3836 guisp=NONE cterm=NONE gui=NONE
@@ -350,24 +372,24 @@ hi VisualMode ctermfg=208 ctermbg=234 guifg=#fe8019 guibg=#1d2021 guisp=NONE cte
 hi CommandMode ctermfg=175 ctermbg=234 guifg=#d3869b guibg=#1d2021 guisp=NONE cterm=NONE,reverse gui=NONE,reverse
 hi Warnings ctermfg=208 ctermbg=234 guifg=#fe8019 guibg=#1d2021 guisp=NONE cterm=NONE,reverse gui=NONE,reverse
 if has('nvim')
-  let g:terminal_color_0  = '#1d2021'
-  let g:terminal_color_8  = '#928374'
-  let g:terminal_color_1  = '#cc241d'
-  let g:terminal_color_9  = '#fb4934'
-  let g:terminal_color_2  = '#98971a'
-  let g:terminal_color_10 = '#b8bb26'
-  let g:terminal_color_3  = '#d79921'
-  let g:terminal_color_11 = '#fabd2f'
-  let g:terminal_color_4  = '#458588'
-  let g:terminal_color_12 = '#83a598'
-  let g:terminal_color_5  = '#b16286'
-  let g:terminal_color_13 = '#d3869b'
-  let g:terminal_color_6  = '#689d6a'
-  let g:terminal_color_14 = '#8ec07c'
-  let g:terminal_color_7  = '#a89984'
-  let g:terminal_color_15 = '#ebdbb2'
-  hi! link TermCursor Cursor
-  hi TermCursorNC ctermfg=237 ctermbg=187 guifg=#3c3836 guibg=#ebdbb2 guisp=NONE cterm=NONE gui=NONE
+let g:terminal_color_0  = '#1d2021'
+let g:terminal_color_8  = '#928374'
+let g:terminal_color_1  = '#cc241d'
+let g:terminal_color_9  = '#fb4934'
+let g:terminal_color_2  = '#98971a'
+let g:terminal_color_10 = '#b8bb26'
+let g:terminal_color_3  = '#d79921'
+let g:terminal_color_11 = '#fabd2f'
+let g:terminal_color_4  = '#458588'
+let g:terminal_color_12 = '#83a598'
+let g:terminal_color_5  = '#b16286'
+let g:terminal_color_13 = '#d3869b'
+let g:terminal_color_6  = '#689d6a'
+let g:terminal_color_14 = '#8ec07c'
+let g:terminal_color_7  = '#a89984'
+let g:terminal_color_15 = '#ebdbb2'
+hi! link TermCursor Cursor
+hi TermCursorNC ctermfg=237 ctermbg=187 guifg=#3c3836 guibg=#ebdbb2 guisp=NONE cterm=NONE gui=NONE
 endif
 hi diffAdded ctermfg=142 ctermbg=NONE guifg=#b8bb26 guibg=NONE guisp=NONE cterm=NONE gui=NONE
 hi diffRemoved ctermfg=203 ctermbg=NONE guifg=#fb4934 guibg=NONE guisp=NONE cterm=NONE gui=NONE
@@ -445,64 +467,83 @@ hi jsonQuote ctermfg=142 ctermbg=NONE guifg=#b8bb26 guibg=NONE guisp=NONE cterm=
 hi jsonBraces ctermfg=187 ctermbg=NONE guifg=#ebdbb2 guibg=NONE guisp=NONE cterm=NONE gui=NONE
 hi jsonString ctermfg=187 ctermbg=NONE guifg=#ebdbb2 guibg=NONE guisp=NONE cterm=NONE gui=NONE
 if has('syntax') && !exists('g:syntax_on')
-  syntax enable
+syntax enable
 endif
 if exists('+colorcolumn')
-  set colorcolumn=80
+set colorcolumn=80
 endif
 nmap <leader>sp :call <SID>SynStack()<CR>
 function! <SID>SynStack()
-  if !exists("*synstack")
-    return
-  endif
-  echo map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
+if !exists("*synstack")
+return
+endif
+echo map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
 endfunc
 function! <SID>lastplace()
-  if index(split("quickfix,nofile,help", ","), &buftype) != -1
-    return
-  endif
-  if index(split("gitcommit,gitrebase,svn,hgcommit", ","), &filetype) != -1
-    return
-  endif
-  try
-    if empty(glob(@%))
-      return
-    endif
-  catch
-    return
-  endtry
-  if line("'\"") > 0 && line("'\"") <= line("$")
-    if line("w$") == line("$")
-      execute "normal! g`\""
-    elseif line("$") - line("'\"") > ((line("w$") - line("w0")) / 2) - 1
-      execute "normal! g`\"zz"
-    else
-      execute "normal! \G'\"\<c-e>"
-    endif
-  endif
-  if foldclosed(".") != -1
-    execute "normal! zvzz"
-  endif
+if index(split("quickfix,nofile,help", ","), &buftype) != -1
+return
+endif
+if index(split("gitcommit,gitrebase,svn,hgcommit", ","), &filetype) != -1
+return
+endif
+try
+if empty(glob(@%))
+return
+endif
+catch
+return
+endtry
+if line("'\"") > 0 && line("'\"") <= line("$")
+if line("w$") == line("$")
+execute "normal! g`\""
+elseif line("$") - line("'\"") > ((line("w$") - line("w0")) / 2) - 1
+execute "normal! g`\"zz"
+else
+execute "normal! \G'\"\<c-e>"
+endif
+endif
+if foldclosed(".") != -1
+execute "normal! zvzz"
+endif
 endfunc
-au! BufWinEnter * call <SID>lastplace()
+augroup RestoreCursorPosition
+au!
+au BufWinEnter * call <SID>lastplace()
+augroup END
 func! <SID>stripTrailingWhitespace()
-    normal mZ
-    let l:winview = winsaveview()
-    let l:chars = col("$")
-    %s/\s\+$//e
-    if (line("'Z") != line(".")) || (l:chars != col("$"))
-        echo "Warning: trailing whitespaces have been removed! Use UNDO to restore deleted whitespaces.\n"
-    endif
-    call winrestview(l:winview)
+normal mZ
+let l:winview = winsaveview()
+let l:chars = col("$")
+%s/\s\+$//e
+if (line("'Z") != line(".")) || (l:chars != col("$"))
+echo "Warning: trailing whitespaces have been removed! Use UNDO to restore deleted whitespaces.\n"
+endif
+call winrestview(l:winview)
 endfunc
-au! BufWritePre * call <SID>stripTrailingWhitespace()
-au! BufNewFile,BufReadPost *.{yaml,yml} set filetype=yaml
-au! FileType yaml setlocal ts=2 sts=2 sw=2 expandtab indentkeys-=0#,0},0],<:>,-
+augroup StripTrailingWhitespace
+au!
+au BufWritePre * call <SID>stripTrailingWhitespace()
+augroup END
+augroup WhitespacesEOL
+au!
+au BufWinEnter * hi WhitespaceEOL ctermbg=red guibg=red | match WhitespaceEOL /\s\+$/
+au InsertEnter * match WhitespaceEOL /\s\+\%#\@<!$/
+au InsertLeave * match WhitespaceEOL /\s\+$/
+au BufWinLeave * call clearmatches()
+augroup END
+augroup SpecialFileTypes
+au!
+au BufNewFile,BufReadPost *.{yaml,yml} set filetype=yaml
+au FileType yaml setlocal ts=2 sts=2 sw=2 expandtab indentkeys-=0#,0},0],<:>,-
+au FileType html,xml setlocal listchars-=tab:>.
+augroup END
+let g:colorizer_auto_filetype = 'css,html'
+let g:colorizer_fgcontrast = 0
 EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_SIZE=4592
+LOCAL_TOOLS_FILE_SIZE=5544
 COLOR_WHITE=$'\e[1;37m'
 COLOR_LIGHTGRAY=$'\e[0;37m'
 COLOR_GRAY=$'\e[1;30m'

@@ -108,6 +108,30 @@ https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-gzip-port
 $IAM_HOME/tools/bin/install-gzip-portable
 filter: linux
 1127
+tool: vim plugin Colorizer (plugin)
+https://raw.githubusercontent.com/chrisbra/Colorizer/master/plugin/ColorizerPlugin.vim
+$IAM_HOME/vim_runtime/plugin/ColorizerPlugin.vim
+1
+tool: vim plugin Colorizer (autoload)
+https://raw.githubusercontent.com/chrisbra/Colorizer/master/autoload/Colorizer.vim
+$IAM_HOME/vim_runtime/autoload/Colorizer.vim
+1
+tool: vim plugin endwise
+https://raw.githubusercontent.com/tpope/vim-endwise/master/plugin/endwise.vim
+$IAM_HOME/vim_runtime/plugin/endwise.vim
+1
+tool: vim plugin commentary
+https://raw.githubusercontent.com/tpope/vim-commentary/master/plugin/commentary.vim
+$IAM_HOME/vim_runtime/plugin/commentary.vim
+1
+tool: vim plugin SynStack (plugin)
+https://github.com/dylnmc/synstack.vim/blob/master/plugin/synstack.vim
+$IAM_HOME/vim_runtime/plugin/synstack.vim
+1
+tool: vim plugin SynStack (autoload)
+https://github.com/dylnmc/synstack.vim/blob/master/autoload/synstack.vim
+$IAM_HOME/vim_runtime/autoload/synstack.vim
+1
 tool: tcl readline
 https://raw.githubusercontent.com/suewonjp/tclsh-wrapper/master/TclReadLine/TclReadLine.tcl
 $IAM_HOME/tools/tcl/TclReadLine/TclReadLine.tcl

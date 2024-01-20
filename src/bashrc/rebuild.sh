@@ -43,9 +43,10 @@ tmux-conf() {
 
 vimrc() {
     # remove comments
-    # remove empty lines
     # more-or-less smart detection for inline comments: when there are 3 or more spaces before quote
-    sed -E -e '/^[[:space:]]*"/d' -e 's/[[:space:]]{3,}".+$//' -e '/^[[:space:]]*$/d'
+    # remove empty lines
+    # delete spaces from the beginning of lines
+    sed -E -e '/^[[:space:]]*"/d' -e 's/[[:space:]]{3,}".+$//' -e '/^[[:space:]]*$/d' -e 's/^[[:space:]]+//'
 }
 
 shell() {
