@@ -151,33 +151,33 @@ filter: linux
 tool: vim plugin Colorizer (plugin)
 https://raw.githubusercontent.com/chrisbra/Colorizer/master/plugin/ColorizerPlugin.vim
 $IAM_HOME/vim_runtime/plugin/ColorizerPlugin.vim
-1
+3660
 
 tool: vim plugin Colorizer (autoload)
 https://raw.githubusercontent.com/chrisbra/Colorizer/master/autoload/Colorizer.vim
 $IAM_HOME/vim_runtime/autoload/Colorizer.vim
-1
+83918
 
 # DOC: https://github.com/tpope/vim-endwise/tree/master
 tool: vim plugin endwise
 https://raw.githubusercontent.com/tpope/vim-endwise/master/plugin/endwise.vim
 $IAM_HOME/vim_runtime/plugin/endwise.vim
-1
+11134
 
 # DOC: https://github.com/tpope/vim-commentary/tree/master
 tool: vim plugin commentary
 https://raw.githubusercontent.com/tpope/vim-commentary/master/plugin/commentary.vim
 $IAM_HOME/vim_runtime/plugin/commentary.vim
-1
+3993
 
-# DOC:
+# DOC: https://github.com/dylnmc/synstack.vim/tree/master
 tool: vim plugin SynStack (plugin)
-https://github.com/dylnmc/synstack.vim/blob/master/plugin/synstack.vim
+https://raw.githubusercontent.com/dylnmc/synstack.vim/master/plugin/synstack.vim
 $IAM_HOME/vim_runtime/plugin/synstack.vim
 1
 
 tool: vim plugin SynStack (autoload)
-https://github.com/dylnmc/synstack.vim/blob/master/autoload/synstack.vim
+https://raw.githubusercontent.com/dylnmc/synstack.vim/master/autoload/synstack.vim
 $IAM_HOME/vim_runtime/autoload/synstack.vim
 1
 
