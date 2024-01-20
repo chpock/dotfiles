@@ -543,7 +543,7 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_SIZE=5578
+LOCAL_TOOLS_FILE_SIZE=5584
 COLOR_WHITE=$'\e[1;37m'
 COLOR_LIGHTGRAY=$'\e[0;37m'
 COLOR_GRAY=$'\e[1;30m'
@@ -1497,9 +1497,9 @@ done
 }
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
+shopt -s histappend
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
-shopt -s histappend
 shopt -s cmdhist
 unset HISTFILESIZE
 HISTSIZE=1000000
@@ -2156,8 +2156,13 @@ if ! _get_url "$TOOLS_URL" >"$TMP" 2>/dev/null; then
 rm -f "$TMP"
 unset TOOLS_EXISTS
 CHECK_STATE=1
+echo "${COLOR_RED}ERROR:${COLOR_DEFAULT} An unexpected error occurred while updating the list of tools."
 else
 mv -f "$TMP" "$TOOLS_FILE"
+SIZE="$(_get_size "$TOOLS_FILE")"
+if [ "$SIZE" != "$LOCAL_TOOLS_FILE_SIZE" ]; then
+echo "${COLOR_BROWN}WARNING:${COLOR_DEFAULT} The list of tools is not properly updated. The current file size ${SIZE} doesn't match the expected size ${LOCAL_TOOLS_FILE_SIZE}."
+fi
 fi
 fi
 if [ -n "$TOOLS_EXISTS" ]; then

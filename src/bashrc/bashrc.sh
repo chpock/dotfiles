@@ -2138,8 +2138,13 @@ tools() {
             rm -f "$TMP"
             unset TOOLS_EXISTS
             CHECK_STATE=1
+            echo "${COLOR_RED}ERROR:${COLOR_DEFAULT} An unexpected error occurred while updating the list of tools."
         else
             mv -f "$TMP" "$TOOLS_FILE"
+            SIZE="$(_get_size "$TOOLS_FILE")"
+            if [ "$SIZE" != "$LOCAL_TOOLS_FILE_SIZE" ]; then
+                echo "${COLOR_BROWN}WARNING:${COLOR_DEFAULT} The list of tools is not properly updated. The current file size ${SIZE} doesn't match the expected size ${LOCAL_TOOLS_FILE_SIZE}."
+            fi
         fi
     fi
 

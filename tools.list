@@ -127,11 +127,11 @@ $IAM_HOME/vim_runtime/plugin/commentary.vim
 tool: vim plugin SynStack (plugin)
 https://raw.githubusercontent.com/dylnmc/synstack.vim/master/plugin/synstack.vim
 $IAM_HOME/vim_runtime/plugin/synstack.vim
-1
+1050
 tool: vim plugin SynStack (autoload)
 https://raw.githubusercontent.com/dylnmc/synstack.vim/master/autoload/synstack.vim
 $IAM_HOME/vim_runtime/autoload/synstack.vim
-1
+2316
 tool: tcl readline
 https://raw.githubusercontent.com/suewonjp/tclsh-wrapper/master/TclReadLine/TclReadLine.tcl
 $IAM_HOME/tools/tcl/TclReadLine/TclReadLine.tcl
