@@ -2132,7 +2132,7 @@ tools() {
 
     local files=() recs=() recs_check=() TOOLS_EXISTS=1
 
-    if [ ! -f "$TOOLS_FILE" -o "$(_get_size "$TOOLS_FILE")" != "$LOCAL_TOOLS_FILE_SIZE" ]; then
+    if [ ! -f "$TOOLS_FILE" ] || [ "$(_get_size "$TOOLS_FILE")" != "$LOCAL_TOOLS_FILE_SIZE" ]; then
         local TMP="$(mktemp)"
         if ! _get_url "$TOOLS_URL" >"$TMP" 2>/dev/null; then
             rm -f "$TMP"
