@@ -51,7 +51,7 @@ git() {
 }
 
 git-config() {
-    local GIT_BIN="$(which git)"
+    local GIT_BIN="$(command -v git)"
     local GIT_AUTHOR
     local SIGN_KEY
     if [ "$1" = "-local" ]; then
