@@ -194,15 +194,26 @@ if !has('gui_running')
         let &termguicolors = v:true              " Enable GUI colors for the terminal to get truecolor
     endif
     " Enable bracketed paste mode, see  :help xterm-bracketed-paste
-    let &t_BE = "\<Esc>[?2004h"
-    let &t_BD = "\<Esc>[?2004l"
-    let &t_PS = "\<Esc>[200~"
-    let &t_PE = "\<Esc>[201~"
+    " This feature has been added since v8.0.0210
+    if v:version > 800 || v:version == 800 && has('patch210')
+        let &t_BE = "\<Esc>[?2004h"
+        let &t_BD = "\<Esc>[?2004l"
+        let &t_PS = "\<Esc>[200~"
+        let &t_PE = "\<Esc>[201~"
+    endif
     " Enable focus event tracking, see  :help xterm-focus-event
-    let &t_fe = "\<Esc>[?1004h"
-    let &t_fd = "\<Esc>[?1004l"
-    execute "set <FocusGained>=\<Esc>[I"
-    execute "set <FocusLost>=\<Esc>[O"
+    " This feature has been added since v8.2.2345
+    " https://github.com/vim/vim/commit/681fc3fa782e99fe69ed2c83c3e29109d2d61e1a
+    if v:version > 802 || v:version == 802 && has('patch2345')
+        let &t_fe = "\<Esc>[?1004h"
+        let &t_fd = "\<Esc>[?1004l"
+        " Named focus events have been added since v8.2.2383
+        " https://github.com/vim/vim/commit/ccb47a2899d9f8076dad0f8348c057450febf32b
+        if v:version > 802 || v:version == 802 && has('patch2383')
+            execute "set <FocusGained>=\<Esc>[I"
+            execute "set <FocusLost>=\<Esc>[O"
+        endif
+    endif
 endif
 
 if exists("syntax_on")

@@ -260,14 +260,20 @@ let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
 let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
 let &termguicolors = v:true
 endif
+if v:version > 800 || v:version == 800 && has('patch210')
 let &t_BE = "\<Esc>[?2004h"
 let &t_BD = "\<Esc>[?2004l"
 let &t_PS = "\<Esc>[200~"
 let &t_PE = "\<Esc>[201~"
+endif
+if v:version > 802 || v:version == 802 && has('patch2345')
 let &t_fe = "\<Esc>[?1004h"
 let &t_fd = "\<Esc>[?1004l"
+if v:version > 802 || v:version == 802 && has('patch2383')
 execute "set <FocusGained>=\<Esc>[I"
 execute "set <FocusLost>=\<Esc>[O"
+endif
+endif
 endif
 if exists("syntax_on")
 syntax reset
