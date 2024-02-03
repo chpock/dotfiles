@@ -47,6 +47,7 @@ bind Down  select-pane -D
 bind Left  select-pane -L
 bind Right select-pane -R
 set -g default-terminal "tmux-256color"
+set -g terminal-overrides ',xterm-256color:Tc'
 set -g base-index 1
 set -g pane-base-index 1
 set -s escape-time 50
@@ -126,145 +127,6 @@ set -g window-status-bell-style 'fg=colour255,bg=colour1,bold'
 set -g message-style 'fg=colour232,bg=colour166,bold'
 EOF
 
-cat <<'EOF' > "$IAM_HOME/local_tools"
-
-git functions
-https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-git.sh
-$IAM_HOME/shell.rc/functions-git.sh
-3983
-
-docker functions
-https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-docker.sh
-$IAM_HOME/shell.rc/functions-docker.sh
-3435
-
-AWS CLI functions
-https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-awscli.sh
-$IAM_HOME/shell.rc/functions-awscli.sh
-1862
-
-kubetcl function
-https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-kubectl.sh
-$IAM_HOME/shell.rc/functions-kubectl.sh
-3735
-
-bash completion
-https://raw.githubusercontent.com/chpock/.ini/master/bash_completion/custom/ecconfigure.bash
-$IAM_HOME/tools/bash_completion/ecconfigure.completion.bash
-3135
-
-bash completion
-https://raw.githubusercontent.com/chpock/.ini/master/bash_completion/custom/ectool.bash
-$IAM_HOME/tools/bash_completion/ectool.completion.bash
-290223
-
-bash completion
-https://raw.githubusercontent.com/chpock/.ini/master/bash_completion/custom/electricflow.bash
-$IAM_HOME/tools/bash_completion/electricflow.completion.bash
-12691
-
-bash completion
-https://raw.githubusercontent.com/docker/cli/master/contrib/completion/bash/docker
-$IAM_HOME/tools/bash_completion/docker.completion.bash
-114566
-
-bash completion
-https://raw.githubusercontent.com/docker/machine/master/contrib/completion/bash/docker-machine.bash
-$IAM_HOME/tools/bash_completion/docker-machine.completion.bash
-12211
-
-bash completion
-https://raw.githubusercontent.com/docker/compose/master/contrib/completion/bash/docker-compose
-$IAM_HOME/tools/bash_completion/docker-compose.completion.bash
-13500
-
-bash completion
-https://raw.githubusercontent.com/Bash-it/bash-it/master/completion/available/virtualbox.completion.bash
-$IAM_HOME/tools/bash_completion/virtualbox.completion.bash
-5467
-
-bash completion
-https://raw.githubusercontent.com/Bash-it/bash-it/master/completion/available/makefile.completion.bash
-$IAM_HOME/tools/bash_completion/makefile.completion.bash
-934
-
-bash completion
-https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash
-$IAM_HOME/tools/bash_completion/git-completion.bash
-87287
-
-bash completion
-https://raw.githubusercontent.com/imomaliev/tmux-bash-completion/master/completions/tmux
-$IAM_HOME/tools/bash_completion/tmux-completion.bash
-6055
-
-tcl readline
-https://raw.githubusercontent.com/suewonjp/tclsh-wrapper/master/TclReadLine/TclReadLine.tcl
-$IAM_HOME/tools/tcl/TclReadLine/TclReadLine.tcl
-40415
-
-tcl readline
-https://raw.githubusercontent.com/suewonjp/tclsh-wrapper/master/TclReadLine/pkgIndex.tcl
-$IAM_HOME/tools/tcl/TclReadLine/pkgIndex.tcl
-546
-
-mydu tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/mydu
-$IAM_HOME/tools/bin/mydu
-2942
-
-colors tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/colors
-$IAM_HOME/tools/bin/colors
-2789
-
-lastbuild tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/lastbuild
-$IAM_HOME/tools/bin/lastbuild
-3213
-
-shellcheck tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-shellcheck
-$IAM_HOME/tools/bin/install-shellcheck
-1408
-
-apt-cyg tool
-https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg
-$IAM_HOME/tools/bin/apt-cyg
-filter: cygwin
-73293
-
-upkg tool
-https://raw.githubusercontent.com/chpock/upkg/main/upkg
-$IAM_HOME/tools/bin/upkg
-on update: mkdir -p "$IAM_HOME"/shell.rc && "$IAM_HOME"/tools/bin/upkg supported silent && "$IAM_HOME"/tools/bin/upkg generate bash-rc >"$IAM_HOME"/shell.rc/upkg.rc.sh || true
-25613
-
-tmux-helper tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/tmux-helper
-$IAM_HOME/tools/bin/tmux-helper
-6045
-
-vim-portable tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-vim-portable
-$IAM_HOME/tools/bin/install-vim-portable
-filter: linux
-1298
-
-tar-portable tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-tar-portable
-$IAM_HOME/tools/bin/install-tar-portable
-filter: linux
-1208
-
-gzip-portable tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-gzip-portable
-$IAM_HOME/tools/bin/install-gzip-portable
-filter: linux
-1127
-
-EOF
-
 cat <<'EOF' > "$IAM_HOME/vimrc"
 set nocompatible
 set t_Co=256
@@ -285,52 +147,97 @@ set expandtab
 set hlsearch
 set incsearch
 if maparg('<C-L>', 'n') ==# ''
-  nnoremap <silent> <C-L> :nohlsearch<C-R>=has('diff')?'<Bar>diffupdate':''<CR><CR><C-L>
+nnoremap <silent> <C-L> :nohlsearch<C-R>=has('diff')?'<Bar>diffupdate':''<CR><CR><C-L>
 endif
 set history=1000
 set undolevels=1000
-set wildignore=*.swp,*.bak,*.pyc,*.class
 set notitle
 set visualbell
 set noerrorbells
 set noshowmode
 set ruler
 set laststatus=2
+set complete-=i
+set notimeout
+set ttimeout
+set ttimeoutlen=100
+set wildmenu
+set wildignore=*.swp,*.bak,*.pyc,*.class
 set directory=$IAM_HOME/vim_swap//,~/tmp//,/var/tmp//,/tmp//,.
+set runtimepath=$IAM_HOME/vim_runtime,$VIMRUNTIME
 if version >= 600
-    filetype plugin indent on
+filetype plugin indent on
 else
-    filetype on
+filetype on
 endif
 set list
-set listchars=tab:>.,trail:.,extends:#,nbsp:.
-if has("autocmd")
-    autocmd filetype html,xml set listchars-=tab:>.
-endif
-nnoremap <silent> <special> <F2> :set invpaste invnumber invlist<CR>
-inoremap <silent> <special> <F2> <C-O>:set invpaste invnumber invlist<CR>
-set pastetoggle=<F2>
+set listchars=tab:>.,trail:.,extends:>,precedes:<,nbsp:.
 if v:version > 703 || v:version == 703 && has("patch541")
-  set formatoptions+=j " Delete comment character when joining commented lines
+set formatoptions+=j " Delete comment character when joining commented lines
 endif
 if !&scrolloff
-  set scrolloff=1
+set scrolloff=1
 endif
 if !&sidescrolloff
-  set sidescrolloff=5
+set sidescrolloff=5
 endif
 set display+=lastline
 command! Q :q
 command! Wq :wq
 command! Wqa :wqa
+noremap <C-s>  :update<CR>
+vnoremap <C-s> <C-C>:update<CR>
+inoremap <C-s> <Esc>:update<CR>gi
+func! PasteGuard()
+if !exists("g:paste_prev") | let g:paste_prev = &paste | endif
+if !exists("g:paste_guard") | let g:paste_guard = 0 | endif
+if g:paste_prev != &paste
+let g:paste_prev = &paste
+if &paste && g:paste_guard == 1
+let g:paste_guard = 2
+call timer_start(1, { -> PasteChange() })
+endif
+if !&paste && g:paste_guard == 2
+let g:paste_guard = 0
+call timer_start(1, { -> PasteChange() })
+endif
+endif
+return ''
+endfunc
+func! PasteChange()
+if &paste
+if mode() == 'n'
+call feedkeys("i")
+endif
+let g:paste_num = &number
+let g:paste_list = &list
+set nonumber nolist
+else
+if mode() == 'i'
+call feedkeys("\<C-\>\<C-n>")
+endif
+let &number = g:paste_num
+let &list = g:paste_list
+endif
+redrawstatus!
+endfunc
+augroup PasteGuardAU
+au!
+au InsertLeave * if mode(1) == "n" && &paste | set nopaste | endif
+augroup END
+nnoremap <silent> <special> <F2> :let g:paste_guard=1<CR>:set invpaste<CR>
+inoremap <silent> <special> <F2> <C-O>:let g:paste_guard=1<CR><C-O>:set invpaste<CR>
+set pastetoggle=<F2>
 set statusline=
+set statusline+=%{PasteGuard()}
+set statusline+=%#DiffText#%{(&paste&&mode()=='i')?'\ \ PASTE\ \ ':''}
+set statusline+=%#DiffChange#%{(!&paste&&mode()=='i')?'\ \ INSERT\ ':''}
 set statusline+=%#DiffAdd#%{(mode()=='n')?'\ \ NORMAL\ ':''}
-set statusline+=%#DiffChange#%{(mode()=='i')?'\ \ INSERT\ ':''}
 set statusline+=%#DiffDelete#%{(mode()=='r')?'\ \ RPLACE\ ':''}
 set statusline+=%#Cursor#%{(mode()=='v')?'\ \ VISUAL\ ':''}
 set statusline+=\ %n
 set statusline+=\ %#Visual#
-set statusline+=%{&paste?'\ PASTE\ ':''}
+set statusline+=%{(&paste&&mode()!='i')?'\ PASTE\ ':''}
 set statusline+=%{&spell?'\ SPELL\ ':''}
 set statusline+=%#CursorIM#
 set statusline+=%R
@@ -342,17 +249,38 @@ set statusline+=\ %=
 set statusline+=%#CursorLine#
 set statusline+=\ [FileType:%Y]
 set statusline+=\ %#CursorIM#
-set statusline+=\ [Line:%-3l\ Column:%-3c] " line + column
+set statusline+=\ [Line:%-3l\ Column:%-3c]
 set statusline+=\ %#Cursor#
 set statusline+=\ %3p%%\ %##
 set background=dark
 highlight clear
+if !has('gui_running')
+if exists('+termguicolors')
+let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+let &termguicolors = v:true
+endif
+if v:version > 800 || v:version == 800 && has('patch210')
+let &t_BE = "\<Esc>[?2004h"
+let &t_BD = "\<Esc>[?2004l"
+let &t_PS = "\<Esc>[200~"
+let &t_PE = "\<Esc>[201~"
+endif
+if v:version > 802 || v:version == 802 && has('patch2345')
+let &t_fe = "\<Esc>[?1004h"
+let &t_fd = "\<Esc>[?1004l"
+if v:version > 802 || v:version == 802 && has('patch2383')
+execute "set <FocusGained>=\<Esc>[I"
+execute "set <FocusLost>=\<Esc>[O"
+endif
+endif
+endif
 if exists("syntax_on")
-  syntax reset
+syntax reset
 endif
 let g:terminal_ansi_colors = [
-     \ '#1d2021', '#cc241d', '#98971a', '#d79921', '#458588', '#b16286', '#689d6a', '#bdae93',
-     \ '#7c6f64', '#fb4934', '#b8bb26', '#fabd2f', '#83a598', '#d3869b', '#8ec07c', '#ebdbb2']
+\ '#1d2021', '#cc241d', '#98971a', '#d79921', '#458588', '#b16286', '#689d6a', '#bdae93',
+\ '#7c6f64', '#fb4934', '#b8bb26', '#fabd2f', '#83a598', '#d3869b', '#8ec07c', '#ebdbb2']
 hi Normal ctermfg=187 ctermbg=234 guifg=#ebdbb2 guibg=#1d2021 guisp=NONE cterm=NONE gui=NONE
 hi CursorLineNr ctermfg=214 ctermbg=237 guifg=#fabd2f guibg=#3c3836 guisp=NONE cterm=NONE gui=NONE
 hi FoldColumn ctermfg=102 ctermbg=237 guifg=#928374 guibg=#3c3836 guisp=NONE cterm=NONE gui=NONE
@@ -450,24 +378,24 @@ hi VisualMode ctermfg=208 ctermbg=234 guifg=#fe8019 guibg=#1d2021 guisp=NONE cte
 hi CommandMode ctermfg=175 ctermbg=234 guifg=#d3869b guibg=#1d2021 guisp=NONE cterm=NONE,reverse gui=NONE,reverse
 hi Warnings ctermfg=208 ctermbg=234 guifg=#fe8019 guibg=#1d2021 guisp=NONE cterm=NONE,reverse gui=NONE,reverse
 if has('nvim')
-  let g:terminal_color_0  = '#1d2021'
-  let g:terminal_color_8  = '#928374'
-  let g:terminal_color_1  = '#cc241d'
-  let g:terminal_color_9  = '#fb4934'
-  let g:terminal_color_2  = '#98971a'
-  let g:terminal_color_10 = '#b8bb26'
-  let g:terminal_color_3  = '#d79921'
-  let g:terminal_color_11 = '#fabd2f'
-  let g:terminal_color_4  = '#458588'
-  let g:terminal_color_12 = '#83a598'
-  let g:terminal_color_5  = '#b16286'
-  let g:terminal_color_13 = '#d3869b'
-  let g:terminal_color_6  = '#689d6a'
-  let g:terminal_color_14 = '#8ec07c'
-  let g:terminal_color_7  = '#a89984'
-  let g:terminal_color_15 = '#ebdbb2'
-  hi! link TermCursor Cursor
-  hi TermCursorNC ctermfg=237 ctermbg=187 guifg=#3c3836 guibg=#ebdbb2 guisp=NONE cterm=NONE gui=NONE
+let g:terminal_color_0  = '#1d2021'
+let g:terminal_color_8  = '#928374'
+let g:terminal_color_1  = '#cc241d'
+let g:terminal_color_9  = '#fb4934'
+let g:terminal_color_2  = '#98971a'
+let g:terminal_color_10 = '#b8bb26'
+let g:terminal_color_3  = '#d79921'
+let g:terminal_color_11 = '#fabd2f'
+let g:terminal_color_4  = '#458588'
+let g:terminal_color_12 = '#83a598'
+let g:terminal_color_5  = '#b16286'
+let g:terminal_color_13 = '#d3869b'
+let g:terminal_color_6  = '#689d6a'
+let g:terminal_color_14 = '#8ec07c'
+let g:terminal_color_7  = '#a89984'
+let g:terminal_color_15 = '#ebdbb2'
+hi! link TermCursor Cursor
+hi TermCursorNC ctermfg=237 ctermbg=187 guifg=#3c3836 guibg=#ebdbb2 guisp=NONE cterm=NONE gui=NONE
 endif
 hi diffAdded ctermfg=142 ctermbg=NONE guifg=#b8bb26 guibg=NONE guisp=NONE cterm=NONE gui=NONE
 hi diffRemoved ctermfg=203 ctermbg=NONE guifg=#fb4934 guibg=NONE guisp=NONE cterm=NONE gui=NONE
@@ -545,52 +473,83 @@ hi jsonQuote ctermfg=142 ctermbg=NONE guifg=#b8bb26 guibg=NONE guisp=NONE cterm=
 hi jsonBraces ctermfg=187 ctermbg=NONE guifg=#ebdbb2 guibg=NONE guisp=NONE cterm=NONE gui=NONE
 hi jsonString ctermfg=187 ctermbg=NONE guifg=#ebdbb2 guibg=NONE guisp=NONE cterm=NONE gui=NONE
 if has('syntax') && !exists('g:syntax_on')
-  syntax enable
+syntax enable
 endif
 if exists('+colorcolumn')
-  set colorcolumn=80
+set colorcolumn=80
 endif
 nmap <leader>sp :call <SID>SynStack()<CR>
 function! <SID>SynStack()
-  if !exists("*synstack")
-    return
-  endif
-  echo map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
+if !exists("*synstack")
+return
+endif
+echo map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
 endfunc
 function! <SID>lastplace()
-  if index(split("quickfix,nofile,help", ","), &buftype) != -1
-    return
-  endif
-  if index(split("gitcommit,gitrebase,svn,hgcommit", ","), &filetype) != -1
-    return
-  endif
-  try
-    if empty(glob(@%))
-      return
-    endif
-  catch
-    return
-  endtry
-  if line("'\"") > 0 && line("'\"") <= line("$")
-    if line("w$") == line("$")
-      execute "normal! g`\""
-    elseif line("$") - line("'\"") > ((line("w$") - line("w0")) / 2) - 1
-      execute "normal! g`\"zz"
-    else
-      execute "normal! \G'\"\<c-e>"
-    endif
-  endif
-  if foldclosed(".") != -1
-    execute "normal! zvzz"
-  endif
+if index(split("quickfix,nofile,help", ","), &buftype) != -1
+return
+endif
+if index(split("gitcommit,gitrebase,svn,hgcommit", ","), &filetype) != -1
+return
+endif
+try
+if empty(glob(@%))
+return
+endif
+catch
+return
+endtry
+if line("'\"") > 0 && line("'\"") <= line("$")
+if line("w$") == line("$")
+execute "normal! g`\""
+elseif line("$") - line("'\"") > ((line("w$") - line("w0")) / 2) - 1
+execute "normal! g`\"zz"
+else
+execute "normal! \G'\"\<c-e>"
+endif
+endif
+if foldclosed(".") != -1
+execute "normal! zvzz"
+endif
 endfunc
-au! BufWinEnter * call <SID>lastplace()
-au! BufNewFile,BufReadPost *.{yaml,yml} set filetype=yaml
-au! FileType yaml setlocal ts=2 sts=2 sw=2 expandtab indentkeys-=0#,0},0],<:>,-
+augroup RestoreCursorPosition
+au!
+au BufWinEnter * call <SID>lastplace()
+augroup END
+func! <SID>stripTrailingWhitespace()
+normal mZ
+let l:winview = winsaveview()
+let l:chars = col("$")
+%s/\s\+$//e
+if (line("'Z") != line(".")) || (l:chars != col("$"))
+echo "Warning: trailing whitespaces have been removed! Use UNDO to restore deleted whitespaces.\n"
+endif
+call winrestview(l:winview)
+endfunc
+augroup StripTrailingWhitespace
+au!
+au BufWritePre * call <SID>stripTrailingWhitespace()
+augroup END
+augroup WhitespacesEOL
+au!
+au BufWinEnter * hi WhitespaceEOL ctermbg=red guibg=red | match WhitespaceEOL /\s\+$/
+au InsertEnter * match WhitespaceEOL /\s\+\%#\@<!$/
+au InsertLeave * match WhitespaceEOL /\s\+$/
+au BufWinLeave * call clearmatches()
+augroup END
+augroup SpecialFileTypes
+au!
+au BufNewFile,BufReadPost *.{yaml,yml} set filetype=yaml
+au FileType yaml setlocal ts=2 sts=2 sw=2 expandtab indentkeys-=0#,0},0],<:>,-
+au FileType html,xml setlocal listchars-=tab:>.
+augroup END
+let g:colorizer_auto_filetype = 'css,html'
+let g:colorizer_fgcontrast = 0
 EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
+LOCAL_TOOLS_FILE_SIZE=5584
 COLOR_WHITE=$'\e[1;37m'
 COLOR_LIGHTGRAY=$'\e[0;37m'
 COLOR_GRAY=$'\e[1;30m'
@@ -660,19 +619,20 @@ fi
 }
 _get_url() {
 if [ "$1" = "-check" ]; then
-if _has curl || _has wget || [ -x /usr/lib/apt/apt-helper ]; then
+if _has curl || _has wget || _has openssl || [ -x /usr/lib/apt/apt-helper ]; then
 return 0
 else
 return 1
 fi
 fi
+local URL="$1"
 if _has curl; then
-curl --fail --silent --show-error -k -L "$1"
+curl --fail --silent --show-error -k -L "$URL"
 elif _has wget; then
-wget -q -O - "$1"
+wget -q -O - "$URL"
 elif [ -x /usr/lib/apt/apt-helper ]; then
 local R OUT ERR TMP="$(mktemp)"
-_catch OUT ERR /usr/lib/apt/apt-helper -oAcquire::https::Verify-Peer=false download-file "$1" "$TMP" && R=0 || R=$?
+_catch OUT ERR /usr/lib/apt/apt-helper -oAcquire::https::Verify-Peer=false download-file "$URL" "$TMP" && R=0 || R=$?
 if [ $R -eq 0 ]; then
 cat "$TMP"
 else
@@ -680,6 +640,36 @@ echo "$ERR" >&2
 fi
 rm -f "$TMP"
 return $R
+elif _has openssl; then
+local LOOP=1
+while [ -n "$LOOP" ]; do
+local X="$URL" HOST UPATH PORT=443 R="" S=""
+unset LOOP
+X="${X#https://}"
+HOST="${X%%/*}"
+UPATH="/${X#*/}"
+[ "$UPATH" != "/$X" ] || UPATH="/"
+while IFS= read -r line; do
+if [ -z "$R" ]; then
+R="${line#* }"
+S="${R%% *}"
+if [ "$S" != "200" -a "$S" != "301" -a "$S" != "302" ]; then
+echo "Error: $R" >&2
+return 1
+fi
+elif [ "${line%% *}" = "Location:" ]; then
+URL="${line#* }"
+URL="${URL%$'\r'}"
+[ "${URL#https://}" != "$URL" ] || URL="https://$HOST$URL"
+LOOP=1
+break
+elif [ "${#line}" -eq 1 ]; then
+cat
+fi
+done < <(printf '%s\r\n' "GET $UPATH HTTP/1.1" "Host: $HOST" "Connection: Close" "" | openssl s_client -quiet -connect "$HOST:443" 2>/dev/null)
+done
+else
+return 1
 fi
 }
 _has() { _check command -v "$1" && return 0 || return 1; }
@@ -709,6 +699,7 @@ shift
 fi
 PATH=":${PATH}:"
 for d; do
+d="${d%/}"
 PATH="${PATH//:${d}:/:}"
 [ "$pos" = "end" ] && PATH="$PATH${d}:" || PATH=":$d$PATH"
 done
@@ -845,6 +836,7 @@ do
 if [ -e "$fn" ]; then
 IFS= read -d $'\0' -r __val < "$fn"
 while read -r -d ';' p; do
+[ -n "$p" ] || continue
 p="${p/\%SystemRoot\%/$SYSTEMROOT}"
 p="${p/\%ProgramFiles\%/$PROGRAMFILES}"
 p="${p/\%USERPROFILE\%/$USERPROFILE}"
@@ -875,6 +867,8 @@ UNAME_ALL="$_CACHE"
 if _is linux; then
 if [ -f /etc/redhat-release ]; then
 UNAME_RELEASE="$(cat /etc/redhat-release)"
+elif [ -f /etc/alpine-release ]; then
+UNAME_RELEASE="$(grep 'PRETTY_NAME=' /etc/os-release | cut -d= -f2 | tr -d '"')"
 elif [ -f /etc/SuSE-release ]; then
 UNAME_RELEASE="SUSE Linux Enterprise Server $(grep VERSION /etc/SuSE-release | cut -d= -f2 | awk '{print $1}') SP$(grep PATCHLEVEL /etc/SuSE-release | cut -d= -f2 | awk '{print $1}')"
 elif [ -f /etc/lsb-release ]; then
@@ -1209,6 +1203,8 @@ fi
 shopt -s checkwinsize
 shopt -s cmdhist
 shopt -u mailwarn
+bind "set input-meta on"
+bind "set output-meta on"
 bind "set show-all-if-ambiguous on"
 bind "set skip-completed-text on"
 bind "set colored-completion-prefix on"
@@ -1218,6 +1214,10 @@ bind "set mark-symlinked-directories on"
 bind "set visible-stats on"
 bind "set blink-matching-paren on"
 bind "set page-completions off"
+bind '"\e[1~": beginning-of-line'
+bind '"\e[4~": end-of-line'
+bind '"\e[3~": delete-char'
+bind '"\e[2~": quoted-insert'
 bind '"\e[1;5D": backward-word'
 bind '"\e[1;5C": forward-word'
 ls() {
@@ -1318,6 +1318,7 @@ rm -f "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim"
 fi
 }
 [ -d "$IAM_HOME/vim_swap" ] || mkdir -p "$IAM_HOME/vim_swap"
+[ -d "$IAM_HOME/vim_runtime" ] || mkdir -p "$IAM_HOME/vim_runtime"
 _has apt-get && apt-get() {
 if [ "$(id -u)" -ne 0 ]; then
 echo "${COLOR_RED}The 'sudo' prefix was added automatically for the 'apt-get' command${COLOR_DEFAULT}" >&2
@@ -1373,7 +1374,9 @@ printf '%s\n' \
 "echo \"$(cat ${IAM_HOME}/local_tools | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/local_tools\"" \
 "echo \"$(cat ${HOME}/.tclshrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$HOME/.tclshrc\"" \
 "echo \"$(cat ${IAM_HOME}/bashrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/bashrc\"" \
-"exec bash --rcfile \"\$IAM_HOME/bashrc\" -i || exec \$SHELL -i"
+"echo \"$(cat ${IAM_HOME}/shellrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/shellrc\"" \
+"chmod +x \"\$IAM_HOME/shellrc\"" \
+"exec \"\$IAM_HOME/shellrc\""
 }
 reload() {
 if _is tmux && [ "$1" != "current" ]; then
@@ -1491,9 +1494,18 @@ printf '\033[4i'
 } | _send_raw_term
 echo "Copied to Windows clipboard" 1>&2
 }
+,fix-x-permission() {
+local fn T
+for fn; do
+cat "$fn" > "${fn}.fix-permissions"
+mv -f "${fn}.fix-permissions" "$fn"
+done
+}
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
 shopt -s histappend
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 shopt -s cmdhist
 unset HISTFILESIZE
 HISTSIZE=1000000
@@ -1504,8 +1516,6 @@ HISTFILE="$IAM_HOME/bash_history"
 if [ -e "$HOME/.${IAM}_history" ] && [ ! -e "$HISTFILE" ]; then
 mv "$HOME/.${IAM}_history" "$HISTFILE"
 fi
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 __kubectl_status() {
 local __K8S_CONTEXT
 local __K8S_CONF
@@ -1977,10 +1987,17 @@ EFAG[${#EFAG[@]}]="/opt/cloudbees/sda/bin"
 fi
 if _is linux; then
 if _has ps; then
+if _check command ps --version; then
 while IFS= read -r line; do
 EFAG[${#EFAG[@]}]="$line"
 done < <(ps -o args= -C ecmdrAgent | grep -oP '^.*(?=/ecmdrAgent)')
 unset line
+else
+while IFS= read -r line; do
+EFAG[${#EFAG[@]}]="$line"
+done < <(ps -o args= | grep '^[^[:space:]]*/ecmdrAgent' | sed 's#/ecmdrAgent.*$##')
+unset line
+fi
 fi
 elif _is windows; then
 while IFS= read -r line; do
@@ -2092,7 +2109,7 @@ fi
 if [ ! -x "$IAM_HOME/tools/bin/geturl" ]; then
 [ -d "$IAM_HOME/tools/bin" ] || mkdir -p "$IAM_HOME/tools/bin"
 {
-echo '#!/bin/bash'
+echo '#!/usr/bin/env bash'
 declare -f _hash _check _has _catch _get_url
 echo '_get_url "$@"'
 } > "$IAM_HOME/tools/bin/geturl"
@@ -2108,6 +2125,8 @@ local SIZE
 local CHECK_STATE
 local IS_ERROR
 local IDX
+local TOOLS_FILE="$IAM_HOME/local_tools"
+local TOOLS_URL="https://raw.githubusercontent.com/chpock/dotfiles/master/tools.list"
 if [ "lock" = "$CMD" ]; then
 touch "$IAM_HOME/local_tools.locked"
 echo "Tools are locked now."
@@ -2131,17 +2150,32 @@ echo "${COLOR_RED}ERROR:${COLOR_DEFAULT} Could not update tools: curl/wget comma
 return 1
 fi
 if [ "$PARAM" = "background" ]; then
-tools update background-real >/dev/null &
+tools update background-real >/dev/null 2>&1 &
 disown $!
 return
 fi
 fi
-local files=() recs=() recs_check=()
-while IFS= read -r LINE; do
-if [ -z "$LINE" ]; then
-unset I_DESC I_URL I_FILE I_SIZE I_FILTER I_ON_UPDATE
-elif [ -z "$I_DESC" ]; then
-I_DESC="$LINE"
+local files=() recs=() recs_check=() TOOLS_EXISTS=1
+if [ ! -f "$TOOLS_FILE" ] || [ "$(_get_size "$TOOLS_FILE")" != "$LOCAL_TOOLS_FILE_SIZE" ]; then
+local TMP="$(mktemp)"
+if ! _get_url "$TOOLS_URL" >"$TMP" 2>/dev/null; then
+rm -f "$TMP"
+unset TOOLS_EXISTS
+CHECK_STATE=1
+echo "${COLOR_RED}ERROR:${COLOR_DEFAULT} An unexpected error occurred while updating the list of tools."
+else
+mv -f "$TMP" "$TOOLS_FILE"
+SIZE="$(_get_size "$TOOLS_FILE")"
+if [ "$SIZE" != "$LOCAL_TOOLS_FILE_SIZE" ]; then
+echo "${COLOR_BROWN}WARNING:${COLOR_DEFAULT} The list of tools is not properly updated. The current file size ${SIZE} doesn't match the expected size ${LOCAL_TOOLS_FILE_SIZE}."
+fi
+fi
+fi
+if [ -n "$TOOLS_EXISTS" ]; then
+while IFS= read -r LINE || [ -n "$LINE" ]; do
+if [ "${LINE:0:5}" = "tool:" ]; then
+I_DESC="${LINE#*: }"
+unset I_URL I_FILE I_SIZE I_FILTER I_ON_UPDATE
 elif [ -z "$I_URL" ]; then
 I_URL="$LINE"
 elif [ -z "$I_FILE" ]; then
@@ -2172,7 +2206,8 @@ else
 recs+=("$I_DESC" "$I_URL" "$I_FILE" "$I_SIZE" "$I_ON_UPDATE" 0)
 fi
 unset I_DESC I_URL I_FILE I_SIZE I_FILTER I_ON_UPDATE
-done < "$IAM_HOME/local_tools"
+done < "$TOOLS_FILE"
+fi
 if [ "${#files[@]}" -gt 0 ]; then
 IDX=0
 while read -r SIZE; do
@@ -2434,6 +2469,42 @@ fi
 fi
 EOF
 
+cat <<'EOF' > "$IAM_HOME/shellrc"
+if [ -x /bin/bash ]; then
+BASH_BIN=/bin/bash
+elif [ -x /usr/bin/bash ]; then
+BASH_BIN=/usr/bin/bash
+elif [ -x "$IAM_HOME/tools/bin/bash" ]; then
+BASH_BIN="$IAM_HOME/tools/bin/bash"
+elif ! BASH_BIN="$(command -v bash 2>/dev/null)"; then
+unset BASH_BIN
+OS="$(uname -o):$(uname -m)"
+if [ "$OS" = "GNU/Linux:x86_64" -o "$OS" = "Linux:x86_64" ]; then
+[ -d "$IAM_HOME/tools/bin" ] || mkdir -p "$IAM_HOME/tools/bin"
+BASH_BIN="$IAM_HOME/tools/bin/bash"
+URL="https://github.com/chpock/dotfiles/releases/download/v0.0.0/bash-portable.5.2.21.linux.x86_64"
+if command -v curl >/dev/null 2>&1 && curl --silent -L "$URL" -o "$BASH_BIN" >/dev/null 2>&1; then
+SUCCESS=1
+elif command -v wget >/dev/null 2>&1 && wget -q -O "$BASH_BIN" "$URL" >/dev/null 2>&1; then
+SUCCESS=1
+elif [ -x /usr/lib/apt/apt-helper ] && /usr/lib/apt/apt-helper -oAcquire::https::Verify-Peer=false download-file "$URL" "$BASH_BIN" >/dev/null 2>&1; then
+SUCCESS=1
+fi
+if [ -z "$SUCCESS" ]; then
+rm -f "$BASH_BIN"
+unset BASH_BIN
+else
+chmod +x "$BASH_BIN"
+unset SUCCESS
+fi
+fi
+fi
+[ -z "$BASH_BIN" ] || exec "$BASH_BIN" --rcfile "$IAM_HOME/bashrc" -i
+[ -z "$SHELL" ] || exec "$SHELL" -i
+exec /bin/sh -i
+EOF
+chmod +x "$IAM_HOME/shellrc"
+
 # Magic: try to restore current directory. Only for SSH.
 if [ -n "$SSH_CLIENT" ]; then
     # get win title
@@ -2452,4 +2523,4 @@ if [ -n "$SSH_CLIENT" ]; then
     unset __WIN_TITLE_2
 fi
 
-exec bash --rcfile "$IAM_HOME/bashrc" -i || exec $SHELL -i
+exec "$IAM_HOME/shellrc"

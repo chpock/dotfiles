@@ -25,21 +25,23 @@ cat <<'EOF' > "$IAM_HOME/tmux.conf.template"
 @include tmux.conf
 EOF
 
-cat <<'EOF' > "$IAM_HOME/local_tools"
-@include tools.list
-EOF
-
 cat <<'EOF' > "$IAM_HOME/vimrc"
 @include vimrc
 EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
+@setSize LOCAL_TOOLS_FILE_SIZE REPO_ROOT/tools.list
 @include part 0 bashrc.sh
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
 @include part 1 bashrc.sh
 EOF
+
+cat <<'EOF' > "$IAM_HOME/shellrc"
+@include shellrc.sh
+EOF
+chmod +x "$IAM_HOME/shellrc"
 
 # Magic: try to restore current directory. Only for SSH.
 if [ -n "$SSH_CLIENT" ]; then
@@ -59,4 +61,4 @@ if [ -n "$SSH_CLIENT" ]; then
     unset __WIN_TITLE_2
 fi
 
-exec bash --rcfile "$IAM_HOME/bashrc" -i || exec $SHELL -i
+exec "$IAM_HOME/shellrc"

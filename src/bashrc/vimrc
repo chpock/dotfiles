@@ -28,7 +28,6 @@ endif
 
 set history=1000       " remember more commands and search history
 set undolevels=1000    " use many muchos levels of undo
-set wildignore=*.swp,*.bak,*.pyc,*.class
 set notitle            " don't change the terminal's title
 set visualbell         " don't beep
 set noerrorbells       " don't beep
@@ -38,10 +37,25 @@ set noshowmode         " don't display the current mode (-- INSERT --)
 set ruler              " show the cursor position always (ru)
 set laststatus=2       " always display status line
 
+set complete-=i   " Disable completing keywords in included files (e.g.,
+                  " #include in C).  When configured properly, this can result
+                  " in the slow, recursive scanning of hundreds of files of
+                  " dubious relevance.
+
+set notimeout         " don't timeout on mappings
+set ttimeout          " Make the escape key more responsive by decreasing the
+set ttimeoutlen=100   " wait time for an escape sequence (e.g., arrow keys).
+
+set wildmenu   " enhanced command-line completion
+set wildignore=*.swp,*.bak,*.pyc,*.class
+
 " store swap files in my home / temp directories, but not in current directory
 " Use // at the end of the filename makes vim use absolute file paths for
 " the swap file names so you don't get name collisions.
 set directory=$IAM_HOME/vim_swap//,~/tmp//,/var/tmp//,/tmp//,.
+
+" set my personal vim runtime
+set runtimepath=$IAM_HOME/vim_runtime,$VIMRUNTIME
 
 if version >= 600
     filetype plugin indent on
@@ -50,14 +64,7 @@ else
 endif
 
 set list
-set listchars=tab:>.,trail:.,extends:#,nbsp:.
-if has("autocmd")
-    autocmd filetype html,xml set listchars-=tab:>.
-endif
-
-nnoremap <silent> <special> <F2> :set invpaste invnumber invlist<CR>
-inoremap <silent> <special> <F2> <C-O>:set invpaste invnumber invlist<CR>
-set pastetoggle=<F2>
+set listchars=tab:>.,trail:.,extends:>,precedes:<,nbsp:.
 
 if v:version > 703 || v:version == 703 && has("patch541")
   set formatoptions+=j " Delete comment character when joining commented lines
@@ -77,35 +84,137 @@ command! Q :q
 command! Wq :wq
 command! Wqa :wqa
 
+" C-s - save
+noremap <C-s>  :update<CR>
+vnoremap <C-s> <C-C>:update<CR>
+inoremap <C-s> <Esc>:update<CR>gi
+
+" There is no way to detect the paste mode changes in vim. That is why I use
+" here a hack to call this procedure on statusline update. It will detect
+" the paste mode change.
+func! PasteGuard()
+    if !exists("g:paste_prev") | let g:paste_prev = &paste | endif
+    if !exists("g:paste_guard") | let g:paste_guard = 0 | endif
+    if g:paste_prev != &paste
+        let g:paste_prev = &paste
+        if &paste && g:paste_guard == 1
+            " Entered into paste mode manually
+            let g:paste_guard = 2
+            call timer_start(1, { -> PasteChange() })
+        endif
+        if !&paste && g:paste_guard == 2
+            " Exited from paste mode manually
+            let g:paste_guard = 0
+            call timer_start(1, { -> PasteChange() })
+        endif
+    endif
+    return ''
+endfunc
+
+" This procedure actually handles the paste mode changes. It will be called in
+" background after a delay. This is necessary because the commands executed
+" as part of the statusline update are not applied immediately.
+func! PasteChange()
+    if &paste
+        if mode() == 'n'
+             " If I use 'startinsert' here, vim will wait until the next
+             " keystroke to change the mode
+             call feedkeys("i")
+        endif
+        let g:paste_num = &number
+        let g:paste_list = &list
+        set nonumber nolist
+    else
+        if mode() == 'i'
+             " If I use 'stopinsert' here, vim will wait until the next
+             " keystroke to change the mode
+             call feedkeys("\<C-\>\<C-n>")
+        endif
+        let &number = g:paste_num
+        let &list = g:paste_list
+    endif
+    redrawstatus!
+endfunc
+
+" This autocommand turns the paste mode off when leaving INSERT mode.
+augroup PasteGuardAU
+    au!
+    " Turn off paste only for real NORMAL mode (when mode(1) returns "n"),
+    " but not for C-o in INSERT (when mode(1) returns "niI", "no", etc.)
+    au InsertLeave * if mode(1) == "n" && &paste | set nopaste | endif
+augroup END
+
+"nnoremap <silent> <special> <F2> :set paste<CR>i
+"nnoremap <silent> <special> <F2> :set invpaste invnumber invlist<CR>
+"inoremap <silent> <special> <F2> <C-O>:set invpaste invnumber invlist<CR>
+
+" The paste guard must ignore automatic paste mode from xterm-bracketed-paste.
+" Here we set the variable g:paste_guard so PasteGuard handles paste mode
+" changes.
+nnoremap <silent> <special> <F2> :let g:paste_guard=1<CR>:set invpaste<CR>
+inoremap <silent> <special> <F2> <C-O>:let g:paste_guard=1<CR><C-O>:set invpaste<CR>
+set pastetoggle=<F2>
+
 " Status line
 " set statusline=%<%f\ %h%m%r%=%-20.(line=%l,col=%c%V,totlin=%L%)\%h%m%r%=%-40(,bytval=0x%B,%n%Y%)\%P
 " set statusline=%F%m%r%h%w\ [FORMAT=%{&ff}]\ [TYPE=%Y]\ [ASCII=\%03.3b]\ [HEX=\%02.2B]\ [POS=%04l,%04v][%p%%]\ [LEN=%L]
 set statusline=
+set statusline+=%{PasteGuard()}
+set statusline+=%#DiffText#%{(&paste&&mode()=='i')?'\ \ PASTE\ \ ':''}
+set statusline+=%#DiffChange#%{(!&paste&&mode()=='i')?'\ \ INSERT\ ':''}
 set statusline+=%#DiffAdd#%{(mode()=='n')?'\ \ NORMAL\ ':''}
-set statusline+=%#DiffChange#%{(mode()=='i')?'\ \ INSERT\ ':''}
 set statusline+=%#DiffDelete#%{(mode()=='r')?'\ \ RPLACE\ ':''}
 set statusline+=%#Cursor#%{(mode()=='v')?'\ \ VISUAL\ ':''}
-set statusline+=\ %n                       " buffer number
-set statusline+=\ %#Visual#                " colour
-set statusline+=%{&paste?'\ PASTE\ ':''}
+set statusline+=\ %n                         " buffer number
+set statusline+=\ %#Visual#                  " colour
+set statusline+=%{(&paste&&mode()!='i')?'\ PASTE\ ':''}
 set statusline+=%{&spell?'\ SPELL\ ':''}
-set statusline+=%#CursorIM#                " colour
-set statusline+=%R                         " readonly flag
-set statusline+=%M                         " modified [+] flag
-set statusline+=%#Cursor#                  " colour
-set statusline+=%#CursorLine#              " colour
-set statusline+=\ %t                       " short file name
-set statusline+=\ %=                       " right align
-set statusline+=%#CursorLine#              " colour
-set statusline+=\ [FileType:%Y]            " file type
-set statusline+=\ %#CursorIM#              " colour
-set statusline+=\ [Line:%-3l\ Column:%-3c] " line + column
-set statusline+=\ %#Cursor#                " colour
-set statusline+=\ %3p%%\ %##               " percentage
+set statusline+=%#CursorIM#                  " colour
+set statusline+=%R                           " readonly flag
+set statusline+=%M                           " modified [+] flag
+set statusline+=%#Cursor#                    " colour
+set statusline+=%#CursorLine#                " colour
+set statusline+=\ %t                         " short file name
+set statusline+=\ %=                         " right align
+set statusline+=%#CursorLine#                " colour
+set statusline+=\ [FileType:%Y]              " file type
+set statusline+=\ %#CursorIM#                " colour
+set statusline+=\ [Line:%-3l\ Column:%-3c]   " line + column
+set statusline+=\ %#Cursor#                  " colour
+set statusline+=\ %3p%%\ %##                 " percentage
 
-" Monokai theme
 set background=dark
 highlight clear
+
+" turn on truecolor
+if !has('gui_running')
+    if exists('+termguicolors')
+        let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"   " Set foreground color
+        let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"   " Set background color
+        let &termguicolors = v:true              " Enable GUI colors for the terminal to get truecolor
+    endif
+    " Enable bracketed paste mode, see  :help xterm-bracketed-paste
+    " This feature has been added since v8.0.0210
+    if v:version > 800 || v:version == 800 && has('patch210')
+        let &t_BE = "\<Esc>[?2004h"
+        let &t_BD = "\<Esc>[?2004l"
+        let &t_PS = "\<Esc>[200~"
+        let &t_PE = "\<Esc>[201~"
+    endif
+    " Enable focus event tracking, see  :help xterm-focus-event
+    " This feature has been added since v8.2.2345
+    " https://github.com/vim/vim/commit/681fc3fa782e99fe69ed2c83c3e29109d2d61e1a
+    if v:version > 802 || v:version == 802 && has('patch2345')
+        let &t_fe = "\<Esc>[?1004h"
+        let &t_fd = "\<Esc>[?1004l"
+        " Named focus events have been added since v8.2.2383
+        " https://github.com/vim/vim/commit/ccb47a2899d9f8076dad0f8348c057450febf32b
+        if v:version > 802 || v:version == 802 && has('patch2383')
+            execute "set <FocusGained>=\<Esc>[I"
+            execute "set <FocusLost>=\<Esc>[O"
+        endif
+    endif
+endif
 
 if exists("syntax_on")
   syntax reset
@@ -366,13 +475,54 @@ function! <SID>lastplace()
     execute "normal! zvzz"
   endif
 endfunc
-au! BufWinEnter * call <SID>lastplace()
+
+augroup RestoreCursorPosition
+    au!
+    au BufWinEnter * call <SID>lastplace()
+augroup END
+
+" Strip trailing whitespaces on save
+func! <SID>stripTrailingWhitespace()
+    normal mZ
+    let l:winview = winsaveview()
+    let l:chars = col("$")
+    %s/\s\+$//e
+    if (line("'Z") != line(".")) || (l:chars != col("$"))
+        echo "Warning: trailing whitespaces have been removed! Use UNDO to restore deleted whitespaces.\n"
+    endif
+    call winrestview(l:winview)
+endfunc
+
+augroup StripTrailingWhitespace
+    au!
+    au BufWritePre * call <SID>stripTrailingWhitespace()
+augroup END
+
+" Hightlight EOL whitespaces
+augroup WhitespacesEOL
+    au!
+    au BufWinEnter * hi WhitespaceEOL ctermbg=red guibg=red | match WhitespaceEOL /\s\+$/
+    au InsertEnter * match WhitespaceEOL /\s\+\%#\@<!$/
+    au InsertLeave * match WhitespaceEOL /\s\+$/
+    au BufWinLeave * call clearmatches()
+augroup END
 
 " Special file types
 
-" YAML
-au! BufNewFile,BufReadPost *.{yaml,yml} set filetype=yaml
-" disable auto ident for keys: ':', '-', '#', '}', ']'
-au! FileType yaml setlocal ts=2 sts=2 sw=2 expandtab indentkeys-=0#,0},0],<:>,-
+augroup SpecialFileTypes
+    au!
+    " set as YAML
+    au BufNewFile,BufReadPost *.{yaml,yml} set filetype=yaml
+    " disable YAML auto ident for keys: ':', '-', '#', '}', ']'
+    au FileType yaml setlocal ts=2 sts=2 sw=2 expandtab indentkeys-=0#,0},0],<:>,-
+    " don't show tabs in html/xml
+    au FileType html,xml setlocal listchars-=tab:>.
+augroup END
 
+" Plugins
+
+" Colorizer
+" https://github.com/chrisbra/Colorizer/blob/master/doc/Colorizer.txt
+let g:colorizer_auto_filetype = 'css,html'   " Automatically highlight filetypes
+let g:colorizer_fgcontrast = 0   " Adjust the contrast (-1, 0, 1, 2). When -1 - fg and bg are the same.
 

@@ -88,19 +88,20 @@ _get_size() {
 
 _get_url() {
     if [ "$1" = "-check" ]; then
-        if _has curl || _has wget || [ -x /usr/lib/apt/apt-helper ]; then
+        if _has curl || _has wget || _has openssl || [ -x /usr/lib/apt/apt-helper ]; then
             return 0
         else
             return 1
         fi
     fi
+    local URL="$1"
     if _has curl; then
-        curl --fail --silent --show-error -k -L "$1"
+        curl --fail --silent --show-error -k -L "$URL"
     elif _has wget; then
-        wget -q -O - "$1"
+        wget -q -O - "$URL"
     elif [ -x /usr/lib/apt/apt-helper ]; then
         local R OUT ERR TMP="$(mktemp)"
-        _catch OUT ERR /usr/lib/apt/apt-helper -oAcquire::https::Verify-Peer=false download-file "$1" "$TMP" && R=0 || R=$?
+        _catch OUT ERR /usr/lib/apt/apt-helper -oAcquire::https::Verify-Peer=false download-file "$URL" "$TMP" && R=0 || R=$?
         if [ $R -eq 0 ]; then
             cat "$TMP"
         else
@@ -108,6 +109,37 @@ _get_url() {
         fi
         rm -f "$TMP"
         return $R
+    elif _has openssl; then
+        local LOOP=1
+        while [ -n "$LOOP" ]; do
+            local X="$URL" HOST UPATH PORT=443 R="" S=""
+            unset LOOP
+            X="${X#https://}"
+            HOST="${X%%/*}"
+            UPATH="/${X#*/}"
+            [ "$UPATH" != "/$X" ] || UPATH="/"
+            while IFS= read -r line; do
+                if [ -z "$R" ]; then
+                    R="${line#* }"
+                    S="${R%% *}"
+                    if [ "$S" != "200" -a "$S" != "301" -a "$S" != "302" ]; then
+                        echo "Error: $R" >&2
+                        return 1
+                    fi
+                elif [ "${line%% *}" = "Location:" ]; then
+                    URL="${line#* }"
+                    URL="${URL%$'\r'}"
+                    [ "${URL#https://}" != "$URL" ] || URL="https://$HOST$URL"
+                    LOOP=1
+                    break
+                elif [ "${#line}" -eq 1 ]; then
+                    # if line contains only '\r'
+                    cat
+                fi
+            done < <(printf '%s\r\n' "GET $UPATH HTTP/1.1" "Host: $HOST" "Connection: Close" "" | openssl s_client -quiet -connect "$HOST:443" 2>/dev/null)
+        done
+    else
+        return 1
     fi
 }
 
@@ -141,6 +173,8 @@ _addpath() {
     fi
     PATH=":${PATH}:"
     for d; do
+        # strip trailing slash
+        d="${d%/}"
         PATH="${PATH//:${d}:/:}"
         [ "$pos" = "end" ] && PATH="$PATH${d}:" || PATH=":$d$PATH"
     done
@@ -313,6 +347,7 @@ do
     if [ -e "$fn" ]; then
         IFS= read -d $'\0' -r __val < "$fn"
         while read -r -d ';' p; do
+            [ -n "$p" ] || continue
             p="${p/\%SystemRoot\%/$SYSTEMROOT}"
             p="${p/\%ProgramFiles\%/$PROGRAMFILES}"
             p="${p/\%USERPROFILE\%/$USERPROFILE}"
@@ -350,6 +385,9 @@ hostinfo() {
         if [ -f /etc/redhat-release ]; then
             # RedHat
             UNAME_RELEASE="$(cat /etc/redhat-release)"
+        elif [ -f /etc/alpine-release ]; then
+            # Alpine
+            UNAME_RELEASE="$(grep 'PRETTY_NAME=' /etc/os-release | cut -d= -f2 | tr -d '"')"
         elif [ -f /etc/SuSE-release ]; then
             # SUSE
             UNAME_RELEASE="SUSE Linux Enterprise Server $(grep VERSION /etc/SuSE-release | cut -d= -f2 | awk '{print $1}') SP$(grep PATCHLEVEL /etc/SuSE-release | cut -d= -f2 | awk '{print $1}')"
@@ -809,6 +847,9 @@ shopt -s cmdhist
 shopt -u mailwarn
 
 # Readline options
+# Be 8 bit clean
+bind "set input-meta on"
+bind "set output-meta on"
 # show-all-if-ambiguous - words which have more than one possible completion
 # cause the matches to be listed immediately instead of ringing the bell
 bind "set show-all-if-ambiguous on"
@@ -839,6 +880,14 @@ bind "set page-completions off"
 # 2. press key
 # 3. press <enter>
 # 4. press <ctrl-d>
+
+# allow the use of the Home/End keys
+bind '"\e[1~": beginning-of-line'
+bind '"\e[4~": end-of-line'
+
+# allow the use of the Delete/Insert keys
+bind '"\e[3~": delete-char'
+bind '"\e[2~": quoted-insert'
 
 # bind arrow keys to search in history
 #bind '"\e[A": history-search-backward'
@@ -974,6 +1023,7 @@ vim() {
 }
 
 [ -d "$IAM_HOME/vim_swap" ] || mkdir -p "$IAM_HOME/vim_swap"
+[ -d "$IAM_HOME/vim_runtime" ] || mkdir -p "$IAM_HOME/vim_runtime"
 
 _has apt-get && apt-get() {
     if [ "$(id -u)" -ne 0 ]; then
@@ -1036,7 +1086,9 @@ __magic_ssh() {
         "echo \"$(cat ${IAM_HOME}/local_tools | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/local_tools\"" \
         "echo \"$(cat ${HOME}/.tclshrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$HOME/.tclshrc\"" \
         "echo \"$(cat ${IAM_HOME}/bashrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/bashrc\"" \
-        "exec bash --rcfile \"\$IAM_HOME/bashrc\" -i || exec \$SHELL -i"
+        "echo \"$(cat ${IAM_HOME}/shellrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/shellrc\"" \
+        "chmod +x \"\$IAM_HOME/shellrc\"" \
+        "exec \"\$IAM_HOME/shellrc\""
 }
 
 reload() {
@@ -1163,6 +1215,13 @@ clip() {
         printf '\033[4i'
     } | _send_raw_term
     echo "Copied to Windows clipboard" 1>&2
+}
+,fix-x-permission() {
+    local fn T
+    for fn; do
+        cat "$fn" > "${fn}.fix-permissions"
+        mv -f "${fn}.fix-permissions" "$fn"
+    done
 }
 
 # 'less' settings
@@ -1868,11 +1927,21 @@ fi
 
 if _is linux; then
     if _has ps; then
-        while IFS= read -r line; do
-            # workaround for old bash: https://unix.stackexchange.com/questions/64427/bash-3-0-not-supporting-lists
-            EFAG[${#EFAG[@]}]="$line"
-        done < <(ps -o args= -C ecmdrAgent | grep -oP '^.*(?=/ecmdrAgent)')
-        unset line
+        if _check command ps --version; then
+            # if we have GNU ps, but not busybox ps
+            while IFS= read -r line; do
+                # workaround for old bash: https://unix.stackexchange.com/questions/64427/bash-3-0-not-supporting-lists
+                EFAG[${#EFAG[@]}]="$line"
+            done < <(ps -o args= -C ecmdrAgent | grep -oP '^.*(?=/ecmdrAgent)')
+            unset line
+        else
+            # busybox version
+            while IFS= read -r line; do
+                # workaround for old bash: https://unix.stackexchange.com/questions/64427/bash-3-0-not-supporting-lists
+                EFAG[${#EFAG[@]}]="$line"
+            done < <(ps -o args= | grep '^[^[:space:]]*/ecmdrAgent' | sed 's#/ecmdrAgent.*$##')
+            unset line
+        fi
     fi
 elif _is windows; then
     while IFS= read -r line; do
@@ -2008,7 +2077,7 @@ fi
 if [ ! -x "$IAM_HOME/tools/bin/geturl" ]; then
     [ -d "$IAM_HOME/tools/bin" ] || mkdir -p "$IAM_HOME/tools/bin"
     {
-        echo '#!/bin/bash'
+        echo '#!/usr/bin/env bash'
         declare -f _hash _check _has _catch _get_url
         echo '_get_url "$@"'
     } > "$IAM_HOME/tools/bin/geturl"
@@ -2026,6 +2095,8 @@ tools() {
     local CHECK_STATE
     local IS_ERROR
     local IDX
+    local TOOLS_FILE="$IAM_HOME/local_tools"
+    local TOOLS_URL="https://raw.githubusercontent.com/chpock/dotfiles/master/tools.list"
 
     if [ "lock" = "$CMD" ]; then
         touch "$IAM_HOME/local_tools.locked"
@@ -2053,51 +2124,68 @@ tools() {
             return 1
         fi
         if [ "$PARAM" = "background" ]; then
-            tools update background-real >/dev/null &
+            tools update background-real >/dev/null 2>&1 &
             disown $!
             return
         fi
     fi
 
-    local files=() recs=() recs_check=()
+    local files=() recs=() recs_check=() TOOLS_EXISTS=1
 
-    while IFS= read -r LINE; do
-        if [ -z "$LINE" ]; then
-            unset I_DESC I_URL I_FILE I_SIZE I_FILTER I_ON_UPDATE
-        elif [ -z "$I_DESC" ]; then
-            I_DESC="$LINE"
-        elif [ -z "$I_URL" ]; then
-            I_URL="$LINE"
-        elif [ -z "$I_FILE" ]; then
-            printf -v LINE '%q' "$LINE"; # quote string
-            eval "I_FILE=\"${LINE//\\\$/\$}\""; # enable $VAR
-        elif [ -z "$I_SIZE" ]; then
-            local P1="${LINE%:*}"
-            if [ "$P1" = "$LINE" ]; then
-                I_SIZE="$LINE"
-            else
-                if [ "$P1" = "filter" ]; then
-                    I_FILTER="${LINE#*: }"
-                elif [ "$P1" = "on update" ]; then
-                    I_ON_UPDATE="${LINE#*: }"
-                else
-                    echo "ERROR: unexpected line in tools list: $LINE"
-                fi
+    if [ ! -f "$TOOLS_FILE" ] || [ "$(_get_size "$TOOLS_FILE")" != "$LOCAL_TOOLS_FILE_SIZE" ]; then
+        local TMP="$(mktemp)"
+        if ! _get_url "$TOOLS_URL" >"$TMP" 2>/dev/null; then
+            rm -f "$TMP"
+            unset TOOLS_EXISTS
+            CHECK_STATE=1
+            echo "${COLOR_RED}ERROR:${COLOR_DEFAULT} An unexpected error occurred while updating the list of tools."
+        else
+            mv -f "$TMP" "$TOOLS_FILE"
+            SIZE="$(_get_size "$TOOLS_FILE")"
+            if [ "$SIZE" != "$LOCAL_TOOLS_FILE_SIZE" ]; then
+                echo "${COLOR_BROWN}WARNING:${COLOR_DEFAULT} The list of tools is not properly updated. The current file size ${SIZE} doesn't match the expected size ${LOCAL_TOOLS_FILE_SIZE}."
             fi
-        else
-            echo "ERROR: unexpected line in tools list: $LINE"
         fi
-        # continue the loop if a tool record is incomplete
-        [ -n "$I_SIZE" ] || continue
-        if [ -n "$I_FILTER" ] && ! _is "$I_FILTER"; then continue; fi
-        if [ -e "$I_FILE" ]; then
-            recs_check+=("$I_DESC" "$I_URL" "$I_FILE" "$I_SIZE" "$I_ON_UPDATE")
-            files+=("$I_FILE")
-        else
-            recs+=("$I_DESC" "$I_URL" "$I_FILE" "$I_SIZE" "$I_ON_UPDATE" 0)
-        fi
-        unset I_DESC I_URL I_FILE I_SIZE I_FILTER I_ON_UPDATE
-    done < "$IAM_HOME/local_tools"
+    fi
+
+    if [ -n "$TOOLS_EXISTS" ]; then
+        while IFS= read -r LINE || [ -n "$LINE" ]; do
+            if [ "${LINE:0:5}" = "tool:" ]; then
+                I_DESC="${LINE#*: }"
+                unset I_URL I_FILE I_SIZE I_FILTER I_ON_UPDATE
+            elif [ -z "$I_URL" ]; then
+                I_URL="$LINE"
+            elif [ -z "$I_FILE" ]; then
+                printf -v LINE '%q' "$LINE"; # quote string
+                eval "I_FILE=\"${LINE//\\\$/\$}\""; # enable $VAR
+            elif [ -z "$I_SIZE" ]; then
+                local P1="${LINE%:*}"
+                if [ "$P1" = "$LINE" ]; then
+                    I_SIZE="$LINE"
+                else
+                    if [ "$P1" = "filter" ]; then
+                        I_FILTER="${LINE#*: }"
+                    elif [ "$P1" = "on update" ]; then
+                        I_ON_UPDATE="${LINE#*: }"
+                    else
+                        echo "ERROR: unexpected line in tools list: $LINE"
+                    fi
+                fi
+            else
+                echo "ERROR: unexpected line in tools list: $LINE"
+            fi
+            # continue the loop if a tool record is incomplete
+            [ -n "$I_SIZE" ] || continue
+            if [ -n "$I_FILTER" ] && ! _is "$I_FILTER"; then continue; fi
+            if [ -e "$I_FILE" ]; then
+                recs_check+=("$I_DESC" "$I_URL" "$I_FILE" "$I_SIZE" "$I_ON_UPDATE")
+                files+=("$I_FILE")
+            else
+                recs+=("$I_DESC" "$I_URL" "$I_FILE" "$I_SIZE" "$I_ON_UPDATE" 0)
+            fi
+            unset I_DESC I_URL I_FILE I_SIZE I_FILTER I_ON_UPDATE
+        done < "$TOOLS_FILE"
+    fi
 
     if [ "${#files[@]}" -gt 0 ]; then
         IDX=0
