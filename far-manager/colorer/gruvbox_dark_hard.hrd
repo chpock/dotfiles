@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hrd PUBLIC "-//Cail Lomecb//DTD Colorer HRD take5//EN"
+  "http://colorer.sf.net/2003/hrd.dtd">
+
+<!--
+
+    Colorer schema
+    Based on: gruvbox colors by morhetz <morhetz@gmail.com> (https://github.com/morhetz/gruvbox)
+    Maintained by: Konstantin Kushnir <chpock@gmail.com> (https://github.com/chpock/dotfiles)
+    Generated at: 2024-02-04T19:19:17,126826900+02:00
+
+-->
+
+<hrd xmlns="http://colorer.sf.net/2003/hrd">
+
+  <assign name="def:Text" fore="#ebdbb2" back="#1d2021"/>
+  <assign name="def:HorzCross" fore="#1d2021" back="#bdae93"/>
+  <assign name="def:VertCross" fore="#1d2021" back="#bdae93"/>
+
+  <assign name="def:Number" fore="#00c23e"/>
+  <assign name="def:NumberDec" fore="#00c23e"/>
+  <assign name="def:NumberHex" fore="#009b08"/>
+  <assign name="def:NumberBin" fore="#00871d"/>
+  <assign name="def:NumberOct" fore="#009b08"/>
+  <assign name="def:NumberFloat" fore="#00be50"/>
+  <assign name="def:NumberSuffix" fore="#008139"/>
+
+  <assign name="def:String" fore="#98971a"/>
+  <assign name="def:StringContent" fore="#d65d0e" style='1'/>
+  <assign name="def:StringEdge" fore="#b8bb26"/>
+
+  <assign name="def:Comment" fore="#928374"/>
+  <assign name="def:CommentContent" fore="#458588" back="#282828" style='1'/>
+  <assign name="def:CommentEdge" fore="#689d6a" back="#282828"/>
+  <assign name="def:CommentDoc" fore="#ebdbb2" back="#282828"/>
+  <assign name="def:CommentDocEdge" fore="#9d0006" back="#282828"/>
+
+  <assign name="def:Symbol" fore="#b57614"/>
+  <assign name="def:SymbolStrong" fore="#a89984"/>
+  <assign name="def:Prefix" fore="#8b8eff"/>
+
+  <assign name="def:Operator" fore="#689d6a"/>
+
+  <assign name="def:Keyword" fore="#cc241d"/>
+  <assign name="def:KeywordStrong" fore="#fb4934" style='1'/>
+  <assign name="def:FunctionKeyword" fore="#d65d0e"/>
+  <assign name="def:DeprecatedKeyword" fore="#af3a03"/>
+  <assign name="def:ClassKeyword" fore="#fabd2f" style='1'/>
+  <assign name="def:InterfaceKeyword" fore="#4075ff"/>
+  <assign name="def:StructKeyword" fore="#8ec07c"/>
+  <assign name="def:TypeKeyword" fore="#fe8019"/>
+
+  <assign name="def:Register" fore="#83a598"/>
+  <assign name="def:Constant" fore="#d3869b"/>
+  <assign name="def:Var" fore="#83a598"/>
+  <assign name="def:VarStrong" fore="#458588"/>
+  <assign name="def:Identifier" fore="#689d6a"/>
+  <assign name="def:BooleanConstant" fore="#b16286"/>
+
+  <assign name="def:Directive" fore="#458588"/>
+  <assign name="def:Parameter" fore="#689d6a"/>
+
+  <assign name="def:Tag" fore="#d65d0e"/>
+  <assign name="def:OpenTag" fore="#83a598"/>
+  <assign name="def:CloseTag" fore="#83a598"/>
+
+  <assign name="def:Label" fore="#b16286" style='4'/>
+  <assign name="def:LabelStrong" fore="#ebdbb2" back="#8f3f71"/>
+
+  <assign name="def:Insertion" fore="#ebdbb2" back="#3c3836"/>
+  <assign name="def:InsertionStart" fore="#ebdbb2" back="#3c3836"/>
+  <assign name="def:InsertionEnd" fore="#ebdbb2" back="#3c3836"/>
+
+  <assign name="def:Error" fore="#ebdbb2" back="#cc241d" style='3'/>
+  <assign name="def:ErrorText" fore="#ebdbb2" back="#9d0006" style='1'/>
+
+  <assign name="def:TODO" fore="#1d2021" back="#d79921" style='4'/>
+  <assign name="def:Debug" fore="#fbf1c7" back="#076678"/>
+
+  <assign name="def:Path" fore="#b16286"/>
+  <assign name="def:URL" fore="#4075ff"/>
+  <assign name="def:EMail" fore="#4075ff"/>
+
+  <assign name="def:Date" fore="#076678"/>
+  <assign name="def:Time" fore="#427b58"/>
+
+  <assign name="def:PairStart" fore="#ffffff" back="#3c3836" style='5'/>
+  <assign name="def:PairEnd" fore="#ffffff" back="#3c3836" style='5'/>
+  <assign name="def:PairStrongStart" fore="#a89984"/>
+  <assign name="def:PairStrongEnd" fore="#a89984"/>
+
+  <!-- DEPRECATED -->
+  <!-- assign name="def:Function" fore="#8ec07c"/ -->
+
+</hrd>

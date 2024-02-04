@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding='UTF-8'?>
+
+<hrd-sets>
+  <hrd class="rgb" name="gruvbox_dark_hard" description="Gruvbox (dark-hard)">
+    <location link="%FARLOCALPROFILE%\FarColorer\gruvbox_dark_hard.hrd"/>
+  </hrd>
+</hrd-sets>

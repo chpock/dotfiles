@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+
+    Far manager configuration: UI colors
+    Maintained by: Konstantin Kushnir <chpock@gmail.com> (https://github.com/chpock/dotfiles)
+    Generated at: 2024-01-15T05:19:09,696374600+02:00
+
+-->
+
+<farconfig>
+    <colors>
+        <object name="Clock" background="FF888545" foreground="FF21201d"/>
+        <object name="Dialog.Box" background="FFa1c4d5" foreground="FF21201d"/>
+        <object name="Dialog.Box.Title" background="FFa1c4d5" foreground="FF21201d"/>
+        <object name="Dialog.Box.Title.Highlight" background="FFa1c4d5" foreground="FF0e5dd6"/>
+        <object name="Dialog.Button" background="FFa1c4d5" foreground="FF21201d"/>
+        <object name="Dialog.Button.Highlight" background="FFa1c4d5" foreground="FF0e5dd6"/>
+        <object name="Dialog.Button.Highlight.Selected" background="FF888545" foreground="FF1980fe"/>
+        <object name="Dialog.Button.Selected" background="FF888545" foreground="FF21201d"/>
+        <object name="Dialog.Combo.Arrows" background="FF888545" foreground="FF0e5dd6"/>
+        <object name="Dialog.Combo.Arrows.Disabled" background="FF888545" foreground="FF748392"/>
+        <object name="Dialog.Combo.Arrows.Selected" background="FF21201d" foreground="FF0e5dd6"/>
+        <object name="Dialog.Combo.Box" background="FF888545" foreground="FFb2dbeb"/>
+        <object name="Dialog.Combo.Disabled" background="FF888545" foreground="FF748392"/>
+        <object name="Dialog.Combo.GrayText" background="FF888545" foreground="FF748392"/>
+        <object name="Dialog.Combo.GrayText.Selected" background="FF21201d" foreground="FF748392"/>
+        <object name="Dialog.Combo.Highlight" background="FF888545" foreground="FF0e5dd6"/>
+        <object name="Dialog.Combo.Highlight.Selected" background="FF21201d" foreground="FF0e5dd6"/>
+        <object name="Dialog.Combo.Scrollbar" background="FF888545" foreground="FFb2dbeb"/>
+        <object name="Dialog.Combo.Text" background="FF888545" foreground="FFb2dbeb"/>
+        <object name="Dialog.Combo.Text.Selected" background="FF21201d" foreground="FFb2dbeb"/>
+        <object name="Dialog.Combo.Title" background="FF888545" foreground="FFb2dbeb"/>
+        <object name="Dialog.DefaultButton" background="FFa1c4d5" foreground="FF21201d"/>
+        <object name="Dialog.DefaultButton.Highlight" background="FFa1c4d5" foreground="FF0e5dd6"/>
+        <object name="Dialog.DefaultButton.Highlight.Selected" background="FF888545" foreground="FF1980fe"/>
+        <object name="Dialog.DefaultButton.Selected" background="FF888545" foreground="FF21201d"/>
+        <object name="Dialog.Disabled" background="FFa1c4d5" foreground="FF748392"/>
+        <object name="Dialog.Edit" background="FF888545" foreground="FF21201d"/>
+        <object name="Dialog.Edit.Disabled" background="FF888545" foreground="FF748392"/>
+        <object name="Dialog.Edit.Selected" background="FF21201d" foreground="FFb2dbeb"/>
+        <object name="Dialog.Edit.Unchanged" background="FF888545" foreground="FFb2dbeb"/>
+        <object name="Dialog.List.Arrows" background="FFa1c4d5" foreground="FF0e5dd6"/>
+        <object name="Dialog.List.Arrows.Disabled" background="FFa1c4d5" foreground="FF748392"/>
+        <object name="Dialog.List.Arrows.Selected" background="FF21201d" foreground="FF0e5dd6"/>
+        <object name="Dialog.List.Box" background="FFa1c4d5" foreground="FF21201d"/>
+        <object name="Dialog.List.Disabled" background="FFa1c4d5" foreground="FF748392"/>
+        <object name="Dialog.List.GrayText" background="FFa1c4d5" foreground="FF748392"/>
+        <object name="Dialog.List.GrayText.Selected" background="FF21201d" foreground="FF748392"/>
+        <object name="Dialog.List.Highlight" background="FFa1c4d5" foreground="FF0e5dd6"/>
+        <object name="Dialog.List.Highlight.Selected" background="FF21201d" foreground="FF0e5dd6"/>
+        <object name="Dialog.List.Scrollbar" background="FFa1c4d5" foreground="FF21201d"/>
+        <object name="Dialog.List.Text" background="FFa1c4d5" foreground="FF21201d"/>
+        <object name="Dialog.List.Text.Selected" background="FF21201d" foreground="FFb2dbeb"/>
+        <object name="Dialog.List.Title" background="FFa1c4d5" foreground="FF21201d"/>
+        <object name="Dialog.Text" background="FFa1c4d5" foreground="FF21201d"/>
+        <object name="Dialog.Text.Highlight" background="FFa1c4d5" foreground="FF0e5dd6"/>
+        <object name="Editor.Clock" background="FF1a9798" foreground="FF21201d"/>
+        <object name="Editor.Scrollbar" background="FF21201d" foreground="FFb2dbeb"/>
+        <object name="Editor.Status" background="FF1a9798" foreground="FF21201d"/>
+        <object name="Editor.Text" background="FF21201d" foreground="FFb2dbeb"/>
+        <object name="Editor.Text.Selected" background="FF888545" foreground="FF21201d"/>
+        <object name="Help.Box" background="FF888545" foreground="FF21201d"/>
+        <object name="Help.Box.Title" background="FF888545" foreground="FF21201d"/>
+        <object name="Help.Scrollbar" background="FF888545" foreground="FF21201d"/>
+        <object name="Help.Text" background="FF888545" foreground="FF21201d"/>
+        <object name="Help.Text.Highlight" background="FF888545" foreground="FFb2dbeb"/>
+        <object name="Help.Topic" background="FF888545" foreground="FF1980fe"/>
+        <object name="Help.Topic.Selected" background="FF21201d" foreground="FF1980fe"/>
+        <object name="HMenu.Highlight" background="FF888545" foreground="FF0e5dd6"/>
+        <object name="HMenu.Highlight.Selected" background="FF21201d" foreground="FF0e5dd6"/>
+        <object name="HMenu.Text" background="FF888545" foreground="FF21201d"/>
+        <object name="HMenu.Text.Selected" background="FF21201d" foreground="FFb2dbeb"/>
+        <object name="Keybar.Background" background="FF21201d" foreground="FFb2dbeb"/>
+        <object name="Keybar.Num" background="FF21201d" foreground="FFb2dbeb"/>
+        <object name="Keybar.Text" background="FF888545" foreground="FF21201d"/>
+        <object name="Menu.Arrows" background="FF888545" foreground="FF0e5dd6"/>
+        <object name="Menu.Arrows.Disabled" background="FF888545" foreground="FF748392"/>
+        <object name="Menu.Arrows.Selected" background="FF21201d" foreground="FFb2dbeb"/>
+        <object name="Menu.Box" background="FF888545" foreground="FF21201d"/>
+        <object name="Menu.GrayText" background="FF888545" foreground="FF748392"/>
+        <object name="Menu.GrayText.Selected" background="FF21201d" foreground="FF748392"/>
+        <object name="Menu.Highlight" background="FF888545" foreground="FF0e5dd6"/>
+        <object name="Menu.Highlight.Selected" background="FF21201d" foreground="FF0e5dd6"/>
+        <object name="Menu.Scrollbar" background="FF888545" foreground="FF21201d"/>
+        <object name="Menu.Text" background="FF888545" foreground="FF21201d"/>
+        <object name="Menu.Text.Disabled" background="FF888545" foreground="FF748392"/>
+        <object name="Menu.Text.Selected" background="FF21201d" foreground="FFb2dbeb"/>
+        <object name="Menu.Title" background="FF888545" foreground="FF21201d"/>
+        <object name="Panel.Box" background="FF21201d" foreground="FFb2dbeb"/>
+        <object name="Panel.Cursor" background="FF888545" foreground="FF21201d"/>
+        <object name="Panel.Cursor.Selected" background="FF888545" foreground="FF1980fe"/>
+        <object name="Panel.DragText" background="FF888545" foreground="FF1980fe"/>
+        <object name="Panel.Info.Selected" background="FF888545" foreground="FF1980fe"/>
+        <object name="Panel.Info.Total" background="FF21201d" foreground="FFb2dbeb"/>
+        <object name="Panel.ScreensNumber" background="FF1a9798" foreground="FF21201d"/>
+        <object name="Panel.Scrollbar" background="FF21201d" foreground="FFb2dbeb"/>
+        <object name="Panel.Text" background="FF21201d" foreground="FFb2dbeb"/>
+        <object name="Panel.Text.Highlight" background="FF21201d" foreground="FF0e5dd6"/>
+        <object name="Panel.Text.Info" background="FF21201d" foreground="FF0e5dd6"/>
+        <object name="Panel.Text.Selected" background="FF21201d" foreground="FF1980fe"/>
+        <object name="Panel.Title" background="FF21201d" foreground="FFb2dbeb"/>
+        <object name="Panel.Title.Column" background="FF21201d" foreground="FF0e5dd6"/>
+        <object name="Panel.Title.Selected" background="FF888545" foreground="FF21201d"/>
+        <object name="Viewer.Arrows" background="FF21201d" foreground="FF0e5dd6"/>
+        <object name="Viewer.Clock" background="FF6a9d68" foreground="FF21201d"/>
+        <object name="Viewer.Scrollbar" background="FF21201d" foreground="FFb2dbeb"/>
+        <object name="Viewer.Status" background="FF6a9d68" foreground="FF21201d"/>
+        <object name="Viewer.Text" background="FF21201d" foreground="FFb2dbeb"/>
+        <object name="Viewer.Text.Selected" background="FF888545" foreground="FF21201d"/>
+        <object name="WarnDialog.Box" background="FF1d24cc" foreground="FFb2dbeb"/>
+        <object name="WarnDialog.Box.Title" background="FF1d24cc" foreground="FFb2dbeb"/>
+        <object name="WarnDialog.Box.Title.Highlight" background="FF1d24cc" foreground="FF2fbdfa"/>
+        <object name="WarnDialog.Button" background="FF1d24cc" foreground="FFb2dbeb"/>
+        <object name="WarnDialog.Button.Highlight" background="FF1d24cc" foreground="FF2199d7"/>
+        <object name="WarnDialog.Button.Highlight.Selected" background="FFb2dbeb" foreground="FF2199d7"/>
+        <object name="WarnDialog.Button.Selected" background="FFb2dbeb" foreground="FF21201d"/>
+        <object name="WarnDialog.Combo.Arrows" background="FF888545" foreground="FF0e5dd6"/>
+        <object name="WarnDialog.Combo.Arrows.Disabled" background="FF888545" foreground="FF748392"/>
+        <object name="WarnDialog.Combo.Arrows.Selected" background="FF21201d" foreground="FF0e5dd6"/>
+        <object name="WarnDialog.Combo.Box" background="FF888545" foreground="FFb2dbeb"/>
+        <object name="WarnDialog.Combo.Disabled" background="FF888545" foreground="FF748392"/>
+        <object name="WarnDialog.Combo.GrayText" background="FF888545" foreground="FF748392"/>
+        <object name="WarnDialog.Combo.GrayText.Selected" background="FF21201d" foreground="FF748392"/>
+        <object name="WarnDialog.Combo.Highlight" background="FF888545" foreground="FF0e5dd6"/>
+        <object name="WarnDialog.Combo.Highlight.Selected" background="FF21201d" foreground="FF0e5dd6"/>
+        <object name="WarnDialog.Combo.Scrollbar" background="FF888545" foreground="FFb2dbeb"/>
+        <object name="WarnDialog.Combo.Text" background="FF888545" foreground="FFb2dbeb"/>
+        <object name="WarnDialog.Combo.Text.Selected" background="FF21201d" foreground="FFb2dbeb"/>
+        <object name="WarnDialog.Combo.Title" background="FF888545" foreground="FFb2dbeb"/>
+        <object name="WarnDialog.DefaultButton" background="FF1d24cc" foreground="FFb2dbeb"/>
+        <object name="WarnDialog.DefaultButton.Highlight" background="FF1d24cc" foreground="FF2199d7"/>
+        <object name="WarnDialog.DefaultButton.Highlight.Selected" background="FFb2dbeb" foreground="FF2199d7"/>
+        <object name="WarnDialog.DefaultButton.Selected" background="FFb2dbeb" foreground="FF21201d"/>
+        <object name="WarnDialog.Disabled" background="FF1d24cc" foreground="FF748392"/>
+        <object name="WarnDialog.Edit" background="FF888545" foreground="FF21201d"/>
+        <object name="WarnDialog.Edit.Disabled" background="FF888545" foreground="FF748392"/>
+        <object name="WarnDialog.Edit.Selected" background="FF21201d" foreground="FFb2dbeb"/>
+        <object name="WarnDialog.Edit.Unchanged" background="FF888545" foreground="FFb2dbeb"/>
+        <object name="WarnDialog.List.Arrows" background="FF1d24cc" foreground="FF2fbdfa"/>
+        <object name="WarnDialog.List.Arrows.Disabled" background="FF1d24cc" foreground="FF748392"/>
+        <object name="WarnDialog.List.Arrows.Selected" background="FFb2dbeb" foreground="FF2199d7"/>
+        <object name="WarnDialog.List.Box" background="FF1d24cc" foreground="FFb2dbeb"/>
+        <object name="WarnDialog.List.Disabled" background="FF1d24cc" foreground="FF748392"/>
+        <object name="WarnDialog.List.GrayText" background="FF1d24cc" foreground="FF748392"/>
+        <object name="WarnDialog.List.GrayText.Selected" background="FFb2dbeb" foreground="FF21201d"/>
+        <object name="WarnDialog.List.Highlight" background="FF1d24cc" foreground="FF2fbdfa"/>
+        <object name="WarnDialog.List.Highlight.Selected" background="FFb2dbeb" foreground="FF2199d7"/>
+        <object name="WarnDialog.List.Scrollbar" background="FF1d24cc" foreground="FFb2dbeb"/>
+        <object name="WarnDialog.List.Text" background="FF1d24cc" foreground="FFb2dbeb"/>
+        <object name="WarnDialog.List.Text.Selected" background="FFb2dbeb" foreground="FF21201d"/>
+        <object name="WarnDialog.List.Title" background="FF1d24cc" foreground="FFb2dbeb"/>
+        <object name="WarnDialog.Text" background="FF1d24cc" foreground="FFb2dbeb"/>
+        <object name="WarnDialog.Text.Highlight" background="FF1d24cc" foreground="FF2fbdfa"/>
+        <object name="CommandLine" background="FF000000" foreground="FF000007" flags="fgindex bgindex"/>
+        <object name="CommandLine.Prefix" background="FF000000" foreground="FF000007" flags="fgindex bgindex"/>
+        <object name="CommandLine.Selected" background="FF000003" foreground="FF000000" flags="fgindex bgindex"/>
+        <object name="CommandLine.UserScreen" background="FF000000" foreground="FF000007" flags="fgindex bgindex"/>
+    </colors>
+</farconfig>

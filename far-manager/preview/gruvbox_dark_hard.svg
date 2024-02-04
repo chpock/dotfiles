@@ -1,0 +1,167 @@
+<svg width="96ch" height="95em" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve">
+    <style>
+        * {
+            font-family: Courier, monospace;
+            font-size: 14px;
+        }
+        tspan, text {
+            font-variant-ligatures: none;
+            dominant-baseline: central;
+            white-space: pre;
+            fill: #bbbbbb;
+        }
+    </style>
+    <rect width="100%" height="100%" x="0" y="0" style="fill: #000000"/>
+<rect x="0ch" y="15em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="16em" width="72ch" height="1em" stroke-width="0.5px" stroke="#bdae93" style="fill:#bdae93"/>
+<rect x="0ch" y="17em" width="72ch" height="1em" stroke-width="0.5px" stroke="#bdae93" style="fill:#bdae93"/>
+<rect x="0ch" y="18em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="19em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="20em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="21em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="22em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="23em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="24em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="25em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="26em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="27em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="28em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="29em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="30em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="31em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="32em" width="72ch" height="1em" stroke-width="0.5px" stroke="#282828" style="fill:#282828"/>
+<rect x="0ch" y="33em" width="72ch" height="1em" stroke-width="0.5px" stroke="#282828" style="fill:#282828"/>
+<rect x="0ch" y="34em" width="72ch" height="1em" stroke-width="0.5px" stroke="#282828" style="fill:#282828"/>
+<rect x="0ch" y="35em" width="72ch" height="1em" stroke-width="0.5px" stroke="#282828" style="fill:#282828"/>
+<rect x="0ch" y="36em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="37em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="38em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="39em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="40em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="41em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="42em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="43em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="44em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="45em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="46em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="47em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="48em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="49em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="50em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="51em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="52em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="53em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="54em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="55em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="56em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="57em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="58em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="59em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="60em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="61em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="62em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="63em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="64em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="65em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="66em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="67em" width="72ch" height="1em" stroke-width="0.5px" stroke="#8f3f71" style="fill:#8f3f71"/>
+<rect x="0ch" y="68em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="69em" width="72ch" height="1em" stroke-width="0.5px" stroke="#3c3836" style="fill:#3c3836"/>
+<rect x="0ch" y="70em" width="72ch" height="1em" stroke-width="0.5px" stroke="#3c3836" style="fill:#3c3836"/>
+<rect x="0ch" y="71em" width="72ch" height="1em" stroke-width="0.5px" stroke="#3c3836" style="fill:#3c3836"/>
+<rect x="0ch" y="72em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="73em" width="72ch" height="1em" stroke-width="0.5px" stroke="#cc241d" style="fill:#cc241d"/>
+<rect x="0ch" y="74em" width="72ch" height="1em" stroke-width="0.5px" stroke="#9d0006" style="fill:#9d0006"/>
+<rect x="0ch" y="75em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="76em" width="72ch" height="1em" stroke-width="0.5px" stroke="#d79921" style="fill:#d79921"/>
+<rect x="0ch" y="77em" width="72ch" height="1em" stroke-width="0.5px" stroke="#076678" style="fill:#076678"/>
+<rect x="0ch" y="78em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="79em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="80em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="81em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="82em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="83em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="84em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="85em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="86em" width="72ch" height="1em" stroke-width="0.5px" stroke="#3c3836" style="fill:#3c3836"/>
+<rect x="0ch" y="87em" width="72ch" height="1em" stroke-width="0.5px" stroke="#3c3836" style="fill:#3c3836"/>
+<rect x="0ch" y="88em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="89em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="90em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="91em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="92em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="93em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<rect x="0ch" y="94em" width="72ch" height="1em" stroke-width="0.5px" stroke="#1d2021" style="fill:#1d2021"/>
+<text x="0" y="0.5em"><tspan>&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt;                                  </tspan></text>
+<text x="0" y="1.5em"><tspan>&lt;!DOCTYPE hrd PUBLIC &#34;-//Cail Lomecb//DTD Colorer HRD take5//EN&#34;        </tspan></text>
+<text x="0" y="2.5em"><tspan>  &#34;http://colorer.sf.net/2003/hrd.dtd&#34;&gt;                                 </tspan></text>
+<text x="0" y="4.5em"><tspan>&lt;!--                                                                    </tspan></text>
+<text x="0" y="6.5em"><tspan>    Colorer schema                                                      </tspan></text>
+<text x="0" y="7.5em"><tspan>    Based on: gruvbox colors by morhetz &lt;morhetz@gmail.com&gt; (https://github.com/morhetz/gruvbox)</tspan></text>
+<text x="0" y="8.5em"><tspan>    Maintained by: Konstantin Kushnir &lt;chpock@gmail.com&gt; (https://github.com/chpock/dotfiles)</tspan></text>
+<text x="0" y="9.5em"><tspan>    Generated at: @@DATE@@                                              </tspan></text>
+<text x="0" y="11.5em"><tspan>--&gt;                                                                     </tspan></text>
+<text x="0" y="13.5em"><tspan>&lt;hrd xmlns=&#34;http://colorer.sf.net/2003/hrd&#34;&gt;                            </tspan></text>
+<text x="0" y="15.5em"><tspan style="fill:#ebdbb2">  &lt;assign name=&#34;def:Text&#34; fore=&#34;fg&#34; back=&#34;bg&#34;/&gt;                         </tspan></text>
+<text x="0" y="16.5em"><tspan style="fill:#1d2021">  &lt;assign name=&#34;def:HorzCross&#34; fore=&#34;bg&#34; back=&#34;fg3&#34;/&gt;                   </tspan></text>
+<text x="0" y="17.5em"><tspan style="fill:#1d2021">  &lt;assign name=&#34;def:VertCross&#34; fore=&#34;bg&#34; back=&#34;fg3&#34;/&gt;                   </tspan></text>
+<text x="0" y="19.5em"><tspan style="fill:#00c23e">  &lt;assign name=&#34;def:Number&#34; fore=&#34;real_bright_green&#34;/&gt;                  </tspan></text>
+<text x="0" y="20.5em"><tspan style="fill:#00c23e">  &lt;assign name=&#34;def:NumberDec&#34; fore=&#34;real_bright_green&#34;/&gt;               </tspan></text>
+<text x="0" y="21.5em"><tspan style="fill:#009b08">  &lt;assign name=&#34;def:NumberHex&#34; fore=&#34;real_green&#34;/&gt;                      </tspan></text>
+<text x="0" y="22.5em"><tspan style="fill:#00871d">  &lt;assign name=&#34;def:NumberBin&#34; fore=&#34;real_green2&#34;/&gt;                     </tspan></text>
+<text x="0" y="23.5em"><tspan style="fill:#009b08">  &lt;assign name=&#34;def:NumberOct&#34; fore=&#34;real_green&#34;/&gt;                      </tspan></text>
+<text x="0" y="24.5em"><tspan style="fill:#00be50">  &lt;assign name=&#34;def:NumberFloat&#34; fore=&#34;real_green1&#34;/&gt;                   </tspan></text>
+<text x="0" y="25.5em"><tspan style="fill:#008139">  &lt;assign name=&#34;def:NumberSuffix&#34; fore=&#34;real_green3&#34;/&gt;                  </tspan></text>
+<text x="0" y="27.5em"><tspan style="fill:#98971a">  &lt;assign name=&#34;def:String&#34; fore=&#34;green&#34;/&gt;                              </tspan></text>
+<text x="0" y="28.5em"><tspan style="fill:#d65d0e">  &lt;assign name=&#34;def:StringContent&#34; fore=&#34;orange&#34; style=&#39;1&#39;/&gt;            </tspan></text>
+<text x="0" y="29.5em"><tspan style="fill:#b8bb26">  &lt;assign name=&#34;def:StringEdge&#34; fore=&#34;bright_green&#34;/&gt;                   </tspan></text>
+<text x="0" y="31.5em"><tspan style="fill:#928374">  &lt;assign name=&#34;def:Comment&#34; fore=&#34;gray&#34;/&gt;                              </tspan></text>
+<text x="0" y="32.5em"><tspan style="fill:#458588">  &lt;assign name=&#34;def:CommentContent&#34; fore=&#34;blue&#34; back=&#34;bg0&#34; style=&#39;1&#39;/&gt;  </tspan></text>
+<text x="0" y="33.5em"><tspan style="fill:#689d6a">  &lt;assign name=&#34;def:CommentEdge&#34; fore=&#34;aqua&#34; back=&#34;bg0&#34;/&gt;               </tspan></text>
+<text x="0" y="34.5em"><tspan style="fill:#ebdbb2">  &lt;assign name=&#34;def:CommentDoc&#34; fore=&#34;fg&#34; back=&#34;bg0&#34;/&gt;                  </tspan></text>
+<text x="0" y="35.5em"><tspan style="fill:#9d0006">  &lt;assign name=&#34;def:CommentDocEdge&#34; fore=&#34;faded_red&#34; back=&#34;bg0&#34;/&gt;       </tspan></text>
+<text x="0" y="37.5em"><tspan style="fill:#b57614">  &lt;assign name=&#34;def:Symbol&#34; fore=&#34;faded_yellow&#34;/&gt;                       </tspan></text>
+<text x="0" y="38.5em"><tspan style="fill:#a89984">  &lt;assign name=&#34;def:SymbolStrong&#34; fore=&#34;fg4&#34;/&gt;                          </tspan></text>
+<text x="0" y="39.5em"><tspan style="fill:#8b8eff">  &lt;assign name=&#34;def:Prefix&#34; fore=&#34;violet&#34;/&gt;                             </tspan></text>
+<text x="0" y="41.5em"><tspan style="fill:#689d6a">  &lt;assign name=&#34;def:Operator&#34; fore=&#34;aqua&#34;/&gt;                             </tspan></text>
+<text x="0" y="43.5em"><tspan style="fill:#cc241d">  &lt;assign name=&#34;def:Keyword&#34; fore=&#34;red&#34;/&gt;                               </tspan></text>
+<text x="0" y="44.5em"><tspan style="fill:#fb4934">  &lt;assign name=&#34;def:KeywordStrong&#34; fore=&#34;bright_red&#34; style=&#39;1&#39;/&gt;        </tspan></text>
+<text x="0" y="45.5em"><tspan style="fill:#d65d0e">  &lt;assign name=&#34;def:FunctionKeyword&#34; fore=&#34;orange&#34;/&gt;                    </tspan></text>
+<text x="0" y="46.5em"><tspan style="fill:#af3a03">  &lt;assign name=&#34;def:DeprecatedKeyword&#34; fore=&#34;faded_orange&#34;/&gt;            </tspan></text>
+<text x="0" y="47.5em"><tspan style="fill:#fabd2f">  &lt;assign name=&#34;def:ClassKeyword&#34; fore=&#34;bright_yellow&#34; style=&#39;1&#39;/&gt;      </tspan></text>
+<text x="0" y="48.5em"><tspan style="fill:#4075ff">  &lt;assign name=&#34;def:InterfaceKeyword&#34; fore=&#34;real_blue&#34;/&gt;                </tspan></text>
+<text x="0" y="49.5em"><tspan style="fill:#8ec07c">  &lt;assign name=&#34;def:StructKeyword&#34; fore=&#34;bright_aqua&#34;/&gt;                 </tspan></text>
+<text x="0" y="50.5em"><tspan style="fill:#fe8019">  &lt;assign name=&#34;def:TypeKeyword&#34; fore=&#34;bright_orange&#34;/&gt;                 </tspan></text>
+<text x="0" y="52.5em"><tspan style="fill:#83a598">  &lt;assign name=&#34;def:Register&#34; fore=&#34;bright_blue&#34;/&gt;                      </tspan></text>
+<text x="0" y="53.5em"><tspan style="fill:#d3869b">  &lt;assign name=&#34;def:Constant&#34; fore=&#34;bright_purple&#34;/&gt;                    </tspan></text>
+<text x="0" y="54.5em"><tspan style="fill:#83a598">  &lt;assign name=&#34;def:Var&#34; fore=&#34;bright_blue&#34;/&gt;                           </tspan></text>
+<text x="0" y="55.5em"><tspan style="fill:#458588">  &lt;assign name=&#34;def:VarStrong&#34; fore=&#34;blue&#34;/&gt;                            </tspan></text>
+<text x="0" y="56.5em"><tspan style="fill:#689d6a">  &lt;assign name=&#34;def:Identifier&#34; fore=&#34;aqua&#34;/&gt;                           </tspan></text>
+<text x="0" y="57.5em"><tspan style="fill:#b16286">  &lt;assign name=&#34;def:BooleanConstant&#34; fore=&#34;purple&#34;/&gt;                    </tspan></text>
+<text x="0" y="59.5em"><tspan style="fill:#458588">  &lt;assign name=&#34;def:Directive&#34; fore=&#34;blue&#34;/&gt;                            </tspan></text>
+<text x="0" y="60.5em"><tspan style="fill:#689d6a">  &lt;assign name=&#34;def:Parameter&#34; fore=&#34;aqua&#34;/&gt;                            </tspan></text>
+<text x="0" y="62.5em"><tspan style="fill:#d65d0e">  &lt;assign name=&#34;def:Tag&#34; fore=&#34;orange&#34;/&gt;                                </tspan></text>
+<text x="0" y="63.5em"><tspan style="fill:#83a598">  &lt;assign name=&#34;def:OpenTag&#34; fore=&#34;bright_blue&#34;/&gt;                       </tspan></text>
+<text x="0" y="64.5em"><tspan style="fill:#83a598">  &lt;assign name=&#34;def:CloseTag&#34; fore=&#34;bright_blue&#34;/&gt;                      </tspan></text>
+<text x="0" y="66.5em"><tspan style="fill:#b16286">  &lt;assign name=&#34;def:Label&#34; fore=&#34;purple&#34; style=&#39;4&#39;/&gt;                    </tspan></text>
+<text x="0" y="67.5em"><tspan style="fill:#ebdbb2">  &lt;assign name=&#34;def:LabelStrong&#34; fore=&#34;fg&#34; back=&#34;faded_purple&#34;/&gt;        </tspan></text>
+<text x="0" y="69.5em"><tspan style="fill:#ebdbb2">  &lt;assign name=&#34;def:Insertion&#34; fore=&#34;fg&#34; back=&#34;bg1&#34;/&gt;                   </tspan></text>
+<text x="0" y="70.5em"><tspan style="fill:#ebdbb2">  &lt;assign name=&#34;def:InsertionStart&#34; fore=&#34;fg&#34; back=&#34;bg1&#34;/&gt;              </tspan></text>
+<text x="0" y="71.5em"><tspan style="fill:#ebdbb2">  &lt;assign name=&#34;def:InsertionEnd&#34; fore=&#34;fg&#34; back=&#34;bg1&#34;/&gt;                </tspan></text>
+<text x="0" y="73.5em"><tspan style="fill:#ebdbb2">  &lt;assign name=&#34;def:Error&#34; fore=&#34;fg&#34; back=&#34;red&#34; style=&#39;3&#39;/&gt;             </tspan></text>
+<text x="0" y="74.5em"><tspan style="fill:#ebdbb2">  &lt;assign name=&#34;def:ErrorText&#34; fore=&#34;fg&#34; back=&#34;faded_red&#34; style=&#39;1&#39;/&gt;   </tspan></text>
+<text x="0" y="76.5em"><tspan style="fill:#1d2021">  &lt;assign name=&#34;def:TODO&#34; fore=&#34;bg&#34; back=&#34;yellow&#34; style=&#39;4&#39;/&gt;           </tspan></text>
+<text x="0" y="77.5em"><tspan style="fill:#fbf1c7">  &lt;assign name=&#34;def:Debug&#34; fore=&#34;fg0&#34; back=&#34;faded_blue&#34;/&gt;               </tspan></text>
+<text x="0" y="79.5em"><tspan style="fill:#b16286">  &lt;assign name=&#34;def:Path&#34; fore=&#34;purple&#34;/&gt;                               </tspan></text>
+<text x="0" y="80.5em"><tspan style="fill:#4075ff">  &lt;assign name=&#34;def:URL&#34; fore=&#34;real_blue&#34;/&gt;                             </tspan></text>
+<text x="0" y="81.5em"><tspan style="fill:#4075ff">  &lt;assign name=&#34;def:EMail&#34; fore=&#34;real_blue&#34;/&gt;                           </tspan></text>
+<text x="0" y="83.5em"><tspan style="fill:#076678">  &lt;assign name=&#34;def:Date&#34; fore=&#34;faded_blue&#34;/&gt;                           </tspan></text>
+<text x="0" y="84.5em"><tspan style="fill:#427b58">  &lt;assign name=&#34;def:Time&#34; fore=&#34;faded_aqua&#34;/&gt;                           </tspan></text>
+<text x="0" y="86.5em"><tspan style="fill:#ffffff">  &lt;assign name=&#34;def:PairStart&#34; fore=&#34;real_white&#34; back=&#34;bg1&#34; style=&#39;5&#39;/&gt; </tspan></text>
+<text x="0" y="87.5em"><tspan style="fill:#ffffff">  &lt;assign name=&#34;def:PairEnd&#34; fore=&#34;real_white&#34; back=&#34;bg1&#34; style=&#39;5&#39;/&gt;   </tspan></text>
+<text x="0" y="88.5em"><tspan style="fill:#a89984">  &lt;assign name=&#34;def:PairStrongStart&#34; fore=&#34;fg4&#34;/&gt;                       </tspan></text>
+<text x="0" y="89.5em"><tspan style="fill:#a89984">  &lt;assign name=&#34;def:PairStrongEnd&#34; fore=&#34;fg4&#34;/&gt;                         </tspan></text>
+<text x="0" y="91.5em"><tspan style="fill:#ebdbb2">  &lt;!-- DEPRECATED --&gt;                                                   </tspan></text>
+<text x="0" y="92.5em"><tspan style="fill:#8ec07c">  &lt;!-- assign name=&#34;def:Function&#34; fore=&#34;bright_aqua&#34;/ --&gt;               </tspan></text>
+<text x="0" y="94.5em"><tspan style="fill:#ebdbb2">&lt;/hrd&gt;                                                                  </tspan></text>
+</svg>

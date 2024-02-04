@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+
+    Far manager configuration: filetypes
+    Maintained by: Konstantin Kushnir <chpock@gmail.com> (https://github.com/chpock/dotfiles)
+    Generated at: 2024-01-15T05:19:32,501791600+02:00
+
+-->
+
+<farconfig>
+    <generalconfig>
+        <setting key="Masks" name="Executable" type="text" value="*.cpl,*.lnk,*.exe,*.msi,*.com,*.bat,*.cmd,*.ps1,*.pif,*.vbs"/>
+        <setting key="Masks" name="Multimedia-Image-Raster" type="text" value="*.psd,*.psb,*.jpg,*.jpeg,*.jpe,*.jfif,*.jif,*.jxl,*.png,*.gif,*.ani,*.cur,*.ico,*.icon,*.icns,*.icl,*.bmp,*.heic,*.heif,*.pcx,*.pic,*.ppm,*.tga,*.tiff,*.tif,*.webp,*.acr,*.ais,*.bm3,*.bw,*.cam,*.clp,*.dcm,*.dcx,*.dib,*.iff,*.ilbm,*.lbm,*.pbm,*.pct,*.pgm,*.pict,*.pix,*.ppm,*.psp,*.ras,*.rgb,*.rgba,*.rle,*.sff,*.sgi,*.sun,*.wbmp,*.wmf,*.xbm,*.xif,*.xpm,*.hdr,*.djvu,*.pxd,*.pxm"/>
+        <setting key="Masks" name="Multimedia-Image-Camera-RAW" type="text" value="*.kdc,*.pcd,*.cr2,*.raf,*.dng,*.dcr"/>
+        <setting key="Masks" name="Multimedia-Image-Vector" type="text" value="*.svg,*.svgz,*.vsdx,*.wmf,*.emf,*.drw"/>
+        <setting key="Masks" name="Multimedia-Image-3D" type="text" value="*.blend,*.m3d,*.x3d,*.3ds"/>
+        <setting key="Masks" name="Multimedia-Audio-File" type="text" value="*.mp[23ae],*.au,*.aup,*.aup3,*.wma,*.mid,*.midi,*.kar,*.mod,*.mpa,*.ogg,*.wav,*.wv,*.wvc,*.asx,*.it,*.m[12]v,*.med,*.mpv2,*.ra,*.rmi,*.s3m,*.snd,*.stm,*.xm,*.xmi,*.voc,*.weba,*.flac,*.alac,*.aac,*.ogg,*.ac3,*.3ga,*.oga,*.amr,*.3ga,*.caf,*.mp4a,*.opus,*.ape,*.aiff,*.cda,*.pcm"/>
+        <setting key="Masks" name="Multimedia-Audio-Playlist" type="text" value="*.m3u,*.m3u8,*.lap,*.pls,*.vlc,*.m4u"/>
+        <setting key="Masks" name="Multimedia-Video-File" type="text" value="*.m4a,*.mp4,*.mov,*.mkv,*.3gp,*.3gpp,*.3gpp2,*.3g2,*.gp3,*.gp4,*.avi,*.h264,*.m2v,*.m4v,*.mpeg,*.mpg,*.mp2,*.webm,*.asf,*.aif,*.aifc,*.aiff,*.flc,*.fli,*.rm,*.smk,*.swf,*.wm,*.wm[xvp],*.wvx,*.vob,*.mp4v,*.flv,*.f4v,*.divx,*.ogm,*.ogv,*.rmvb"/>
+        <setting key="Masks" name="Multimedia-Video-Subtitles" type="text" value="*.ass,*.ssa,*.srt,*.cue,*.sup,*.vtt,*.ttml,*.mpsub"/>
+        <setting key="Masks" name="Font" type="text" value="*.ttf,*.woff,*.woff2,*.otf,*.fon,*.otf,*.fnt,*.pfb,*.pfm,*.pfa,*.fot,*.odttf,*.ttc,*.afm,*.eot,*.fog"/>
+        <setting key="Masks" name="Development-Code" type="text" value="*.phpt,*.php,*.php4,*.ctp,*.twig,*.asm,*.wasm,*.cpp,*.c,*.cc,*.cs,*.cp,*.cxx,*.c--,*.awk,*.sed,*.gs,*.jscript,*.js,*.jse,*.jsx,*.cjs,*.mjs,*.au3,*.tf,*.cgi,*.sh,*.bash,*.zsh,*.fish,*.ahk,*.asp,*.vbe,*.wsf,*.ts,*.tsx,*.nt,*.pl,*.pm,*.t,*.clj,*.cljs,*.cljc,*.cljw,*.scala,*.sc,*.cl,*.ml,*.lisp,*.rkt,*.el,*.elc,*.eln,*.nim,*.nimble,*.hi,*.hs,*.lhs,*.java,*.jav,*.coffee,*.jsm,*.jsp,*.vb,*.vba,*.go,*.rb,*.tcl,*.py,*.ipynb,*.vim,*.lua,*.moon,*.bas,*.dsl,*.groovy,*.pas,*.r,*.rs,*.swift,*.dart,*.cr,.zig,*.ntest"/>
+        <setting key="Masks" name="Development-Header" type="text" value="*.htm,*.html,*.[sxpdrmj]html,*.[sxpdrmj]htm,*.css,*.scss,*.sass,*.h,*.hpp,*.h++,*.hh,*.h--,*.inc,*.tcc,*.ii,*.gemspec,*.sql,*.mysql,*.msql,*.prql,*.pgsql,*.dtd,*.xsl,*.lng,*.hlf,*.po,*.rc,*.rc2,*.mf,*.tfstate,*.tfvars"/>
+        <setting key="Masks" name="Development-Build" type="text" value="*.cmake,*.nmake,*.sln,*.suo,*.vcxproj,*.vcxproj.filters,*.vcxproj.user,*.csproj,*.csproj.user,*.vbproj,*.vdproj,*.vcproj,makefile.*,makefile,*.in,*.mak,*.m4,*.mk,*.am,*.ac,*.hin,*.scan,*.pom,*.vbp,*.rake,dockerfile,containerfile,dockerfile.*,containerfile.*"/>
+        <setting key="Masks" name="Development-Patch" type="text" value="*.patch,*.diff"/>
+        <setting key="Masks" name="Development-Compiled" type="text" value="*.pyd,*.whl,*.pyc,*.pyo,*.luc,*.jar,*.war,*.class,*.jad,*.map,*.pdb,*.obj,*.lib,*.idl,*.a,*.o,*.kit,*.tm,*.gem,*.nupkg,*.pc,*.smali,*.jnlp,*.res,*.rlib"/>
+        <setting key="Masks" name="Document-README-First" type="text" value="NEWS,README,README.rst,README.md,INSTALL,INSTALL.md,HISTORY,HISTORY.md,CHANGELOG,CHANGELOG.md,CHANGELOG*.,VERSION,VERSION.md,NOTICE,NOTICE.md,CHANGES,CHANGES.md,read.me,read.me!,readme.*,*.!!!"/>
+        <setting key="Masks" name="Document-Text-Plain" type="text" value="*.txt,*.text,*.log,*.logs,*.list,*.lst,*.man,*.md,*.markdown,*.mkd,*.mdx,*.adoc,*.ansi,*.ans,*.asciidoc,*.url,*.asc,*.faq,*.info,*.nfo,*.rus,*.eng,*.ru,*.en,*.diz,*.dsc,*.rpt,descript.ion,dirinfo,files.bbs,license,*.description,LICENSE,COPYING,COPYRIGHT,AUTHORS,CONTRIBUTORS,CONTRIBUTING,CODEOWNERS,PATENTS"/>
+        <setting key="Masks" name="Document-Text-Format" type="text" value="*.rdoc,*.yml,*.yaml,*.pod,*.xml,*.fxml,*.xsd,*.rst,*.json,*.json[lc5],*.hjson,*.ndjson,*.jsonnet,*.toml,*.sgml,*.inf,*.msg,*.texinfo,*.tex,*.textile,*.vcf,*.vcard"/>
+        <setting key="Masks" name="Document-Bin-File" type="text" value="*.doc,*.docx,*.docm,*.dot,*.dotm,*.xla,*.xls,*.xlsx,*.xlsm,*.xlsb,*.xlm,*.xltm,*.xltx,*.pptx,*.ppt,*.pps,*.ppts,*.pptxm,*.pptsm,*.odf,*.ods,*.odp,*.odt,*.ots,*.odt,*.ott,*.cdx,*.cdr,*.chm,*.hlp,*.hxs,*.chw,*.ps,*.eps,*.epsf,*.xps,*.fig,*.har,*.pdf,*.rtf,*.wri,*.pages,*.mht"/>
+        <setting key="Masks" name="Document-EBook" type="text" value="*.fb[23],*.epub,*.mobi,*.tpz,*.ebk"/>
+        <setting key="Masks" name="Archive-Compressed" type="text" value="*.$z,*.[bg]zip,*.[lw]sz,*.[xbg7sz]z,*.[zj],*.777,*.a[0-9][0-9],*.ac[bei],*.ain,*.ar[cj],*.boa,*.bs[2a],*.bz2,*.cab,*.chz,*.cpio,*.ddi,*.h[ay]p,*.ha,*.hpk,*.hqx,*.ice,*.imp,*.jsonlz4,*.lha,*.lim,*.lrz,*.lz,*.lz[4cho],*.lzma,*.pa[ck],*.r[0-9][0-9],*.rar,*.rk,*.rkv,*.s7z,*.sea,*.sit,*.sqz,*.t[agbx]z,*.tar,*.tbz2,*.uc2,*.ufa,*.uue,*.warc,*.x2,*.xxe,*.zip,*.zipx,*.zoo,*.zpaq,*.zst,*.zstd"/>
+        <setting key="Masks" name="Archive-Disk-Image" type="text" value="*.vmdk,*.vbox,*.im[ag],*.mdf,*.vhdx,*.vhd,*.vol,*.ddi,*.dis,*.dsk,*.fdr,*.flp,*.vfd,*.xdf,*.iso,*.nrg,*.vcd,*.dmg,*.vfd,*.flp,*.dvd,*.mdf,*.rom,*.vdi,*.dsk,*.nrg,*.disk,*.hc,*.tc,*.qcow,*.fvd,*.sparseimage,*.toast"/>
+        <setting key="Masks" name="Archive-Packaged-App" type="text" value="*.rpm,*.apk,*.deb,*.ipa,*.crx,*.xpi"/>
+        <setting key="Masks" name="Configuration" type="text" value="*.cfg,*.config,*.farconfig,*.ini,*.cnf,*.conf,*.ovpn,*.settings,*.properties,*.props,*.prop,*.plist,*.doxy,authorized_keys,known_hosts,*.reg,.*|.."/>
+        <setting key="Masks" name="Data-File" type="text" value="*.torrent,*.skin"/>
+        <setting key="Masks" name="Data-Encrypted" type="text" value="*.pkpass,*.b64,*.base64,*.gpg,*.pgp,*.sec,*.aes,.htpasswd,id_dsa*,id_rsa*,id_ecdsa*,id_ed25519*,*.keytab,*.pubkey,*.key,*.pub,*.rsa,*.sig,*.signature,*.sha,*.sha256sum,*.sha256,*.sha512,*.sum,*.checksum,*.crc,*.sha1,*.md5,*.p7[bcs],*.p7,*.crt,*.csr,*.ctl,*.clr,*.crl,*.srl,*.pem,*.der,*.pkcs12,*.p12,*.p10,*.cer,*.cert,*.certificate,*.jks,*.keystore,keystore,*.ks"/>
+        <setting key="Masks" name="Data-Game" type="text" value="*.vpk,*.gbx,*.gba,*.gb,*.save,*.sav,*.n64,*.nes"/>
+        <setting key="Masks" name="Data-GIS" type="text" value="*.gmap,*.nm2,*.saf,*.gsm,*.gpx,*.gml,*.geojson,*.kmz,*.osm,*.osc"/>
+        <setting key="Masks" name="Data-Database" type="text" value="*.sqlite,*.sqlite3,*.csv,*.tsv,*.db,*.dbf,*.db2,*.db3,*.leveldb,*.gdb,*.localstorage,*.typelib,*.mdb,*.mde,*.odb"/>
+        <setting key="Masks" name="Data-Work-In-Progress" type="text" value="*.!ut,*.!bt,*.part,*.partial,*.download,*.crdownload,*.opdownload"/>
+        <setting key="Masks" name="Data-Runtime-File" type="text" value="/.*\.\w+-shm$/,/.*\.\w+-wal$/,*.lockfile,*.lock,*.lck,*.pid,*.ldb,*.sock,*.socket,*.state"/>
+        <setting key="Masks" name="Application-Bin-File" type="text" value="/.*\.so(\.\d+){0,3}$/,*.dylib,*.jnilib,*.ocx,*.odl,*.scr,*.sys,*.drv,*.dll,*.cdf-ms,*.manifest,*.mum"/>
+        <setting key="Masks" name="Backup" type="text" value="*.old,*.bak,*.backup,*.vbox-prev,*.orig"/>
+        <setting key="Masks" name="Temporary" type="text" value="*.temp,*.tmp,*.tmp-,*.tmpfile,*.~*,*.$$$,*.chk,*.swp,*.swo,*.wbk,*.un~,.DS_Store"/>
+        <setting key="Masks" name="Error" type="text" value="*.dump,*.dmp,*.err,*.error,*.errors,*.stderr,*.stackdump,*.zcompdump,*.fdr,*.core"/>
+    </generalconfig>
+</farconfig>

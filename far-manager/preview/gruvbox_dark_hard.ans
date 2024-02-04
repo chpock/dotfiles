@@ -1,0 +1,96 @@
+[?7l<?xml version="1.0" encoding="UTF-8"?>                                  [0m
+[?7h[?7l<!DOCTYPE hrd PUBLIC "-//Cail Lomecb//DTD Colorer HRD take5//EN"        [0m
+[?7h[?7l  "http://colorer.sf.net/2003/hrd.dtd">                                 [0m
+[?7h[?7l                                                                        [0m
+[?7h[?7l<!--                                                                    [0m
+[?7h[?7l                                                                        [0m
+[?7h[?7l    Colorer schema                                                      [0m
+[?7h[?7l    Based on: gruvbox colors by morhetz <morhetz@gmail.com> (https://github.com/morhetz/gruvbox)[0m
+[?7h[?7l    Maintained by: Konstantin Kushnir <chpock@gmail.com> (https://github.com/chpock/dotfiles)[0m
+[?7h[?7l    Generated at: @@DATE@@                                              [0m
+[?7h[?7l                                                                        [0m
+[?7h[?7l-->                                                                     [0m
+[?7h[?7l                                                                        [0m
+[?7h[?7l<hrd xmlns="http://colorer.sf.net/2003/hrd">                            [0m
+[?7h[?7l                                                                        [0m
+[?7h[?7l[38;2;235;219;178m[48;2;29;32;33m  <assign name="def:Text" fore="fg" back="bg"/>                         [0m
+[?7h[?7l[38;2;29;32;33m[48;2;189;174;147m  <assign name="def:HorzCross" fore="bg" back="fg3"/>                   [0m
+[?7h[?7l[38;2;29;32;33m[48;2;189;174;147m  <assign name="def:VertCross" fore="bg" back="fg3"/>                   [0m
+[?7h[?7l[38;2;235;219;178m[48;2;29;32;33m                                                                        [0m
+[?7h[?7l[38;2;0;194;62m[48;2;29;32;33m  <assign name="def:Number" fore="real_bright_green"/>                  [0m
+[?7h[?7l[38;2;0;194;62m[48;2;29;32;33m  <assign name="def:NumberDec" fore="real_bright_green"/>               [0m
+[?7h[?7l[38;2;0;155;8m[48;2;29;32;33m  <assign name="def:NumberHex" fore="real_green"/>                      [0m
+[?7h[?7l[38;2;0;135;29m[48;2;29;32;33m  <assign name="def:NumberBin" fore="real_green2"/>                     [0m
+[?7h[?7l[38;2;0;155;8m[48;2;29;32;33m  <assign name="def:NumberOct" fore="real_green"/>                      [0m
+[?7h[?7l[38;2;0;190;80m[48;2;29;32;33m  <assign name="def:NumberFloat" fore="real_green1"/>                   [0m
+[?7h[?7l[38;2;0;129;57m[48;2;29;32;33m  <assign name="def:NumberSuffix" fore="real_green3"/>                  [0m
+[?7h[?7l[38;2;235;219;178m[48;2;29;32;33m                                                                        [0m
+[?7h[?7l[38;2;152;151;26m[48;2;29;32;33m  <assign name="def:String" fore="green"/>                              [0m
+[?7h[?7l[38;2;214;93;14m[48;2;29;32;33m  <assign name="def:StringContent" fore="orange" style='1'/>            [0m
+[?7h[?7l[38;2;184;187;38m[48;2;29;32;33m  <assign name="def:StringEdge" fore="bright_green"/>                   [0m
+[?7h[?7l[38;2;235;219;178m[48;2;29;32;33m                                                                        [0m
+[?7h[?7l[38;2;146;131;116m[48;2;29;32;33m  <assign name="def:Comment" fore="gray"/>                              [0m
+[?7h[?7l[38;2;69;133;136m[48;2;40;40;40m  <assign name="def:CommentContent" fore="blue" back="bg0" style='1'/>  [0m
+[?7h[?7l[38;2;104;157;106m[48;2;40;40;40m  <assign name="def:CommentEdge" fore="aqua" back="bg0"/>               [0m
+[?7h[?7l[38;2;235;219;178m[48;2;40;40;40m  <assign name="def:CommentDoc" fore="fg" back="bg0"/>                  [0m
+[?7h[?7l[38;2;157;0;6m[48;2;40;40;40m  <assign name="def:CommentDocEdge" fore="faded_red" back="bg0"/>       [0m
+[?7h[?7l[38;2;235;219;178m[48;2;29;32;33m                                                                        [0m
+[?7h[?7l[38;2;181;118;20m[48;2;29;32;33m  <assign name="def:Symbol" fore="faded_yellow"/>                       [0m
+[?7h[?7l[38;2;168;153;132m[48;2;29;32;33m  <assign name="def:SymbolStrong" fore="fg4"/>                          [0m
+[?7h[?7l[38;2;139;142;255m[48;2;29;32;33m  <assign name="def:Prefix" fore="violet"/>                             [0m
+[?7h[?7l[38;2;235;219;178m[48;2;29;32;33m                                                                        [0m
+[?7h[?7l[38;2;104;157;106m[48;2;29;32;33m  <assign name="def:Operator" fore="aqua"/>                             [0m
+[?7h[?7l[38;2;235;219;178m[48;2;29;32;33m                                                                        [0m
+[?7h[?7l[38;2;204;36;29m[48;2;29;32;33m  <assign name="def:Keyword" fore="red"/>                               [0m
+[?7h[?7l[38;2;251;73;52m[48;2;29;32;33m  <assign name="def:KeywordStrong" fore="bright_red" style='1'/>        [0m
+[?7h[?7l[38;2;214;93;14m[48;2;29;32;33m  <assign name="def:FunctionKeyword" fore="orange"/>                    [0m
+[?7h[?7l[38;2;175;58;3m[48;2;29;32;33m  <assign name="def:DeprecatedKeyword" fore="faded_orange"/>            [0m
+[?7h[?7l[38;2;250;189;47m[48;2;29;32;33m  <assign name="def:ClassKeyword" fore="bright_yellow" style='1'/>      [0m
+[?7h[?7l[38;2;64;117;255m[48;2;29;32;33m  <assign name="def:InterfaceKeyword" fore="real_blue"/>                [0m
+[?7h[?7l[38;2;142;192;124m[48;2;29;32;33m  <assign name="def:StructKeyword" fore="bright_aqua"/>                 [0m
+[?7h[?7l[38;2;254;128;25m[48;2;29;32;33m  <assign name="def:TypeKeyword" fore="bright_orange"/>                 [0m
+[?7h[?7l[38;2;235;219;178m[48;2;29;32;33m                                                                        [0m
+[?7h[?7l[38;2;131;165;152m[48;2;29;32;33m  <assign name="def:Register" fore="bright_blue"/>                      [0m
+[?7h[?7l[38;2;211;134;155m[48;2;29;32;33m  <assign name="def:Constant" fore="bright_purple"/>                    [0m
+[?7h[?7l[38;2;131;165;152m[48;2;29;32;33m  <assign name="def:Var" fore="bright_blue"/>                           [0m
+[?7h[?7l[38;2;69;133;136m[48;2;29;32;33m  <assign name="def:VarStrong" fore="blue"/>                            [0m
+[?7h[?7l[38;2;104;157;106m[48;2;29;32;33m  <assign name="def:Identifier" fore="aqua"/>                           [0m
+[?7h[?7l[38;2;177;98;134m[48;2;29;32;33m  <assign name="def:BooleanConstant" fore="purple"/>                    [0m
+[?7h[?7l[38;2;235;219;178m[48;2;29;32;33m                                                                        [0m
+[?7h[?7l[38;2;69;133;136m[48;2;29;32;33m  <assign name="def:Directive" fore="blue"/>                            [0m
+[?7h[?7l[38;2;104;157;106m[48;2;29;32;33m  <assign name="def:Parameter" fore="aqua"/>                            [0m
+[?7h[?7l[38;2;235;219;178m[48;2;29;32;33m                                                                        [0m
+[?7h[?7l[38;2;214;93;14m[48;2;29;32;33m  <assign name="def:Tag" fore="orange"/>                                [0m
+[?7h[?7l[38;2;131;165;152m[48;2;29;32;33m  <assign name="def:OpenTag" fore="bright_blue"/>                       [0m
+[?7h[?7l[38;2;131;165;152m[48;2;29;32;33m  <assign name="def:CloseTag" fore="bright_blue"/>                      [0m
+[?7h[?7l[38;2;235;219;178m[48;2;29;32;33m                                                                        [0m
+[?7h[?7l[38;2;177;98;134m[48;2;29;32;33m  <assign name="def:Label" fore="purple" style='4'/>                    [0m
+[?7h[?7l[38;2;235;219;178m[48;2;143;63;113m  <assign name="def:LabelStrong" fore="fg" back="faded_purple"/>        [0m
+[?7h[?7l[38;2;235;219;178m[48;2;29;32;33m                                                                        [0m
+[?7h[?7l[38;2;235;219;178m[48;2;60;56;54m  <assign name="def:Insertion" fore="fg" back="bg1"/>                   [0m
+[?7h[?7l[38;2;235;219;178m[48;2;60;56;54m  <assign name="def:InsertionStart" fore="fg" back="bg1"/>              [0m
+[?7h[?7l[38;2;235;219;178m[48;2;60;56;54m  <assign name="def:InsertionEnd" fore="fg" back="bg1"/>                [0m
+[?7h[?7l[38;2;235;219;178m[48;2;29;32;33m                                                                        [0m
+[?7h[?7l[38;2;235;219;178m[48;2;204;36;29m  <assign name="def:Error" fore="fg" back="red" style='3'/>             [0m
+[?7h[?7l[38;2;235;219;178m[48;2;157;0;6m  <assign name="def:ErrorText" fore="fg" back="faded_red" style='1'/>   [0m
+[?7h[?7l[38;2;235;219;178m[48;2;29;32;33m                                                                        [0m
+[?7h[?7l[38;2;29;32;33m[48;2;215;153;33m  <assign name="def:TODO" fore="bg" back="yellow" style='4'/>           [0m
+[?7h[?7l[38;2;251;241;199m[48;2;7;102;120m  <assign name="def:Debug" fore="fg0" back="faded_blue"/>               [0m
+[?7h[?7l[38;2;235;219;178m[48;2;29;32;33m                                                                        [0m
+[?7h[?7l[38;2;177;98;134m[48;2;29;32;33m  <assign name="def:Path" fore="purple"/>                               [0m
+[?7h[?7l[38;2;64;117;255m[48;2;29;32;33m  <assign name="def:URL" fore="real_blue"/>                             [0m
+[?7h[?7l[38;2;64;117;255m[48;2;29;32;33m  <assign name="def:EMail" fore="real_blue"/>                           [0m
+[?7h[?7l[38;2;235;219;178m[48;2;29;32;33m                                                                        [0m
+[?7h[?7l[38;2;7;102;120m[48;2;29;32;33m  <assign name="def:Date" fore="faded_blue"/>                           [0m
+[?7h[?7l[38;2;66;123;88m[48;2;29;32;33m  <assign name="def:Time" fore="faded_aqua"/>                           [0m
+[?7h[?7l[38;2;235;219;178m[48;2;29;32;33m                                                                        [0m
+[?7h[?7l[38;2;255;255;255m[48;2;60;56;54m  <assign name="def:PairStart" fore="real_white" back="bg1" style='5'/> [0m
+[?7h[?7l[38;2;255;255;255m[48;2;60;56;54m  <assign name="def:PairEnd" fore="real_white" back="bg1" style='5'/>   [0m
+[?7h[?7l[38;2;168;153;132m[48;2;29;32;33m  <assign name="def:PairStrongStart" fore="fg4"/>                       [0m
+[?7h[?7l[38;2;168;153;132m[48;2;29;32;33m  <assign name="def:PairStrongEnd" fore="fg4"/>                         [0m
+[?7h[?7l[38;2;235;219;178m[48;2;29;32;33m                                                                        [0m
+[?7h[?7l[38;2;235;219;178m[48;2;29;32;33m  <!-- DEPRECATED -->                                                   [0m
+[?7h[?7l[38;2;142;192;124m[48;2;29;32;33m  <!-- assign name="def:Function" fore="bright_aqua"/ -->               [0m
+[?7h[?7l[38;2;235;219;178m[48;2;29;32;33m                                                                        [0m
+[?7h[?7l[38;2;235;219;178m[48;2;29;32;33m</hrd>                                                                  [0m
+[?7h
