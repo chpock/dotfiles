@@ -20,11 +20,13 @@ Preview is not available.
 Files are grouped by extension using specific [groups](../src/far-manager/filetypes/masks).
 
 Preview the color scheme for groups of files:
+
 ![file groups](./preview/filetypes.svg)
 
 ### 3. Color scheme for Colorer and FarColorer
 
 Preview for the color scheme:
+
 ![gruvbox_dark_hard](./preview/gruvbox_dark_hard.svg)
 
 ## How to use
