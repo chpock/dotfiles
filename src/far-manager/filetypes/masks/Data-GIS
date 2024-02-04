@@ -1,0 +1,12 @@
+*.gmap
+*.nm2
+*.saf
+*.gsm
+*.gpx
+*.gml
+*.geojson
+# GoogleEarth
+*.kmz
+# OpenStreetMap
+*.osm
+*.osc

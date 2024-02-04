@@ -1,0 +1,16 @@
+# Linux shared library
+/.*\.so(\.\d+){0,3}$/
+# MacOS shared library
+*.dylib
+*.jnilib
+# Windows binaries
+*.ocx
+*.odl
+*.scr
+*.sys
+*.drv
+*.dll
+*.cdf-ms
+*.manifest
+# Windows upgrade package
+*.mum

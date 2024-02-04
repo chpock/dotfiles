@@ -1,0 +1,9 @@
+# utorrent progress file
+*.!ut
+*.!bt
+# browser partially downloaded files
+*.part
+*.partial
+*.download
+*.crdownload
+*.opdownload

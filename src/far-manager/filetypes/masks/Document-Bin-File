@@ -1,0 +1,54 @@
+# Microsoft Word
+*.doc
+*.docx
+*.docm
+*.dot
+*.dotm
+# Microsoft Excel
+*.xla
+*.xls
+*.xlsx
+*.xlsm
+*.xlsb
+*.xlm
+*.xltm
+*.xltx
+# Microsoft PowerPoint
+*.pptx
+*.ppt
+*.pps
+*.ppts
+*.pptxm
+*.pptsm
+# OpenOffice
+*.odf
+*.ods
+*.odp
+*.odt
+*.ots
+*.odt
+*.ott
+# CorelDRAW
+*.cdx
+*.cdr
+# Windows help
+*.chm
+*.hlp
+*.hxs
+*.chw
+# PostScript File
+*.ps
+*.eps
+*.epsf
+# XML Paper Specification File
+*.xps
+# Figma Design
+*.fig
+# HTTP Archive File
+*.har
+# Other
+*.pdf
+*.rtf
+*.wri
+*.pages
+*.mht

@@ -1,0 +1,10 @@
+*.cpl
+*.lnk
+*.exe
+*.msi
+*.com
+*.bat
+*.cmd
+*.ps1
+*.pif
+*.vbs

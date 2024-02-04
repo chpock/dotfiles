@@ -1,0 +1,33 @@
+*.vmdk
+*.vbox
+*.im[ag]
+*.mdf
+*.vhdx
+*.vhd
+*.vol
+*.ddi
+*.dis
+*.dsk
+*.fdr
+*.flp
+*.vfd
+*.xdf
+*.iso
+*.nrg
+*.vcd
+*.dmg
+*.vfd
+*.flp
+*.dvd
+*.mdf
+*.rom
+*.vdi
+*.dsk
+*.nrg
+*.disk
+*.hc # VeraCrypt container
+*.tc # TrueCrypt volume
+*.qcow
+*.fvd
+*.sparseimage
+*.toast

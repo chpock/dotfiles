@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hrd xmlns="http://colorer.sf.net/2003/hrd">
+
+<assign name="def:bg"  fore="#1d2021"/>
+<assign name="def:bg0" fore="#282828"/>
+<assign name="def:bg1" fore="#3c3836"/>
+<assign name="def:bg2" fore="#504945"/>
+<assign name="def:bg3" fore="#665c54"/>
+<assign name="def:bg4" fore="#7c6f64"/>
+
+<assign name="def:fg"  fore="#ebdbb2"/>
+<assign name="def:fg0" fore="#fbf1c7"/>
+<assign name="def:fg1" fore="#ebdbb2"/>
+<assign name="def:fg2" fore="#d5c4a1"/>
+<assign name="def:fg3" fore="#bdae93"/>
+<assign name="def:fg4" fore="#a89984"/>
+
+<assign name="def:bright_gray"   fore="#a89984"/>
+<assign name="def:bright_red"    fore="#fb4934"/>
+<assign name="def:bright_green"  fore="#b8bb26"/>
+<assign name="def:bright_yellow" fore="#fabd2f"/>
+<assign name="def:bright_blue"   fore="#83a598"/>
+<assign name="def:bright_purple" fore="#d3869b"/>
+<assign name="def:bright_aqua"   fore="#8ec07c"/>
+<assign name="def:bright_orange" fore="#fe8019"/>
+
+<assign name="def:gray"   fore="#928374"/>
+<assign name="def:red"    fore="#cc241d"/>
+<assign name="def:green"  fore="#98971a"/>
+<assign name="def:yellow" fore="#d79921"/>
+<assign name="def:blue"   fore="#458588"/>
+<assign name="def:purple" fore="#b16286"/>
+<assign name="def:aqua"   fore="#689d6a"/>
+<assign name="def:orange" fore="#d65d0e"/>
+
+<assign name="def:faded_gray"   fore="#7c6f64"/>
+<assign name="def:faded_red"    fore="#9d0006"/>
+<assign name="def:faded_green"  fore="#79740e"/>
+<assign name="def:faded_yellow" fore="#b57614"/>
+<assign name="def:faded_blue"   fore="#076678"/>
+<assign name="def:faded_purple" fore="#8f3f71"/>
+<assign name="def:faded_aqua"   fore="#427b58"/>
+<assign name="def:faded_orange" fore="#af3a03"/>
+
+<assign name="def:real_green" fore="#009b08"/>
+<assign name="def:real_bright_green" fore="#00c23e"/>
+<assign name="def:real_green1" fore="#00be50"/>
+<assign name="def:real_green2" fore="#00871d"/>
+<assign name="def:real_green3" fore="#008139"/>
+<assign name="def:real_green4" fore="#308b00"/>
+
+<assign name="def:violet" fore="#8b8eff"/>
+<assign name="def:real_blue" fore="#4075ff"/>
+<assign name="def:real_white" fore="#ffffff"/>
+<assign name="def:strong_purple" fore="#ff49f5"/>
+<assign name="def:light_yellow" fore="#d2cd86"/>
+
+</hrd>

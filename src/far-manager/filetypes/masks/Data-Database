@@ -1,0 +1,17 @@
+*.sqlite
+*.sqlite3
+*.csv
+*.tsv
+*.db
+*.dbf
+*.db2
+*.db3
+*.leveldb
+*.gdb
+*.localstorage
+*.typelib
+# Microsoft Access
+*.mdb
+*.mde
+# OpenDocument Database
+*.odb

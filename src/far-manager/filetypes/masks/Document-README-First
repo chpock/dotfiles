@@ -1,0 +1,22 @@
+NEWS
+README
+README.rst
+README.md
+INSTALL
+INSTALL.md
+HISTORY
+HISTORY.md
+CHANGELOG
+CHANGELOG.md
+# changelog without extension
+CHANGELOG*.
+VERSION
+VERSION.md
+NOTICE
+NOTICE.md
+CHANGES
+CHANGES.md
+read.me
+read.me!
+readme.*
+*.!!!

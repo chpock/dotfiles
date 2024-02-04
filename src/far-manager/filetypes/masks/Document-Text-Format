@@ -1,0 +1,30 @@
+# Ruby document
+*.rdoc
+# YAML
+*.yml
+*.yaml
+# Perl documentation
+*.pod
+# XML
+*.xml
+*.fxml
+*.xsd # XML Schema Definition
+# reStructuredText markup language
+*.rst
+# JSON
+*.json
+*.json[lc5]
+*.hjson
+*.ndjson
+*.jsonnet
+# Other
+*.toml
+*.sgml
+*.inf
+*.msg
+*.texinfo
+*.tex
+*.textile
+# vCard
+*.vcf
+*.vcard

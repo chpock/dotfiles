@@ -1,0 +1,29 @@
+*.cfg
+*.config
+*.farconfig
+*.ini
+*.cnf
+*.conf
+*.ovpn
+*.settings
+*.properties
+*.props
+*.prop
+*.plist
+*.doxy # settings for doxygen
+authorized_keys
+known_hosts
+# Windows registry file
+*.reg
+# Files starting with dot are usually configuration files
+.*
+#.containerignore
+#.dockerignore
+#.gitignore
+#.gitattributes
+#.gitmodules
+#.htaccess
+#
+# Is an exception. Don't mark '..' as a configuration file, as it is the previous directory.
+|
+..

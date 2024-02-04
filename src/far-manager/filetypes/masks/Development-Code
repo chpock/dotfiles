@@ -1,0 +1,110 @@
+# PHP
+*.phpt
+*.php
+*.php4
+*.ctp  # CakePHP
+*.twig # Twig
+# Assembler
+*.asm
+*.wasm
+# C / C++ / C#
+*.cpp
+*.c
+*.cc
+*.cs
+*.cp
+*.cxx
+*.c--
+# sed / awk
+*.awk
+*.sed
+# Google Apps Script
+*.gs
+# JS
+*.jscript
+*.js
+*.jse
+*.jsx
+*.cjs # CommonJS
+*.mjs # ECMAScript
+# AutoIt v3 Script
+*.au3
+# Terraform
+*.tf
+# CGI scripts
+*.cgi
+# Shell
+*.sh
+*.bash
+*.zsh
+*.fish
+# AutoHotkey Script
+*.ahk
+# Active Server Page
+*.asp
+# VBScript encoded
+*.vbe
+# Windows Script File
+*.wsf
+# TypeScript
+*.ts
+*.tsx
+# Windows NT Startup
+*.nt
+# Perl
+*.pl
+*.pm
+*.t
+# Clojure
+*.clj
+*.cljs
+*.cljc
+*.cljw
+# Scala
+*.scala
+*.sc
+# Lisp
+*.cl
+*.ml
+*.lisp
+*.rkt
+*.el
+*.elc
+*.eln
+# Nim
+*.nim
+*.nimble
+# Haskell
+*.hi
+*.hs
+*.lhs
+# Java
+*.java
+*.jav
+*.coffee
+*.jsm
+*.jsp
+# VBA
+*.vb
+*.vba
+# Misc languages
+*.go
+*.rb
+*.tcl
+*.py
+*.ipynb
+*.vim
+*.lua
+*.moon
+*.bas
+*.dsl
+*.groovy
+*.pas
+*.r
+*.rs
+*.swift
+*.dart
+*.cr # Crystal
+.zig # Zig
+# Other
+*.ntest

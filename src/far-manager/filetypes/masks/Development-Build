@@ -1,0 +1,37 @@
+# CMake
+*.cmake
+# NMake
+*.nmake
+# Various Microsoft Compilers
+*.sln
+*.suo
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.csproj
+*.csproj.user
+*.vbproj
+*.vdproj
+*.vcproj
+# GNU Make / Autoconf
+makefile.*
+makefile
+*.in
+*.mak
+*.m4
+*.mk
+*.am
+*.ac
+*.hin
+*.scan
+# Maven build file
+*.pom
+# Visual Basic project
+*.vbp
+# Ruby
+*.rake
+# Docker
+dockerfile
+containerfile
+dockerfile.*
+containerfile.*

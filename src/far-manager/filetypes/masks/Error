@@ -1,0 +1,10 @@
+*.dump
+*.dmp
+*.err
+*.error
+*.errors
+*.stderr
+*.stackdump
+*.zcompdump
+*.fdr # Windows Error Report File
+*.core

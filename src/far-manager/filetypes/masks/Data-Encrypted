@@ -1,0 +1,52 @@
+*.pkpass
+*.b64
+*.base64
+*.gpg
+*.pgp
+*.sec
+*.aes
+.htpasswd
+# Keys
+id_dsa*
+id_rsa*
+id_ecdsa*
+id_ed25519*
+*.keytab
+*.pubkey
+*.key
+*.pub
+*.rsa
+# Checksums and signatures
+*.sig
+*.signature
+*.sha
+*.sha256sum
+*.sha256
+*.sha512
+*.sum
+*.checksum
+*.crc
+*.sha1
+*.md5
+# Certificates
+*.p7[bcs]
+*.p7
+*.crt
+*.csr
+*.ctl
+*.clr
+*.crl
+*.srl
+*.pem
+*.der
+*.pkcs12
+*.p12
+*.p10
+*.cer
+*.cert
+*.certificate
+# Java keystore
+*.jks
+*.keystore
+keystore
+*.ks

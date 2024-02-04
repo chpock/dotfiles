@@ -1,0 +1,12 @@
+*.temp
+*.tmp
+*.tmp-
+*.tmpfile
+*.~*
+*.$$$
+*.chk
+*.swp
+*.swo
+*.wbk
+*.un~
+.DS_Store

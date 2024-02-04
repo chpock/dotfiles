@@ -1,0 +1,38 @@
+# Python
+*.pyd
+*.whl
+*.pyc
+*.pyo
+# Compiled LUA
+*.luc
+# Java
+*.jar
+*.war
+*.class
+*.jad
+# Windows compiler output
+*.map
+*.pdb
+*.obj
+*.lib
+*.idl # Interface Definition Language File
+# GCC compiler output
+*.a
+*.o
+# Tcl packages and tclkit
+*.kit
+*.tm
+# Ruby gem
+*.gem
+# NuGet Package for .NET
+*.nupkg
+# Pkg-config Configuration File
+*.pc
+# Android Smali Assembly Language File
+*.smali
+# Java Web Start File
+*.jnlp
+# Compiled resources
+*.res
+# Rust
+*.rlib

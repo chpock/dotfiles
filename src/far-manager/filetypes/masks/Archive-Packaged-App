@@ -1,0 +1,6 @@
+*.rpm
+*.apk
+*.deb
+*.ipa
+*.crx # Google Chrome extension
+*.xpi # Mozilla Firefox extension

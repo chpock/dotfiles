@@ -1,0 +1,16 @@
+# SQLite temporary files
+/.*\.\w+-shm$/
+/.*\.\w+-wal$/
+# Lock files
+*.lockfile
+*.lock
+*.lck
+# PID files
+*.pid
+# Microsoft Access Lock File
+*.ldb
+# Sockets
+*.sock
+*.socket
+# Other
+*.state

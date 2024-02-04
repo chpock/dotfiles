@@ -1,0 +1,8 @@
+*.ass
+*.ssa
+*.srt
+*.cue
+*.sup
+*.vtt
+*.ttml # Timed Text Markup Language Subtitles File
+*.mpsub # Mplayer subtitles

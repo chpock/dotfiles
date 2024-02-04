@@ -1,0 +1,43 @@
+# HTML Family
+*.htm
+*.html
+*.[sxpdrmj]html
+*.[sxpdrmj]htm
+# CSS Family
+*.css
+*.scss
+*.sass
+# C / C++
+*.h
+*.hpp
+*.h++
+*.hh
+*.h--
+*.inc
+*.tcc
+*.ii
+# Ruby Gem Specification File
+*.gemspec
+# SQL script
+*.sql
+*.mysql
+*.msql
+*.prql
+*.pgsql
+# Document Type Definition File that specifies XML elements and attributes
+*.dtd
+# XML Stylesheet to transform XML document
+*.xsl
+# Far manager language / help
+*.lng
+*.hlf
+# UI messages for GNU gettext
+*.po
+# Resources
+*.rc
+*.rc2
+# Java Manifest
+*.mf
+# Terraform
+*.tfstate
+*.tfvars
