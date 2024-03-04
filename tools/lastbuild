@@ -59,7 +59,7 @@ lastbuild() {
     elif [ "$1" = "agent" ]; then
         MSK="CloudBeesFlowAgent-x64-*"
     elif [ "$1" = "dois" ]; then
-        MSK="CloudBeesFlowDevOpsInsightServer-x64-*"
+        MSK="CloudBees*Server-x64-*"
     elif [ "$1" = "dofs" ]; then
         MSK="CloudBeesFlowDevOpsForesightServer-x64-*"
     else

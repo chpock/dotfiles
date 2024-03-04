@@ -65,7 +65,7 @@ $IAM_HOME/tools/bin/colors
 tool: lastbuild tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/lastbuild
 $IAM_HOME/tools/bin/lastbuild
-3213
+3198
 tool: shellcheck tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-shellcheck
 $IAM_HOME/tools/bin/install-shellcheck

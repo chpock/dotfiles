@@ -1504,11 +1504,11 @@ done
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
 shopt -s histappend
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 shopt -s cmdhist
 unset HISTFILESIZE
 HISTSIZE=1000000
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 HISTCONTROL=ignoreboth
 HISTTIMEFORMAT='%F %T '
 HISTIGNORE="&:[bf]g:exit"
@@ -2452,6 +2452,12 @@ cd "$JUMP/$2"
 }
 complete -F j j
 if _isnot tmux; then
+if [ -z "$SSH_CLIENT" ]; then
+tmux -L local new-session -d
+tmux -L local new-session -d
+tmux -L local new-session -d
+exit 0
+fi
 tools check quick update
 j -prompt
 if [ -n "$__KITTY_ID" ] && [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID/pwd" ]; then

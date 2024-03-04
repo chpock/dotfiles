@@ -2462,6 +2462,14 @@ complete -F j j
 
 if _isnot tmux; then
 
+    # if we are in cygwin, but not in ssh, then just create 3 detached sessions
+    if [ -z "$SSH_CLIENT" ]; then
+        tmux -L local new-session -d
+        tmux -L local new-session -d
+        tmux -L local new-session -d
+        exit 0
+    fi
+
     # don't check for tools update and don't print saved directories in new tmux window
     tools check quick update
     j -prompt
