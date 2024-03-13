@@ -177,6 +177,14 @@ set statusline+=%#CursorLine#                " colour
 set statusline+=\ %t                         " short file name
 set statusline+=\ %=                         " right align
 set statusline+=%#CursorLine#                " colour
+if v:version > 802 || v:version == 802 && has("patch2854")
+    set statusline+=\ [StripSpaces:%{%exists('#StripTrailingWhitespace#BufWritePre')?'%#diffChanged#ON':'%#diffRemoved#OFF'%}%#CursorLine#]
+else
+    set statusline+=\ [StripSpaces:
+    set statusline+=%#diffChanged#%{exists('#StripTrailingWhitespace#BufWritePre')?'ON':''}
+    set statusline+=%#diffRemoved#%{exists('#StripTrailingWhitespace#BufWritePre')?'':'OFF'}
+    set statusline+=%#CursorLine#]
+endif
 set statusline+=\ [FileType:%Y]              " file type
 set statusline+=\ %#CursorIM#                " colour
 set statusline+=\ [Line:%-3l\ Column:%-3c]   " line + column
@@ -493,10 +501,18 @@ func! <SID>stripTrailingWhitespace()
     call winrestview(l:winview)
 endfunc
 
-augroup StripTrailingWhitespace
-    au!
-    au BufWritePre * call <SID>stripTrailingWhitespace()
-augroup END
+func! ToggleStripTrailingWhitespace()
+    if exists('#StripTrailingWhitespace#BufWritePre')
+        augroup StripTrailingWhitespace
+            au!
+        augroup END
+    else
+        augroup StripTrailingWhitespace
+            au!
+            au BufWritePre * call <SID>stripTrailingWhitespace()
+        augroup END
+    endif
+endfunc
 
 " Hightlight EOL whitespaces
 augroup WhitespacesEOL
@@ -519,10 +535,15 @@ augroup SpecialFileTypes
     au FileType html,xml setlocal listchars-=tab:>.
 augroup END
 
+command ToggleStripTrailingWhitespace :call ToggleStripTrailingWhitespace()
+" Enable the whitespace stripping by default
+call ToggleStripTrailingWhitespace()
+
 " Plugins
 
 " Colorizer
 " https://github.com/chrisbra/Colorizer/blob/master/doc/Colorizer.txt
 let g:colorizer_auto_filetype = 'css,html'   " Automatically highlight filetypes
 let g:colorizer_fgcontrast = 0   " Adjust the contrast (-1, 0, 1, 2). When -1 - fg and bg are the same.
+
 

@@ -247,6 +247,14 @@ set statusline+=%#CursorLine#
 set statusline+=\ %t
 set statusline+=\ %=
 set statusline+=%#CursorLine#
+if v:version > 802 || v:version == 802 && has("patch2854")
+set statusline+=\ [StripSpaces:%{%exists('#StripTrailingWhitespace#BufWritePre')?'%#diffChanged#ON':'%#diffRemoved#OFF'%}%#CursorLine#]
+else
+set statusline+=\ [StripSpaces:
+set statusline+=%#diffChanged#%{exists('#StripTrailingWhitespace#BufWritePre')?'ON':''}
+set statusline+=%#diffRemoved#%{exists('#StripTrailingWhitespace#BufWritePre')?'':'OFF'}
+set statusline+=%#CursorLine#]
+endif
 set statusline+=\ [FileType:%Y]
 set statusline+=\ %#CursorIM#
 set statusline+=\ [Line:%-3l\ Column:%-3c]
@@ -526,10 +534,18 @@ echo "Warning: trailing whitespaces have been removed! Use UNDO to restore delet
 endif
 call winrestview(l:winview)
 endfunc
+func! ToggleStripTrailingWhitespace()
+if exists('#StripTrailingWhitespace#BufWritePre')
+augroup StripTrailingWhitespace
+au!
+augroup END
+else
 augroup StripTrailingWhitespace
 au!
 au BufWritePre * call <SID>stripTrailingWhitespace()
 augroup END
+endif
+endfunc
 augroup WhitespacesEOL
 au!
 au BufWinEnter * hi WhitespaceEOL ctermbg=red guibg=red | match WhitespaceEOL /\s\+$/
@@ -543,6 +559,8 @@ au BufNewFile,BufReadPost *.{yaml,yml} set filetype=yaml
 au FileType yaml setlocal ts=2 sts=2 sw=2 expandtab indentkeys-=0#,0},0],<:>,-
 au FileType html,xml setlocal listchars-=tab:>.
 augroup END
+command ToggleStripTrailingWhitespace :call ToggleStripTrailingWhitespace()
+call ToggleStripTrailingWhitespace()
 let g:colorizer_auto_filetype = 'css,html'
 let g:colorizer_fgcontrast = 0
 EOF
