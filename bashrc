@@ -773,12 +773,16 @@ printf -v "$V" '%s' "$R"
 return "${!V}"
 }
 _isnot() { _is "$1" && return 1 || return 0; }
+_addpath -start "$IAM_HOME/tools/bin"
+_addpath "/usr/local/bin"
+[ -d "$IAM_HOME/tools/bin" ] || mkdir -p "$IAM_HOME/tools/bin"
 if _is aix; then
 _addpath -start "/opt/freeware/bin"
 elif _is sunos; then
 _addpath -start "/usr/xpg4/bin"
 elif _is macos; then
 _addpath -start "/usr/local/bin" "/usr/local/opt/coreutils/libexec/gnubin"
+_addpath -start "/opt/local/bin"
 elif _is msys || _is mingw; then
 for i in ucrt64 clang64 mingw64; do
 [ ! -d "/${i}/bin" ] || _addpath -start "/${i}/bin"
@@ -787,6 +791,40 @@ MSYS2_ARG_CONV_EXCL="*"
 export MSYS2_ARG_CONV_EXCL
 MSYS2_ENV_CONV_EXCL="*"
 export MSYS2_ENV_CONV_EXCL
+elif _is wsl; then
+if [ -d /usr/bin/windows/System32 ]; then
+_addpath -start "/usr/bin/windows" "/usr/bin/windows/System32"
+fi
+fi
+if _isnot tmux; then
+unset WARN
+if _is wsl; then
+for fn in gsudo gsudo.exe; do
+REAL_CMD="$(command -v "$fn" 2>/dev/null)"
+if [ -n "$REAL_CMD" ] && [ ! -x "$REAL_CMD" ]; then
+if ! chmod +x "$REAL_CMD" >/dev/null 2>&1; then
+[ -n "$WARN" ] || echo
+echo "${COLOR_RED}WARNING:${COLOR_DEFAULT} could not chmod +x '$REAL_CMD': Permission denied. Run it using gsudo or run WSL under elevated powershell."
+WARN=1
+fi
+fi
+done
+for fn in vagrant VBoxManage net sc notepad explorer reg; do
+REAL_CMD="$(command -v "${fn}.exe" 2>/dev/null)"
+if [ -n "$REAL_CMD" ]; then
+ln -sf "$REAL_CMD" "$IAM_HOME/tools/bin/$fn"
+if [ ! -x "$REAL_CMD" ]; then
+if ! chmod +x "$REAL_CMD" >/dev/null 2>&1; then
+[ -n "$WARN" ] || echo
+echo "${COLOR_RED}WARNING:${COLOR_DEFAULT} could not chmod +x '$REAL_CMD': Permission denied. Run it using gsudo."
+WARN=1
+fi
+fi
+fi
+done
+fi
+[ -z "$WARN" ] || echo
+unset fn REAL_CMD WARN
 fi
 if [ "$LANG" != "en_US.UTF-8" ] && _has locale && [ "$(LANG=en_US.UTF-8 locale charmap 2>/dev/null)" = "UTF-8" ]; then
 LANG="en_US.UTF-8"
@@ -845,8 +883,6 @@ fi; # tmux
 if [ -f ~/gcloud/google-cloud-sdk/path.bash.inc ]; then
 . ~/gcloud/google-cloud-sdk/path.bash.inc
 fi
-_addpath -start "$IAM_HOME/tools/bin"
-_addpath "/usr/local/bin"
 for fn in \
 "/proc/registry/HKEY_CURRENT_USER/Environment/Path" \
 "/proc/registry/HKEY_LOCAL_MACHINE/SYSTEM/CurrentControlSet/Control/Session Manager/Environment/Path"
@@ -1520,13 +1556,13 @@ mv -f "${fn}.fix-permissions" "$fn"
 done
 }
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 export LESS
 shopt -s histappend
 shopt -s cmdhist
 unset HISTFILESIZE
 HISTSIZE=1000000
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 HISTCONTROL=ignoreboth
 HISTTIMEFORMAT='%F %T '
 HISTIGNORE="&:[bf]g:exit"
@@ -2470,11 +2506,23 @@ cd "$JUMP/$2"
 }
 complete -F j j
 if _isnot tmux; then
-if [ -z "$SSH_CLIENT" ]; then
-tmux -L local new-session -d
-tmux -L local new-session -d
-tmux -L local new-session -d
-exit 0
+if _is wsl; then
+if [ ! -f /etc/wsl.conf ] || ! grep -q -E '^options\s*=.*metadata' /etc/wsl.conf; then
+echo "${COLOR_RED}WARNING:${COLOR_DEFAULT} /etc/wsl.conf doesn't contain 'option=metadata' in the section '[autoconf]'. This is necessary to preserve the linux permissions on the Windows file system."
+echo "Launch 'sudo vi /etc/wsl.conf' and add the following under the section '[automount]':"
+echo "    options = \"metadata,umask=22,fmask=11,case=off\""
+echo "Restart WSL after that."
+echo
+fi
+if [ ! -d /usr/bin/windows/System32 ]; then
+echo "${COLOR_RED}WARNING:${COLOR_DEFAULT} /usr/bin/windows/System32 is unavailable. Windows standard exes will not work. Do the following:"
+echo "\$ sudo mkdir -p /usr/bin/windows"
+echo "\$ sudo vi /etc/fstab"
+echo 'c:\\Windows /usr/bin/windows drvfs ro,noatime,metadata 0 0'
+echo "\$ sudo vi /etc/wsl.conf"
+echo "Make sure that 'mountFsTab = true' exists under the section '[automount]'"
+echo
+fi
 fi
 tools check quick update
 j -prompt

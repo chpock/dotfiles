@@ -237,6 +237,10 @@ _is() {
 
 _isnot() { _is "$1" && return 1 || return 0; }
 
+_addpath -start "$IAM_HOME/tools/bin"
+_addpath "/usr/local/bin"
+[ -d "$IAM_HOME/tools/bin" ] || mkdir -p "$IAM_HOME/tools/bin"
+
 if _is aix; then
     # Insert path to GNU utilities for AIX platform
     _addpath -start "/opt/freeware/bin"
@@ -247,6 +251,10 @@ elif _is macos; then
     # Add local bin directory
     # Insert path to GNU utilities for MacOS platform
     _addpath -start "/usr/local/bin" "/usr/local/opt/coreutils/libexec/gnubin"
+    # Insert path to ports for MacOS
+    _addpath -start "/opt/local/bin"
+    # Use curl from brew if available
+    #[ ! -x /usr/local/opt/curl/bin/curl ] || _addpath -start "/usr/local/opt/curl/bin"
 elif _is msys || _is mingw; then
     for i in ucrt64 clang64 mingw64; do
         [ ! -d "/${i}/bin" ] || _addpath -start "/${i}/bin"
@@ -257,6 +265,43 @@ elif _is msys || _is mingw; then
     export MSYS2_ARG_CONV_EXCL
     MSYS2_ENV_CONV_EXCL="*"
     export MSYS2_ENV_CONV_EXCL
+elif _is wsl; then
+    if [ -d /usr/bin/windows/System32 ]; then
+        _addpath -start "/usr/bin/windows" "/usr/bin/windows/System32"
+    fi
+
+fi
+
+# Add native Windows utilities to WSL. Don't run inside tmux to speed up reloads.
+if _isnot tmux; then
+    unset WARN
+    if _is wsl; then
+        for fn in gsudo gsudo.exe; do
+            REAL_CMD="$(command -v "$fn" 2>/dev/null)"
+            if [ -n "$REAL_CMD" ] && [ ! -x "$REAL_CMD" ]; then
+            if ! chmod +x "$REAL_CMD" >/dev/null 2>&1; then
+                [ -n "$WARN" ] || echo
+                echo "${COLOR_RED}WARNING:${COLOR_DEFAULT} could not chmod +x '$REAL_CMD': Permission denied. Run it using gsudo or run WSL under elevated powershell."
+                WARN=1
+            fi
+            fi
+        done
+        for fn in vagrant VBoxManage net sc notepad explorer reg; do
+            REAL_CMD="$(command -v "${fn}.exe" 2>/dev/null)"
+            if [ -n "$REAL_CMD" ]; then
+                ln -sf "$REAL_CMD" "$IAM_HOME/tools/bin/$fn"
+                if [ ! -x "$REAL_CMD" ]; then
+                    if ! chmod +x "$REAL_CMD" >/dev/null 2>&1; then
+                        [ -n "$WARN" ] || echo
+                        echo "${COLOR_RED}WARNING:${COLOR_DEFAULT} could not chmod +x '$REAL_CMD': Permission denied. Run it using gsudo."
+                        WARN=1
+                    fi
+                fi
+            fi
+        done
+    fi
+    [ -z "$WARN" ] || echo
+    unset fn REAL_CMD WARN
 fi
 
 # try to use en_US.UTF-8 locale if available
@@ -334,9 +379,6 @@ fi; # tmux
 if [ -f ~/gcloud/google-cloud-sdk/path.bash.inc ]; then
     . ~/gcloud/google-cloud-sdk/path.bash.inc
 fi
-
-_addpath -start "$IAM_HOME/tools/bin"
-_addpath "/usr/local/bin"
 
 # Add user PATH in cygwin
 # https://stackoverflow.com/a/51430239
@@ -2462,13 +2504,35 @@ complete -F j j
 
 if _isnot tmux; then
 
-    # if we are in cygwin, but not in ssh, then just create 3 detached sessions
-    if [ -z "$SSH_CLIENT" ]; then
-        tmux -L local new-session -d
-        tmux -L local new-session -d
-        tmux -L local new-session -d
-        exit 0
+    if _is wsl; then
+        # Check option=metadata in /etc/wsl.conf
+        if [ ! -f /etc/wsl.conf ] || ! grep -q -E '^options\s*=.*metadata' /etc/wsl.conf; then
+            echo "${COLOR_RED}WARNING:${COLOR_DEFAULT} /etc/wsl.conf doesn't contain 'option=metadata' in the section '[autoconf]'. This is necessary to preserve the linux permissions on the Windows file system."
+            echo "Launch 'sudo vi /etc/wsl.conf' and add the following under the section '[automount]':"
+            echo "    options = \"metadata,umask=22,fmask=11,case=off\""
+            echo "Restart WSL after that."
+            echo
+        fi
+
+        # Check if Windows standard exes are available
+        if [ ! -d /usr/bin/windows/System32 ]; then
+            echo "${COLOR_RED}WARNING:${COLOR_DEFAULT} /usr/bin/windows/System32 is unavailable. Windows standard exes will not work. Do the following:"
+            echo "\$ sudo mkdir -p /usr/bin/windows"
+            echo "\$ sudo vi /etc/fstab"
+            echo 'c:\\Windows /usr/bin/windows drvfs ro,noatime,metadata 0 0'
+            echo "\$ sudo vi /etc/wsl.conf"
+            echo "Make sure that 'mountFsTab = true' exists under the section '[automount]'"
+            echo
+        fi
     fi
+
+    # if we are in cygwin, but not in ssh, then just create 3 detached sessions
+    #if [ -z "$SSH_CLIENT" ]; then
+    #    tmux -L local new-session -d
+    #    tmux -L local new-session -d
+    #    tmux -L local new-session -d
+    #    exit 0
+    #fi
 
     # don't check for tools update and don't print saved directories in new tmux window
     tools check quick update
