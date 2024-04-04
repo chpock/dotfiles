@@ -1,6 +1,7 @@
 
-BASHRC_HOME="/c/DriveD/Projects/dotfiles/tools"
-[ -d "$BASHRC_HOME" ] || BASHRC_HOME="/w/projects/dotfiles/tools"
+# higher priority for WSL repo location
+BASHRC_HOME="/w/projects/dotfiles/tools"
+[ -d "$BASHRC_HOME" ] || BASHRC_HOME="/c/DriveD/Projects/dotfiles/tools"
 
 if [ -d "$BASHRC_HOME" ]; then
     alias bashrc="$BASHRC_HOME/bashrc"
