@@ -2172,20 +2172,27 @@ tools() {
         fi
     fi
 
-    local files=() recs=() recs_check=() TOOLS_EXISTS=1
+    local files=() recs=() recs_check=() TOOLS_EXISTS=
 
-    if [ ! -f "$TOOLS_FILE" ] || [ "$(_get_size "$TOOLS_FILE")" != "$LOCAL_TOOLS_FILE_SIZE" ]; then
+    if [ -f "$TOOLS_FILE" ]; then
+        _hash < "$TOOLS_FILE"
+        [ "$_HASH" != "$LOCAL_TOOLS_FILE_HASH" ] || TOOLS_EXISTS=1
+    fi
+
+    if [ -z "$TOOLS_EXISTS" ]; then
         local TMP="$(mktemp)"
         if ! _get_url "$TOOLS_URL" >"$TMP" 2>/dev/null; then
             rm -f "$TMP"
-            unset TOOLS_EXISTS
             CHECK_STATE=1
             echo "${COLOR_RED}ERROR:${COLOR_DEFAULT} An unexpected error occurred while updating the list of tools."
         else
-            mv -f "$TMP" "$TOOLS_FILE"
-            SIZE="$(_get_size "$TOOLS_FILE")"
-            if [ "$SIZE" != "$LOCAL_TOOLS_FILE_SIZE" ]; then
-                echo "${COLOR_BROWN}WARNING:${COLOR_DEFAULT} The list of tools is not properly updated. The current file size ${SIZE} doesn't match the expected size ${LOCAL_TOOLS_FILE_SIZE}."
+            _hash < "$TMP"
+            if [ "$_HASH" != "$LOCAL_TOOLS_FILE_HASH" ]; then
+                rm -f "$TMP"
+                echo "${COLOR_BROWN}WARNING:${COLOR_DEFAULT} The list of tools is not properly updated. The downloaded file hash ${_HASH} doesn't match the expected hash ${LOCAL_TOOLS_FILE_HASH}."
+            else
+                mv -f "$TMP" "$TOOLS_FILE"
+                TOOLS_EXISTS=1
             fi
         fi
     fi

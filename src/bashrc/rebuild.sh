@@ -17,6 +17,22 @@ getSize() {
     stat -c '%s' "$1"
 }
 
+_hash() {
+    # here is Adler-32
+    # disable messages during -x
+    {
+        local A=1 B=0 M="$@" C i
+        [ -n "$M" ] || IFS= read -r -d '' M || :
+        local L=${#M}
+        for (( i = 0; i < $L; i++ )); do
+            printf -v C '%d' "'${M:$i:1}"
+            A=$(( (A + C) % 65521 ))
+            B=$(( (B + A) % 65521 ))
+        done
+    } 2>/dev/null
+    printf -v _HASH '%X' $(( A + ( B << 16 ) ))
+}
+
 terminfo() {
     # remove comments
     # delete spaces from the beginning of lines
@@ -102,6 +118,13 @@ process() {
             fn="${line#* }"
             fn="${fn/REPO_ROOT/..\/..\//}"
             getSize "$SRC_DIR/$fn"
+        elif [ "${line%% *}" = "@setHash" ]; then
+            line="${line#* }"
+            var="${line%% *}"
+            fn="${line#* }"
+            fn="${fn/REPO_ROOT/..\/../}"
+            _hash < "$SRC_DIR/$fn"
+            printf '%s=%s\n' "$var" "$_HASH"
         else
             echo "$line"
         fi
