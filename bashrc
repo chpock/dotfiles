@@ -56,7 +56,7 @@ set -g history-limit 1000000
 set -g automatic-rename on
 set -g renumber-windows on
 set -g set-titles on
-set -g set-titles-string '#h:#{pane_current_path}'
+set -g set-titles-string '#h:#S'
 set -g status-interval 10
 set -g display-time 2000
 set -g monitor-activity on
@@ -115,15 +115,16 @@ set -g pane-active-border-style 'bg=colour236,fg=colour51'
 set -g status on
 set -g status-position top
 set -g status-style 'bg=colour234,fg=colour137,dim'
-set -g status-left '#{?client_prefix,#[#{@ind_s_prefix}]#{@ind_t_prefix},#{?pane_in_mode,#[#{@ind_s_copy}]#{@ind_t_copy},#[#{@ind_s_none}]#{@ind_t_none}}}'
+set -g status-left '#{?client_prefix,#[#{@ind_s_prefix}]#{@ind_t_prefix},#{?pane_in_mode,#[#{@ind_s_copy}]#{@ind_t_copy},#[#{@ind_s_none}]#{@ind_t_none}}}#[fg=colour245,bg=colour234]|'
 set -g status-left-length 20
-set -g status-right ''
+set -g status-right '#[fg=colour245]|#[bg=colour175,fg=black] #S '
 set -g status-right-length 50
 set -g window-status-current-format ' #I#[fg=colour250]:#[fg=colour255]#W#[fg=colour50]#F '
 set -g window-status-current-style  'fg=colour81,bg=colour238,bold'
-set -g window-status-format ' #I#[fg=colour237]:#[fg=colour250]#W#{?monitor-activity,,#[fg=colour250]##}#[fg=colour244]#F '
+set -g window-status-format ' #I#[fg=colour237]:#[fg=colour250]#W#{?monitor-activity,,#[fg=colour250]###[]}#[fg=colour50]#F '
 set -g window-status-style  'fg=colour138,bg=colour235,none'
 set -g window-status-bell-style 'fg=colour255,bg=colour1,bold'
+set -g window-status-activity-style 'default'
 set -g message-style 'fg=colour232,bg=colour166,bold'
 EOF
 

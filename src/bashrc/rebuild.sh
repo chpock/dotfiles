@@ -139,4 +139,8 @@ cat "$TOOLS_SRC_FILE" | tools-list | process > "$TOOLS_OUT_FILE"
 process < "$BASHRC_SRC_FILE" > "$BASHRC_OUT_FILE"
 [ "$1" = "silent" ] || echo " OK"
 
+if [ -e "/c/Far Manager/Stuff/bashrc" ]; then
+    cp -f "$BASHRC_OUT_FILE" "/c/Far Manager/Stuff/bashrc"
+fi
+
 [ "$1" = "silent" ] || echo "Done."
