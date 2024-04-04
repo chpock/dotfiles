@@ -14,6 +14,10 @@ tool: kubetcl function
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-kubectl.sh
 $IAM_HOME/shell.rc/functions-kubectl.sh
 3735
+tool: edit bashrc
+https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/bashrc.rc.sh
+$IAM_HOME/shell.rc/bashrc.rc.sh
+318
 tool: bash completion
 https://raw.githubusercontent.com/chpock/.ini/master/bash_completion/custom/ecconfigure.bash
 $IAM_HOME/tools/bash_completion/ecconfigure.completion.bash

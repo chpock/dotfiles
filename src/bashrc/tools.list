@@ -21,6 +21,11 @@ https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-kube
 $IAM_HOME/shell.rc/functions-kubectl.sh
 @getSize REPO_ROOT/shell.rc/functions-kubectl.sh
 
+tool: edit bashrc
+https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/bashrc.rc.sh
+$IAM_HOME/shell.rc/bashrc.rc.sh
+@getSize REPO_ROOT/shell.rc/bashrc.rc.sh
+
 # Bash completions
 
 tool: bash completion
