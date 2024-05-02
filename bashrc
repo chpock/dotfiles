@@ -56,7 +56,7 @@ set -g history-limit 1000000
 set -g automatic-rename on
 set -g renumber-windows on
 set -g set-titles on
-set -g set-titles-string '#h:#S'
+set -g set-titles-string '#h > #S'
 set -g status-interval 10
 set -g display-time 2000
 set -g monitor-activity on
@@ -568,7 +568,7 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=B7D2263E
+LOCAL_TOOLS_FILE_HASH=A20A263D
 COLOR_WHITE=$'\e[1;37m'
 COLOR_LIGHTGRAY=$'\e[0;37m'
 COLOR_GRAY=$'\e[1;30m'

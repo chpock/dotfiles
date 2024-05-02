@@ -25,7 +25,7 @@ _git-config-check() {
 
 git() {
     local REMORE_BRANCH
-    local GIT_BIN="$(command -v git)"
+    local GIT_BIN="$(which git)"
     if [ "commit" = "$1" ]; then
         # don't do anything if we are in a merge conflict state
         # https://stackoverflow.com/a/55192451
@@ -51,7 +51,7 @@ git() {
 }
 
 git-config() {
-    local GIT_BIN="$(command -v git)"
+    local GIT_BIN="$(which git)"
     local GIT_AUTHOR
     local SIGN_KEY
     if [ "$1" = "-local" ]; then
