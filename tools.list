@@ -37,7 +37,7 @@ $IAM_HOME/tools/bash_completion/electricflow.completion.bash
 tool: bash completion
 https://raw.githubusercontent.com/docker/cli/master/contrib/completion/bash/docker
 $IAM_HOME/tools/bash_completion/docker.completion.bash
-114566
+114580
 tool: bash completion
 https://raw.githubusercontent.com/docker/machine/master/contrib/completion/bash/docker-machine.bash
 $IAM_HOME/tools/bash_completion/docker-machine.completion.bash
@@ -57,7 +57,7 @@ $IAM_HOME/tools/bash_completion/makefile.completion.bash
 tool: bash completion
 https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash
 $IAM_HOME/tools/bash_completion/git-completion.bash
-88235
+93629
 tool: bash completion
 https://raw.githubusercontent.com/imomaliev/tmux-bash-completion/master/completions/tmux
 $IAM_HOME/tools/bash_completion/tmux-completion.bash
@@ -135,7 +135,7 @@ $IAM_HOME/vim_runtime/plugin/endwise.vim
 tool: vim plugin commentary
 https://raw.githubusercontent.com/tpope/vim-commentary/master/plugin/commentary.vim
 $IAM_HOME/vim_runtime/plugin/commentary.vim
-3993
+3994
 tool: vim plugin SynStack (plugin)
 https://raw.githubusercontent.com/dylnmc/synstack.vim/master/plugin/synstack.vim
 $IAM_HOME/vim_runtime/plugin/synstack.vim
