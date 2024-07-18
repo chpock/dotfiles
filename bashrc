@@ -568,7 +568,7 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=A20A263D
+LOCAL_TOOLS_FILE_HASH=24078E68
 COLOR_WHITE=$'\e[1;37m'
 COLOR_LIGHTGRAY=$'\e[0;37m'
 COLOR_GRAY=$'\e[1;30m'
@@ -1558,9 +1558,9 @@ done
 }
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
+shopt -s histappend
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
-shopt -s histappend
 shopt -s cmdhist
 unset HISTFILESIZE
 HISTSIZE=1000000
@@ -1937,6 +1937,9 @@ PS1="${PS1}\[${COLOR_YELLOW}\][stp:${STPJBS}]\[${COLOR_DEFAULT}\]"
 fi
 PS1="${PS1}\[${COLOR_SIGN}\]\\$\[${COLOR_DEFAULT}\] "
 unset PS1_COMMAND
+if _is tmux && [ -n "$__TMUX_FUNCTIONS_AVAILABLE" ]; then
+,tmux autosave
+fi
 }
 function prompt_workingdir () {
 local MY_PWD newPWD
@@ -2541,9 +2544,12 @@ cd "$(cat "$IAM_HOME/kitty_sessions/$__KITTY_ID/pwd")"
 [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim" ] && vim || true
 fi
 fi
-if _has tmux && tmux list-sessions -F '#{session_attached}' 2>/dev/null | grep --silent --fixed-strings '0'; then
+if _has tmux; then
+[ -z "$__TMUX_FUNCTIONS_AVAILABLE" ] || ,tmux restore
+if tmux list-sessions -F '#{session_attached}' 2>/dev/null | grep --silent --fixed-strings '0'; then
 echo "${COLOR_GRAY}[${COLOR_CYAN}TMUX${COLOR_GRAY}] ${COLOR_DEFAULT}Current environment has the following unattached tmux sessions: \"$(tmux list-sessions -F '#{session_attached} #{session_name}' | grep '^0' | sed -E 's/^[[:digit:]][[:space:]]+//' | sed ':a;N;$!ba; s/\n/", "/g')\""
 echo "${COLOR_GRAY}[${COLOR_CYAN}TMUX${COLOR_GRAY}] ${COLOR_DEFAULT}Type to attach: tmux attach-session -t <session name>"
+fi
 fi
 fi
 EOF

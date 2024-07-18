@@ -1,0 +1,32 @@
+#!/bin/sh
+
+set -e
+
+echo "Uninstall previous docker packages..."
+for i in docker docker-engine docker.io containerd runc; do
+    sudo apt remove >/dev/null 2>&1 || true
+done
+
+(set -x; sudo apt-get update)
+(set -x; sudo apt-get install ca-certificates curl gnupg lsb-release)
+
+if [ ! -e /usr/share/keyrings/docker-archive-keyring.gpg ]; then
+    echo "Install docker GPG key..."
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+fi
+
+if ! grep -q download.docker.com /etc/apt/sources.list.d/docker.list; then
+    echo "Add docker repository ..."
+    echo \
+    "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+    $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+fi
+
+(set -x; sudo apt-get update)
+(set -x; sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin)
+
+if ! id -nG | tr ' ' '\n' | grep -q "^docker$"; then
+    echo "Add current user '$USER' to the docker group..."
+    (set -x; sudo usermod -aG docker $USER)
+    echo "WARNING: you need to re-login to apply the group change"
+fi

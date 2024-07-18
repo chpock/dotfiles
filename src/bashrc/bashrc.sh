@@ -1823,6 +1823,10 @@ function promptcmd () {
 
     unset PS1_COMMAND
 
+    if _is tmux && [ -n "$__TMUX_FUNCTIONS_AVAILABLE" ]; then
+        ,tmux autosave
+    fi
+
 }
 
 # Trim working dir to 1/4 the screen width
@@ -2556,9 +2560,13 @@ if _isnot tmux; then
         fi
     fi
 
-    if _has tmux && tmux list-sessions -F '#{session_attached}' 2>/dev/null | grep --silent --fixed-strings '0'; then
-        echo "${COLOR_GRAY}[${COLOR_CYAN}TMUX${COLOR_GRAY}] ${COLOR_DEFAULT}Current environment has the following unattached tmux sessions: \"$(tmux list-sessions -F '#{session_attached} #{session_name}' | grep '^0' | sed -E 's/^[[:digit:]][[:space:]]+//' | sed ':a;N;$!ba; s/\n/", "/g')\""
-        echo "${COLOR_GRAY}[${COLOR_CYAN}TMUX${COLOR_GRAY}] ${COLOR_DEFAULT}Type to attach: tmux attach-session -t <session name>"
+    if _has tmux; then
+        [ -z "$__TMUX_FUNCTIONS_AVAILABLE" ] || ,tmux restore
+        if tmux list-sessions -F '#{session_attached}' 2>/dev/null | grep --silent --fixed-strings '0'; then
+            echo "${COLOR_GRAY}[${COLOR_CYAN}TMUX${COLOR_GRAY}] ${COLOR_DEFAULT}Current environment has the following unattached tmux sessions: \"$(tmux list-sessions -F '#{session_attached} #{session_name}' | grep '^0' | sed -E 's/^[[:digit:]][[:space:]]+//' | sed ':a;N;$!ba; s/\n/", "/g')\""
+            echo "${COLOR_GRAY}[${COLOR_CYAN}TMUX${COLOR_GRAY}] ${COLOR_DEFAULT}Type to attach: tmux attach-session -t <session name>"
+
+        fi
     fi
 
 fi

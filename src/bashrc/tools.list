@@ -21,6 +21,11 @@ https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-kube
 $IAM_HOME/shell.rc/functions-kubectl.sh
 @getSize REPO_ROOT/shell.rc/functions-kubectl.sh
 
+tool: tmux function
+https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-tmux.sh
+$IAM_HOME/shell.rc/functions-tmux.sh
+@getSize REPO_ROOT/shell.rc/functions-tmux.sh
+
 tool: edit bashrc
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/bashrc.rc.sh
 $IAM_HOME/shell.rc/bashrc.rc.sh
@@ -116,6 +121,11 @@ tool: tmux-helper tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/tmux-helper
 $IAM_HOME/tools/bin/tmux-helper
 @getSize REPO_ROOT/tools/tmux-helper
+
+tool: install-docker
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-docker
+$IAM_HOME/tools/bin/install-docker
+@getSize REPO_ROOT/tools/install-docker
 
 tool: tracer/debugger for perl
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/trace-perl
