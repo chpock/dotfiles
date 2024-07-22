@@ -37,6 +37,23 @@ _has tmux || return
                 __TMUX_BACKUP_COUNTER=0
             fi
             ;;
+        memory)
+            # Find the longest number of bytes
+            local MAX_LEN_SIZE="$(tmux list-panes -a -F '#{history_bytes}' \
+                | awk 'length > maxlen { maxlen = length } END { print maxlen }')"
+            # Fin the longest session name
+            local MAX_LEN_SESSION="$(tmux list-sessions -F '#S' \
+                | awk 'length > maxlen { maxlen = length } END { print maxlen }')"
+            tmux list-panes -a -F \
+                "#{p$(( MAX_LEN_SIZE + 1)):history_bytes} [#{p$(( MAX_LEN_SESSION + 1)):session_name}] Win: ###{window_index} (lines: #{history_size}/#{history_limit})" \
+                | sort --numeric-sort --reverse
+            ;;
+        clean)
+            local ID
+            tmux list-panes -a -F '#{pane_id}' | while read -r ID; do
+                tmux clear-history -t "$ID"
+            done
+            ;;
         *)
             echo "Unknown cmd: '$CMD'"
             return 1
@@ -46,4 +63,4 @@ _has tmux || return
 
 __TMUX_FUNCTIONS_AVAILABLE=1
 
-complete -W 'save restore' ,tmux
+complete -W 'save restore memory clean' ,tmux
