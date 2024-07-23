@@ -568,7 +568,7 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=E16E8E66
+LOCAL_TOOLS_FILE_HASH=383C8E6A
 COLOR_WHITE=$'\e[1;37m'
 COLOR_LIGHTGRAY=$'\e[0;37m'
 COLOR_GRAY=$'\e[1;30m'
@@ -1216,7 +1216,7 @@ local DOCKER_COMPOSE_V2=1
 if _has docker && docker compose version >/dev/null 2>&1; then
 DOCKER_COMPOSE_V2=0
 fi
-_showfeature "AWS CLI:aws" "gcloud CLI:gcloud"
+_showfeature "AWS CLI:aws" "localstack" "gcloud CLI:gcloud"
 _showfeature "docker" "docker-comp.V1:docker-compose" "docker-comp.V2:$DOCKER_COMPOSE_V2"
 _showfeature "kubectl" "eksctl" "OpenShift CLI:oc"
 _showfeature "vim" "git" "curl" "wget"
@@ -1559,8 +1559,6 @@ done
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
 shopt -s histappend
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 shopt -s cmdhist
 unset HISTFILESIZE
 HISTSIZE=1000000
@@ -1569,6 +1567,8 @@ HISTTIMEFORMAT='%F %T '
 HISTIGNORE="&:[bf]g:exit"
 HISTFILE="$IAM_HOME/bash_history"
 if [ -e "$HOME/.${IAM}_history" ] && [ ! -e "$HISTFILE" ]; then
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 mv "$HOME/.${IAM}_history" "$HISTFILE"
 fi
 __kubectl_status() {
@@ -1612,6 +1612,21 @@ if ! _has aws || [ ! -e "$IAM_HOME/state/on_aws" ]; then
 return 0
 fi
 __AWS_OUTPUT="${COLOR_GRAY}[${COLOR_WHITE}AWS${COLOR_GRAY}: "
+if [ -e "$IAM_HOME/state/on_aws_localstack" ]; then
+set -x
+__AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_DEFAULT}localstack${COLOR_GRAY}:"
+if ! _has curl; then
+__AWS_OUTPUT="$__AWS_OUTPUT${COLOR_BROWN} unknown (curl doesn't exist)"
+elif curl --silent --fail -o /dev/null http://localhost:4566; then
+__AWS_OUTPUT="$__AWS_OUTPUT${COLOR_GREEN} running"
+else
+__AWS_OUTPUT="$__AWS_OUTPUT${COLOR_RED} not running"
+fi
+__AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}]${COLOR_DEFAULT}"
+_ps1_show_status "$__AWS_OUTPUT"
+set +x
+return 0
+fi
 __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_DEFAULT}key${COLOR_GRAY}:"
 if declare -p AWS_ACCESS_KEY_ID >/dev/null 2>&1; then
 __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_GREEN} Y"

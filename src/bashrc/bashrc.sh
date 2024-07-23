@@ -817,7 +817,7 @@ hostinfo() {
         DOCKER_COMPOSE_V2=0
     fi
 
-    _showfeature "AWS CLI:aws" "gcloud CLI:gcloud"
+    _showfeature "AWS CLI:aws" "localstack" "gcloud CLI:gcloud"
     _showfeature "docker" "docker-comp.V1:docker-compose" "docker-comp.V2:$DOCKER_COMPOSE_V2"
     _showfeature "kubectl" "eksctl" "OpenShift CLI:oc"
     _showfeature "vim" "git" "curl" "wget"
@@ -1362,6 +1362,30 @@ __aws_status() {
     fi
 
     __AWS_OUTPUT="${COLOR_GRAY}[${COLOR_WHITE}AWS${COLOR_GRAY}: "
+
+    if [ -e "$IAM_HOME/state/on_aws_localstack" ]; then
+
+        set -x
+
+        __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_DEFAULT}localstack${COLOR_GRAY}:"
+
+        if ! _has curl; then
+            __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_BROWN} unknown (curl doesn't exist)"
+        elif curl --silent --fail -o /dev/null http://localhost:4566; then
+            __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_GREEN} running"
+        else
+            __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_RED} not running"
+        fi
+
+        __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}]${COLOR_DEFAULT}"
+
+        _ps1_show_status "$__AWS_OUTPUT"
+
+        set +x
+
+        return 0
+
+    fi
 
     __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_DEFAULT}key${COLOR_GRAY}:"
     if declare -p AWS_ACCESS_KEY_ID >/dev/null 2>&1; then
