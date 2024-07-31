@@ -1164,7 +1164,14 @@ while IFS=$' \t\r\n' read a b c d e f; do
 [ "${f:0:5}" = "/sys/" ] && continue
 [ "${f:0:5}" = "/run/" ] && continue
 [ "${f:0:6}" = "/boot/" ] && continue
+[ "${f:0:6}" = "/snap/" ] && continue
+[ "$f" = "/usr/lib/modules" ]         && continue
+[ "${f:0:17}" = "/usr/lib/modules/" ] && continue
 if _is wsl; then
+[ "$f" = "/init" ]                && continue
+[ "$f" = "/wslg" ]                && continue
+[ "$f" = "/wsl" ]                 && continue
+[ "${f:0:6}" = "/wslg/" ]         && continue
 [ "${f:0:13}" = "/usr/lib/wsl/" ] && continue
 fi
 if [ "$a" = "${a%:*}" ]; then
@@ -1173,7 +1180,7 @@ else
 a="(nfs: $a)"
 fi
 _showinfo "Mount" "$b" "$d" "$f" "$a"
-done < <(df -m -P | tail -n +2 | grep -v '^/dev/loop')
+done < <(df -m -P 2>/dev/null | tail -n +2 | grep -v '^/dev/loop')
 elif _is macos; then
 while IFS=$' \t\r\n' read a b c d e f g h i; do
 _check df --version || f="$i"
@@ -1565,10 +1572,10 @@ HISTSIZE=1000000
 HISTCONTROL=ignoreboth
 HISTTIMEFORMAT='%F %T '
 HISTIGNORE="&:[bf]g:exit"
-HISTFILE="$IAM_HOME/bash_history"
-if [ -e "$HOME/.${IAM}_history" ] && [ ! -e "$HISTFILE" ]; then
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
+HISTFILE="$IAM_HOME/bash_history"
+if [ -e "$HOME/.${IAM}_history" ] && [ ! -e "$HISTFILE" ]; then
 mv "$HOME/.${IAM}_history" "$HISTFILE"
 fi
 __kubectl_status() {

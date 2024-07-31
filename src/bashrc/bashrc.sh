@@ -743,10 +743,16 @@ hostinfo() {
                 [ "${f:0:5}" = "/sys/" ] && continue
                 [ "${f:0:5}" = "/run/" ] && continue
                 [ "${f:0:6}" = "/boot/" ] && continue
+                [ "${f:0:6}" = "/snap/" ] && continue
+                [ "$f" = "/usr/lib/modules" ]         && continue
+                [ "${f:0:17}" = "/usr/lib/modules/" ] && continue
 
                 # hide WSL volumes
                 if _is wsl; then
-                    # [ "$f" = "/init" ]                && continue
+                    [ "$f" = "/init" ]                && continue
+                    [ "$f" = "/wslg" ]                && continue
+                    [ "$f" = "/wsl" ]                 && continue
+                    [ "${f:0:6}" = "/wslg/" ]         && continue
                     [ "${f:0:13}" = "/usr/lib/wsl/" ] && continue
                 fi
 
@@ -758,7 +764,7 @@ hostinfo() {
 
                 _showinfo "Mount" "$b" "$d" "$f" "$a"
 
-            done < <(df -m -P | tail -n +2 | grep -v '^/dev/loop')
+            done < <(df -m -P 2>/dev/null | tail -n +2 | grep -v '^/dev/loop')
         elif _is macos; then
             while IFS=$' \t\r\n' read a b c d e f g h i; do
                 # if BSD df
