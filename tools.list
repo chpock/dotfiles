@@ -59,9 +59,9 @@ https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completi
 $IAM_HOME/tools/bash_completion/git-completion.bash
 93629
 tool: bash completion
-https://raw.githubusercontent.com/imomaliev/tmux-bash-completion/master/completions/tmux
+https://raw.githubusercontent.com/chpock/tmux-bash-completion/master/completions/tmux
 $IAM_HOME/tools/bash_completion/tmux-completion.bash
-6055
+6102
 tool: mydu tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/mydu
 $IAM_HOME/tools/bin/mydu
