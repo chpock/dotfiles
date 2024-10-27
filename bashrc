@@ -75,6 +75,9 @@ set -ag update-environment "__KITTY_ID"
 -2.0:set -g mouse-select-pane on
 -2.0:set -g mouse-select-window on
 unbind -n MouseDown3Pane
+unbind -T copy-mode-vi MouseDragEnd1Pane
+bind -T copy-mode-vi MouseDown1Pane select-pane\; send-keys -X clear-selection
+bind -n MouseDrag1Pane if -Ft= '#{mouse_any_flag}' 'if -Ft= \"#{pane_in_mode}\" \"copy-mode -eM\" \"send-keys -M\"' 'copy-mode -eM'
 bind - split-window -v -c "#{pane_current_path}"
 bind \\ split-window -h -c "#{pane_current_path}"
 bind c new-window -c "#{pane_current_path}"
@@ -1563,6 +1566,9 @@ cat "$fn" > "${fn}.fix-permissions"
 mv -f "${fn}.fix-permissions" "$fn"
 done
 }
+,venv() {
+source ./.venv/bin/activate
+}
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
 shopt -s histappend
@@ -1572,12 +1578,28 @@ HISTSIZE=1000000
 HISTCONTROL=ignoreboth
 HISTTIMEFORMAT='%F %T '
 HISTIGNORE="&:[bf]g:exit"
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 HISTFILE="$IAM_HOME/bash_history"
 if [ -e "$HOME/.${IAM}_history" ] && [ ! -e "$HISTFILE" ]; then
 mv "$HOME/.${IAM}_history" "$HISTFILE"
 fi
+__venv_status() {
+local __MSG
+if [ -z "$VIRTUAL_ENV" ]; then
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
+if [ ! -d .venv ]; then
+return 0
+fi
+fi
+__MSG="${COLOR_GRAY}[${COLOR_WHITE}VEN${COLOR_GRAY}: $COLOR_CYAN"
+if [ -z "$VIRTUAL_ENV" ]; then
+__MSG="$__MSG$PWD/.venv ${COLOR_GRAY}(inactive)"
+else
+__MSG="$__MSG$VIRTUAL_ENV ${COLOR_GRAY}(${COLOR_GREEN}active${COLOR_GRAY})"
+fi
+__MSG="$__MSG${COLOR_GRAY}]${COLOR_DEFAULT}"
+_ps1_show_status "$__MSG"
+}
 __kubectl_status() {
 local __K8S_CONTEXT
 local __K8S_CONF
@@ -1893,6 +1915,7 @@ for i in "$IAM_HOME"/shell.rc/*; do
 done
 fi
 unset _PS1_STATUS_LINE
+__venv_status
 __aws_status
 __kubectl_status
 __git_status

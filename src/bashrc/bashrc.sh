@@ -1272,6 +1272,10 @@ clip() {
     done
 }
 
+,venv() {
+    source ./.venv/bin/activate
+}
+
 # 'less' settings
 # -F Causes less to automatically exit if the entire file can be displayed on the first screen
 # -X Disables sending the termcap initialization and deinitialization strings to the terminal.
@@ -1304,6 +1308,31 @@ HISTFILE="$IAM_HOME/bash_history"
 if [ -e "$HOME/.${IAM}_history" ] && [ ! -e "$HISTFILE" ]; then
     mv "$HOME/.${IAM}_history" "$HISTFILE"
 fi
+
+__venv_status() {
+
+    local __MSG
+
+    if [ -z "$VIRTUAL_ENV" ]; then
+        if [ ! -d .venv ]; then
+            return 0
+        fi
+    fi
+
+    __MSG="${COLOR_GRAY}[${COLOR_WHITE}VEN${COLOR_GRAY}: $COLOR_CYAN"
+
+    if [ -z "$VIRTUAL_ENV" ]; then
+        __MSG="$__MSG$PWD/.venv ${COLOR_GRAY}(inactive)"
+    else
+        __MSG="$__MSG$VIRTUAL_ENV ${COLOR_GRAY}(${COLOR_GREEN}active${COLOR_GRAY})"
+    fi
+
+    __MSG="$__MSG${COLOR_GRAY}]${COLOR_DEFAULT}"
+
+
+    _ps1_show_status "$__MSG"
+
+}
 
 __kubectl_status() {
 
@@ -1756,6 +1785,7 @@ function promptcmd () {
 
     unset _PS1_STATUS_LINE
 
+    __venv_status
     __aws_status
     __kubectl_status
     __git_status
