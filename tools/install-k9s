@@ -11,7 +11,7 @@ Linux_amd64.tar.gz
 EOF
 )"
 
-if CUR_VERSION="$("$BIN_PATH"/k9s version | tr -d '\r' | grep 'Version:' | awk '{print $2}' | tr -d 'v')"; then
+if CUR_VERSION="$("$BIN_PATH"/k9s version 2>/dev/null | tr -d '\r' | grep 'Version:' | awk '{print $2}' | tr -d 'v')"; then
     [ "$CUR_VERSION" != "$VERSION" ] || exit 0
     [ -z "$CUR_VERSION" ] || echo "The current k9s version '$CUR_VERSION' does not match the desired version '$VERSION'" >&2
 fi

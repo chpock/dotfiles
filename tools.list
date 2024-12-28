@@ -81,7 +81,7 @@ $IAM_HOME/tools/bin/install-shellcheck
 tool: k9s tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-k9s
 $IAM_HOME/tools/bin/install-k9s
-1246
+1258
 tool: apt-cyg tool
 https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg
 $IAM_HOME/tools/bin/orig-apt-cyg
