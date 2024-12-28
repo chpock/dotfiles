@@ -4,8 +4,8 @@ _has kubectl || return
 
 k() {
 
-    if [ -n "$__KUBECTL_KUBECOLOR" ] && [ -e "$IAM_HOME/tools/bin/install-kubecolor" ]; then
-        if "$IAM_HOME/tools/bin/install-k9s" "$IAM_HOME/tools/bin"; then
+    if [ -z "$__KUBECTL_KUBECOLOR" ] && [ -e "$IAM_HOME/tools/bin/install-kubecolor" ]; then
+        if "$IAM_HOME/tools/bin/install-kubecolor" "$IAM_HOME/tools/bin"; then
             __KUBECTL_KUBECOLOR=1
         else
             __KUBECTL_KUBECOLOR=0
@@ -13,7 +13,7 @@ k() {
     fi
 
     if [ "$__KUBECTL_KUBECOLOR" = "1" ]; then
-        env kubecolor "$@"
+        env KUBECOLOR_OBJ_FRESH="2h" kubecolor "$@"
     else
         command kubectl "$@"
     fi
