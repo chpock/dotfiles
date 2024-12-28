@@ -1031,6 +1031,20 @@ k9s() {
     env k9s "$@"
 }
 
+jq() {
+    if [ -e "$IAM_HOME/tools/bin/install-jq" ]; then
+        "$IAM_HOME/tools/bin/install-jq" "$IAM_HOME/tools/bin"
+    fi
+    env jq "$@"
+}
+
+yq() {
+    if [ -e "$IAM_HOME/tools/bin/install-yq" ]; then
+        "$IAM_HOME/tools/bin/install-yq" "$IAM_HOME/tools/bin"
+    fi
+    env yq "$@"
+}
+
 alias mv='mv -i'
 
 alias mkdir='mkdir -p'

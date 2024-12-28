@@ -86,6 +86,14 @@ tool: kubecolor tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-kubecolor
 $IAM_HOME/tools/bin/install-kubecolor
 1292
+tool: jq tool
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-jq
+$IAM_HOME/tools/bin/install-jq
+1035
+tool: yq tool
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-yq
+$IAM_HOME/tools/bin/install-yq
+1055
 tool: apt-cyg tool
 https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg
 $IAM_HOME/tools/bin/orig-apt-cyg

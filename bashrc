@@ -571,7 +571,7 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=E01DEFCD
+LOCAL_TOOLS_FILE_HASH=310C494D
 COLOR_WHITE=$'\e[1;37m'
 COLOR_LIGHTGRAY=$'\e[0;37m'
 COLOR_GRAY=$'\e[1;30m'
@@ -1349,6 +1349,18 @@ if [ -e "$IAM_HOME/tools/bin/install-k9s" ]; then
 fi
 env k9s "$@"
 }
+jq() {
+if [ -e "$IAM_HOME/tools/bin/install-jq" ]; then
+"$IAM_HOME/tools/bin/install-jq" "$IAM_HOME/tools/bin"
+fi
+env jq "$@"
+}
+yq() {
+if [ -e "$IAM_HOME/tools/bin/install-yq" ]; then
+"$IAM_HOME/tools/bin/install-yq" "$IAM_HOME/tools/bin"
+fi
+env yq "$@"
+}
 alias mv='mv -i'
 alias mkdir='mkdir -p'
 alias mkcd='_(){ mkdir -p $1; cd $1; }; _'
@@ -1585,12 +1597,12 @@ HISTCONTROL=ignoreboth
 HISTTIMEFORMAT='%F %T '
 HISTIGNORE="&:[bf]g:exit"
 HISTFILE="$IAM_HOME/bash_history"
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 if [ -e "$HOME/.${IAM}_history" ] && [ ! -e "$HISTFILE" ]; then
 mv "$HOME/.${IAM}_history" "$HISTFILE"
 fi
 __venv_status() {
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 local __MSG
 if [ -z "$VIRTUAL_ENV" ]; then
 if [ ! -d .venv ]; then
