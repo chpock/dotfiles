@@ -13,7 +13,7 @@ $IAM_HOME/shell.rc/functions-awscli.sh
 tool: kubetcl function
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-kubectl.sh
 $IAM_HOME/shell.rc/functions-kubectl.sh
-3758
+4136
 tool: tmux function
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-tmux.sh
 $IAM_HOME/shell.rc/functions-tmux.sh
@@ -82,6 +82,10 @@ tool: k9s tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-k9s
 $IAM_HOME/tools/bin/install-k9s
 1258
+tool: kubecolor tool
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-kubecolor
+$IAM_HOME/tools/bin/install-kubecolor
+1292
 tool: apt-cyg tool
 https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg
 $IAM_HOME/tools/bin/orig-apt-cyg

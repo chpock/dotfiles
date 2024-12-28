@@ -2,6 +2,24 @@
 
 _has kubectl || return
 
+k() {
+
+    if [ -n "$__KUBECTL_KUBECOLOR" ] && [ -e "$IAM_HOME/tools/bin/install-kubecolor" ]; then
+        if "$IAM_HOME/tools/bin/install-k9s" "$IAM_HOME/tools/bin"; then
+            __KUBECTL_KUBECOLOR=1
+        else
+            __KUBECTL_KUBECOLOR=0
+        fi
+    fi
+
+    if [ "$__KUBECTL_KUBECOLOR" = "1" ]; then
+        env kubecolor "$@"
+    else
+        command kubectl "$@"
+    fi
+
+}
+
 ,kube() {
 
     local __K8S_CONF
@@ -113,8 +131,6 @@ __kube_complete() {
 }
 
 complete -F __kube_complete ,kube
-
-alias k=kubectl
 
 if type -t __start_kubectl >/dev/null 2>&1; then
     if [ "$(type -t compopt)" = "builtin" ]; then
