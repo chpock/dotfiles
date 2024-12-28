@@ -2,7 +2,7 @@
 
 _has kubectl || return
 
-kube() {
+,kube() {
 
     local __K8S_CONF
 
@@ -112,15 +112,15 @@ __kube_complete() {
 
 }
 
-complete -F __kube_complete kube
+complete -F __kube_complete ,kube
 
 alias k=kubectl
 
 if type -t __start_kubectl >/dev/null 2>&1; then
-	if [ "$(type -t compopt)" = "builtin" ]; then
-		complete -o default -F __start_kubectl k
-	else
-		complete -o default -o nospace -F __start_kubectl k
-	fi
+    if [ "$(type -t compopt)" = "builtin" ]; then
+        complete -o default -F __start_kubectl k
+    else
+        complete -o default -o nospace -F __start_kubectl k
+    fi
 fi
 

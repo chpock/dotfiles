@@ -571,7 +571,7 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=445D8D0A
+LOCAL_TOOLS_FILE_HASH=3AD0BA68
 COLOR_WHITE=$'\e[1;37m'
 COLOR_LIGHTGRAY=$'\e[0;37m'
 COLOR_GRAY=$'\e[1;30m'
@@ -1343,6 +1343,12 @@ if [ -e "$IAM_HOME/tools/bin/install-shellcheck" ]; then
 fi
 env shellcheck "$@"
 }
+k9s() {
+if [ -e "$IAM_HOME/tools/bin/install-k9s" ]; then
+"$IAM_HOME/tools/bin/install-k9s" "$IAM_HOME/tools/bin"
+fi
+env k9s "$@"
+}
 alias mv='mv -i'
 alias mkdir='mkdir -p'
 alias mkcd='_(){ mkdir -p $1; cd $1; }; _'
@@ -1583,10 +1589,10 @@ if [ -e "$HOME/.${IAM}_history" ] && [ ! -e "$HISTFILE" ]; then
 mv "$HOME/.${IAM}_history" "$HISTFILE"
 fi
 __venv_status() {
-local __MSG
-if [ -z "$VIRTUAL_ENV" ]; then
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
+local __MSG
+if [ -z "$VIRTUAL_ENV" ]; then
 if [ ! -d .venv ]; then
 return 0
 fi

@@ -1024,6 +1024,13 @@ shellcheck() {
     env shellcheck "$@"
 }
 
+k9s() {
+    if [ -e "$IAM_HOME/tools/bin/install-k9s" ]; then
+        "$IAM_HOME/tools/bin/install-k9s" "$IAM_HOME/tools/bin"
+    fi
+    env k9s "$@"
+}
+
 alias mv='mv -i'
 
 alias mkdir='mkdir -p'

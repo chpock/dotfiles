@@ -105,6 +105,11 @@ https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-shellchec
 $IAM_HOME/tools/bin/install-shellcheck
 @getSize REPO_ROOT/tools/install-shellcheck
 
+tool: k9s tool
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-k9s
+$IAM_HOME/tools/bin/install-k9s
+@getSize REPO_ROOT/tools/install-k9s
+
 tool: apt-cyg tool
 https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg
 $IAM_HOME/tools/bin/orig-apt-cyg

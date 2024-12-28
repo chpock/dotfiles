@@ -25,7 +25,7 @@ fi
 (set -x; sudo apt-get update)
 (set -x; sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin)
 
-if ! id -nG | tr ' ' '\n' | grep -q "^docker$"; then
+if ! id -nG | tr ' ' '\n' | grep -q '^docker$'; then
     echo "Add current user '$USER' to the docker group..."
     (set -x; sudo usermod -aG docker $USER)
     echo "WARNING: you need to re-login to apply the group change"
