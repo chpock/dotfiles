@@ -81,11 +81,11 @@ $IAM_HOME/tools/bin/install-shellcheck
 tool: k9s tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-k9s
 $IAM_HOME/tools/bin/install-k9s
-1258
+1407
 tool: kubecolor tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-kubecolor
 $IAM_HOME/tools/bin/install-kubecolor
-1292
+1441
 tool: jq tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-jq
 $IAM_HOME/tools/bin/install-jq

@@ -35,6 +35,10 @@ cd "$TEMP_DIR"
 geturl "$URL" > archive
 echo "Extracting the archive ..." >&2
 
+# SUFFIX will be "zip" when SUFFIX is something line *.zip, and it will not be
+# changed if SUFFIX doesn't contain an extension
+EXT="${SUFFIX##*.}"
+
 if [ "$SUFFIX" = "zip" ]; then
     unzip archive >/dev/null
 else
