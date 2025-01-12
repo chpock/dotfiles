@@ -82,6 +82,10 @@ tool: k9s tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-k9s
 $IAM_HOME/tools/bin/install-k9s
 1407
+tool: ktop tool
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-ktop
+$IAM_HOME/tools/bin/install-ktop
+969
 tool: kubecolor tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-kubecolor
 $IAM_HOME/tools/bin/install-kubecolor
