@@ -98,6 +98,10 @@ tool: yq tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-yq
 $IAM_HOME/tools/bin/install-yq
 1055
+tool: dive tool
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-dive
+$IAM_HOME/tools/bin/install-dive
+1259
 tool: apt-cyg tool
 https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg
 $IAM_HOME/tools/bin/orig-apt-cyg

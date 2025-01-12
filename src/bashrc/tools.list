@@ -130,6 +130,11 @@ https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-yq
 $IAM_HOME/tools/bin/install-yq
 @getSize REPO_ROOT/tools/install-yq
 
+tool: dive tool
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-dive
+$IAM_HOME/tools/bin/install-dive
+@getSize REPO_ROOT/tools/install-dive
+
 tool: apt-cyg tool
 https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg
 $IAM_HOME/tools/bin/orig-apt-cyg
