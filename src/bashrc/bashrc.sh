@@ -1031,6 +1031,20 @@ k9s() {
     env k9s "$@"
 }
 
+ktop() {
+    if [ -e "$IAM_HOME/tools/bin/install-ktop" ]; then
+        "$IAM_HOME/tools/bin/install-ktop" "$IAM_HOME/tools/bin"
+    fi
+    env ktop "$@"
+}
+
+dive() {
+    if [ -e "$IAM_HOME/tools/bin/install-dive" ]; then
+        "$IAM_HOME/tools/bin/install-dive" "$IAM_HOME/tools/bin"
+    fi
+    env dive "$@"
+}
+
 jq() {
     if [ -e "$IAM_HOME/tools/bin/install-jq" ]; then
         "$IAM_HOME/tools/bin/install-jq" "$IAM_HOME/tools/bin"

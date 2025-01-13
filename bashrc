@@ -1349,6 +1349,18 @@ if [ -e "$IAM_HOME/tools/bin/install-k9s" ]; then
 fi
 env k9s "$@"
 }
+ktop() {
+if [ -e "$IAM_HOME/tools/bin/install-ktop" ]; then
+"$IAM_HOME/tools/bin/install-ktop" "$IAM_HOME/tools/bin"
+fi
+env ktop "$@"
+}
+dive() {
+if [ -e "$IAM_HOME/tools/bin/install-dive" ]; then
+"$IAM_HOME/tools/bin/install-dive" "$IAM_HOME/tools/bin"
+fi
+env dive "$@"
+}
 jq() {
 if [ -e "$IAM_HOME/tools/bin/install-jq" ]; then
 "$IAM_HOME/tools/bin/install-jq" "$IAM_HOME/tools/bin"
@@ -1593,12 +1605,12 @@ shopt -s histappend
 shopt -s cmdhist
 unset HISTFILESIZE
 HISTSIZE=1000000
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 HISTCONTROL=ignoreboth
 HISTTIMEFORMAT='%F %T '
 HISTIGNORE="&:[bf]g:exit"
 HISTFILE="$IAM_HOME/bash_history"
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 if [ -e "$HOME/.${IAM}_history" ] && [ ! -e "$HISTFILE" ]; then
 mv "$HOME/.${IAM}_history" "$HISTFILE"
 fi
