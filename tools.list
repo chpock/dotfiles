@@ -37,7 +37,7 @@ $IAM_HOME/tools/bash_completion/electricflow.completion.bash
 tool: bash completion
 https://raw.githubusercontent.com/docker/cli/master/contrib/completion/bash/docker
 $IAM_HOME/tools/bash_completion/docker.completion.bash
-114580
+114535
 tool: bash completion
 https://raw.githubusercontent.com/docker/machine/master/contrib/completion/bash/docker-machine.bash
 $IAM_HOME/tools/bash_completion/docker-machine.completion.bash
@@ -57,7 +57,7 @@ $IAM_HOME/tools/bash_completion/makefile.completion.bash
 tool: bash completion
 https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash
 $IAM_HOME/tools/bash_completion/git-completion.bash
-93629
+93639
 tool: bash completion
 https://raw.githubusercontent.com/chpock/tmux-bash-completion/master/completions/tmux
 $IAM_HOME/tools/bash_completion/tmux-completion.bash
@@ -151,15 +151,15 @@ $IAM_HOME/vim_runtime/plugin/ColorizerPlugin.vim
 tool: vim plugin Colorizer (autoload)
 https://raw.githubusercontent.com/chrisbra/Colorizer/master/autoload/Colorizer.vim
 $IAM_HOME/vim_runtime/autoload/Colorizer.vim
-83918
+83930
 tool: vim plugin endwise
 https://raw.githubusercontent.com/tpope/vim-endwise/master/plugin/endwise.vim
 $IAM_HOME/vim_runtime/plugin/endwise.vim
-11134
+11162
 tool: vim plugin commentary
 https://raw.githubusercontent.com/tpope/vim-commentary/master/plugin/commentary.vim
 $IAM_HOME/vim_runtime/plugin/commentary.vim
-3994
+4002
 tool: vim plugin SynStack (plugin)
 https://raw.githubusercontent.com/dylnmc/synstack.vim/master/plugin/synstack.vim
 $IAM_HOME/vim_runtime/plugin/synstack.vim
