@@ -1038,6 +1038,27 @@ ktop() {
     env ktop "$@"
 }
 
+kdash() {
+    if [ -e "$IAM_HOME/tools/bin/install-kdash" ]; then
+        "$IAM_HOME/tools/bin/install-kdash" "$IAM_HOME/tools/bin"
+    fi
+    env kdash "$@"
+}
+
+kl() {
+    if [ -e "$IAM_HOME/tools/bin/install-kl" ]; then
+        "$IAM_HOME/tools/bin/install-kl" "$IAM_HOME/tools/bin"
+    fi
+    env kl "$@"
+}
+
+kube-capacity() {
+    if [ -e "$IAM_HOME/tools/bin/install-kube-capacity" ]; then
+        "$IAM_HOME/tools/bin/install-kube-capacity" "$IAM_HOME/tools/bin"
+    fi
+    env kube-capacity "$@"
+}
+
 dive() {
     if [ -e "$IAM_HOME/tools/bin/install-dive" ]; then
         "$IAM_HOME/tools/bin/install-dive" "$IAM_HOME/tools/bin"

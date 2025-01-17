@@ -571,7 +571,7 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=5E73A767
+LOCAL_TOOLS_FILE_HASH=D1A3DB4
 COLOR_WHITE=$'\e[1;37m'
 COLOR_LIGHTGRAY=$'\e[0;37m'
 COLOR_GRAY=$'\e[1;30m'
@@ -1355,6 +1355,24 @@ if [ -e "$IAM_HOME/tools/bin/install-ktop" ]; then
 fi
 env ktop "$@"
 }
+kdash() {
+if [ -e "$IAM_HOME/tools/bin/install-kdash" ]; then
+"$IAM_HOME/tools/bin/install-kdash" "$IAM_HOME/tools/bin"
+fi
+env kdash "$@"
+}
+kl() {
+if [ -e "$IAM_HOME/tools/bin/install-kl" ]; then
+"$IAM_HOME/tools/bin/install-kl" "$IAM_HOME/tools/bin"
+fi
+env kl "$@"
+}
+kube-capacity() {
+if [ -e "$IAM_HOME/tools/bin/install-kube-capacity" ]; then
+"$IAM_HOME/tools/bin/install-kube-capacity" "$IAM_HOME/tools/bin"
+fi
+env kube-capacity "$@"
+}
 dive() {
 if [ -e "$IAM_HOME/tools/bin/install-dive" ]; then
 "$IAM_HOME/tools/bin/install-dive" "$IAM_HOME/tools/bin"
@@ -1599,14 +1617,14 @@ done
 ,venv() {
 source ./.venv/bin/activate
 }
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
 shopt -s histappend
 shopt -s cmdhist
 unset HISTFILESIZE
 HISTSIZE=1000000
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 HISTCONTROL=ignoreboth
 HISTTIMEFORMAT='%F %T '
 HISTIGNORE="&:[bf]g:exit"

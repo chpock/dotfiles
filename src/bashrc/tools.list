@@ -115,6 +115,21 @@ https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-ktop
 $IAM_HOME/tools/bin/install-ktop
 @getSize REPO_ROOT/tools/install-ktop
 
+tool: kdash tool
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-kdash
+$IAM_HOME/tools/bin/install-kdash
+@getSize REPO_ROOT/tools/install-kdash
+
+tool: kl tool
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-kl
+$IAM_HOME/tools/bin/install-kl
+@getSize REPO_ROOT/tools/install-kl
+
+tool: kube-capacity tool
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-kube-capacity
+$IAM_HOME/tools/bin/install-kube-capacity
+@getSize REPO_ROOT/tools/install-kube-capacity
+
 tool: kubecolor tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-kubecolor
 $IAM_HOME/tools/bin/install-kubecolor
