@@ -93,7 +93,7 @@ $IAM_HOME/tools/bin/install-kdash
 tool: kl tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-kl
 $IAM_HOME/tools/bin/install-kl
-1101
+1137
 tool: kube-capacity tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-kube-capacity
 $IAM_HOME/tools/bin/install-kube-capacity
