@@ -321,7 +321,7 @@ if _has tmux; then
     [ -z "$TMUX_CONF_CACHED" ] && {
         # strip beta prefix for versions like '3.0a', '3.1c', etc.
         echo "# generated from tmux.conf.template, size: $(_get_size "$IAM_HOME/tmux.conf.template")"
-        ver="$(tmux -V | sed -E -e 's/^.*[[:space:]]//' -e 's/[^[:digit:].]//')"
+        ver="$(tmux -V | sed -E -e 's/^.*[[:space:]][^[:digit:]]*//')"
         unset blank
         while IFS= read -r line; do
             [ -z "$line" ] && [ -n "$blank" ] && continue || true
