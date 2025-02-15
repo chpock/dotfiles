@@ -762,7 +762,7 @@ linux)     [ "$_CACHE" = "Linux" ] && R=0 || R=1 ;;
 cygwin)    [ "$_CACHE" = ${_CACHE#CYGWIN_NT*} ] && R=1 || R=0 ;;
 msys)      [ "$_CACHE" = ${_CACHE#MSYS_NT*} ] && R=1 || R=0 ;;
 mingw)     [ "$_CACHE" = ${_CACHE#MINGW*} ] && R=1 || R=0 ;;
-windows)   if _is cygwin || _is mingw || _is mingw; then R=0; else R=1; fi ;;
+windows)   if _is cygwin || _is mingw || _is msys; then R=0; else R=1; fi ;;
 unix)      if ! _is windows; then R=0; else R=1; fi ;;
 wsl)
 _cache __uname_kernel_release
@@ -772,6 +772,9 @@ root)      [ "$(id -u 2>/dev/null)" = "0" ] && R=0 || R=1;;
 dockerenv) [ -f /.dockerenv ] && R=0 || R=1;;
 sudo)      [ -n "$SUDO_USER" ] && R=0 || R=1;;
 tmux)      [ -n "$TMUX" ] && R=0 || R=1;;
+cloud)
+_has curl && curl -s --connect-timeout 0.1 http://169.254.169.254 && R=0 || R=1 ;;
+aws)       _is cloud && curl -s -I http://169.254.169.254 | grep -qF 'Server: EC2ws' && R=0 || R=1 ;;
 esac
 printf -v "$V" '%s' "$R"
 return "${!V}"
@@ -2099,14 +2102,21 @@ for fn; do
 [ -f "$fn" ] || continue
 __var="${fn##*/}"
 __var="${__var^^}"
+if [ "${__var/ /}" != "$__var" ]; then
+echo "Warning! Space in environment variable name '${__var}'"
+continue
+fi
 [ -z "${!__var}" ] || continue
+if [ "$__var" = "TEMP" ] || [ "$__var" = "TMP" ]; then
+continue
+fi
 IFS= read -d $'\0' -r __val < "$fn"
 __val="${__val/\%SystemRoot\%/$SYSTEMROOT}"
 __val="${__val/\%ProgramFiles\%/$PROGRAMFILES}"
 __val="${__val/\%USERPROFILE\%/$USERPROFILE}"
 __val="${__val/\%ProgramFiles(x86)\%/$PROGRAMFILESX86}"
 __val="${__val/\%HomeDrive\%\%HomePath\%/$USERPROFILE}"
-echo "Adding environment variable '${__var}'"
+echo "Added environment variable: $__var"
 if [ "${__val/\%/}" != "$__val" ]; then
 echo "Warning! Percent in environment variable '${__var}': '${__val}'"
 fi

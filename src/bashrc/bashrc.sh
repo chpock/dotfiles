@@ -220,7 +220,7 @@ _is() {
         cygwin)    [ "$_CACHE" = ${_CACHE#CYGWIN_NT*} ] && R=1 || R=0 ;;
         msys)      [ "$_CACHE" = ${_CACHE#MSYS_NT*} ] && R=1 || R=0 ;;
         mingw)     [ "$_CACHE" = ${_CACHE#MINGW*} ] && R=1 || R=0 ;;
-        windows)   if _is cygwin || _is mingw || _is mingw; then R=0; else R=1; fi ;;
+        windows)   if _is cygwin || _is mingw || _is msys; then R=0; else R=1; fi ;;
         unix)      if ! _is windows; then R=0; else R=1; fi ;;
         wsl)
             _cache __uname_kernel_release
@@ -230,6 +230,20 @@ _is() {
         dockerenv) [ -f /.dockerenv ] && R=0 || R=1;;
         sudo)      [ -n "$SUDO_USER" ] && R=0 || R=1;;
         tmux)      [ -n "$TMUX" ] && R=0 || R=1;;
+        cloud)
+            # We have only one stable way to detect if the current machine
+            # is in the cloud, and that is to try to query the metadata URL http://169.254.169.254.
+            # This method is ugly because we must wait some amount of time for
+            # network connection. Also, it is impossible to use bash built-in
+            # TCP connection here because bash has no ability to specify timeout
+            # and attempt to make a connection in non-cloud environment leads
+            # to hang-up. Thus here we first try to check if curl is available.
+            # If it is not, then cloud detection will return false. After that,
+            # we try to make a request with 100 millisecond timeout.
+            # Unfortunatelly, this will lead to 100 millisecond delay in
+            # non-cloud environments.
+            _has curl && curl -s --connect-timeout 0.1 http://169.254.169.254 && R=0 || R=1 ;;
+        aws)       _is cloud && curl -s -I http://169.254.169.254 | grep -qF 'Server: EC2ws' && R=0 || R=1 ;;
     esac
     printf -v "$V" '%s' "$R"
     return "${!V}"
@@ -2041,14 +2055,22 @@ elif _is windows; then
             [ -f "$fn" ] || continue
             __var="${fn##*/}"
             __var="${__var^^}"
-             [ -z "${!__var}" ] || continue
+            if [ "${__var/ /}" != "$__var" ]; then
+                echo "Warning! Space in environment variable name '${__var}'"
+                continue
+            fi
+            [ -z "${!__var}" ] || continue
+            # Skip TEMP/TMP variables. We don't want to use Windows temp locations in cygwin.
+            if [ "$__var" = "TEMP" ] || [ "$__var" = "TMP" ]; then
+                continue
+            fi
             IFS= read -d $'\0' -r __val < "$fn"
             __val="${__val/\%SystemRoot\%/$SYSTEMROOT}"
             __val="${__val/\%ProgramFiles\%/$PROGRAMFILES}"
             __val="${__val/\%USERPROFILE\%/$USERPROFILE}"
             __val="${__val/\%ProgramFiles(x86)\%/$PROGRAMFILESX86}"
             __val="${__val/\%HomeDrive\%\%HomePath\%/$USERPROFILE}"
-            echo "Adding environment variable '${__var}'"
+            echo "Added environment variable: $__var"
             if [ "${__val/\%/}" != "$__val" ]; then
                 echo "Warning! Percent in environment variable '${__var}': '${__val}'"
             fi
