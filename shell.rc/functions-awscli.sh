@@ -2,6 +2,17 @@
 
 _has aws || return
 
+# In environments that are not in AWS EC2, requests to metadata must be disabled.
+# Requests to http://169.254.169.254/ are completely useless there and can cause
+# significant delays in requests to the AWS API, as they time out. Let's disable
+# them if we have curl and don't have aws. We cannot rely only on the aws check,
+# as this check depends on curl, and it is possible that this check returned FALSE
+# when curl does not exist, even if the environment is on AWS EC2.
+if _has curl && _isnot aws; then
+    AWS_EC2_METADATA_DISABLED=true
+    export AWS_EC2_METADATA_DISABLED
+fi
+
 aws() {
     case "$1" in
     on|off|local|remote|role)

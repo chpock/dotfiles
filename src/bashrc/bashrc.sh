@@ -1461,7 +1461,12 @@ __aws_status() {
     local __AWS_OUTPUT
     local __AWS_INDENTITY
 
-    if ! _has aws || [ ! -e "$IAM_HOME/state/on_aws" ]; then
+    # Don't show AWS status if AWS CLI is not installed
+    _has aws || return 0
+
+    # If AWS-related environment variables exist, then we always show AWS status.
+    # If they doesn't exist, then AWS status is controlled by the flag.
+    if [ -z "$AWS_ACCESS_KEY_ID$AWS_SECRET_ACCESS_KEY$AWS_SESSION_TOKEN" ] && [ ! -e "$IAM_HOME/state/on_aws" ]; then
         return 0
     fi
 
