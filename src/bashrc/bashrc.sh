@@ -1836,7 +1836,7 @@ function promptcmd () {
         if [ "$__VENV_HOME" != "$PWD" ]; then
             # If venv directory doesn't match PWD, then we check if we are
             # within venv directory tree.
-            __VENV_HOME="$VENV_HOME/"
+            __VENV_HOME="$__VENV_HOME/"
             if [ "${PWD:0:${#__VENV_HOME}}" != "$__VENV_HOME" ]; then
                 # We are not in venv directory tree. Let's deactivate venv.
                 deactivate
@@ -2007,6 +2007,7 @@ __debug_trap() {
 #PROMPT_COMMAND="promptcmd \$?"
 #PROMPT_COMMAND="__debug_trap off \$? && __EC=0 || __EC=\$?; promptcmd \$__EC; unset __EC; __debug_trap on"
 PROMPT_COMMAND="{ __debug_trap off \$? && __EC=0 || __EC=\$?; promptcmd \$__EC; unset __EC; __debug_trap on; } 2>/dev/null"
+
 #trap __debug_trap DEBUG
 trap '{ __debug_trap; } 2>/dev/null' DEBUG
 

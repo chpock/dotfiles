@@ -571,7 +571,7 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=D078760A
+LOCAL_TOOLS_FILE_HASH=7297602
 COLOR_WHITE=$'\e[1;37m'
 COLOR_LIGHTGRAY=$'\e[0;37m'
 COLOR_GRAY=$'\e[1;30m'
@@ -1953,7 +1953,7 @@ fi
 else
 __VENV_HOME="${VIRTUAL_ENV%/*}"
 if [ "$__VENV_HOME" != "$PWD" ]; then
-__VENV_HOME="$VENV_HOME/"
+__VENV_HOME="$__VENV_HOME/"
 if [ "${PWD:0:${#__VENV_HOME}}" != "$__VENV_HOME" ]; then
 deactivate
 fi

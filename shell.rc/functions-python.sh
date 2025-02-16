@@ -34,7 +34,7 @@ fi
                 echo "Python venv already activated at: $VIRTUAL_ENV"
                 return 0
             fi
-            printf "Crearing python virtual environment in %s ..." "$PWD"
+            printf "Creating python virtual environment in %s ..." "$PWD"
             python -m venv .venv && RC=0 || RC=$?
             if [ "$RC" -eq 0 ]; then
                 printf '\b\b\b\b: OK\n'
@@ -70,3 +70,4 @@ fi
 }
 
 complete -W 'destroy' ,venv
+
