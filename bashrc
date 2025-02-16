@@ -765,8 +765,10 @@ mingw)     [ "$_CACHE" = ${_CACHE#MINGW*} ] && R=1 || R=0 ;;
 windows)   if _is cygwin || _is mingw || _is msys; then R=0; else R=1; fi ;;
 unix)      if ! _is windows; then R=0; else R=1; fi ;;
 wsl)
+_is dockerenv && R=1 || {
 _cache __uname_kernel_release
 [ -z ${_CACHE%%*-WSL2} ] && R=0 || R=1
+}
 ;;
 root)      [ "$(id -u 2>/dev/null)" = "0" ] && R=0 || R=1;;
 dockerenv) [ -f /.dockerenv ] && R=0 || R=1;;
