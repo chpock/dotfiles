@@ -1635,8 +1635,6 @@ cat "$fn" > "${fn}.fix-permissions"
 mv -f "${fn}.fix-permissions" "$fn"
 done
 }
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
 shopt -s histappend
@@ -1644,6 +1642,8 @@ shopt -s cmdhist
 unset HISTFILESIZE
 HISTSIZE=1000000
 HISTCONTROL=ignoreboth
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 HISTTIMEFORMAT='%F %T '
 HISTIGNORE="&:[bf]g:exit"
 HISTFILE="$IAM_HOME/bash_history"
@@ -1687,10 +1687,20 @@ _ps1_show_status "$__K8S_OUTPUT"
 __aws_status() {
 local __AWS_OUTPUT
 local __AWS_INDENTITY
+local __AWS_USERID
 _has aws || return 0
-if [ -z "$AWS_ACCESS_KEY_ID$AWS_SECRET_ACCESS_KEY$AWS_SESSION_TOKEN" ] && [ ! -e "$IAM_HOME/state/on_aws" ]; then
-return 0
+if [ -z "$__AWS_INSTANCE_HAS_ROLE" ]; then
+_is aws \
+&& __AWS_USERID="$(aws sts get-caller-identity --query 'UserId' --output text 2>&1)" \
+&& _glob_match "*:i-*" "$__AWS_USERID" \
+&& __AWS_INSTANCE_HAS_ROLE=1 \
+|| __AWS_INSTANCE_HAS_ROLE=0
 fi
+[ "$__AWS_INSTANCE_HAS_ROLE" -eq 0 ] \
+&& [ -z "$AWS_ACCESS_KEY_ID$AWS_SECRET_ACCESS_KEY$AWS_SESSION_TOKEN" ] \
+&& [ ! -e "$IAM_HOME/state/on_aws" ] \
+&& return 0 \
+|| true
 __AWS_OUTPUT="${COLOR_GRAY}[${COLOR_WHITE}AWS${COLOR_GRAY}: "
 if [ -e "$IAM_HOME/state/on_aws_localstack" ]; then
 set -x
@@ -1707,6 +1717,9 @@ _ps1_show_status "$__AWS_OUTPUT"
 set +x
 return 0
 fi
+if [ -z "$AWS_ACCESS_KEY_ID$AWS_SECRET_ACCESS_KEY$AWS_SESSION_TOKEN" ] && [ "$__AWS_INSTANCE_HAS_ROLE" -eq 1 ]; then
+__AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_DEFAULT}instance-profile${COLOR_GRAY}:${COLOR_GREEN} Y"
+else
 __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_DEFAULT}key${COLOR_GRAY}:"
 if declare -p AWS_ACCESS_KEY_ID >/dev/null 2>&1; then
 __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_GREEN} Y"
@@ -1725,6 +1738,7 @@ __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_GREEN} Y"
 else
 __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_RED} N"
 fi
+fi
 __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}region${COLOR_GRAY}:"
 if declare -p AWS_DEFAULT_REGION >/dev/null 2>&1; then
 __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_CYAN} $AWS_DEFAULT_REGION"
@@ -1732,11 +1746,13 @@ else
 __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_RED} N"
 fi
 __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}indentity${COLOR_GRAY}:"
-if ! __AWS_INDENTITY="$(aws sts get-caller-identity --query 'Arn' 2>&1)"; then
+if ! __AWS_INDENTITY="$(aws sts get-caller-identity --query 'Arn' --output text 2>&1)"; then
+__AWS_INDENTITY="${__AWS_INDENTITY/$'\n'/}"
 __AWS_INDENTITY="${__AWS_INDENTITY#*:}"
-__AWS_OUTPUT="$__AWS_OUTPUT${COLOR_LIGHTRED}$__AWS_INDENTITY"
+__AWS_INDENTITY=${__AWS_INDENTITY#"${__AWS_INDENTITY%%[![:space:]]*}"}
+__AWS_OUTPUT="$__AWS_OUTPUT${COLOR_LIGHTRED} $__AWS_INDENTITY"
 else
-__AWS_OUTPUT="$__AWS_OUTPUT${COLOR_GREEN} $(echo "$__AWS_INDENTITY" | tr -d '"')"
+__AWS_OUTPUT="$__AWS_OUTPUT${COLOR_GREEN} $__AWS_INDENTITY"
 fi
 __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}]${COLOR_DEFAULT}"
 _ps1_show_status "$__AWS_OUTPUT"

@@ -1460,15 +1460,31 @@ __aws_status() {
 
     local __AWS_OUTPUT
     local __AWS_INDENTITY
+    local __AWS_USERID
 
     # Don't show AWS status if AWS CLI is not installed
     _has aws || return 0
 
+    # Try to detect if current environment is AWS EC2 environment with bound role
+    if [ -z "$__AWS_INSTANCE_HAS_ROLE" ]; then
+        # Here we use '_is aws' that depends on curl. This means that we will not
+        # be able to detect an instance with a role if curl doesn't exist.
+        # UserId for EC2 instance with a role is expected as something like: AROAWQUOZYGS15BHRR5OU:i-07cd2351dacb99d17
+        _is aws \
+            && __AWS_USERID="$(aws sts get-caller-identity --query 'UserId' --output text 2>&1)" \
+            && _glob_match "*:i-*" "$__AWS_USERID" \
+            && __AWS_INSTANCE_HAS_ROLE=1 \
+            || __AWS_INSTANCE_HAS_ROLE=0
+    fi
+
+    # If we are in AWS instance with a role, then we always show AWS status.
     # If AWS-related environment variables exist, then we always show AWS status.
     # If they doesn't exist, then AWS status is controlled by the flag.
-    if [ -z "$AWS_ACCESS_KEY_ID$AWS_SECRET_ACCESS_KEY$AWS_SESSION_TOKEN" ] && [ ! -e "$IAM_HOME/state/on_aws" ]; then
-        return 0
-    fi
+    [ "$__AWS_INSTANCE_HAS_ROLE" -eq 0 ] \
+        && [ -z "$AWS_ACCESS_KEY_ID$AWS_SECRET_ACCESS_KEY$AWS_SESSION_TOKEN" ] \
+        && [ ! -e "$IAM_HOME/state/on_aws" ] \
+        && return 0 \
+        || true
 
     __AWS_OUTPUT="${COLOR_GRAY}[${COLOR_WHITE}AWS${COLOR_GRAY}: "
 
@@ -1496,25 +1512,34 @@ __aws_status() {
 
     fi
 
-    __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_DEFAULT}key${COLOR_GRAY}:"
-    if declare -p AWS_ACCESS_KEY_ID >/dev/null 2>&1; then
-        __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_GREEN} Y"
+    # If we do not have AWS credentials in the environment variables, but
+    # the current instance has an attached profile/role, then show only this
+    # to avoid unnecessary information.
+    if [ -z "$AWS_ACCESS_KEY_ID$AWS_SECRET_ACCESS_KEY$AWS_SESSION_TOKEN" ] && [ "$__AWS_INSTANCE_HAS_ROLE" -eq 1 ]; then
+        __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_DEFAULT}instance-profile${COLOR_GRAY}:${COLOR_GREEN} Y"
     else
-        __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_RED} N"
-    fi
 
-    __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}secret${COLOR_GRAY}:"
-    if declare -p AWS_SECRET_ACCESS_KEY >/dev/null 2>&1; then
-        __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_GREEN} Y"
-    else
-        __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_RED} N"
-    fi
+        __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_DEFAULT}key${COLOR_GRAY}:"
+        if declare -p AWS_ACCESS_KEY_ID >/dev/null 2>&1; then
+            __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_GREEN} Y"
+        else
+            __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_RED} N"
+        fi
 
-    __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}session${COLOR_GRAY}:"
-    if declare -p AWS_SESSION_TOKEN >/dev/null 2>&1; then
-        __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_GREEN} Y"
-    else
-        __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_RED} N"
+        __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}secret${COLOR_GRAY}:"
+        if declare -p AWS_SECRET_ACCESS_KEY >/dev/null 2>&1; then
+            __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_GREEN} Y"
+        else
+            __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_RED} N"
+        fi
+
+        __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}session${COLOR_GRAY}:"
+        if declare -p AWS_SESSION_TOKEN >/dev/null 2>&1; then
+            __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_GREEN} Y"
+        else
+            __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_RED} N"
+        fi
+
     fi
 
     __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}region${COLOR_GRAY}:"
@@ -1525,15 +1550,19 @@ __aws_status() {
     fi
 
     __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}indentity${COLOR_GRAY}:"
-    if ! __AWS_INDENTITY="$(aws sts get-caller-identity --query 'Arn' 2>&1)"; then
+    if ! __AWS_INDENTITY="$(aws sts get-caller-identity --query 'Arn' --output text 2>&1)"; then
+        # Strip possible new lines from the error message
+        __AWS_INDENTITY="${__AWS_INDENTITY/$'\n'/}"
         # convert from:
         #   An error occurred (InvalidClientTokenId) when calling the GetCallerIdentity operation: The security token included in the request is invalid.
         # to
         #   The security token included in the request is invalid.
         __AWS_INDENTITY="${__AWS_INDENTITY#*:}"
-        __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_LIGHTRED}$__AWS_INDENTITY"
+        # Trim possible leading spaces
+        __AWS_INDENTITY=${__AWS_INDENTITY#"${__AWS_INDENTITY%%[![:space:]]*}"}
+        __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_LIGHTRED} $__AWS_INDENTITY"
     else
-        __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_GREEN} $(echo "$__AWS_INDENTITY" | tr -d '"')"
+        __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_GREEN} $__AWS_INDENTITY"
     fi
 
     __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}]${COLOR_DEFAULT}"
