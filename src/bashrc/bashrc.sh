@@ -2279,15 +2279,17 @@ if [ -d "$IAM_HOME/tools/bash_completion" ]; then
     fi
 
     if [ ! -f "$IAM_HOME/tools/bash_completion/pip.completion.bash" ]; then
+        # Remove '\r' here, as Python can be compiled for Windows, and pip in
+        # this case creates scripts with CRLF new lines.
         if _has pip3; then
             echo "Generating bash completions for pip3..."
             # pip3 adds completions only for 'pip3' command, but we have 'pip' alias for it.
             # Let's add it, but only if 'pip3 completion --bash' was successful.
-            pip3 completion --bash >"$IAM_HOME/tools/bash_completion/pip.completion.bash" 2>/dev/null && \
+            pip3 completion --bash | tr -d '\r' >"$IAM_HOME/tools/bash_completion/pip.completion.bash" 2>/dev/null && \
                 echo 'complete -o default -F _pip_completion pip' >>"$IAM_HOME/tools/bash_completion/pip.completion.bash"
         elif _has pip; then
             echo "Generating bash completions for pip..."
-            pip completion --bash >"$IAM_HOME/tools/bash_completion/pip.completion.bash" 2>/dev/null
+            pip completion --bash | tr -d '\r' >"$IAM_HOME/tools/bash_completion/pip.completion.bash" 2>/dev/null
         fi
     fi
 
