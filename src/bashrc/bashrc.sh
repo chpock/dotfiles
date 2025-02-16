@@ -1762,8 +1762,6 @@ function promptcmd () {
     stty "$SAVE_STTY"
     [ ${CURPOS##*;} -eq 1 ] || echo "${COLOR_ERROR}%${COLOR_DEFAULT}"
 
-    PS1=''
-
     # A non-zero exit code is displayed here. It's not such a trivial task.
     # Bash doesn't cleanup the latest exit code when executing an empty command.
     # It is possible to use a hack and insert the exit status message
@@ -1863,6 +1861,10 @@ function promptcmd () {
         tmux set-hook -R -t "$TMUX_PANE" window-renamed >/dev/null 2>&1 &
         disown $!
     fi
+
+    # Here we initialize PS1. It should be initialized after everything related to
+    # python virtual environment, since activating venv changes PS1.
+    PS1=""
 
     # Titlebar
     if _isnot tmux; then

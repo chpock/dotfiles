@@ -571,7 +571,7 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=BB9575FF
+LOCAL_TOOLS_FILE_HASH=D078760A
 COLOR_WHITE=$'\e[1;37m'
 COLOR_LIGHTGRAY=$'\e[0;37m'
 COLOR_GRAY=$'\e[1;30m'
@@ -1617,9 +1617,9 @@ cat "$fn" > "${fn}.fix-permissions"
 mv -f "${fn}.fix-permissions" "$fn"
 done
 }
+LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
-LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
 shopt -s histappend
 shopt -s cmdhist
@@ -1907,7 +1907,6 @@ stty raw -echo min 0
 echo -en "\033[6n" && read -sdR CURPOS
 stty "$SAVE_STTY"
 [ ${CURPOS##*;} -eq 1 ] || echo "${COLOR_ERROR}%${COLOR_DEFAULT}"
-PS1=''
 if [ "$exitcode" -ne 0 ] && [ -n "$PS1_COMMAND" ]; then
 local SIG="" MSG
 MSG="${COLOR_RED}Exit code: $exitcode"
@@ -1973,6 +1972,7 @@ if _is tmux && [ -n "$TMUX_PANE" ]; then
 tmux set-hook -R -t "$TMUX_PANE" window-renamed >/dev/null 2>&1 &
 disown $!
 fi
+PS1=""
 if _isnot tmux; then
 case ${TERM} in
 xterm*)
