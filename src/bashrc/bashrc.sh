@@ -242,7 +242,7 @@ _is() {
             # we try to make a request with 100 millisecond timeout.
             # Unfortunatelly, this will lead to 100 millisecond delay in
             # non-cloud environments.
-            _has curl && curl -s --connect-timeout 0.1 http://169.254.169.254 && R=0 || R=1 ;;
+            _has curl && curl -s -I --connect-timeout 0.1 -o /dev/null http://169.254.169.254 && R=0 || R=1 ;;
         aws)       _is cloud && curl -s -I http://169.254.169.254 | grep -qF 'Server: EC2ws' && R=0 || R=1 ;;
     esac
     printf -v "$V" '%s' "$R"
@@ -1167,6 +1167,26 @@ _has apt && apt() {
     fi
 }
 
+if _has python3; then
+
+    python() {
+        if [ -n "$VIRTUAL_ENV" ]; then
+            command python "$@"
+        else
+            command python3 "$@"
+        fi
+    }
+
+    pip() {
+        if [ -n "$VIRTUAL_ENV" ]; then
+            command pip "$@"
+        else
+            command pip3 "$@"
+        fi
+    }
+
+fi
+
 man() {
     # LESS man page colors (makes Man pages more readable).
     env \
@@ -1911,14 +1931,15 @@ function promptcmd () {
     # Host
     PS1="${PS1}\[${COLOR_LIGHTBLUE}\]\h\[${COLOR_DEFAULT}\]"
 
-    # WSL?
     if _is wsl; then
+        # WSL?
         PS1="${PS1}\[${COLOR_GRAY}\][\[${COLOR_DEFAULT}\]WSL\[${COLOR_GRAY}\]]\[${COLOR_DEFAULT}\]"
-    fi
-
-    # Docker?
-    if [ -f /.dockerenv ]; then
+    elif _is dockerenv; then
+        # Docker?
         PS1="${PS1}\[${COLOR_GRAY}\][\[${COLOR_DEFAULT}\]docker\[${COLOR_GRAY}\]]\[${COLOR_DEFAULT}\]"
+    elif _is aws; then
+        # AWS instance?
+        PS1="${PS1}\[${COLOR_GRAY}\][\[${COLOR_PURPLE}\]AWS\[${COLOR_GRAY}\]]\[${COLOR_DEFAULT}\]"
     fi
 
     # :

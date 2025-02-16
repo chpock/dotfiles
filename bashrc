@@ -773,7 +773,7 @@ dockerenv) [ -f /.dockerenv ] && R=0 || R=1;;
 sudo)      [ -n "$SUDO_USER" ] && R=0 || R=1;;
 tmux)      [ -n "$TMUX" ] && R=0 || R=1;;
 cloud)
-_has curl && curl -s --connect-timeout 0.1 http://169.254.169.254 && R=0 || R=1 ;;
+_has curl && curl -s -I --connect-timeout 0.1 -o /dev/null http://169.254.169.254 && R=0 || R=1 ;;
 aws)       _is cloud && curl -s -I http://169.254.169.254 | grep -qF 'Server: EC2ws' && R=0 || R=1 ;;
 esac
 printf -v "$V" '%s' "$R"
@@ -1457,6 +1457,22 @@ else
 command apt "$@"
 fi
 }
+if _has python3; then
+python() {
+if [ -n "$VIRTUAL_ENV" ]; then
+command python "$@"
+else
+command python3 "$@"
+fi
+}
+pip() {
+if [ -n "$VIRTUAL_ENV" ]; then
+command pip "$@"
+else
+command pip3 "$@"
+fi
+}
+fi
 man() {
 env \
 LESS_TERMCAP_mb=$'\E[01;31m' \
@@ -1619,9 +1635,9 @@ done
 }
 ,venv() {
 source ./.venv/bin/activate
-}
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
+}
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
 shopt -s histappend
@@ -2008,9 +2024,10 @@ PS1="${PS1}\u\[${COLOR_GRAY}\]@\[${COLOR_DEFAULT}\]"
 PS1="${PS1}\[${COLOR_LIGHTBLUE}\]\h\[${COLOR_DEFAULT}\]"
 if _is wsl; then
 PS1="${PS1}\[${COLOR_GRAY}\][\[${COLOR_DEFAULT}\]WSL\[${COLOR_GRAY}\]]\[${COLOR_DEFAULT}\]"
-fi
-if [ -f /.dockerenv ]; then
+elif _is dockerenv; then
 PS1="${PS1}\[${COLOR_GRAY}\][\[${COLOR_DEFAULT}\]docker\[${COLOR_GRAY}\]]\[${COLOR_DEFAULT}\]"
+elif _is aws; then
+PS1="${PS1}\[${COLOR_GRAY}\][\[${COLOR_PURPLE}\]AWS\[${COLOR_GRAY}\]]\[${COLOR_DEFAULT}\]"
 fi
 PS1="${PS1}\[${COLOR_GRAY}${COLOR_BOLD}\]:\[${COLOR_DEFAULT}\]"
 if [ -w "${PWD}" ]; then
