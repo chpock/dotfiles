@@ -1637,13 +1637,13 @@ echo "Copied to Windows clipboard" 1>&2
 local fn T
 for fn; do
 cat "$fn" > "${fn}.fix-permissions"
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 mv -f "${fn}.fix-permissions" "$fn"
 done
 }
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 shopt -s histappend
 shopt -s cmdhist
 unset HISTFILESIZE
@@ -2179,6 +2179,36 @@ done; unset VAR
 if [ ! -z "$FOUND" ]; then
 echo ""
 unset FOUND
+fi
+if _has ssh; then
+if ! RESULT="$(ssh -G 127.0.0.1 2>&1)"; then
+echo "${COLOR_GRAY}[${COLOR_LIGHTRED}Warning${COLOR_GRAY}]${COLOR_DEFAULT} unknown error while checking SSH ServerAliveInterval"
+else
+if ! RESULT="$(echo "$RESULT" | grep '^serveraliveinterval ')"; then
+echo "${COLOR_GRAY}[${COLOR_LIGHTRED}Warning${COLOR_GRAY}]${COLOR_DEFAULT} could not find ServerAliveInterval in SSH output"
+else
+RESULT="${RESULT#* }"
+case "$RESULT" in
+''|*[!0-9]*)
+echo "${COLOR_GRAY}[${COLOR_LIGHTRED}Warning${COLOR_GRAY}]${COLOR_DEFAULT} SSH ServerAliveInterval is expected to be a number, but got: '$RESULT'"
+;;
+*)
+if [ "$RESULT" -ne 60 ]; then
+echo "${COLOR_GRAY}[${COLOR_GREEN}Info${COLOR_GRAY}]${COLOR_DEFAULT} SSH ServerAliveInterval is '$RESULT'. Adding correct value (60) to ~/.ssh/config."
+if [ -d ~/.ssh ]; then
+mkdir -p ~/.ssh
+chmod 0700 ~/.ssh
+fi
+if [ -f ~/.ssh/config ]; then
+touch ~/.ssh/config
+chmod 0600 ~/.ssh/config
+fi
+printf '\n%s\n' 'ServerAliveInterval 60' >> ~/.ssh/config
+fi
+;;
+esac
+fi
+fi
 fi
 if [ -f /etc/bash_completion ]; then
 . /etc/bash_completion
