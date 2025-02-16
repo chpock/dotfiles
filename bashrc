@@ -571,7 +571,7 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=575F3DAB
+LOCAL_TOOLS_FILE_HASH=BB9575FF
 COLOR_WHITE=$'\e[1;37m'
 COLOR_LIGHTGRAY=$'\e[0;37m'
 COLOR_GRAY=$'\e[1;30m'
@@ -1457,22 +1457,6 @@ else
 command apt "$@"
 fi
 }
-if _has python3; then
-python() {
-if [ -n "$VIRTUAL_ENV" ]; then
-command python "$@"
-else
-command python3 "$@"
-fi
-}
-pip() {
-if [ -n "$VIRTUAL_ENV" ]; then
-command pip "$@"
-else
-command pip3 "$@"
-fi
-}
-fi
 man() {
 env \
 LESS_TERMCAP_mb=$'\E[01;31m' \
@@ -1633,11 +1617,8 @@ cat "$fn" > "${fn}.fix-permissions"
 mv -f "${fn}.fix-permissions" "$fn"
 done
 }
-,venv() {
-source ./.venv/bin/activate
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
-}
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
 shopt -s histappend
@@ -1651,22 +1632,6 @@ HISTFILE="$IAM_HOME/bash_history"
 if [ -e "$HOME/.${IAM}_history" ] && [ ! -e "$HISTFILE" ]; then
 mv "$HOME/.${IAM}_history" "$HISTFILE"
 fi
-__venv_status() {
-local __MSG
-if [ -z "$VIRTUAL_ENV" ]; then
-if [ ! -d .venv ]; then
-return 0
-fi
-fi
-__MSG="${COLOR_GRAY}[${COLOR_WHITE}VEN${COLOR_GRAY}: $COLOR_CYAN"
-if [ -z "$VIRTUAL_ENV" ]; then
-__MSG="$__MSG$PWD/.venv ${COLOR_GRAY}(inactive)"
-else
-__MSG="$__MSG$VIRTUAL_ENV ${COLOR_GRAY}(${COLOR_GREEN}active${COLOR_GRAY})"
-fi
-__MSG="$__MSG${COLOR_GRAY}]${COLOR_DEFAULT}"
-_ps1_show_status "$__MSG"
-}
 __kubectl_status() {
 local __K8S_CONTEXT
 local __K8S_CONF
@@ -1982,7 +1947,20 @@ for i in "$IAM_HOME"/shell.rc/*; do
 done
 fi
 unset _PS1_STATUS_LINE
-__venv_status
+if [ -z "$VIRTUAL_ENV" ]; then
+if [ -f "$PWD/.venv/bin/activate" ]; then
+source "$PWD/.venv/bin/activate"
+fi
+else
+__VENV_HOME="${VIRTUAL_ENV%/*}"
+if [ "$__VENV_HOME" != "$PWD" ]; then
+__VENV_HOME="$VENV_HOME/"
+if [ "${PWD:0:${#__VENV_HOME}}" != "$__VENV_HOME" ]; then
+deactivate
+fi
+fi
+unset __VENV_HOME
+fi
 __aws_status
 __kubectl_status
 __git_status
@@ -2028,6 +2006,9 @@ elif _is dockerenv; then
 PS1="${PS1}\[${COLOR_GRAY}\][\[${COLOR_DEFAULT}\]docker\[${COLOR_GRAY}\]]\[${COLOR_DEFAULT}\]"
 elif _is aws; then
 PS1="${PS1}\[${COLOR_GRAY}\][\[${COLOR_PURPLE}\]AWS\[${COLOR_GRAY}\]]\[${COLOR_DEFAULT}\]"
+fi
+if [ -n "$VIRTUAL_ENV" ]; then
+PS1="${PS1}\[${COLOR_GRAY}\][\[${COLOR_BROWN}\]VENV\[${COLOR_GRAY}\]]\[${COLOR_DEFAULT}\]"
 fi
 PS1="${PS1}\[${COLOR_GRAY}${COLOR_BOLD}\]:\[${COLOR_DEFAULT}\]"
 if [ -w "${PWD}" ]; then

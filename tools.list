@@ -18,6 +18,10 @@ tool: tmux function
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-tmux.sh
 $IAM_HOME/shell.rc/functions-tmux.sh
 2508
+tool: python functions
+https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-python.sh
+$IAM_HOME/shell.rc/functions-python.sh
+1441
 tool: edit bashrc
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/bashrc.rc.sh
 $IAM_HOME/shell.rc/bashrc.rc.sh

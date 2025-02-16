@@ -1167,26 +1167,6 @@ _has apt && apt() {
     fi
 }
 
-if _has python3; then
-
-    python() {
-        if [ -n "$VIRTUAL_ENV" ]; then
-            command python "$@"
-        else
-            command python3 "$@"
-        fi
-    }
-
-    pip() {
-        if [ -n "$VIRTUAL_ENV" ]; then
-            command pip "$@"
-        else
-            command pip3 "$@"
-        fi
-    }
-
-fi
-
 man() {
     # LESS man page colors (makes Man pages more readable).
     env \
@@ -1362,10 +1342,6 @@ clip() {
     done
 }
 
-,venv() {
-    source ./.venv/bin/activate
-}
-
 # 'less' settings
 # -F Causes less to automatically exit if the entire file can be displayed on the first screen
 # -X Disables sending the termcap initialization and deinitialization strings to the terminal.
@@ -1398,31 +1374,6 @@ HISTFILE="$IAM_HOME/bash_history"
 if [ -e "$HOME/.${IAM}_history" ] && [ ! -e "$HISTFILE" ]; then
     mv "$HOME/.${IAM}_history" "$HISTFILE"
 fi
-
-__venv_status() {
-
-    local __MSG
-
-    if [ -z "$VIRTUAL_ENV" ]; then
-        if [ ! -d .venv ]; then
-            return 0
-        fi
-    fi
-
-    __MSG="${COLOR_GRAY}[${COLOR_WHITE}VEN${COLOR_GRAY}: $COLOR_CYAN"
-
-    if [ -z "$VIRTUAL_ENV" ]; then
-        __MSG="$__MSG$PWD/.venv ${COLOR_GRAY}(inactive)"
-    else
-        __MSG="$__MSG$VIRTUAL_ENV ${COLOR_GRAY}(${COLOR_GREEN}active${COLOR_GRAY})"
-    fi
-
-    __MSG="$__MSG${COLOR_GRAY}]${COLOR_DEFAULT}"
-
-
-    _ps1_show_status "$__MSG"
-
-}
 
 __kubectl_status() {
 
@@ -1875,7 +1826,27 @@ function promptcmd () {
 
     unset _PS1_STATUS_LINE
 
-    __venv_status
+    if [ -z "$VIRTUAL_ENV" ]; then
+        # If venv is inactive and we have a venv in PWD, then activate it
+        if [ -f "$PWD/.venv/bin/activate" ]; then
+            source "$PWD/.venv/bin/activate"
+        fi
+    else
+        # If venv is active, we want to deactivate it if we have exited its
+        # directory tree. First we check if venv dir doesn't match PWD.
+        __VENV_HOME="${VIRTUAL_ENV%/*}"
+        if [ "$__VENV_HOME" != "$PWD" ]; then
+            # If venv directory doesn't match PWD, then we check if we are
+            # within venv directory tree.
+            __VENV_HOME="$VENV_HOME/"
+            if [ "${PWD:0:${#__VENV_HOME}}" != "$__VENV_HOME" ]; then
+                # We are not in venv directory tree. Let's deactivate venv.
+                deactivate
+            fi
+        fi
+        unset __VENV_HOME
+    fi
+
     __aws_status
     __kubectl_status
     __git_status
@@ -1940,6 +1911,11 @@ function promptcmd () {
     elif _is aws; then
         # AWS instance?
         PS1="${PS1}\[${COLOR_GRAY}\][\[${COLOR_PURPLE}\]AWS\[${COLOR_GRAY}\]]\[${COLOR_DEFAULT}\]"
+    fi
+
+    if [ -n "$VIRTUAL_ENV" ]; then
+        # Python venv?
+        PS1="${PS1}\[${COLOR_GRAY}\][\[${COLOR_BROWN}\]VENV\[${COLOR_GRAY}\]]\[${COLOR_DEFAULT}\]"
     fi
 
     # :
