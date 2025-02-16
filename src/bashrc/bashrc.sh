@@ -463,16 +463,25 @@ hostinfo() {
         elif [ -f /etc/SuSE-release ]; then
             # SUSE
             UNAME_RELEASE="SUSE Linux Enterprise Server $(grep VERSION /etc/SuSE-release | cut -d= -f2 | awk '{print $1}') SP$(grep PATCHLEVEL /etc/SuSE-release | cut -d= -f2 | awk '{print $1}')"
+        elif [ -f /etc/debian_version ]; then
+            # Debian
+            UNAME_RELEASE="Debian $(cat /etc/debian_version)"
+        elif [ -e /etc/amazon-linux-release ]; then
+            # Amazon Linux
+            UNAME_RELEASE="$(cat /etc/amazon-linux-release)"
         elif [ -f /etc/lsb-release ]; then
             # Linux standard base, grep&sed in the box
             # * Ubuntu
             UNAME_RELEASE="$(grep DISTRIB_DESCRIPTION= /etc/lsb-release | sed 's/DISTRIB_DESCRIPTION\s*=\s*"//' | sed 's/""*$//')"
-        elif [ -f /etc/debian_version ]; then
-            # Debian
-            UNAME_RELEASE="Debian $(cat /etc/debian_version)"
+        elif [ -f /usr/lib/system-release ]; then
+            # Some common location for linux distribution name
+            UNAME_RELEASE="$(cat /usr/lib/system-release)"
+        elif [ -f /etc/system-release ]; then
+            # Some common location for linux distribution name
+            UNAME_RELEASE="$(cat /etc/system-release)"
         else
-            # Linux, unknown distr
-            UNAME_RELEASE="Linux, unknown distributive"
+            # Linux, unknown distribution name
+            UNAME_RELEASE="Linux, unknown distribution"
         fi
         case "$UNAME_MACHINE" in
             x86_64) UNAME_MACHINE="Intel x86-64" ;;
