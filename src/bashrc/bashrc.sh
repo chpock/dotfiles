@@ -418,6 +418,20 @@ do
 done
 unset fn
 
+# In some cases, it is possible that we do not have the 'vi/vim' commands,
+# but vim exists as a binary file vim.basic. E.g. it is possible in docker
+# containers from distroless docker images, and when vim is installed by
+# simply unpacking its package in filesystem. Let's create an alias for this
+# case.
+if
+    ! command -v vi >/dev/null 2>&1 && \
+    ! command -v vim >/dev/null 2>&1 && \
+    [ ! -e "$IAM_HOME/tools/bin/vim" ] && \
+    [ -x /usr/bin/vim.basic ]
+then
+    ln -sf /usr/bin/vim.basic "$IAM_HOME/tools/bin/vim"
+fi
+
 hostinfo() {
 
     local UNAME_MACHINE UNAME_RELEASE UNAME_ALL
@@ -453,6 +467,9 @@ hostinfo() {
             # Linux standard base, grep&sed in the box
             # * Ubuntu
             UNAME_RELEASE="$(grep DISTRIB_DESCRIPTION= /etc/lsb-release | sed 's/DISTRIB_DESCRIPTION\s*=\s*"//' | sed 's/""*$//')"
+        elif [ -f /etc/debian_version ]; then
+            # Debian
+            UNAME_RELEASE="Debian $(cat /etc/debian_version)"
         else
             # Linux, unknown distr
             UNAME_RELEASE="Linux, unknown distributive"

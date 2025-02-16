@@ -911,6 +911,14 @@ unset __val
 fi
 done
 unset fn
+if
+! command -v vi >/dev/null 2>&1 && \
+! command -v vim >/dev/null 2>&1 && \
+[ ! -e "$IAM_HOME/tools/bin/vim" ] && \
+[ -x /usr/bin/vim.basic ]
+then
+ln -sf /usr/bin/vim.basic "$IAM_HOME/tools/bin/vim"
+fi
 hostinfo() {
 local UNAME_MACHINE UNAME_RELEASE UNAME_ALL
 local MSHELL="unknown"
@@ -936,6 +944,8 @@ elif [ -f /etc/SuSE-release ]; then
 UNAME_RELEASE="SUSE Linux Enterprise Server $(grep VERSION /etc/SuSE-release | cut -d= -f2 | awk '{print $1}') SP$(grep PATCHLEVEL /etc/SuSE-release | cut -d= -f2 | awk '{print $1}')"
 elif [ -f /etc/lsb-release ]; then
 UNAME_RELEASE="$(grep DISTRIB_DESCRIPTION= /etc/lsb-release | sed 's/DISTRIB_DESCRIPTION\s*=\s*"//' | sed 's/""*$//')"
+elif [ -f /etc/debian_version ]; then
+UNAME_RELEASE="Debian $(cat /etc/debian_version)"
 else
 UNAME_RELEASE="Linux, unknown distributive"
 fi
@@ -1620,11 +1630,11 @@ mv -f "${fn}.fix-permissions" "$fn"
 done
 }
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 export LESS
 shopt -s histappend
 shopt -s cmdhist
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 unset HISTFILESIZE
 HISTSIZE=1000000
 HISTCONTROL=ignoreboth
