@@ -65,15 +65,16 @@ git-config() {
         GIT_AUTHOR="$_GIT_USER_EMAIL"
     fi
     (set -x; "$GIT_BIN" config "$@" user.name "$_GIT_USER_NAME")
-    (set -x; "$GIT_BIN" config "$@" commit.gpgsign true)
     (set -x; "$GIT_BIN" config "$@" user.email "$GIT_AUTHOR")
     if ! SIGN_KEY="$(set +e; LC_ALL=C gpg --with-colons --list-secret-keys "$GIT_AUTHOR" 2>/dev/null | cut -d: -f5 | head -n 1)"; then
         echo "WARNING: gpg error: $SIGN_KEY"
+        (set -x; "$GIT_BIN" config "$@" commit.gpgsign false)
     elif [ -z "$SIGN_KEY" ]; then
         echo "WARNING: gpg key for '$GIT_AUTHOR' not found!"
+        (set -x; "$GIT_BIN" config "$@" commit.gpgsign false)
     else
         (set -x; "$GIT_BIN" config "$@" user.signingkey "$SIGN_KEY")
-
+        (set -x; "$GIT_BIN" config "$@" commit.gpgsign true)
     fi
 }
 
