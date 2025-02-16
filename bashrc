@@ -1622,9 +1622,9 @@ done
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
 shopt -s histappend
+shopt -s cmdhist
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
-shopt -s cmdhist
 unset HISTFILESIZE
 HISTSIZE=1000000
 HISTCONTROL=ignoreboth
@@ -2031,7 +2031,11 @@ PS1="${PS1}\[${COLOR_RED}\][stp:${STPJBS}]\[${COLOR_DEFAULT}\]"
 elif [ ${STPJBS} -gt 0 ]; then
 PS1="${PS1}\[${COLOR_YELLOW}\][stp:${STPJBS}]\[${COLOR_DEFAULT}\]"
 fi
+if [ ${UID} -eq 0 ] ; then
+PS1="${PS1}\[${COLOR_RED}\]"'#'"\[${COLOR_DEFAULT}\] "
+else
 PS1="${PS1}\[${COLOR_SIGN}\]\\$\[${COLOR_DEFAULT}\] "
+fi
 unset PS1_COMMAND
 if _is tmux && [ -n "$__TMUX_FUNCTIONS_AVAILABLE" ]; then
 ,tmux autosave

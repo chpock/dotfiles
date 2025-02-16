@@ -1950,7 +1950,12 @@ function promptcmd () {
         PS1="${PS1}\[${COLOR_YELLOW}\][stp:${STPJBS}]\[${COLOR_DEFAULT}\]"
     fi
 
-    PS1="${PS1}\[${COLOR_SIGN}\]\\$\[${COLOR_DEFAULT}\] "
+    if [ ${UID} -eq 0 ] ; then
+        # A small hack, as vim highlighting marks '#' as a comment
+        PS1="${PS1}\[${COLOR_RED}\]"'#'"\[${COLOR_DEFAULT}\] "
+    else
+        PS1="${PS1}\[${COLOR_SIGN}\]\\$\[${COLOR_DEFAULT}\] "
+    fi
 
     unset PS1_COMMAND
 
