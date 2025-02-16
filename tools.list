@@ -73,7 +73,7 @@ $IAM_HOME/tools/bin/install-shellcheck
 tool: k9s tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-k9s
 $IAM_HOME/tools/bin/install-k9s
-1407
+1435
 tool: ktop tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-ktop
 $IAM_HOME/tools/bin/install-ktop
