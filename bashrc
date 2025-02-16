@@ -1618,10 +1618,10 @@ mv -f "${fn}.fix-permissions" "$fn"
 done
 }
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 export LESS
 shopt -s histappend
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 shopt -s cmdhist
 unset HISTFILESIZE
 HISTSIZE=1000000
@@ -2224,6 +2224,16 @@ fi
 if [ ! -f "$IAM_HOME/tools/bash_completion/oc.completion.bash" ] && type -t _init_completion >/dev/null 2>&1 && _has oc; then
 echo "Generating bash completions for OpenShift..."
 oc completion bash >"$IAM_HOME/tools/bash_completion/oc.completion.bash" 2>/dev/null
+fi
+if [ ! -f "$IAM_HOME/tools/bash_completion/pip.completion.bash" ]; then
+if _has pip3; then
+echo "Generating bash completions for pip3..."
+pip3 completion --bash >"$IAM_HOME/tools/bash_completion/pip.completion.bash" 2>/dev/null && \
+echo 'complete -o default -F _pip_completion pip' >>"$IAM_HOME/tools/bash_completion/pip.completion.bash"
+elif _has pip; then
+echo "Generating bash completions for pip..."
+pip completion --bash >"$IAM_HOME/tools/bash_completion/pip.completion.bash" 2>/dev/null
+fi
 fi
 if [ ! -f "$IAM_HOME/tools/bash_completion/upkg.bash" ] && _has upkg && upkg supported silent; then
 echo "Generating bash completions for upkg..."

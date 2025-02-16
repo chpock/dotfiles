@@ -2211,6 +2211,19 @@ if [ -d "$IAM_HOME/tools/bash_completion" ]; then
         oc completion bash >"$IAM_HOME/tools/bash_completion/oc.completion.bash" 2>/dev/null
     fi
 
+    if [ ! -f "$IAM_HOME/tools/bash_completion/pip.completion.bash" ]; then
+        if _has pip3; then
+            echo "Generating bash completions for pip3..."
+            # pip3 adds completions only for 'pip3' command, but we have 'pip' alias for it.
+            # Let's add it, but only if 'pip3 completion --bash' was successful.
+            pip3 completion --bash >"$IAM_HOME/tools/bash_completion/pip.completion.bash" 2>/dev/null && \
+                echo 'complete -o default -F _pip_completion pip' >>"$IAM_HOME/tools/bash_completion/pip.completion.bash"
+        elif _has pip; then
+            echo "Generating bash completions for pip..."
+            pip completion --bash >"$IAM_HOME/tools/bash_completion/pip.completion.bash" 2>/dev/null
+        fi
+    fi
+
     if [ ! -f "$IAM_HOME/tools/bash_completion/upkg.bash" ] && _has upkg && upkg supported silent; then
         echo "Generating bash completions for upkg..."
         upkg generate bash-completion >"$IAM_HOME/tools/bash_completion/upkg.bash" 2>/dev/null
