@@ -3,36 +3,41 @@
 _has docker || return
 
 docker() {
-    local LINE
-    # check if the first arg is "rmi" and the second arg has "*"
-    if [ "$1" = "rmi" ] && [ "$2" != "${2%\**}" ]; then
-        local MASK="$2"
-        shift
-        shift
-        while IFS= read -r LINE; do
-            case "$LINE" in
-                *\<none\>*) continue ;;
-                $MASK) set -- "$LINE" "$@" ;;
-            esac
-        done < <(command docker images --format '{{.Repository}}:{{.Tag}}')
-        set -- "rmi" "$@"
-    elif [ "$1" = "prune" ]; then
-        shift
-        set -- system prune --force --volumes
-    elif [ "$1" = "run" ]; then
-        # always add --rm to 'docker run' command if there is no '-d' argument
-        local IS_DETACH="" i
-        for i in "$@"; do
-            if [ "$i" = "-d" ]; then
-                IS_DETACH=1
-                break
-            elif [ "$i" = "--" ]; then
-                break
-            fi
-        done
-        [ -n "$IS_DETACH" ] || set -- "$1" "--rm" "${@:2}"
-    fi
-    command docker "$@"
+    # Execute in subshell to suppress trace messages in this function, but leave
+    # the default trace status in the original shell instance.
+    (
+        { set +x; } 2>/dev/null
+        local LINE
+        # check if the first arg is "rmi" and the second arg has "*"
+        if [ "$1" = "rmi" ] && [ "$2" != "${2%\**}" ]; then
+            local MASK="$2"
+            shift
+            shift
+            while IFS= read -r LINE; do
+                case "$LINE" in
+                    *\<none\>*) continue ;;
+                    $MASK) set -- "$LINE" "$@" ;;
+                esac
+            done < <(command docker images --format '{{.Repository}}:{{.Tag}}')
+            set -- "rmi" "$@"
+        elif [ "$1" = "prune" ]; then
+            shift
+            set -- system prune --force --volumes
+        elif [ "$1" = "run" ]; then
+            # always add --rm to 'docker run' command if there is no '-d' argument
+            local IS_DETACH="" i
+            for i in "$@"; do
+                if [ "$i" = "-d" ]; then
+                    IS_DETACH=1
+                    break
+                elif [ "$i" = "--" ]; then
+                    break
+                fi
+            done
+            [ -n "$IS_DETACH" ] || set -- "$1" "--rm" "${@:2}"
+        fi
+        command docker "$@"
+    )
 }
 
 ,docker() {
