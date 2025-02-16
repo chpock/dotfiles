@@ -1534,6 +1534,11 @@ fi
 exec bash --rcfile "$IAM_HOME/bashrc" -i
 }
 ,ssh() {
+local ARG
+for ARG in "$@"; do :; done
+if ! _glob_match "*@*" "$ARG"; then
+echo "${COLOR_LIGHTRED}WARNING${COLOR_GRAY}:${COLOR_DEFAULT} the remote user is not provided. Current user '$USER' will be used on the remove machine."
+fi
 ssh -t "$@" "$(__magic_ssh)"
 }
 gssh() {
@@ -1632,10 +1637,10 @@ echo "Copied to Windows clipboard" 1>&2
 local fn T
 for fn; do
 cat "$fn" > "${fn}.fix-permissions"
-mv -f "${fn}.fix-permissions" "$fn"
-done
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
+mv -f "${fn}.fix-permissions" "$fn"
+done
 }
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS

@@ -1259,6 +1259,11 @@ reload() {
     exec bash --rcfile "$IAM_HOME/bashrc" -i
 }
 ,ssh() {
+    local ARG
+    for ARG in "$@"; do :; done
+    if ! _glob_match "*@*" "$ARG"; then
+        echo "${COLOR_LIGHTRED}WARNING${COLOR_GRAY}:${COLOR_DEFAULT} the remote user is not provided. Current user '$USER' will be used on the remove machine."
+    fi
     ssh -t "$@" "$(__magic_ssh)"
 }
 gssh() {
