@@ -2163,64 +2163,6 @@ if [ ! -z "$FOUND" ]; then
     unset FOUND
 fi
 
-# ---------------
-
-EFAG=()
-
-# Add known locations for temporary installations first
-if _is windows; then
-    EFAG[${#EFAG[@]}]="c:/Program Files/Electric Cloud/ElectricCommander/bin"
-    EFAG[${#EFAG[@]}]="c:/Program Files/CloudBees/Software Delivery Automation/bin"
-else
-    EFAG[${#EFAG[@]}]="/opt/electriccloud/electriccommander/bin"
-    EFAG[${#EFAG[@]}]="/opt/cloudbees/sda/bin"
-fi
-
-if _is linux; then
-    if _has ps; then
-        if _check command ps --version; then
-            # if we have GNU ps, but not busybox ps
-            while IFS= read -r line; do
-                # workaround for old bash: https://unix.stackexchange.com/questions/64427/bash-3-0-not-supporting-lists
-                EFAG[${#EFAG[@]}]="$line"
-            done < <(ps -o args= -C ecmdrAgent | grep -oP '^.*(?=/ecmdrAgent)')
-            unset line
-        else
-            # busybox version
-            while IFS= read -r line; do
-                # workaround for old bash: https://unix.stackexchange.com/questions/64427/bash-3-0-not-supporting-lists
-                EFAG[${#EFAG[@]}]="$line"
-            done < <(ps -o args= | grep '^[^[:space:]]*/ecmdrAgent' | sed 's#/ecmdrAgent.*$##')
-            unset line
-        fi
-    fi
-elif _is windows; then
-    while IFS= read -r line; do
-        if [ "${line%%=*}" = "ExecutablePath" ]; then
-            line="${line#*=}"
-            line="${line%\\*}"
-            # workaround for old bash: https://unix.stackexchange.com/questions/64427/bash-3-0-not-supporting-lists
-            EFAG[${#EFAG[@]}]="$line"
-        fi
-    done < <(wmic process where "name='ecmdrAgent.exe'" get ExecutablePath /FORMAT:LIST 2>/dev/null)
-    unset line
-fi
-
-# Try to detect and add path to tools-only install
-if _is windows; then
-    EFAG[${#EFAG[@]}]="c:/Artemis/install/bin"
-else
-    EFAG[${#EFAG[@]}]="/opt/_cbcd-tools/bin"
-    EFAG[${#EFAG[@]}]="/opt/chronic/install/bin"
-fi
-
-for (( idx=0; $idx < ${#EFAG[@]}; idx++ )); do
-    [ -d "${EFAG[idx]}" ] || continue
-    _is windows && _addpath "$(cygpath -u "${EFAG[idx]}")" || _addpath "${EFAG[idx]}"
-done
-unset idx
-unset EFAG
-
 if [ -f /etc/bash_completion ]; then
     . /etc/bash_completion
 elif [ -f /etc/profile.d/bash_completion.sh ]; then
@@ -2297,6 +2239,12 @@ if [ -d "$IAM_HOME/tools/bash_completion" ]; then
         echo "Generating bash completions for upkg..."
         upkg generate bash-completion >"$IAM_HOME/tools/bash_completion/upkg.bash" 2>/dev/null
     fi
+
+    # Remove outdated bash completions if they exist
+    rm -f \
+        "$IAM_HOME/tools/bash_completion"/ecconfigure.completion.bash \
+        "$IAM_HOME/tools/bash_completion"/ectool.completion.bash \
+        "$IAM_HOME/tools/bash_completion"/electricflow.completion.bash
 
     for i in "$IAM_HOME/tools/bash_completion"/*.bash; do
         source $i

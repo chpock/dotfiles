@@ -571,7 +571,7 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=F2B57602
+LOCAL_TOOLS_FILE_HASH=E43AFDB
 COLOR_WHITE=$'\e[1;37m'
 COLOR_LIGHTGRAY=$'\e[0;37m'
 COLOR_GRAY=$'\e[1;30m'
@@ -1634,6 +1634,8 @@ for fn; do
 cat "$fn" > "${fn}.fix-permissions"
 mv -f "${fn}.fix-permissions" "$fn"
 done
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 }
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
@@ -1642,8 +1644,6 @@ shopt -s cmdhist
 unset HISTFILESIZE
 HISTSIZE=1000000
 HISTCONTROL=ignoreboth
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 HISTTIMEFORMAT='%F %T '
 HISTIGNORE="&:[bf]g:exit"
 HISTFILE="$IAM_HOME/bash_history"
@@ -2175,50 +2175,6 @@ if [ ! -z "$FOUND" ]; then
 echo ""
 unset FOUND
 fi
-EFAG=()
-if _is windows; then
-EFAG[${#EFAG[@]}]="c:/Program Files/Electric Cloud/ElectricCommander/bin"
-EFAG[${#EFAG[@]}]="c:/Program Files/CloudBees/Software Delivery Automation/bin"
-else
-EFAG[${#EFAG[@]}]="/opt/electriccloud/electriccommander/bin"
-EFAG[${#EFAG[@]}]="/opt/cloudbees/sda/bin"
-fi
-if _is linux; then
-if _has ps; then
-if _check command ps --version; then
-while IFS= read -r line; do
-EFAG[${#EFAG[@]}]="$line"
-done < <(ps -o args= -C ecmdrAgent | grep -oP '^.*(?=/ecmdrAgent)')
-unset line
-else
-while IFS= read -r line; do
-EFAG[${#EFAG[@]}]="$line"
-done < <(ps -o args= | grep '^[^[:space:]]*/ecmdrAgent' | sed 's#/ecmdrAgent.*$##')
-unset line
-fi
-fi
-elif _is windows; then
-while IFS= read -r line; do
-if [ "${line%%=*}" = "ExecutablePath" ]; then
-line="${line#*=}"
-line="${line%\\*}"
-EFAG[${#EFAG[@]}]="$line"
-fi
-done < <(wmic process where "name='ecmdrAgent.exe'" get ExecutablePath /FORMAT:LIST 2>/dev/null)
-unset line
-fi
-if _is windows; then
-EFAG[${#EFAG[@]}]="c:/Artemis/install/bin"
-else
-EFAG[${#EFAG[@]}]="/opt/_cbcd-tools/bin"
-EFAG[${#EFAG[@]}]="/opt/chronic/install/bin"
-fi
-for (( idx=0; $idx < ${#EFAG[@]}; idx++ )); do
-[ -d "${EFAG[idx]}" ] || continue
-_is windows && _addpath "$(cygpath -u "${EFAG[idx]}")" || _addpath "${EFAG[idx]}"
-done
-unset idx
-unset EFAG
 if [ -f /etc/bash_completion ]; then
 . /etc/bash_completion
 elif [ -f /etc/profile.d/bash_completion.sh ]; then
@@ -2278,6 +2234,10 @@ if [ ! -f "$IAM_HOME/tools/bash_completion/upkg.bash" ] && _has upkg && upkg sup
 echo "Generating bash completions for upkg..."
 upkg generate bash-completion >"$IAM_HOME/tools/bash_completion/upkg.bash" 2>/dev/null
 fi
+rm -f \
+"$IAM_HOME/tools/bash_completion"/ecconfigure.completion.bash \
+"$IAM_HOME/tools/bash_completion"/ectool.completion.bash \
+"$IAM_HOME/tools/bash_completion"/electricflow.completion.bash
 for i in "$IAM_HOME/tools/bash_completion"/*.bash; do
 source $i
 done

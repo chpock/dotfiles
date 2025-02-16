@@ -39,21 +39,6 @@ $IAM_HOME/shell.rc/bashrc.rc.sh
 # Bash completions
 
 tool: bash completion
-https://raw.githubusercontent.com/chpock/.ini/master/bash_completion/custom/ecconfigure.bash
-$IAM_HOME/tools/bash_completion/ecconfigure.completion.bash
-3135
-
-tool: bash completion
-https://raw.githubusercontent.com/chpock/.ini/master/bash_completion/custom/ectool.bash
-$IAM_HOME/tools/bash_completion/ectool.completion.bash
-290223
-
-tool: bash completion
-https://raw.githubusercontent.com/chpock/.ini/master/bash_completion/custom/electricflow.bash
-$IAM_HOME/tools/bash_completion/electricflow.completion.bash
-12691
-
-tool: bash completion
 https://raw.githubusercontent.com/docker/cli/master/contrib/completion/bash/docker
 $IAM_HOME/tools/bash_completion/docker.completion.bash
 114527
