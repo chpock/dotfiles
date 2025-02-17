@@ -942,12 +942,12 @@ elif [ -f /etc/alpine-release ]; then
 UNAME_RELEASE="$(grep 'PRETTY_NAME=' /etc/os-release | cut -d= -f2 | tr -d '"')"
 elif [ -f /etc/SuSE-release ]; then
 UNAME_RELEASE="SUSE Linux Enterprise Server $(grep VERSION /etc/SuSE-release | cut -d= -f2 | awk '{print $1}') SP$(grep PATCHLEVEL /etc/SuSE-release | cut -d= -f2 | awk '{print $1}')"
+elif [ -f /etc/lsb-release ]; then
+UNAME_RELEASE="$(grep DISTRIB_DESCRIPTION= /etc/lsb-release | sed 's/DISTRIB_DESCRIPTION\s*=\s*"//' | sed 's/""*$//')"
 elif [ -f /etc/debian_version ]; then
 UNAME_RELEASE="Debian $(cat /etc/debian_version)"
 elif [ -e /etc/amazon-linux-release ]; then
 UNAME_RELEASE="$(cat /etc/amazon-linux-release)"
-elif [ -f /etc/lsb-release ]; then
-UNAME_RELEASE="$(grep DISTRIB_DESCRIPTION= /etc/lsb-release | sed 's/DISTRIB_DESCRIPTION\s*=\s*"//' | sed 's/""*$//')"
 elif [ -f /usr/lib/system-release ]; then
 UNAME_RELEASE="$(cat /usr/lib/system-release)"
 elif [ -f /etc/system-release ]; then
@@ -1643,10 +1643,10 @@ done
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
 shopt -s histappend
-shopt -s cmdhist
-unset HISTFILESIZE
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
+shopt -s cmdhist
+unset HISTFILESIZE
 HISTSIZE=1000000
 HISTCONTROL=ignoreboth
 HISTTIMEFORMAT='%F %T '

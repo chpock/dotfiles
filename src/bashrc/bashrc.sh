@@ -463,16 +463,19 @@ hostinfo() {
         elif [ -f /etc/SuSE-release ]; then
             # SUSE
             UNAME_RELEASE="SUSE Linux Enterprise Server $(grep VERSION /etc/SuSE-release | cut -d= -f2 | awk '{print $1}') SP$(grep PATCHLEVEL /etc/SuSE-release | cut -d= -f2 | awk '{print $1}')"
+        elif [ -f /etc/lsb-release ]; then
+            # Linux standard base, grep&sed in the box.
+            # This detection should be used before /etc/debian_version,
+            # as Ubuntu also contains /etc/debian_version, but /etc/lsb-release
+            # provides more accurate information.
+            # * Ubuntu
+            UNAME_RELEASE="$(grep DISTRIB_DESCRIPTION= /etc/lsb-release | sed 's/DISTRIB_DESCRIPTION\s*=\s*"//' | sed 's/""*$//')"
         elif [ -f /etc/debian_version ]; then
             # Debian
             UNAME_RELEASE="Debian $(cat /etc/debian_version)"
         elif [ -e /etc/amazon-linux-release ]; then
             # Amazon Linux
             UNAME_RELEASE="$(cat /etc/amazon-linux-release)"
-        elif [ -f /etc/lsb-release ]; then
-            # Linux standard base, grep&sed in the box
-            # * Ubuntu
-            UNAME_RELEASE="$(grep DISTRIB_DESCRIPTION= /etc/lsb-release | sed 's/DISTRIB_DESCRIPTION\s*=\s*"//' | sed 's/""*$//')"
         elif [ -f /usr/lib/system-release ]; then
             # Some common location for linux distribution name
             UNAME_RELEASE="$(cat /usr/lib/system-release)"
