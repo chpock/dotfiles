@@ -2200,15 +2200,22 @@ mkdir -p ~/.ssh
 chmod 0700 ~/.ssh
 fi
 if [ -f ~/.ssh/config ]; then
-touch ~/.ssh/config
+TEMP_FILE="$(mktemp)"
+echo 'ServerAliveInterval 60' > "$TEMP_FILE"
+cat ~/.ssh/config >> "$TEMP_FILE"
+cat "$TEMP_FILE" > ~/.ssh/config
+rm -f "$TEMP_FILE"
+unset TEMP_FILE
+else
+echo 'ServerAliveInterval 60' >> ~/.ssh/config
 chmod 0600 ~/.ssh/config
 fi
-printf '\n%s\n' 'ServerAliveInterval 60' >> ~/.ssh/config
 fi
 ;;
 esac
 fi
 fi
+unset RESULT
 fi
 if [ -f /etc/bash_completion ]; then
 . /etc/bash_completion
