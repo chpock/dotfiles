@@ -97,6 +97,9 @@ aws() {
         fi
         (set -x; aws ecr get-login-password --region "$REGION" | docker login --username AWS --password-stdin "$ECR_HOST")
         ;;
+    unset-environment-variables)
+        unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_DEFAULT_REGION
+        ;;
     *)
         echo "Unknown command: '$1'"
         return 1
@@ -120,7 +123,7 @@ __,aws() {
     COMPREPLY=()
 
     if [ $COMP_CWORD -eq 1 ]; then
-        COMPREPLY=($(compgen -W "on off local remote role region eks-update-kubeconfig ecr-auth-docker" -- "$CUR"))
+        COMPREPLY=($(compgen -W "on off local remote role region eks-update-kubeconfig ecr-auth-docker unset-environment-variables" -- "$CUR"))
         return
     fi
 
