@@ -2177,12 +2177,14 @@ if [ ! -z "$FOUND" ]; then
     unset FOUND
 fi
 
-if _has ssh; then
+if _has ssh && _isnot dockerenv; then
     if ! RESULT="$(ssh -G 127.0.0.1 2>&1)"; then
         echo "${COLOR_GRAY}[${COLOR_LIGHTRED}Warning${COLOR_GRAY}]${COLOR_DEFAULT} unknown error while checking SSH ServerAliveInterval"
+        echo
     else
         if ! RESULT="$(echo "$RESULT" | grep '^serveraliveinterval ')"; then
             echo "${COLOR_GRAY}[${COLOR_LIGHTRED}Warning${COLOR_GRAY}]${COLOR_DEFAULT} could not find ServerAliveInterval in SSH output"
+            echo
         else
             # $RESULT is expected to be like "serveraliveinterval 60"
             # Let's strip the first word
@@ -2190,11 +2192,12 @@ if _has ssh; then
             case "$RESULT" in
             ''|*[!0-9]*)
                 echo "${COLOR_GRAY}[${COLOR_LIGHTRED}Warning${COLOR_GRAY}]${COLOR_DEFAULT} SSH ServerAliveInterval is expected to be a number, but got: '$RESULT'"
+                echo
                 ;;
             *)
                 if [ "$RESULT" -ne 60 ]; then
-                    echo "${COLOR_GRAY}[${COLOR_GREEN}Info${COLOR_GRAY}]${COLOR_DEFAULT} SSH ServerAliveInterval is '$RESULT'. Adding correct value (60) to ~/.ssh/config."
-                    if [ -d ~/.ssh ]; then
+                    echo "${COLOR_GRAY}[${COLOR_GREEN}Info${COLOR_GRAY}]${COLOR_DEFAULT} SSH ServerAliveInterval is '$RESULT'. Adding correct value (60) to ~/.ssh/config"
+                    if [ ! -d ~/.ssh ]; then
                         mkdir -p ~/.ssh
                         chmod 0700 ~/.ssh
                     fi
@@ -2209,6 +2212,7 @@ if _has ssh; then
                         echo 'ServerAliveInterval 60' >> ~/.ssh/config
                         chmod 0600 ~/.ssh/config
                     fi
+                    echo
                 fi
                 ;;
             esac
