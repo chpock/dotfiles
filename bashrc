@@ -1642,11 +1642,11 @@ done
 }
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 shopt -s histappend
 shopt -s cmdhist
 unset HISTFILESIZE
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 HISTSIZE=1000000
 HISTCONTROL=ignoreboth
 HISTTIMEFORMAT='%F %T '
@@ -1986,20 +1986,22 @@ for i in "$IAM_HOME"/shell.rc/*; do
 done
 fi
 unset _PS1_STATUS_LINE
+set -x
 if [ -z "$VIRTUAL_ENV" ]; then
 if [ -f "$PWD/.venv/bin/activate" ]; then
-source "$PWD/.venv/bin/activate"
+source "$PWD/.venv/bin/activate" || true
 fi
 else
 __VENV_HOME="${VIRTUAL_ENV%/*}"
 if [ "$__VENV_HOME" != "$PWD" ]; then
 __VENV_HOME="$__VENV_HOME/"
 if [ "${PWD:0:${#__VENV_HOME}}" != "$__VENV_HOME" ]; then
-deactivate
+deactivate || unset VIRTUAL_ENV
 fi
 fi
 unset __VENV_HOME
 fi
+set +x
 __aws_status
 __kubectl_status
 __git_status
