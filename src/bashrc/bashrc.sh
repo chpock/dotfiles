@@ -1894,15 +1894,14 @@ function promptcmd () {
 
     unset _PS1_STATUS_LINE
 
-
-    set -x
-
     if [ -z "$VIRTUAL_ENV" ]; then
         # If venv is inactive and we have a venv in PWD, then activate it
         if [ -f "$PWD/.venv/bin/activate" ]; then
             # At the moment, we are silently ignoring possible errors during
             # activation.
             source "$PWD/.venv/bin/activate" || true
+        elif _is windows && [ -f "$PWD/.venv/Scripts/activate" ]; then
+            source "$PWD/.venv/Scripts/activate" || true
         fi
     else
         # If venv is active, we want to deactivate it if we have exited its
@@ -1921,8 +1920,6 @@ function promptcmd () {
         fi
         unset __VENV_HOME
     fi
-
-    set +x
 
     __aws_status
     __kubectl_status

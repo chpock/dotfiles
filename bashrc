@@ -1986,10 +1986,11 @@ for i in "$IAM_HOME"/shell.rc/*; do
 done
 fi
 unset _PS1_STATUS_LINE
-set -x
 if [ -z "$VIRTUAL_ENV" ]; then
 if [ -f "$PWD/.venv/bin/activate" ]; then
 source "$PWD/.venv/bin/activate" || true
+elif _is windows && [ -f "$PWD/.venv/Scripts/activate" ]; then
+source "$PWD/.venv/Scripts/activate" || true
 fi
 else
 __VENV_HOME="${VIRTUAL_ENV%/*}"
@@ -2001,7 +2002,6 @@ fi
 fi
 unset __VENV_HOME
 fi
-set +x
 __aws_status
 __kubectl_status
 __git_status
