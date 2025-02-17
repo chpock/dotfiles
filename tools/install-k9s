@@ -1,11 +1,11 @@
 #!/bin/sh
 
-# dummy commept for update
+# dummy comment for update 2
 
 set -e
 
 BIN_PATH="$1"
-VERSION="0.40.1"
+VERSION="0.40.3"
 BASE_URL="https://github.com/derailed/k9s/releases/download/v${VERSION}/k9s_"
 SUFFIX="$(cat <<EOF
 GNU_Linux:x86_64
