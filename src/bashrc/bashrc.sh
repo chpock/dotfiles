@@ -1905,20 +1905,31 @@ function promptcmd () {
         fi
     else
         # If venv is active, we want to deactivate it if we have exited its
-        # directory tree. First we check if venv dir doesn't match PWD.
-        __VENV_HOME="${VIRTUAL_ENV%/*}"
-        if [ "$__VENV_HOME" != "$PWD" ]; then
-            # If venv directory doesn't match PWD, then we check if we are
-            # within venv directory tree.
-            __VENV_HOME="$__VENV_HOME/"
-            if [ "${PWD:0:${#__VENV_HOME}}" != "$__VENV_HOME" ]; then
-                # We are not in venv directory tree. Let's deactivate venv.
-                # If deactivation failed for any reason, just reset
-                # the variable for venv.
-                deactivate || unset VIRTUAL_ENV
+        # directory tree or venv directory no longer exists.
+        unset __VENV_DEACTIVATE
+        if [ ! -d "$VIRTUAL_ENV" ]; then
+            # Deactivate the venv if directory no longer exists
+            __VENV_DEACTIVATE=1
+        else
+            # First we check if venv dir doesn't match PWD.
+            __VENV_HOME="${VIRTUAL_ENV%/*}"
+            if [ "$__VENV_HOME" != "$PWD" ]; then
+                # If venv directory doesn't match PWD, then we check if we are
+                # within venv directory tree.
+                __VENV_HOME="$__VENV_HOME/"
+                if [ "${PWD:0:${#__VENV_HOME}}" != "$__VENV_HOME" ]; then
+                    # We are not in venv directory tree. Let's deactivate venv.
+                    __VENV_DEACTIVATE=1
+                fi
             fi
+            unset __VENV_HOME
         fi
-        unset __VENV_HOME
+        if [ -n "$__VENV_DEACTIVATE" ]; then
+            # Deactivate the venv. If deactivation failed for any reason,
+            # just reset the variable for venv.
+            deactivate || unset VIRTUAL_ENV
+            unset __VENV_DEACTIVATE
+        fi
     fi
 
     __aws_status

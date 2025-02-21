@@ -571,7 +571,7 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=BE9DAFE3
+LOCAL_TOOLS_FILE_HASH=D5B0AFE4
 COLOR_WHITE=$'\e[1;37m'
 COLOR_LIGHTGRAY=$'\e[0;37m'
 COLOR_GRAY=$'\e[1;30m'
@@ -1644,11 +1644,11 @@ LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \
 export LESS
 shopt -s histappend
 shopt -s cmdhist
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 unset HISTFILESIZE
 HISTSIZE=1000000
 HISTCONTROL=ignoreboth
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 HISTTIMEFORMAT='%F %T '
 HISTIGNORE="&:[bf]g:exit"
 HISTFILE="$IAM_HOME/bash_history"
@@ -1993,14 +1993,23 @@ elif _is windows && [ -f "$PWD/.venv/Scripts/activate" ]; then
 source "$PWD/.venv/Scripts/activate" || true
 fi
 else
+unset __VENV_DEACTIVATE
+if [ ! -d "$VIRTUAL_ENV" ]; then
+__VENV_DEACTIVATE=1
+else
 __VENV_HOME="${VIRTUAL_ENV%/*}"
 if [ "$__VENV_HOME" != "$PWD" ]; then
 __VENV_HOME="$__VENV_HOME/"
 if [ "${PWD:0:${#__VENV_HOME}}" != "$__VENV_HOME" ]; then
-deactivate || unset VIRTUAL_ENV
+__VENV_DEACTIVATE=1
 fi
 fi
 unset __VENV_HOME
+fi
+if [ -n "$__VENV_DEACTIVATE" ]; then
+deactivate || unset VIRTUAL_ENV
+unset __VENV_DEACTIVATE
+fi
 fi
 __aws_status
 __kubectl_status

@@ -27,6 +27,7 @@ fi
     local CMD="$1"
     local RC
     local VENV_HOME
+    local FN
 
     case "$CMD" in
         "")
@@ -38,10 +39,13 @@ fi
             python -m venv .venv && RC=0 || RC=$?
             if [ "$RC" -eq 0 ]; then
                 printf '\b\b\b\b: OK\n'
-                if [ -f "$PWD/requirements.txt" ]; then
-                    echo "Installing requirements ..."
-                    source "$PWD"/.venv/bin/activate && pip install -r "$PWD/requirements.txt" && RC=0 || RC=$?
-                fi
+                for FN in requirements.txt requirements-dev.txt dev-requirements.txt; do
+                    if [ -f "$PWD/$FN" ]; then
+                        echo "Installing requirements: $FN ..."
+                        (source "$PWD"/.venv/bin/activate && pip install -r "$PWD/$FN") && RC=0 || RC=$?
+                    fi
+                    [ $RC -eq 0 ] || break
+                done
             else
                 echo
                 echo "Error: something wrong happened."
