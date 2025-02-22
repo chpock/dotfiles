@@ -729,6 +729,21 @@ PATH=${PATH%:}
 PATH=${PATH#:}
 export PATH
 }
+_random() {
+local chars="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+local V=""
+if [ "$1" = "-v" ]; then
+V="$2"
+shift 2
+fi
+local count="${1:-8}"
+local result=""
+while [ "$count" -ne 0 ]; do
+result="$result${chars:$(( RANDOM % ${#chars} )):1}"
+count=$(( count - 1 ))
+done
+[ -n "$V" ] && printf -v "$V" "$result" || echo "$result"
+}
 _catch() {
 local USE_V USE_X R STDOUT STDERR
 [ "${-/v}" != "$-" ] && set +v && USE_V="-v" || USE_V="+v"
@@ -1643,14 +1658,14 @@ done
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
 shopt -s histappend
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 shopt -s cmdhist
 unset HISTFILESIZE
 HISTSIZE=1000000
 HISTCONTROL=ignoreboth
 HISTTIMEFORMAT='%F %T '
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
-HISTIGNORE="&:[bf]g:exit:history"
+HISTIGNORE="&:[bf]g:exit:history:history *"
 HISTIGNORE="$HISTIGNORE:reload:reload current:mkcdtmp"
 HISTFILE="$IAM_HOME/bash_history"
 if [ -e "$HOME/.${IAM}_history" ] && [ ! -e "$HISTFILE" ]; then

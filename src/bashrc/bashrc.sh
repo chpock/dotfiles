@@ -183,6 +183,22 @@ _addpath() {
     export PATH
 }
 
+_random() {
+    local chars="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    local V=""
+    if [ "$1" = "-v" ]; then
+        V="$2"
+        shift 2
+    fi
+    local count="${1:-8}"
+    local result=""
+    while [ "$count" -ne 0 ]; do
+        result="$result${chars:$(( RANDOM % ${#chars} )):1}"
+        count=$(( count - 1 ))
+    done
+    [ -n "$V" ] && printf -v "$V" "$result" || echo "$result"
+}
+
 _catch() {
     local USE_V USE_X R STDOUT STDERR
     # check "verbose" option, turn if off if enabled, and save restore status USE_V
@@ -1404,7 +1420,7 @@ HISTCONTROL=ignoreboth
 # add the full date and time to lines
 HISTTIMEFORMAT='%F %T '
 # Ignore standard commands
-HISTIGNORE="&:[bf]g:exit:history"
+HISTIGNORE="&:[bf]g:exit:history:history *"
 # Ignore our custom commands. They are useless for history.
 # reload - is my function to reload current shell
 HISTIGNORE="$HISTIGNORE:reload:reload current:mkcdtmp"
