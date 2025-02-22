@@ -1647,10 +1647,11 @@ shopt -s cmdhist
 unset HISTFILESIZE
 HISTSIZE=1000000
 HISTCONTROL=ignoreboth
+HISTTIMEFORMAT='%F %T '
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
-HISTTIMEFORMAT='%F %T '
-HISTIGNORE="&:[bf]g:exit"
+HISTIGNORE="&:[bf]g:exit:history"
+HISTIGNORE="$HISTIGNORE:reload:reload current:mkcdtmp"
 HISTFILE="$IAM_HOME/bash_history"
 if [ -e "$HOME/.${IAM}_history" ] && [ ! -e "$HISTFILE" ]; then
 mv "$HOME/.${IAM}_history" "$HISTFILE"

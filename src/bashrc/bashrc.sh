@@ -1403,7 +1403,11 @@ HISTSIZE=1000000
 HISTCONTROL=ignoreboth
 # add the full date and time to lines
 HISTTIMEFORMAT='%F %T '
-HISTIGNORE="&:[bf]g:exit"
+# Ignore standard commands
+HISTIGNORE="&:[bf]g:exit:history"
+# Ignore our custom commands. They are useless for history.
+# reload - is my function to reload current shell
+HISTIGNORE="$HISTIGNORE:reload:reload current:mkcdtmp"
 # history file
 HISTFILE="$IAM_HOME/bash_history"
 # move history file from old location
