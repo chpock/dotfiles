@@ -54,6 +54,10 @@ tool: bash completion
 https://raw.githubusercontent.com/chpock/tmux-bash-completion/master/completions/tmux
 $IAM_HOME/tools/bash_completion/tmux-completion.bash
 6102
+tool: mcfly tool
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-mcfly
+$IAM_HOME/tools/bin/install-mcfly
+1124
 tool: mydu tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/mydu
 $IAM_HOME/tools/bin/mydu

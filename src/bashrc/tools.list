@@ -75,6 +75,11 @@ $IAM_HOME/tools/bash_completion/tmux-completion.bash
 
 # Various tools
 
+tool: mcfly tool
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-mcfly
+$IAM_HOME/tools/bin/install-mcfly
+@getSize REPO_ROOT/tools/install-mcfly
+
 tool: mydu tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/mydu
 $IAM_HOME/tools/bin/mydu
