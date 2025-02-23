@@ -571,7 +571,7 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=D5B0AFE4
+LOCAL_TOOLS_FILE_HASH=47A8AFDE
 COLOR_WHITE=$'\e[1;37m'
 COLOR_LIGHTGRAY=$'\e[0;37m'
 COLOR_GRAY=$'\e[1;30m'
@@ -1658,18 +1658,40 @@ done
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
 shopt -s histappend
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 shopt -s cmdhist
 unset HISTFILESIZE
 HISTSIZE=1000000
 HISTCONTROL=ignoreboth
 HISTTIMEFORMAT='%F %T '
-HISTIGNORE="&:[bf]g:exit:history:history *"
+HISTIGNORE="&:[bf]g:exit:history:history *:reset:clear"
 HISTIGNORE="$HISTIGNORE:reload:reload current:mkcdtmp"
+if _is dockerenv; then
 HISTFILE="$IAM_HOME/bash_history"
-if [ -e "$HOME/.${IAM}_history" ] && [ ! -e "$HISTFILE" ]; then
-mv "$HOME/.${IAM}_history" "$HISTFILE"
+else
+HISTFILE_GLOBAL="$IAM_HOME/bash_history"
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
+if [ -z "$_SHELL_SESSION_ID" ]; then
+_random -v _SHELL_SESSION_ID
+export _SHELL_SESSION_ID
+fi
+if _isnot tmux; then
+_random -v _TMUX_SESSION_ID
+export _TMUX_SESSION_ID
+_SHELL_SESSION_DIR="$IAM_HOME/shell_sessions/plain-$_SHELL_SESSION_ID"
+else
+if _TMUX_SESSION_ID="$(tmux show-env _TMUX_SESSION_ID 2>/dev/null)"; then
+_TMUX_SESSION_ID="${_TMUX_SESSION_ID#*=}"
+elif [ "$__TMUX_FUNCTIONS_AVAILABLE" != "1" ] || ! _TMUX_SESSION_ID="$(,tmux _get-id-from-backup)"; then
+_random -v _TMUX_SESSION_ID
+tmux set-env _TMUX_SESSION_ID "$_TMUX_SESSION_ID"
+fi
+_TMUX_SESSION_DIR="$IAM_HOME/shell_sessions/tmux-$_TMUX_SESSION_ID"
+_SHELL_SESSION_DIR="$_TMUX_SESSION_DIR/$_SHELL_SESSION_ID"
+fi
+mkdir -p "$_SHELL_SESSION_DIR"
+HISTFILE="$_SHELL_SESSION_DIR/bash_history"
+history -cr "$HISTFILE_GLOBAL"
 fi
 __kubectl_status() {
 local __K8S_CONTEXT
@@ -1993,9 +2015,16 @@ echo "$TMUX" > "$IAM_HOME/kitty_sessions/$__KITTY_ID/tmux"
 else
 echo "$PWD" > "$IAM_HOME/kitty_sessions/$__KITTY_ID/pwd"
 fi
+if [ ! -e "$IAM_HOME/kitty_sessions/$__KITTY_ID/shell_session_id" ] && [ -n "$_SHELL_SESSION_ID" ]; then
+echo "$_SHELL_SESSION_ID" > "$IAM_HOME/kitty_sessions/$__KITTY_ID/shell_session_id"
+fi
 fi
 echo "$PWD" > "$IAM_HOME/jumplist_last_pwd"
+if [ -z "$HISTFILE_GLOBAL" ]; then
 history -a
+else
+history -a /dev/stdout | tee -a "$HISTFILE_GLOBAL" >> "$HISTFILE"
+fi
 if [ -d "$IAM_HOME"/shell.rc ]; then
 for i in "$IAM_HOME"/shell.rc/*; do
 ! _once "PS1 -> source $i" || source "$i"

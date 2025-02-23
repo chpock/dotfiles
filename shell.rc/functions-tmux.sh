@@ -6,13 +6,27 @@ _has tmux || return
     local CMD="$1"
     local SEP=$'\t'
     local BACKUP_FILE="$TMUX_TMPDIR/sessions-backup"
+    local BACKUP_FILE_IDS="$TMUX_TMPDIR/sessions-backup-ids"
     local WANT_TO_RESTORE
-    local session_name window_name current_path
+    local session_name window_name current_path session_id
     shift
 
     case "$CMD" in
+        _get-id-from-backup)
+            if [ -e "$BACKUP_FILE_IDS" ]; then
+                local current_session_name="$(tmux display-message -p '#S')"
+                while IFS="$SEP" read session_name session_id; do
+                    if [ "$session_name" = "$current_session_name" ]; then
+                        echo "$session_id"
+                        return 0
+                    fi
+                done < "$BACKUP_FILE_IDS"
+            fi
+            return 1
+            ;;
         save)
             tmux list-windows -a -F "#S${SEP}#W${SEP}#{pane_current_path}" >"$BACKUP_FILE"
+            tmux list-sessions -F "#S${SEP}#{_TMUX_SESSION_ID}" >"$BACKUP_FILE_IDS"
             ;;
         restore)
             while IFS="$SEP" read session_name window_name current_path; do

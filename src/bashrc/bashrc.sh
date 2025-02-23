@@ -1394,6 +1394,7 @@ clip() {
     done
 }
 
+
 # 'less' settings
 # -F Causes less to automatically exit if the entire file can be displayed on the first screen
 # -X Disables sending the termcap initialization and deinitialization strings to the terminal.
@@ -1420,15 +1421,48 @@ HISTCONTROL=ignoreboth
 # add the full date and time to lines
 HISTTIMEFORMAT='%F %T '
 # Ignore standard commands
-HISTIGNORE="&:[bf]g:exit:history:history *"
+HISTIGNORE="&:[bf]g:exit:history:history *:reset:clear"
 # Ignore our custom commands. They are useless for history.
 # reload - is my function to reload current shell
 HISTIGNORE="$HISTIGNORE:reload:reload current:mkcdtmp"
-# history file
-HISTFILE="$IAM_HOME/bash_history"
-# move history file from old location
-if [ -e "$HOME/.${IAM}_history" ] && [ ! -e "$HISTFILE" ]; then
-    mv "$HOME/.${IAM}_history" "$HISTFILE"
+
+if _is dockerenv; then
+    # In Docker, we don't want to do anything complicated with the shell command history.
+    HISTFILE="$IAM_HOME/bash_history"
+else
+
+    HISTFILE_GLOBAL="$IAM_HOME/bash_history"
+
+    if [ -z "$_SHELL_SESSION_ID" ]; then
+        _random -v _SHELL_SESSION_ID
+        export _SHELL_SESSION_ID
+    fi
+
+    if _isnot tmux; then
+        _random -v _TMUX_SESSION_ID
+        export _TMUX_SESSION_ID
+        _SHELL_SESSION_DIR="$IAM_HOME/shell_sessions/plain-$_SHELL_SESSION_ID"
+    else
+        if _TMUX_SESSION_ID="$(tmux show-env _TMUX_SESSION_ID 2>/dev/null)"; then
+            # Strip variable name
+            _TMUX_SESSION_ID="${_TMUX_SESSION_ID#*=}"
+        elif [ "$__TMUX_FUNCTIONS_AVAILABLE" != "1" ] || ! _TMUX_SESSION_ID="$(,tmux _get-id-from-backup)"; then
+            _random -v _TMUX_SESSION_ID
+            tmux set-env _TMUX_SESSION_ID "$_TMUX_SESSION_ID"
+        fi
+        _TMUX_SESSION_DIR="$IAM_HOME/shell_sessions/tmux-$_TMUX_SESSION_ID"
+        _SHELL_SESSION_DIR="$_TMUX_SESSION_DIR/$_SHELL_SESSION_ID"
+    fi
+
+    mkdir -p "$_SHELL_SESSION_DIR"
+
+    HISTFILE="$_SHELL_SESSION_DIR/bash_history"
+
+    # Read global history file
+    history -cr "$HISTFILE_GLOBAL"
+
+    # Session history file will be read automatically
+
 fi
 
 __kubectl_status() {
@@ -1899,12 +1933,20 @@ function promptcmd () {
         else
             echo "$PWD" > "$IAM_HOME/kitty_sessions/$__KITTY_ID/pwd"
         fi
+        if [ ! -e "$IAM_HOME/kitty_sessions/$__KITTY_ID/shell_session_id" ] && [ -n "$_SHELL_SESSION_ID" ]; then
+            echo "$_SHELL_SESSION_ID" > "$IAM_HOME/kitty_sessions/$__KITTY_ID/shell_session_id"
+        fi
     fi
 
     echo "$PWD" > "$IAM_HOME/jumplist_last_pwd"
 
     # update history file
-    history -a
+    if [ -z "$HISTFILE_GLOBAL" ]; then
+        history -a
+    else
+        # Update both global and session history files
+        history -a /dev/stdout | tee -a "$HISTFILE_GLOBAL" >> "$HISTFILE"
+    fi
 
     if [ -d "$IAM_HOME"/shell.rc ]; then
         for i in "$IAM_HOME"/shell.rc/*; do
