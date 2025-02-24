@@ -1275,6 +1275,9 @@ reload() {
             tmux send-keys -t $wid 'reload current' C-m
         done
     fi
+    # Reloaded shell should be with the same _SHELL_SESSION_ID.
+    # It will be removed from exports by launched shell instance.
+    export _SHELL_SESSION_ID
     exec bash --rcfile "$IAM_HOME/bashrc" -i
 }
 ,ssh() {
@@ -1410,6 +1413,17 @@ export LESS
 #PAGER=less
 #export PAGER
 
+if [ -z "$_SHELL_SESSION_ID" ]; then
+    _random -v _SHELL_SESSION_ID
+else
+    # If _SHELL_SESSION_ID exists here, then we might want to preserve it.
+    # But now we need to remove it from the export to avoid unwanted inheritance.
+    _SHELL_SESSION_ID_SAVE="$_SHELL_SESSION_ID"
+    unset _SHELL_SESSION_ID
+    _SHELL_SESSION_ID="$_SHELL_SESSION_ID_SAVE"
+    unset _SHELL_SESSION_ID_SAVE
+fi
+
 # append history rather than overwrite
 shopt -s histappend
 # one command per line
@@ -1433,14 +1447,7 @@ else
 
     HISTFILE_GLOBAL="$IAM_HOME/bash_history"
 
-    if [ -z "$_SHELL_SESSION_ID" ]; then
-        _random -v _SHELL_SESSION_ID
-        export _SHELL_SESSION_ID
-    fi
-
     if _isnot tmux; then
-        _random -v _TMUX_SESSION_ID
-        export _TMUX_SESSION_ID
         _SHELL_SESSION_DIR="$IAM_HOME/shell_sessions/plain-$_SHELL_SESSION_ID"
     else
         if _TMUX_SESSION_ID="$(tmux show-env _TMUX_SESSION_ID 2>/dev/null)"; then

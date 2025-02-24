@@ -1546,6 +1546,7 @@ for wid in $(tmux list-windows -F '#{window_id}'); do
 tmux send-keys -t $wid 'reload current' C-m
 done
 fi
+export _SHELL_SESSION_ID
 exec bash --rcfile "$IAM_HOME/bashrc" -i
 }
 ,ssh() {
@@ -1657,6 +1658,14 @@ done
 }
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
+if [ -z "$_SHELL_SESSION_ID" ]; then
+_random -v _SHELL_SESSION_ID
+else
+_SHELL_SESSION_ID_SAVE="$_SHELL_SESSION_ID"
+unset _SHELL_SESSION_ID
+_SHELL_SESSION_ID="$_SHELL_SESSION_ID_SAVE"
+unset _SHELL_SESSION_ID_SAVE
+fi
 shopt -s histappend
 shopt -s cmdhist
 unset HISTFILESIZE
@@ -1664,20 +1673,14 @@ HISTSIZE=1000000
 HISTCONTROL=ignoreboth
 HISTTIMEFORMAT='%F %T '
 HISTIGNORE="&:[bf]g:exit:history:history *:reset:clear"
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 HISTIGNORE="$HISTIGNORE:reload:reload current:mkcdtmp"
 if _is dockerenv; then
 HISTFILE="$IAM_HOME/bash_history"
 else
 HISTFILE_GLOBAL="$IAM_HOME/bash_history"
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
-if [ -z "$_SHELL_SESSION_ID" ]; then
-_random -v _SHELL_SESSION_ID
-export _SHELL_SESSION_ID
-fi
 if _isnot tmux; then
-_random -v _TMUX_SESSION_ID
-export _TMUX_SESSION_ID
 _SHELL_SESSION_DIR="$IAM_HOME/shell_sessions/plain-$_SHELL_SESSION_ID"
 else
 if _TMUX_SESSION_ID="$(tmux show-env _TMUX_SESSION_ID 2>/dev/null)"; then
