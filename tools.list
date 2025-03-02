@@ -128,6 +128,10 @@ tool: install-docker
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-docker
 $IAM_HOME/tools/bin/install-docker
 1225
+tool: install-awscli
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-awscli
+$IAM_HOME/tools/bin/install-awscli
+635
 tool: tracer/debugger for perl
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/trace-perl
 $IAM_HOME/tools/bin/trace-perl

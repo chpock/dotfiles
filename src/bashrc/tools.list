@@ -167,6 +167,11 @@ https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-docker
 $IAM_HOME/tools/bin/install-docker
 @getSize REPO_ROOT/tools/install-docker
 
+tool: install-awscli
+https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-awscli
+$IAM_HOME/tools/bin/install-awscli
+@getSize REPO_ROOT/tools/install-awscli
+
 tool: tracer/debugger for perl
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/trace-perl
 $IAM_HOME/tools/bin/trace-perl
