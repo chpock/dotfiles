@@ -142,5 +142,9 @@ process < "$BASHRC_SRC_FILE" > "$BASHRC_OUT_FILE"
 if [ -e "/c/Far Manager/Stuff/bashrc" ]; then
     cp -f "$BASHRC_OUT_FILE" "/c/Far Manager/Stuff/bashrc"
 fi
+if [ -e "/d/Sync/Envy" ]; then
+    mkdir -p /d/Sync/Envy/dotfiles
+    cp -f "$BASHRC_OUT_FILE" /d/Sync/Envy/dotfiles/bashrc
+fi
 
 [ "$1" = "silent" ] || echo "Done."
