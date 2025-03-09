@@ -175,7 +175,7 @@ __install_yq() {
 
     local URL="https://github.com/mikefarah/yq/releases/download/v${VERSION}/yq_"
     __install_make_url -noformat "
-        linux-x64   linux-amd64
+        linux-x64   linux_amd64
     " && __install_download && __install_bin "archive" || return $?
 }
 

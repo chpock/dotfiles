@@ -7,7 +7,7 @@ k() {
     [ -z "$__KUBECTL_KUBECOLOR" ] \
         && [ -n "$__INSTALL_FUNCTIONS_AVAILABLE" ] \
         && _check _is_install_available "kubecolor" \
-        && ,install "$1" \
+        && ,install "kubecolor" \
         && __KUBECTL_KUBECOLOR=1 \
         || :
 
