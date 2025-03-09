@@ -515,7 +515,7 @@ __install_complete() {
     COMPREPLY=()
 
     if [ $COMP_CWORD -lt 2 ]; then
-        COMPREPLY=($(compgen -W "-check $__INSTALL_AVAILABLE_TOOLS" "${COMP_WORDS[1]}"))
+        COMPREPLY=($(compgen -W "-check $__INSTALL_AVAILABLE_TOOLS" -- "${COMP_WORDS[1]}"))
         return
     fi
 }

@@ -101,7 +101,7 @@ __kube_complete() {
     COMPREPLY=()
 
     if [ $COMP_CWORD -lt 2 ]; then
-        COMPREPLY=($(compgen -W "on off context conf ns events" "${COMP_WORDS[1]}"))
+        COMPREPLY=($(compgen -W "on off context conf ns events" -- "${COMP_WORDS[1]}"))
         return
     fi
 
@@ -115,7 +115,7 @@ __kube_complete() {
                 printf '%s' "${COLOR_RED}ERROR${COLOR_GRAY}:$COLOR_DEFAULT $__VAR"
                 COMPREPLY=('~=~=~=~=~=~' '=~=~=~=~=~=')
             else
-                COMPREPLY=($(compgen -W "$__VAR" "${COMP_WORDS[2]}"))
+                COMPREPLY=($(compgen -W "$__VAR" -- "${COMP_WORDS[2]}"))
             fi
         ;;
         ns)
@@ -124,7 +124,7 @@ __kube_complete() {
                 printf '%s' "${COLOR_RED}ERROR${COLOR_GRAY}:$COLOR_DEFAULT $__VAR"
                 COMPREPLY=('~=~=~=~=~=~' '=~=~=~=~=~=')
             else
-                COMPREPLY=($(compgen -W "$__VAR" "${COMP_WORDS[2]}"))
+                COMPREPLY=($(compgen -W "$__VAR" -- "${COMP_WORDS[2]}"))
             fi
         ;;
     esac
