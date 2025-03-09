@@ -571,7 +571,7 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=94231301
+LOCAL_TOOLS_FILE_HASH=ADA2190C
 COLOR_WHITE=$'\e[1;37m'
 COLOR_LIGHTGRAY=$'\e[0;37m'
 COLOR_GRAY=$'\e[1;30m'
@@ -696,6 +696,21 @@ fi
 }
 _has() { _check command -v "$1" && return 0 || return 1; }
 _hasnot() { _has "$1" && return 1 || return 0; }
+_has_local() {
+[ -n "$__INSTALL_FUNCTIONS_AVAILABLE" ] || return 1
+local EXECUTABLE="$IAM_HOME/tools/bin/$1"
+_isnot windows || EXECUTABLE="${EXECUTABLE}.exe"
+[ -x "$EXECUTABLE" ] && return 0 || return 1
+}
+_has_executable() { hash "$1" 2>/dev/null && return 0 || return 1; }
+_has_function() { declare -f -F "$1" >/dev/null && return 0 || return 1; }
+_maybe_local() {
+[ -n "$__INSTALL_FUNCTIONS_AVAILABLE" ] \
+&& _check _is_install_available "$1" \
+&& _has_local "$1" \
+&& ,install "$1" \
+|| return 0
+}
 __vercomp() {
 local i IFS=.
 local v1=($1) v2=($2)
@@ -764,34 +779,53 @@ __uname_kernel_name() { uname --kernel-name 2>/dev/null || uname -s 2>/dev/null 
 __uname_kernel_release() { uname --kernel-release 2>/dev/null || uname -r 2>/dev/null || uname -v 2>/dev/null || echo "Unknown"; }
 __uname_all() { uname --all 2>/dev/null || uname -a 2>/dev/null || echo "Unknown"; }
 _is() {
-local V="__CACHE_IS_$1"
+local CONDITION="${1//-/_}"
+local V="__CACHE_IS_$CONDITION"
 [ -z "${!V}" ] || return "${!V}"
-local R
+local R=0
+case "$CONDITION" in
+x86_64|aarch64_be|aarch64|armv8b|armv8l)
+_cache __uname_machine
+[ "$_CACHE" = "$CONDITION" ] || R=1
+;;
+x64)   _is x86_64 || R=1 ;;
+arm64) ! _is aarch64_be && ! _is aarch64 && ! _is armv8b && ! _is armv8l && R=1 || : ;;
+hpux|aix|sunos|macos|linux|cygwin|msys|mingw)
 _cache __uname_kernel_name
-case "$1" in
-hpux)      [ "$_CACHE" = "HP-UX" ] && R=0 || R=1 ;;
-aix)       [ "$_CACHE" = "AIX" ] && R=0 || R=1 ;;
-sunos)     [ "$_CACHE" = "SunOS" ] && R=0 || R=1 ;;
-macos)     [ "$_CACHE" = "Darwin" ] && R=0 || R=1 ;;
-linux)     [ "$_CACHE" = "Linux" ] && R=0 || R=1 ;;
-cygwin)    [ "$_CACHE" = ${_CACHE#CYGWIN_NT*} ] && R=1 || R=0 ;;
-msys)      [ "$_CACHE" = ${_CACHE#MSYS_NT*} ] && R=1 || R=0 ;;
-mingw)     [ "$_CACHE" = ${_CACHE#MINGW*} ] && R=1 || R=0 ;;
-windows)   if _is cygwin || _is mingw || _is msys; then R=0; else R=1; fi ;;
-unix)      if ! _is windows; then R=0; else R=1; fi ;;
+case "$CONDITION" in
+hpux)   [ "$_CACHE" = "HP-UX" ]  || R=1 ;;
+aix)    [ "$_CACHE" = "AIX" ]    || R=1 ;;
+sunos)  [ "$_CACHE" = "SunOS" ]  || R=1 ;;
+macos)  [ "$_CACHE" = "Darwin" ] || R=1 ;;
+linux)  [ "$_CACHE" = "Linux" ]  || R=1 ;;
+cygwin) [ "$_CACHE" = ${_CACHE#CYGWIN_NT*} ] && R=1 || : ;;
+msys)   [ "$_CACHE" = ${_CACHE#MSYS_NT*} ]   && R=1 || : ;;
+mingw)  [ "$_CACHE" = ${_CACHE#MINGW*} ]     && R=1 || : ;;
+esac
+;;
 wsl)
 _is dockerenv && R=1 || {
 _cache __uname_kernel_release
-[ -z ${_CACHE%%*-WSL2} ] && R=0 || R=1
+[ -z ${_CACHE%%*-WSL2} ] || R=1
 }
 ;;
-root)      [ "$(id -u 2>/dev/null)" = "0" ] && R=0 || R=1;;
-dockerenv) [ -f /.dockerenv ] && R=0 || R=1;;
-sudo)      [ -n "$SUDO_USER" ] && R=0 || R=1;;
-tmux)      [ -n "$TMUX" ] && R=0 || R=1;;
+windows)     ! _is cygwin && ! _is mingw && ! _is msys && R=1 || : ;;
+unix)        ! _is windows || R=1 ;;
+linux_x64)   _is linux && _is x64   || R=1 ;;
+windows_x64) _is windows && _is x64 || R=1 ;;
+macos_x64)   _is macos && _is x64   || R=1 ;;
+root)        [ "$(id -u 2>/dev/null)" = "0" ] || R=1 ;;
+dockerenv)   [ -f /.dockerenv ] || R=1 ;;
+sudo)        [ -n "$SUDO_USER" ] || R=1 ;;
+tmux)        [ -n "$TMUX" ] || R=1 ;;
+aws)         _is cloud && curl -s -I http://169.254.169.254 | grep -qF 'Server: EC2ws' || R=1 ;;
 cloud)
-_has curl && curl -s -I --connect-timeout 0.1 -o /dev/null http://169.254.169.254 && R=0 || R=1 ;;
-aws)       _is cloud && curl -s -I http://169.254.169.254 | grep -qF 'Server: EC2ws' && R=0 || R=1 ;;
+_has curl && curl -s -I --connect-timeout 0.1 -o /dev/null http://169.254.169.254 || R=1
+;;
+*)
+echo "bashrc error: unknown _is '$CONDITION'" >&2
+R=1
+;;
 esac
 printf -v "$V" '%s' "$R"
 return "${!V}"
@@ -1079,9 +1113,9 @@ local color
 feature="${f%:*}"
 state="${f#*:}"
 if [ "$feature" = "$state" ]; then
-_has "$feature" && state=0 || state=1
+_has_executable "$feature" && state=0 || state=1
 elif [ "$state" != 1 ] && [ "$state" != 0 ]; then
-_has "$state" && state=0 || state=1
+_has_executable "$state" && state=0 || state=1
 fi
 if [ "$state" = "0" ]; then
 color="$COLOR_GREEN"
@@ -1278,6 +1312,9 @@ fi
 printf -- "------------------------------------------------------------------[ Features ]--\n\n"
 }
 _is tmux || hostinfo
+SCRIPT="$IAM_HOME/shell.rc/functions-install.sh"
+[ -e "$SCRIPT" ] && _once "PS1 -> source $SCRIPT" && source "$SCRIPT" || :
+unset SCRIPT
 mkdir -p "$IAM_HOME/state"
 KUBECONFIG="$IAM_HOME/kubeconfig"
 export KUBECONFIG
@@ -1373,60 +1410,6 @@ if [ -t 1 ]; then
 fi
 env diff "$@"
 }
-shellcheck() {
-if [ -e "$IAM_HOME/tools/bin/install-shellcheck" ]; then
-"$IAM_HOME/tools/bin/install-shellcheck" "$IAM_HOME/tools/bin"
-fi
-env shellcheck "$@"
-}
-k9s() {
-if [ -e "$IAM_HOME/tools/bin/install-k9s" ]; then
-"$IAM_HOME/tools/bin/install-k9s" "$IAM_HOME/tools/bin"
-fi
-env k9s "$@"
-}
-ktop() {
-if [ -e "$IAM_HOME/tools/bin/install-ktop" ]; then
-"$IAM_HOME/tools/bin/install-ktop" "$IAM_HOME/tools/bin"
-fi
-env ktop "$@"
-}
-kdash() {
-if [ -e "$IAM_HOME/tools/bin/install-kdash" ]; then
-"$IAM_HOME/tools/bin/install-kdash" "$IAM_HOME/tools/bin"
-fi
-env kdash "$@"
-}
-kl() {
-if [ -e "$IAM_HOME/tools/bin/install-kl" ]; then
-"$IAM_HOME/tools/bin/install-kl" "$IAM_HOME/tools/bin"
-fi
-env kl "$@"
-}
-kube-capacity() {
-if [ -e "$IAM_HOME/tools/bin/install-kube-capacity" ]; then
-"$IAM_HOME/tools/bin/install-kube-capacity" "$IAM_HOME/tools/bin"
-fi
-env kube-capacity "$@"
-}
-dive() {
-if [ -e "$IAM_HOME/tools/bin/install-dive" ]; then
-"$IAM_HOME/tools/bin/install-dive" "$IAM_HOME/tools/bin"
-fi
-env dive "$@"
-}
-jq() {
-if [ -e "$IAM_HOME/tools/bin/install-jq" ]; then
-"$IAM_HOME/tools/bin/install-jq" "$IAM_HOME/tools/bin"
-fi
-env jq "$@"
-}
-yq() {
-if [ -e "$IAM_HOME/tools/bin/install-yq" ]; then
-"$IAM_HOME/tools/bin/install-yq" "$IAM_HOME/tools/bin"
-fi
-env yq "$@"
-}
 alias mv='mv -i'
 alias mkdir='mkdir -p'
 alias mkcd='_(){ mkdir -p $1; cd $1; }; _'
@@ -1446,10 +1429,7 @@ export EDITOR
 alias vi=vim
 vim() {
 local CMD="vim"
-if _hasnot vim; then
-if [ -e "$IAM_HOME/tools/bin/install-vim-portable" ]; then
-"$IAM_HOME/tools/bin/install-vim-portable" "$IAM_HOME/tools/bin"
-fi
+if ! _has_executable vim && [ -n "$__INSTALL_FUNCTIONS_AVAILABLE" ] && ,install vim-portable; then
 CMD="vim-portable"
 fi
 if _isnot tmux; then
@@ -1673,12 +1653,12 @@ HISTSIZE=1000000
 HISTCONTROL=ignoreboth
 HISTTIMEFORMAT='%F %T '
 HISTIGNORE="&:[bf]g:exit:history:history *:reset:clear"
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 HISTIGNORE="$HISTIGNORE:reload:reload current:mkcdtmp"
 if _is dockerenv; then
 HISTFILE="$IAM_HOME/bash_history"
 else
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 HISTFILE_GLOBAL="$IAM_HOME/bash_history"
 if _isnot tmux; then
 _SHELL_SESSION_DIR="$IAM_HOME/shell_sessions/plain-$_SHELL_SESSION_ID"

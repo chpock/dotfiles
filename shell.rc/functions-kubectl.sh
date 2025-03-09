@@ -4,13 +4,14 @@ _has kubectl || return
 
 k() {
 
-    if [ -z "$__KUBECTL_KUBECOLOR" ] && [ -e "$IAM_HOME/tools/bin/install-kubecolor" ]; then
-        if "$IAM_HOME/tools/bin/install-kubecolor" "$IAM_HOME/tools/bin"; then
-            __KUBECTL_KUBECOLOR=1
-        else
-            __KUBECTL_KUBECOLOR=0
-        fi
-    fi
+    [ -z "$__KUBECTL_KUBECOLOR" ] \
+        && [ -n "$__INSTALL_FUNCTIONS_AVAILABLE" ] \
+        && _check _is_install_available "kubecolor" \
+        && ,install "$1" \
+        && __KUBECTL_KUBECOLOR=1 \
+        || :
+
+    [ -n "$__KUBECTL_KUBECOLOR" ] || __KUBECTL_KUBECOLOR=0
 
     if [ "$__KUBECTL_KUBECOLOR" = "1" ]; then
         env KUBECOLOR_OBJ_FRESH="2h" kubecolor "$@"

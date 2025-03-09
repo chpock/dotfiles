@@ -18,6 +18,7 @@ aws() {
     # the default trace status in the original shell instance.
     (
         { set +x; } 2>/dev/null
+        _maybe_local "aws"
         if [ -e "$IAM_HOME/state/on_aws_localstack" ]; then
             AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_DEFAULT_REGION=${DEFAULT_REGION:-${AWS_DEFAULT_REGION:-eu-west-1}} \
                 command aws --endpoint-url=http://${LOCALSTACK_HOST:-localhost}:4566 "$@"

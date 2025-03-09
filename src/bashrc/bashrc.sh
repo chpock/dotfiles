@@ -145,6 +145,21 @@ _get_url() {
 
 _has() { _check command -v "$1" && return 0 || return 1; }
 _hasnot() { _has "$1" && return 1 || return 0; }
+_has_local() {
+    [ -n "$__INSTALL_FUNCTIONS_AVAILABLE" ] || return 1
+    local EXECUTABLE="$IAM_HOME/tools/bin/$1"
+    _isnot windows || EXECUTABLE="${EXECUTABLE}.exe"
+    [ -x "$EXECUTABLE" ] && return 0 || return 1
+}
+_has_executable() { hash "$1" 2>/dev/null && return 0 || return 1; }
+_has_function() { declare -f -F "$1" >/dev/null && return 0 || return 1; }
+_maybe_local() {
+    [ -n "$__INSTALL_FUNCTIONS_AVAILABLE" ] \
+        && _check _is_install_available "$1" \
+        && _has_local "$1" \
+        && ,install "$1" \
+        || return 0
+}
 
 __vercomp() {
     local i IFS=.
@@ -223,31 +238,59 @@ __uname_kernel_release() { uname --kernel-release 2>/dev/null || uname -r 2>/dev
 __uname_all() { uname --all 2>/dev/null || uname -a 2>/dev/null || echo "Unknown"; }
 
 _is() {
-    local V="__CACHE_IS_$1"
+    # We want to check conditions that include the "-" character, but the shell
+    # variable cannot contain this symbol. The right thing to do is to use
+    # the _hash function to modify the condition and then build a cache variable
+    # using the calculated hash. However, this function needs to be as fast
+    # as possible, and calculating the hash will slow it down a bit.
+    # Thus, there is a compromise - replace "-" with "_". It is not quite
+    # correct because the conditions "linux_x64" and "linux-x64" will be
+    # treated as the same.
+    local CONDITION="${1//-/_}"
+    local V="__CACHE_IS_$CONDITION"
     [ -z "${!V}" ] || return "${!V}"
-    local R
-    _cache __uname_kernel_name
-    case "$1" in
-        hpux)      [ "$_CACHE" = "HP-UX" ] && R=0 || R=1 ;;
-        aix)       [ "$_CACHE" = "AIX" ] && R=0 || R=1 ;;
-        sunos)     [ "$_CACHE" = "SunOS" ] && R=0 || R=1 ;;
-        macos)     [ "$_CACHE" = "Darwin" ] && R=0 || R=1 ;;
-        linux)     [ "$_CACHE" = "Linux" ] && R=0 || R=1 ;;
-        cygwin)    [ "$_CACHE" = ${_CACHE#CYGWIN_NT*} ] && R=1 || R=0 ;;
-        msys)      [ "$_CACHE" = ${_CACHE#MSYS_NT*} ] && R=1 || R=0 ;;
-        mingw)     [ "$_CACHE" = ${_CACHE#MINGW*} ] && R=1 || R=0 ;;
-        windows)   if _is cygwin || _is mingw || _is msys; then R=0; else R=1; fi ;;
-        unix)      if ! _is windows; then R=0; else R=1; fi ;;
+    local R=0
+    case "$CONDITION" in
+        # Architecture
+        x86_64|aarch64_be|aarch64|armv8b|armv8l)
+            _cache __uname_machine
+            [ "$_CACHE" = "$CONDITION" ] || R=1
+            ;;
+        x64)   _is x86_64 || R=1 ;;
+        arm64) ! _is aarch64_be && ! _is aarch64 && ! _is armv8b && ! _is armv8l && R=1 || : ;;
+        # OS
+        hpux|aix|sunos|macos|linux|cygwin|msys|mingw)
+            _cache __uname_kernel_name
+            case "$CONDITION" in
+                hpux)   [ "$_CACHE" = "HP-UX" ]  || R=1 ;;
+                aix)    [ "$_CACHE" = "AIX" ]    || R=1 ;;
+                sunos)  [ "$_CACHE" = "SunOS" ]  || R=1 ;;
+                macos)  [ "$_CACHE" = "Darwin" ] || R=1 ;;
+                linux)  [ "$_CACHE" = "Linux" ]  || R=1 ;;
+                cygwin) [ "$_CACHE" = ${_CACHE#CYGWIN_NT*} ] && R=1 || : ;;
+                msys)   [ "$_CACHE" = ${_CACHE#MSYS_NT*} ]   && R=1 || : ;;
+                mingw)  [ "$_CACHE" = ${_CACHE#MINGW*} ]     && R=1 || : ;;
+            esac
+            ;;
         wsl)
             _is dockerenv && R=1 || {
                 _cache __uname_kernel_release
-                [ -z ${_CACHE%%*-WSL2} ] && R=0 || R=1
+                [ -z ${_CACHE%%*-WSL2} ] || R=1
             }
             ;;
-        root)      [ "$(id -u 2>/dev/null)" = "0" ] && R=0 || R=1;;
-        dockerenv) [ -f /.dockerenv ] && R=0 || R=1;;
-        sudo)      [ -n "$SUDO_USER" ] && R=0 || R=1;;
-        tmux)      [ -n "$TMUX" ] && R=0 || R=1;;
+        windows)     ! _is cygwin && ! _is mingw && ! _is msys && R=1 || : ;;
+        unix)        ! _is windows || R=1 ;;
+        # OS + Architecture
+        linux_x64)   _is linux && _is x64   || R=1 ;;
+        windows_x64) _is windows && _is x64 || R=1 ;;
+        macos_x64)   _is macos && _is x64   || R=1 ;;
+        # Other
+        root)        [ "$(id -u 2>/dev/null)" = "0" ] || R=1 ;;
+        dockerenv)   [ -f /.dockerenv ] || R=1 ;;
+        sudo)        [ -n "$SUDO_USER" ] || R=1 ;;
+        tmux)        [ -n "$TMUX" ] || R=1 ;;
+        # Clouds
+        aws)         _is cloud && curl -s -I http://169.254.169.254 | grep -qF 'Server: EC2ws' || R=1 ;;
         cloud)
             # We have only one stable way to detect if the current machine
             # is in the cloud, and that is to try to query the metadata URL http://169.254.169.254.
@@ -260,8 +303,12 @@ _is() {
             # we try to make a request with 100 millisecond timeout.
             # Unfortunatelly, this will lead to 100 millisecond delay in
             # non-cloud environments.
-            _has curl && curl -s -I --connect-timeout 0.1 -o /dev/null http://169.254.169.254 && R=0 || R=1 ;;
-        aws)       _is cloud && curl -s -I http://169.254.169.254 | grep -qF 'Server: EC2ws' && R=0 || R=1 ;;
+            _has curl && curl -s -I --connect-timeout 0.1 -o /dev/null http://169.254.169.254 || R=1
+            ;;
+        *)
+            echo "bashrc error: unknown _is '$CONDITION'" >&2
+            R=1
+            ;;
     esac
     printf -v "$V" '%s' "$R"
     return "${!V}"
@@ -633,9 +680,9 @@ hostinfo() {
             state="${f#*:}"
 
             if [ "$feature" = "$state" ]; then
-                _has "$feature" && state=0 || state=1
+                _has_executable "$feature" && state=0 || state=1
             elif [ "$state" != 1 ] && [ "$state" != 0 ]; then
-                _has "$state" && state=0 || state=1
+                _has_executable "$state" && state=0 || state=1
             fi
 
             if [ "$state" = "0" ]; then
@@ -905,6 +952,11 @@ hostinfo() {
 
 _is tmux || hostinfo
 
+# Load functions-install.sh as other scripts may depend on functions defined there
+SCRIPT="$IAM_HOME/shell.rc/functions-install.sh"
+[ -e "$SCRIPT" ] && _once "PS1 -> source $SCRIPT" && source "$SCRIPT" || :
+unset SCRIPT
+
 mkdir -p "$IAM_HOME/state"
 
 KUBECONFIG="$IAM_HOME/kubeconfig"
@@ -1078,69 +1130,6 @@ _hasnot diff || diff() {
     env diff "$@"
 }
 
-shellcheck() {
-    if [ -e "$IAM_HOME/tools/bin/install-shellcheck" ]; then
-        "$IAM_HOME/tools/bin/install-shellcheck" "$IAM_HOME/tools/bin"
-    fi
-    env shellcheck "$@"
-}
-
-k9s() {
-    if [ -e "$IAM_HOME/tools/bin/install-k9s" ]; then
-        "$IAM_HOME/tools/bin/install-k9s" "$IAM_HOME/tools/bin"
-    fi
-    env k9s "$@"
-}
-
-ktop() {
-    if [ -e "$IAM_HOME/tools/bin/install-ktop" ]; then
-        "$IAM_HOME/tools/bin/install-ktop" "$IAM_HOME/tools/bin"
-    fi
-    env ktop "$@"
-}
-
-kdash() {
-    if [ -e "$IAM_HOME/tools/bin/install-kdash" ]; then
-        "$IAM_HOME/tools/bin/install-kdash" "$IAM_HOME/tools/bin"
-    fi
-    env kdash "$@"
-}
-
-kl() {
-    if [ -e "$IAM_HOME/tools/bin/install-kl" ]; then
-        "$IAM_HOME/tools/bin/install-kl" "$IAM_HOME/tools/bin"
-    fi
-    env kl "$@"
-}
-
-kube-capacity() {
-    if [ -e "$IAM_HOME/tools/bin/install-kube-capacity" ]; then
-        "$IAM_HOME/tools/bin/install-kube-capacity" "$IAM_HOME/tools/bin"
-    fi
-    env kube-capacity "$@"
-}
-
-dive() {
-    if [ -e "$IAM_HOME/tools/bin/install-dive" ]; then
-        "$IAM_HOME/tools/bin/install-dive" "$IAM_HOME/tools/bin"
-    fi
-    env dive "$@"
-}
-
-jq() {
-    if [ -e "$IAM_HOME/tools/bin/install-jq" ]; then
-        "$IAM_HOME/tools/bin/install-jq" "$IAM_HOME/tools/bin"
-    fi
-    env jq "$@"
-}
-
-yq() {
-    if [ -e "$IAM_HOME/tools/bin/install-yq" ]; then
-        "$IAM_HOME/tools/bin/install-yq" "$IAM_HOME/tools/bin"
-    fi
-    env yq "$@"
-}
-
 alias mv='mv -i'
 
 alias mkdir='mkdir -p'
@@ -1166,10 +1155,7 @@ export EDITOR
 alias vi=vim
 vim() {
     local CMD="vim"
-    if _hasnot vim; then
-        if [ -e "$IAM_HOME/tools/bin/install-vim-portable" ]; then
-            "$IAM_HOME/tools/bin/install-vim-portable" "$IAM_HOME/tools/bin"
-        fi
+    if ! _has_executable vim && [ -n "$__INSTALL_FUNCTIONS_AVAILABLE" ] && ,install vim-portable; then
         CMD="vim-portable"
     fi
     if _isnot tmux; then

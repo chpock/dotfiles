@@ -1,3 +1,7 @@
+tool: install functions
+https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-install.sh
+$IAM_HOME/shell.rc/functions-install.sh
+18846
 tool: git functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-git.sh
 $IAM_HOME/shell.rc/functions-git.sh
@@ -9,11 +13,11 @@ $IAM_HOME/shell.rc/functions-docker.sh
 tool: AWS CLI functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-awscli.sh
 $IAM_HOME/shell.rc/functions-awscli.sh
-7146
+7173
 tool: kubetcl function
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-kubectl.sh
 $IAM_HOME/shell.rc/functions-kubectl.sh
-4167
+4174
 tool: tmux function
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-tmux.sh
 $IAM_HOME/shell.rc/functions-tmux.sh
@@ -54,10 +58,6 @@ tool: bash completion
 https://raw.githubusercontent.com/chpock/tmux-bash-completion/master/completions/tmux
 $IAM_HOME/tools/bash_completion/tmux-completion.bash
 6102
-tool: mcfly tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-mcfly
-$IAM_HOME/tools/bin/install-mcfly
-1124
 tool: mydu tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/mydu
 $IAM_HOME/tools/bin/mydu
@@ -66,50 +66,6 @@ tool: colors tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/colors
 $IAM_HOME/tools/bin/colors
 8262
-tool: lastbuild tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/lastbuild
-$IAM_HOME/tools/bin/lastbuild
-3198
-tool: shellcheck tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-shellcheck
-$IAM_HOME/tools/bin/install-shellcheck
-1408
-tool: k9s tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-k9s
-$IAM_HOME/tools/bin/install-k9s
-1437
-tool: ktop tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-ktop
-$IAM_HOME/tools/bin/install-ktop
-969
-tool: kdash tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-kdash
-$IAM_HOME/tools/bin/install-kdash
-1093
-tool: kl tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-kl
-$IAM_HOME/tools/bin/install-kl
-1101
-tool: kube-capacity tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-kube-capacity
-$IAM_HOME/tools/bin/install-kube-capacity
-1309
-tool: kubecolor tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-kubecolor
-$IAM_HOME/tools/bin/install-kubecolor
-1441
-tool: jq tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-jq
-$IAM_HOME/tools/bin/install-jq
-1035
-tool: yq tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-yq
-$IAM_HOME/tools/bin/install-yq
-1055
-tool: dive tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-dive
-$IAM_HOME/tools/bin/install-dive
-1259
 tool: apt-cyg tool
 https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg
 $IAM_HOME/tools/bin/orig-apt-cyg
@@ -128,10 +84,6 @@ tool: install-docker
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-docker
 $IAM_HOME/tools/bin/install-docker
 1225
-tool: install-awscli
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-awscli
-$IAM_HOME/tools/bin/install-awscli
-635
 tool: tracer/debugger for perl
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/trace-perl
 $IAM_HOME/tools/bin/trace-perl
@@ -141,21 +93,6 @@ https://raw.githubusercontent.com/chpock/upkg/main/upkg
 $IAM_HOME/tools/bin/upkg
 on update: mkdir -p "$IAM_HOME"/shell.rc && "$IAM_HOME"/tools/bin/upkg supported silent && "$IAM_HOME"/tools/bin/upkg generate bash-rc >"$IAM_HOME"/shell.rc/upkg.rc.sh || true
 27480
-tool: vim-portable tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-vim-portable
-$IAM_HOME/tools/bin/install-vim-portable
-filter: linux
-1298
-tool: tar-portable tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-tar-portable
-$IAM_HOME/tools/bin/install-tar-portable
-filter: linux
-1208
-tool: gzip-portable tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-gzip-portable
-$IAM_HOME/tools/bin/install-gzip-portable
-filter: linux
-1127
 tool: vim plugin Colorizer (plugin)
 https://raw.githubusercontent.com/chrisbra/Colorizer/master/plugin/ColorizerPlugin.vim
 $IAM_HOME/vim_runtime/plugin/ColorizerPlugin.vim

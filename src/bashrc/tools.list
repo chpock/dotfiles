@@ -1,6 +1,12 @@
 
 # Various functions available from the command line.
 
+# install functions are important and should be at the top
+tool: install functions
+https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-install.sh
+$IAM_HOME/shell.rc/functions-install.sh
+@getSize REPO_ROOT/shell.rc/functions-install.sh
+
 tool: git functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-git.sh
 $IAM_HOME/shell.rc/functions-git.sh
@@ -75,11 +81,6 @@ $IAM_HOME/tools/bash_completion/tmux-completion.bash
 
 # Various tools
 
-tool: mcfly tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-mcfly
-$IAM_HOME/tools/bin/install-mcfly
-@getSize REPO_ROOT/tools/install-mcfly
-
 tool: mydu tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/mydu
 $IAM_HOME/tools/bin/mydu
@@ -89,61 +90,6 @@ tool: colors tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/colors
 $IAM_HOME/tools/bin/colors
 @getSize REPO_ROOT/tools/colors
-
-tool: lastbuild tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/lastbuild
-$IAM_HOME/tools/bin/lastbuild
-@getSize REPO_ROOT/tools/lastbuild
-
-tool: shellcheck tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-shellcheck
-$IAM_HOME/tools/bin/install-shellcheck
-@getSize REPO_ROOT/tools/install-shellcheck
-
-tool: k9s tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-k9s
-$IAM_HOME/tools/bin/install-k9s
-@getSize REPO_ROOT/tools/install-k9s
-
-tool: ktop tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-ktop
-$IAM_HOME/tools/bin/install-ktop
-@getSize REPO_ROOT/tools/install-ktop
-
-tool: kdash tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-kdash
-$IAM_HOME/tools/bin/install-kdash
-@getSize REPO_ROOT/tools/install-kdash
-
-tool: kl tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-kl
-$IAM_HOME/tools/bin/install-kl
-@getSize REPO_ROOT/tools/install-kl
-
-tool: kube-capacity tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-kube-capacity
-$IAM_HOME/tools/bin/install-kube-capacity
-@getSize REPO_ROOT/tools/install-kube-capacity
-
-tool: kubecolor tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-kubecolor
-$IAM_HOME/tools/bin/install-kubecolor
-@getSize REPO_ROOT/tools/install-kubecolor
-
-tool: jq tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-jq
-$IAM_HOME/tools/bin/install-jq
-@getSize REPO_ROOT/tools/install-jq
-
-tool: yq tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-yq
-$IAM_HOME/tools/bin/install-yq
-@getSize REPO_ROOT/tools/install-yq
-
-tool: dive tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-dive
-$IAM_HOME/tools/bin/install-dive
-@getSize REPO_ROOT/tools/install-dive
 
 tool: apt-cyg tool
 https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg
@@ -167,11 +113,6 @@ https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-docker
 $IAM_HOME/tools/bin/install-docker
 @getSize REPO_ROOT/tools/install-docker
 
-tool: install-awscli
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-awscli
-$IAM_HOME/tools/bin/install-awscli
-@getSize REPO_ROOT/tools/install-awscli
-
 tool: tracer/debugger for perl
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/trace-perl
 $IAM_HOME/tools/bin/trace-perl
@@ -184,26 +125,6 @@ https://raw.githubusercontent.com/chpock/upkg/main/upkg
 $IAM_HOME/tools/bin/upkg
 on update: mkdir -p "$IAM_HOME"/shell.rc && "$IAM_HOME"/tools/bin/upkg supported silent && "$IAM_HOME"/tools/bin/upkg generate bash-rc >"$IAM_HOME"/shell.rc/upkg.rc.sh || true
 27480
-
-# Portable tools
-
-tool: vim-portable tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-vim-portable
-$IAM_HOME/tools/bin/install-vim-portable
-filter: linux
-@getSize REPO_ROOT/tools/install-vim-portable
-
-tool: tar-portable tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-tar-portable
-$IAM_HOME/tools/bin/install-tar-portable
-filter: linux
-@getSize REPO_ROOT/tools/install-tar-portable
-
-tool: gzip-portable tool
-https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-gzip-portable
-$IAM_HOME/tools/bin/install-gzip-portable
-filter: linux
-@getSize REPO_ROOT/tools/install-gzip-portable
 
 # VIM plugins
 
