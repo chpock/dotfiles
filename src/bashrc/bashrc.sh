@@ -151,14 +151,14 @@ _has_local() {
     _isnot windows || EXECUTABLE="${EXECUTABLE}.exe"
     [ -x "$EXECUTABLE" ] && return 0 || return 1
 }
-_has_executable() { hash "$1" 2>/dev/null && return 0 || return 1; }
+_has_executable() { builtin type -P "$1" >/dev/null && return 0 || return 1; }
 _has_function() { declare -f -F "$1" >/dev/null && return 0 || return 1; }
 _maybe_local() {
-    [ -n "$__INSTALL_FUNCTIONS_AVAILABLE" ] \
-        && _check _is_install_available "$1" \
-        && _has_local "$1" \
-        && ,install "$1" \
-        || return 0
+    if [ -n "$__INSTALL_FUNCTIONS_AVAILABLE" ] && _check _is_install_available "$1"; then
+        if _has_local "$1" || ! _has_executable "$1"; then
+            ,install "$1" || :
+        fi
+    fi
 }
 
 __vercomp() {
@@ -954,7 +954,12 @@ _is tmux || hostinfo
 
 # Load functions-install.sh as other scripts may depend on functions defined there
 SCRIPT="$IAM_HOME/shell.rc/functions-install.sh"
-[ -e "$SCRIPT" ] && _once "PS1 -> source $SCRIPT" && source "$SCRIPT" || :
+# Something like this can't be used here, as it would disable error checking
+# when loading the script:
+#   [ -e $SCRIPT ] && _once ... && source $SCRIPT || true
+if [ -e "$SCRIPT" ] && _once "PS1 -> source $SCRIPT"; then
+    source "$SCRIPT"
+fi
 unset SCRIPT
 
 mkdir -p "$IAM_HOME/state"

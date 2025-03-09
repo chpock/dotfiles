@@ -571,7 +571,7 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=4F341907
+LOCAL_TOOLS_FILE_HASH=31EA1913
 COLOR_WHITE=$'\e[1;37m'
 COLOR_LIGHTGRAY=$'\e[0;37m'
 COLOR_GRAY=$'\e[1;30m'
@@ -702,14 +702,14 @@ local EXECUTABLE="$IAM_HOME/tools/bin/$1"
 _isnot windows || EXECUTABLE="${EXECUTABLE}.exe"
 [ -x "$EXECUTABLE" ] && return 0 || return 1
 }
-_has_executable() { hash "$1" 2>/dev/null && return 0 || return 1; }
+_has_executable() { builtin type -P "$1" >/dev/null && return 0 || return 1; }
 _has_function() { declare -f -F "$1" >/dev/null && return 0 || return 1; }
 _maybe_local() {
-[ -n "$__INSTALL_FUNCTIONS_AVAILABLE" ] \
-&& _check _is_install_available "$1" \
-&& _has_local "$1" \
-&& ,install "$1" \
-|| return 0
+if [ -n "$__INSTALL_FUNCTIONS_AVAILABLE" ] && _check _is_install_available "$1"; then
+if _has_local "$1" || ! _has_executable "$1"; then
+,install "$1" || :
+fi
+fi
 }
 __vercomp() {
 local i IFS=.
@@ -1313,7 +1313,9 @@ printf -- "------------------------------------------------------------------[ F
 }
 _is tmux || hostinfo
 SCRIPT="$IAM_HOME/shell.rc/functions-install.sh"
-[ -e "$SCRIPT" ] && _once "PS1 -> source $SCRIPT" && source "$SCRIPT" || :
+if [ -e "$SCRIPT" ] && _once "PS1 -> source $SCRIPT"; then
+source "$SCRIPT"
+fi
 unset SCRIPT
 mkdir -p "$IAM_HOME/state"
 KUBECONFIG="$IAM_HOME/kubeconfig"
@@ -1655,10 +1657,10 @@ HISTTIMEFORMAT='%F %T '
 HISTIGNORE="&:[bf]g:exit:history:history *:reset:clear"
 HISTIGNORE="$HISTIGNORE:reload:reload current:mkcdtmp"
 if _is dockerenv; then
-HISTFILE="$IAM_HOME/bash_history"
-else
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
+HISTFILE="$IAM_HOME/bash_history"
+else
 HISTFILE_GLOBAL="$IAM_HOME/bash_history"
 if _isnot tmux; then
 _SHELL_SESSION_DIR="$IAM_HOME/shell_sessions/plain-$_SHELL_SESSION_ID"

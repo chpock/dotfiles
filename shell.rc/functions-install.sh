@@ -33,11 +33,7 @@ __install_mcfly() {
     local FORMAT URL="https://github.com/cantino/mcfly/releases/download/v${VERSION}/mcfly-v${VERSION}-"
     __install_make_url "
         linux-x64   x86_64-unknown-linux-musl.tar.gz
-    "
-
-    __install_download
-    __install_unpack
-    __install_bin
+    " && __install_download && __install_unpack &&  __install_bin || return $?
 }
 
 __install_kubecolor() {
@@ -54,11 +50,7 @@ __install_kubecolor() {
     local FORMAT URL="https://github.com/kubecolor/kubecolor/releases/download/v${VERSION}/kubecolor_${VERSION}_"
     __install_make_url "
         linux-x64   linux_amd64.tar.gz
-    "
-
-    __install_download
-    __install_unpack
-    __install_bin
+    " && __install_download && __install_unpack &&  __install_bin || return $?
 }
 
 __install_kube_capacity() {
@@ -76,11 +68,7 @@ __install_kube_capacity() {
     local FORMAT URL="https://github.com/robscott/kube-capacity/releases/download/v${VERSION}/kube-capacity_v${VERSION}_"
     __install_make_url "
         linux-x64   linux_x86_64.tar.gz
-    "
-
-    __install_download
-    __install_unpack
-    __install_bin
+    " && __install_download && __install_unpack &&  __install_bin || return $?
 }
 
 __install_ktop() {
@@ -98,11 +86,7 @@ __install_ktop() {
     local FORMAT URL="https://github.com/vladimirvivien/ktop/releases/download/v${VERSION}/ktop_v${VERSION}_"
     __install_make_url "
         linux-x64   linux_amd64.tar.gz
-    "
-
-    __install_download
-    __install_unpack
-    __install_bin
+    " && __install_download && __install_unpack &&  __install_bin || return $?
 }
 
 __install_kl() {
@@ -120,11 +104,7 @@ __install_kl() {
     local FORMAT URL="https://github.com/robinovitch61/kl/releases/download/v${VERSION}/kl_${VERSION}_"
     __install_make_url "
         linux-x64   Linux_x86_64.tar.gz
-    "
-
-    __install_download
-    __install_unpack
-    __install_bin
+    " && __install_download && __install_unpack &&  __install_bin || return $?
 }
 
 __install_kdash() {
@@ -142,11 +122,7 @@ __install_kdash() {
     local FORMAT URL="https://github.com/kdash-rs/kdash/releases/download/v${VERSION}/kdash-"
     __install_make_url "
         linux-x64   linux.tar.gz
-    "
-
-    __install_download
-    __install_unpack
-    __install_bin
+    " && __install_download && __install_unpack &&  __install_bin || return $?
 }
 
 __install_k9s() {
@@ -164,11 +140,7 @@ __install_k9s() {
     local FORMAT URL="https://github.com/derailed/k9s/releases/download/v${VERSION}/k9s_"
     __install_make_url "
         linux-x64   Linux_amd64.tar.gz
-    "
-
-    __install_download
-    __install_unpack
-    __install_bin
+    " && __install_download && __install_unpack &&  __install_bin || return $?
 }
 
 __install_jq() {
@@ -186,10 +158,7 @@ __install_jq() {
     local URL="https://github.com/jqlang/jq/releases/download/jq-${VERSION}/jq-"
     __install_make_url -noformat "
         linux-x64   linux-amd64
-    "
-
-    __install_download
-    __install_bin "archive"
+    " && __install_download && __install_bin "archive" || return $?
 }
 
 __install_yq() {
@@ -207,10 +176,7 @@ __install_yq() {
     local URL="https://github.com/mikefarah/yq/releases/download/v${VERSION}/yq_"
     __install_make_url -noformat "
         linux-x64   linux-amd64
-    "
-
-    __install_download
-    __install_bin "archive"
+    " && __install_download && __install_bin "archive" || return $?
 }
 
 __install_gzip_portable() {
@@ -228,10 +194,7 @@ __install_gzip_portable() {
     local URL="https://github.com/chpock/dotfiles/releases/download/${VERSION_REPO}/gzip-portable.${VERSION}."
     __install_make_url -noformat "
         linux-x64   linux.x86_64
-    "
-
-    __install_download
-    __install_bin "archive"
+    " && __install_download && __install_bin "archive" || return $?
 }
 
 __install_tar_portable() {
@@ -249,12 +212,13 @@ __install_tar_portable() {
     local URL="https://github.com/chpock/dotfiles/releases/download/${VERSION_REPO}/tar-portable.${VERSION}."
     __install_make_url -noformat "
         linux-x64   linux.x86_64
-    "
+    " || return $?
 
-    _has gzip || ,install gzip-portable
+    if _hasnot gzip; then
+        ,install gzip-portable || return $?
+    fi
 
-    __install_download
-    __install_bin "archive"
+    __install_download && __install_bin "archive" || return $?
 }
 
 __install_vim_portable() {
@@ -273,13 +237,17 @@ __install_vim_portable() {
     local URL="https://github.com/chpock/dotfiles/releases/download/${VERSION_REPO}/vim-portable.v${VERSION}."
     __install_make_url -noformat "
         linux-x64   linux.x86_64
-    "
+    " || return $?
 
-    _has gzip || ,install gzip-portable
-    _has tar || ,install tar-portable
+    if _hasnot gzip; then
+        ,install gzip-portable || return $?
+    fi
 
-    __install_download
-    __install_bin "archive"
+    if _hasnot tar; then
+        ,install tar-portable || return $?
+    fi
+
+    __install_download && __install_bin "archive" || return $?
 }
 
 
@@ -299,17 +267,14 @@ __install_awscli() {
     local FORMAT URL="https://awscli.amazonaws.com/"
     __install_make_url "
         linux-x64 awscli-exe-linux-x86_64-${VERSION}.zip
-    "
-
-    __install_download
-    __install_unpack
+    " && __install_download && __install_unpack || return $?
 
     if [ -e "/usr/local/bin/aws" ]; then
         echo "Updating ..." >&2
-        sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update >/dev/null
+        sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update >/dev/null || return $?
     else
         echo "Installing ..." >&2
-        sudo ./aws/install >/dev/null
+        sudo ./aws/install >/dev/null || return $?
     fi
 
     ln -sf /usr/local/bin/aws "$EXECUTABLE"
@@ -333,11 +298,7 @@ __install_dive() {
         linux-x64   linux_amd64.tar.gz
         macos-x64   darwin_amd64.tar.gz
         windows-x64 windows_amd64.zip
-    "
-
-    __install_download
-    __install_unpack
-    __install_bin
+    " && __install_download && __install_unpack &&  __install_bin || return $?
 }
 
 
@@ -358,11 +319,7 @@ __install_shellcheck() {
         linux-x64   linux.x86_64.tar.xz
         macos-x64   darwin.x86_64.tar.xz
         windows-x64 zip
-    "
-
-    __install_download
-    __install_unpack
-    __install_bin
+    " && __install_download && __install_unpack &&  __install_bin || return $?
 }
 
 __install_bin() {
@@ -456,7 +413,7 @@ __install_check_new_versions() {
         [ -n "$TOOL" ] || continue
         local TOOL_FUNC="__install_${TOOL//-/_}"
         printf "${COLOR_CYAN}%s ${COLOR_BLUE}v${COLOR_LIGHTBLUE}%s${COLOR_DEFAULT} ..." "$TOOL" "$VERSION"
-        VERSION_LATEST="$(set -e; "$TOOL_FUNC" -latest "$EXECUTABLE")"
+        VERSION_LATEST="$("$TOOL_FUNC" -latest "$EXECUTABLE" || :)"
         printf '\b\b\b\b'"${COLOR_GRAY}:   "'\r\t\t\t'
         if [ -z "$VERSION_LATEST" ]; then
             echo "${COLOR_LIGHTRED}unknown error${COLOR_DEFAULT}"
@@ -479,7 +436,7 @@ _is_install_available() {
     return 1
 }
 
-,install() {
+,install() {(
 
     if [ -z "$1" ]; then
         echo "Available tools:"
@@ -496,7 +453,7 @@ _is_install_available() {
     fi
 
     local V="__CACHE_INSTALL_${1//-/_}"
-    [ -z "${!V}" ] || return "${!V}"
+    #[ -z "${!V}" ] || return "${!V}"
 
     local R=0 DISABLED TOOL VERSION EXECUTABLE
     while read -r DISABLED TOOL EXECUTABLE VERSION; do
@@ -542,21 +499,7 @@ _is_install_available() {
         if [ "$CHECK_VERSION" != "$VERSION" ]; then
 
             local TEMP_DIR="$(mktemp --directory)"
-            # Here we run "__install_$TOOL" in subshell to preserve PWD.
-            # We also want to enable error checking in this function to avoid
-            # complicated error checks and just exit in case of any error.
-            #
-            # However, something like this will not work:
-            #     (set -e; "__install_$TOOL" ...) || R=$?
-            # In this case, the shell treats the function call as part of
-            # an OR expression and ignores error checks within the function.
-            # See: https://fvue.nl/wiki/Bash:_Error_handling#Caveat_2:_.60Exit_on_error.27_not_exitting_subshell_on_error
-            #
-            # So, we assume that we are in an interactive shell with error
-            # checking disabled. We will be able to assign the function's exit
-            # code to the variable even if it fails.
-            (set -e; cd "$TEMP_DIR"; "$TOOL_FUNC" "$VERSION" "$EXECUTABLE")
-            R=$?
+            (cd "$TEMP_DIR"; "$TOOL_FUNC" "$VERSION" "$EXECUTABLE") && R=0 || R=$?
             rm -rf "$TEMP_DIR"
 
         fi
@@ -566,7 +509,7 @@ _is_install_available() {
     printf -v "$V" '%s' "$R"
     return "${!V}"
 
-}
+)}
 
 __install_complete() {
     COMPREPLY=()
@@ -592,14 +535,9 @@ while read -r TOOL VERSION; do
     # cutting off all characters after the colon.
     [ "$EXECUTABLE" = "$TOOL" ] || TOOL="${TOOL%%:*}"
     TOOL_FUNC="__install_${TOOL//-/_}"
-    # We can not call "__install_$TOOL -available ..." in 'if' or
-    # use &&/|| to check the success status, as this will disable -e during
-    # function execution. See full description in the comment for
-    # the function ",install" when we call "__install_$TOOL" to install
-    # a tool.
-    (set -e; "$TOOL_FUNC" -available "$EXECUTABLE")
+    "$TOOL_FUNC" -available "$EXECUTABLE" && R=1 || R=$?
     # If "$TOOL_FUNC -available" returns 251, then the tool is available
-    if [ $? -eq 251 ]; then
+    if [ $R -eq 251 ]; then
         if [ -n "$__INSTALL_AVAILABLE_TOOLS" ]; then
             __INSTALL_AVAILABLE_TOOLS="$__INSTALL_AVAILABLE_TOOLS $TOOL"
             __INSTALL_AVAILABLE_EXECUTABLES="$__INSTALL_AVAILABLE_EXECUTABLES $EXECUTABLE"
@@ -609,8 +547,6 @@ while read -r TOOL VERSION; do
         fi
         _has_function "$EXECUTABLE" || eval "${EXECUTABLE}() {  _maybe_local \"\${FUNCNAME[0]}\"; env \"\${FUNCNAME[0]}\" \"\$@\"; }"
         R=0
-    else
-        R=1
     fi
     __INSTALL_VERSION_FILTERED="$R $TOOL $EXECUTABLE $VERSION
         $__INSTALL_VERSION_FILTERED"
