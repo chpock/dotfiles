@@ -1,21 +1,21 @@
 #!/bin/sh
 
 __INSTALL_VERSION="
-  shellcheck    0.9.0
+  shellcheck    0.10.0
   awscli:aws    2.24.20
   dive          0.12.0
   gzip-portable 1.13
   jq            1.7.1
-  k9s           0.40.3
+  k9s           0.40.5
   kdash         0.6.1
-  kl            0.5.2
+  kl            0.6.0
   ktop          0.3.7
   kube-capacity 0.8.0
-  kubecolor     0.4.0
+  kubecolor     0.5.0
   mcfly         0.9.3
   tar-portable  1.35
   vim-portable  9.0.2094
-  yq            4.44.6
+  yq            4.45.1
 "
 
 __install_mcfly() {
