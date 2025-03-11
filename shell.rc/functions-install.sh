@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 __INSTALL_VERSION="
   shellcheck    0.10.0
@@ -436,7 +436,7 @@ _is_install_available() {
     return 1
 }
 
-,install() {(
+,install() {
 
     if [ -z "$1" ]; then
         echo "Available tools:"
@@ -509,7 +509,7 @@ _is_install_available() {
     printf -v "$V" '%s' "$R"
     return "${!V}"
 
-)}
+}
 
 __install_complete() {
     COMPREPLY=()
