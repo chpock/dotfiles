@@ -53,7 +53,7 @@ _hash_file() {
     local HASH_CACHE_PATH="$IAM_HOME/.cache/hash_file"
     _hash "$SOURCE_PATH"
     local HASH_FILE="$HASH_CACHE_PATH/${SOURCE_BASENAME}.${_HASH}.hash"
-    if [ -f "$HASH_FILE" ] && [ "$HASH_FILE" -nt "$SOURCE_FILE" ]; then
+    if [ -f "$HASH_FILE" ] && [ "$SOURCE_FILE" -nt "$HASH_FILE" ]; then
         _HASH="$(<"$HASH_FILE")"
     else
         _hash < "$SOURCE_FILE"
@@ -1581,8 +1581,6 @@ __aws_status() {
 
     if [ -e "$IAM_HOME/state/on_aws_localstack" ]; then
 
-        set -x
-
         __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_DEFAULT}localstack${COLOR_GRAY}:"
 
         if ! _has curl; then
@@ -1596,8 +1594,6 @@ __aws_status() {
         __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}]${COLOR_DEFAULT}"
 
         _ps1_show_status "$__AWS_OUTPUT"
-
-        set +x
 
         return 0
 
@@ -2601,7 +2597,7 @@ tools() {
         SIZE="${recs[IDX++]}"
         HASH="${recs[IDX++]}"
         if [ "check" = "$CMD" ]; then
-            if [ "$SIZE$HASH" -eq 0 ]; then
+            if [ "$SIZE$HASH" = "00" ]; then
                 LINE="${COLOR_LIGHTRED}NOT FOUND${COLOR_GRAY}${COLOR_DEFAULT}"
                 SIZE="undef"
                 HASH="undef"
@@ -2610,7 +2606,7 @@ tools() {
                 if [ -n "$I_HASH" ] && [ "$I_HASH" != "$HASH" ]; then
                     LINE="${COLOR_BROWN}OUTDATED ${COLOR_GRAY}${COLOR_DEFAULT}"
                     CHECK_STATE=2
-                elif [ -n "$I_SIZE" ] && [ "$I_SIZE" != "$SIZE" ]; then
+                elif [ -n "$I_SIZE" ] && [ "$I_SIZE" -ne "$SIZE" ]; then
                     LINE="${COLOR_BROWN}OUTDATED ${COLOR_GRAY}${COLOR_DEFAULT}"
                     CHECK_STATE=2
                 else
@@ -2626,7 +2622,7 @@ tools() {
             fi
         elif [ "update" = "$CMD" ]; then
             if [ "$PARAM" != "force" ]; then
-                [ -n "$I_HASH" ] && [ "$HASH" -eq "$I_HASH" ] && continue || true
+                [ -n "$I_HASH" ] && [ "$HASH" = "$I_HASH" ] && continue || true
                 [ -n "$I_SIZE" ] && [ "$SIZE" -eq "$I_SIZE" ] && continue || true
             fi
             printf "Download: %s '%s'..." "$I_DESC" "${I_FILE##*/}"

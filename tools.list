@@ -1,35 +1,35 @@
 tool: install functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-install.sh
 $IAM_HOME/shell.rc/functions-install.sh
-#608518D5
+#815CFF20
 tool: git functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-git.sh
 $IAM_HOME/shell.rc/functions-git.sh
-#FE9B1722
+4110
 tool: docker functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-docker.sh
 $IAM_HOME/shell.rc/functions-docker.sh
-#46D61856
+3739
 tool: AWS CLI functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-awscli.sh
 $IAM_HOME/shell.rc/functions-awscli.sh
-#473A1861
+7173
 tool: kubetcl function
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-kubectl.sh
 $IAM_HOME/shell.rc/functions-kubectl.sh
-#601B18C8
+4190
 tool: tmux function
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-tmux.sh
 $IAM_HOME/shell.rc/functions-tmux.sh
-#171B17AC
+3150
 tool: python functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-python.sh
 $IAM_HOME/shell.rc/functions-python.sh
-#48191880
+1913
 tool: edit bashrc
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/bashrc.rc.sh
 $IAM_HOME/shell.rc/bashrc.rc.sh
-#A1E0154E
+358
 tool: bash completion
 https://raw.githubusercontent.com/docker/cli/master/contrib/completion/bash/docker
 $IAM_HOME/tools/bash_completion/docker.completion.bash
@@ -61,11 +61,11 @@ $IAM_HOME/tools/bash_completion/tmux-completion.bash
 tool: mydu tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/mydu
 $IAM_HOME/tools/bin/mydu
-#CCE111A4
+2942
 tool: colors tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/colors
 $IAM_HOME/tools/bin/colors
-#F1201277
+8262
 tool: apt-cyg tool
 https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg
 $IAM_HOME/tools/bin/orig-apt-cyg
@@ -75,19 +75,19 @@ tool: dependency check for apt-cyg tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/apt-cyg
 $IAM_HOME/tools/bin/apt-cyg
 filter: cygwin
-#304129A
+826
 tool: tmux-helper tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/tmux-helper
 $IAM_HOME/tools/bin/tmux-helper
-#52D21460
+6045
 tool: install-docker
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-docker
 $IAM_HOME/tools/bin/install-docker
-#91F71581
+1225
 tool: tracer/debugger for perl
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/trace-perl
 $IAM_HOME/tools/bin/trace-perl
-#3DB713D4
+3770
 tool: upkg tool
 https://raw.githubusercontent.com/chpock/upkg/main/upkg
 $IAM_HOME/tools/bin/upkg

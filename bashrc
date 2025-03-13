@@ -571,7 +571,7 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=FC6427C3
+LOCAL_TOOLS_FILE_HASH=7FD819F1
 COLOR_WHITE=$'\e[1;37m'
 COLOR_LIGHTGRAY=$'\e[0;37m'
 COLOR_GRAY=$'\e[1;30m'
@@ -611,7 +611,7 @@ local SOURCE_FILE="$1" SOURCE_BASENAME="${1##*/}" SOURCE_PATH="${1%/*}"
 local HASH_CACHE_PATH="$IAM_HOME/.cache/hash_file"
 _hash "$SOURCE_PATH"
 local HASH_FILE="$HASH_CACHE_PATH/${SOURCE_BASENAME}.${_HASH}.hash"
-if [ -f "$HASH_FILE" ] && [ "$HASH_FILE" -nt "$SOURCE_FILE" ]; then
+if [ -f "$HASH_FILE" ] && [ "$SOURCE_FILE" -nt "$HASH_FILE" ]; then
 _HASH="$(<"$HASH_FILE")"
 else
 _hash < "$SOURCE_FILE"
@@ -1676,9 +1676,9 @@ HISTSIZE=1000000
 HISTCONTROL=ignoreboth
 HISTTIMEFORMAT='%F %T '
 HISTIGNORE="&:[bf]g:exit:history:history *:reset:clear"
-HISTIGNORE="$HISTIGNORE:reload:reload current:mkcdtmp"
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
+HISTIGNORE="$HISTIGNORE:reload:reload current:mkcdtmp"
 if _is dockerenv; then
 HISTFILE="$IAM_HOME/bash_history"
 else
@@ -1752,7 +1752,6 @@ fi
 || true
 __AWS_OUTPUT="${COLOR_GRAY}[${COLOR_WHITE}AWS${COLOR_GRAY}: "
 if [ -e "$IAM_HOME/state/on_aws_localstack" ]; then
-set -x
 __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_DEFAULT}localstack${COLOR_GRAY}:"
 if ! _has curl; then
 __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_BROWN} unknown (curl doesn't exist)"
@@ -1763,7 +1762,6 @@ __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_RED} not running"
 fi
 __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}]${COLOR_DEFAULT}"
 _ps1_show_status "$__AWS_OUTPUT"
-set +x
 return 0
 fi
 if [ -z "$AWS_ACCESS_KEY_ID$AWS_SECRET_ACCESS_KEY$AWS_SESSION_TOKEN" ] && [ "$__AWS_INSTANCE_HAS_ROLE" -eq 1 ]; then
@@ -2520,7 +2518,7 @@ I_HASH="${recs[IDX++]}"
 SIZE="${recs[IDX++]}"
 HASH="${recs[IDX++]}"
 if [ "check" = "$CMD" ]; then
-if [ "$SIZE$HASH" -eq 0 ]; then
+if [ "$SIZE$HASH" = "00" ]; then
 LINE="${COLOR_LIGHTRED}NOT FOUND${COLOR_GRAY}${COLOR_DEFAULT}"
 SIZE="undef"
 HASH="undef"
@@ -2529,7 +2527,7 @@ else
 if [ -n "$I_HASH" ] && [ "$I_HASH" != "$HASH" ]; then
 LINE="${COLOR_BROWN}OUTDATED ${COLOR_GRAY}${COLOR_DEFAULT}"
 CHECK_STATE=2
-elif [ -n "$I_SIZE" ] && [ "$I_SIZE" != "$SIZE" ]; then
+elif [ -n "$I_SIZE" ] && [ "$I_SIZE" -ne "$SIZE" ]; then
 LINE="${COLOR_BROWN}OUTDATED ${COLOR_GRAY}${COLOR_DEFAULT}"
 CHECK_STATE=2
 else
@@ -2545,7 +2543,7 @@ fi
 fi
 elif [ "update" = "$CMD" ]; then
 if [ "$PARAM" != "force" ]; then
-[ -n "$I_HASH" ] && [ "$HASH" -eq "$I_HASH" ] && continue || true
+[ -n "$I_HASH" ] && [ "$HASH" = "$I_HASH" ] && continue || true
 [ -n "$I_SIZE" ] && [ "$SIZE" -eq "$I_SIZE" ] && continue || true
 fi
 printf "Download: %s '%s'..." "$I_DESC" "${I_FILE##*/}"

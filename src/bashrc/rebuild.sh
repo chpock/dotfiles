@@ -18,7 +18,7 @@ getSize() {
 }
 
 getHash() {
-    _hash "$1"
+    _hash < "$1"
     echo "#$_HASH"
 }
 
