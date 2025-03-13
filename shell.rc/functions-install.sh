@@ -3,6 +3,7 @@
 __INSTALL_VERSION="
   shellcheck    0.10.0
   awscli:aws    2.24.20
+  kubectl       1.32.3
   dive          0.12.0
   gzip-portable 1.13
   jq            1.7.1
@@ -250,6 +251,26 @@ __install_vim_portable() {
     __install_download && __install_bin "archive" || return $?
 }
 
+__install_kubectl() {
+    local VERSION="$1" EXECUTABLE="$2"
+
+    if [ "$VERSION" = "-check" ]; then
+        __install_check_version "$EXECUTABLE" version --client=true \
+            | grep -F 'Client Version' | awk '{print $NF}' | tr -d 'v'
+        return 0
+    elif [ "$VERSION" = "-latest" ]; then
+        geturl https://dl.k8s.io/release/stable.txt 2>/dev/null \
+            | tr -d 'v'
+        return 0
+    fi
+
+    local URL="https://dl.k8s.io/release/v${VERSION}/bin/"
+    __install_make_url -noformat "
+        linux-x64   linux/amd64/kubectl
+    " || return $?
+
+    __install_download && __install_bin "archive" || return $?
+}
 
 __install_awscli() {
     local VERSION="$1" EXECUTABLE="$2"
