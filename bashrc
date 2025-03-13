@@ -611,7 +611,7 @@ local SOURCE_FILE="$1" SOURCE_BASENAME="${1##*/}" SOURCE_PATH="${1%/*}"
 local HASH_CACHE_PATH="$IAM_HOME/.cache/hash_file"
 _hash "$SOURCE_PATH"
 local HASH_FILE="$HASH_CACHE_PATH/${SOURCE_BASENAME}.${_HASH}.hash"
-if [ -f "$HASH_FILE" ] && [ "$SOURCE_FILE" -nt "$HASH_FILE" ]; then
+if [ -f "$HASH_FILE" ] && [ "$HASH_FILE" -nt "$SOURCE_FILE" ]; then
 _HASH="$(<"$HASH_FILE")"
 else
 _hash < "$SOURCE_FILE"
