@@ -1,8 +1,10 @@
 #!/bin/bash
 
-_has kubectl || return
+_hasnot kubectl && ! _has_potentially kubectl && return || :
 
 k() {
+
+    _maybe_local "kubectl"
 
     [ -z "$__KUBECTL_KUBECOLOR" ] \
         && [ -n "$__INSTALL_FUNCTIONS_AVAILABLE" ] \
