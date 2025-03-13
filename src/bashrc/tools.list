@@ -5,42 +5,42 @@
 tool: install functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-install.sh
 $IAM_HOME/shell.rc/functions-install.sh
-@getSize REPO_ROOT/shell.rc/functions-install.sh
+@getHash REPO_ROOT/shell.rc/functions-install.sh
 
 tool: git functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-git.sh
 $IAM_HOME/shell.rc/functions-git.sh
-@getSize REPO_ROOT/shell.rc/functions-git.sh
+@getHash REPO_ROOT/shell.rc/functions-git.sh
 
 tool: docker functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-docker.sh
 $IAM_HOME/shell.rc/functions-docker.sh
-@getSize REPO_ROOT/shell.rc/functions-docker.sh
+@getHash REPO_ROOT/shell.rc/functions-docker.sh
 
 tool: AWS CLI functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-awscli.sh
 $IAM_HOME/shell.rc/functions-awscli.sh
-@getSize REPO_ROOT/shell.rc/functions-awscli.sh
+@getHash REPO_ROOT/shell.rc/functions-awscli.sh
 
 tool: kubetcl function
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-kubectl.sh
 $IAM_HOME/shell.rc/functions-kubectl.sh
-@getSize REPO_ROOT/shell.rc/functions-kubectl.sh
+@getHash REPO_ROOT/shell.rc/functions-kubectl.sh
 
 tool: tmux function
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-tmux.sh
 $IAM_HOME/shell.rc/functions-tmux.sh
-@getSize REPO_ROOT/shell.rc/functions-tmux.sh
+@getHash REPO_ROOT/shell.rc/functions-tmux.sh
 
 tool: python functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-python.sh
 $IAM_HOME/shell.rc/functions-python.sh
-@getSize REPO_ROOT/shell.rc/functions-python.sh
+@getHash REPO_ROOT/shell.rc/functions-python.sh
 
 tool: edit bashrc
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/bashrc.rc.sh
 $IAM_HOME/shell.rc/bashrc.rc.sh
-@getSize REPO_ROOT/shell.rc/bashrc.rc.sh
+@getHash REPO_ROOT/shell.rc/bashrc.rc.sh
 
 # Bash completions
 
@@ -84,12 +84,12 @@ $IAM_HOME/tools/bash_completion/tmux-completion.bash
 tool: mydu tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/mydu
 $IAM_HOME/tools/bin/mydu
-@getSize REPO_ROOT/tools/mydu
+@getHash REPO_ROOT/tools/mydu
 
 tool: colors tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/colors
 $IAM_HOME/tools/bin/colors
-@getSize REPO_ROOT/tools/colors
+@getHash REPO_ROOT/tools/colors
 
 tool: apt-cyg tool
 https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg
@@ -101,22 +101,22 @@ tool: dependency check for apt-cyg tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/apt-cyg
 $IAM_HOME/tools/bin/apt-cyg
 filter: cygwin
-@getSize REPO_ROOT/tools/apt-cyg
+@getHash REPO_ROOT/tools/apt-cyg
 
 tool: tmux-helper tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/tmux-helper
 $IAM_HOME/tools/bin/tmux-helper
-@getSize REPO_ROOT/tools/tmux-helper
+@getHash REPO_ROOT/tools/tmux-helper
 
 tool: install-docker
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-docker
 $IAM_HOME/tools/bin/install-docker
-@getSize REPO_ROOT/tools/install-docker
+@getHash REPO_ROOT/tools/install-docker
 
 tool: tracer/debugger for perl
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/trace-perl
 $IAM_HOME/tools/bin/trace-perl
-@getSize REPO_ROOT/tools/trace-perl
+@getHash REPO_ROOT/tools/trace-perl
 
 # Universal package manager
 

@@ -37,6 +37,30 @@ _hash() {
     } 2>/dev/null
     printf -v _HASH '%X' $(( A + ( B << 16 ) ))
 }
+_hash_file() {
+    local SOURCE_FILE="$1" SOURCE_BASENAME="${1##*/}" SOURCE_PATH="${1%/*}"
+    # If variables SOURCE_BASENAME and SOURCE_PATH are equivalent, it means
+    # that SOURCE_FILE doesn't contain filesystem separator ("/"), i.e. it was
+    # specified without directories. In this case we will use the current
+    # directory as SOURCE_PATH.
+    #
+    # In addition, this function will work, not completely correct when
+    # the input file name was indicated as a relative path. However, I don't
+    # plan to use it with relative path. In the future, it may be necessary
+    # to detect that the input file was specified as a relative path and
+    # convert it to an absolute path.
+    [ "$SOURCE_BASENAME" != "$SOURCE_PATH" ] || SOURCE_PATH="$PWD"
+    local HASH_CACHE_PATH="$IAM_HOME/.cache/hash_file"
+    _hash "$SOURCE_PATH"
+    local HASH_FILE="$HASH_CACHE_PATH/${SOURCE_BASENAME}.${_HASH}.hash"
+    if [ -f "$HASH_FILE" ] && [ "$HASH_FILE" -nt "$SOURCE_FILE" ]; then
+        _HASH="$(<"$HASH_FILE")"
+    else
+        _hash < "$SOURCE_FILE"
+        [ -d "$HASH_CACHE_PATH" ] || mkdir -p "$HASH_CACHE_PATH"
+        printf '%s' "$_HASH" > "$HASH_FILE"
+    fi
+}
 
 # old bash doesn't support to set default value during indirect expansion
 # i.e. echo "${!V:=$R}"
@@ -84,6 +108,13 @@ _get_size() {
         local a
         for a; do echo "unknown"; done
     fi
+}
+_get_hash() {
+    while [ $# -gt 0 ]; do
+        _hash_file "$1"
+        echo "$_HASH"
+        shift
+    done
 }
 
 _get_url() {
@@ -2434,7 +2465,7 @@ tools() {
     local PARAM_EX="$3"
     local LINE
     local I_DESC I_URL I_FILE I_SIZE I_FILTER I_ON_UPDATE
-    local SIZE
+    local SIZE HASH
     local CHECK_STATE
     local IS_ERROR
     local IDX
@@ -2473,10 +2504,12 @@ tools() {
         fi
     fi
 
-    local files=() recs=() recs_check=() TOOLS_EXISTS=
+    local recs=() TOOLS_EXISTS=
+    local files_by_size=() checks_by_size=()
+    local files_by_hash=() checks_by_hash=()
 
     if [ -f "$TOOLS_FILE" ]; then
-        _hash < "$TOOLS_FILE"
+        _hash_file "$TOOLS_FILE"
         [ "$_HASH" != "$LOCAL_TOOLS_FILE_HASH" ] || TOOLS_EXISTS=1
     fi
 
@@ -2502,7 +2535,7 @@ tools() {
         while IFS= read -r LINE || [ -n "$LINE" ]; do
             if [ "${LINE:0:5}" = "tool:" ]; then
                 I_DESC="${LINE#*: }"
-                unset I_URL I_FILE I_SIZE I_FILTER I_ON_UPDATE
+                unset I_URL I_FILE I_SIZE I_HASH I_FILTER I_ON_UPDATE
             elif [ -z "$I_URL" ]; then
                 I_URL="$LINE"
             elif [ -z "$I_FILE" ]; then
@@ -2511,7 +2544,7 @@ tools() {
             elif [ -z "$I_SIZE" ]; then
                 local P1="${LINE%:*}"
                 if [ "$P1" = "$LINE" ]; then
-                    I_SIZE="$LINE"
+                    [ "${LINE:0:1}" = "#" ] && I_HASH="${LINE:1}" || I_SIZE="$LINE"
                 else
                     if [ "$P1" = "filter" ]; then
                         I_FILTER="${LINE#*: }"
@@ -2525,23 +2558,35 @@ tools() {
                 echo "ERROR: unexpected line in tools list: $LINE"
             fi
             # continue the loop if a tool record is incomplete
-            [ -n "$I_SIZE" ] || continue
+            [ -n "$I_SIZE$I_HASH" ] || continue
             if [ -n "$I_FILTER" ] && ! _is "$I_FILTER"; then continue; fi
             if [ -e "$I_FILE" ]; then
-                recs_check+=("$I_DESC" "$I_URL" "$I_FILE" "$I_SIZE" "$I_ON_UPDATE")
-                files+=("$I_FILE")
+                if [ -n "$I_SIZE" ]; then
+                    files_by_size+=("$I_FILE")
+                    checks_by_size+=("$I_DESC" "$I_URL" "$I_FILE" "$I_ON_UPDATE" "$I_SIZE" "$I_HASH")
+                else
+                    files_by_hash+=("$I_FILE")
+                    checks_by_hash+=("$I_DESC" "$I_URL" "$I_FILE" "$I_ON_UPDATE" "$I_SIZE" "$I_HASH")
+                fi
             else
-                recs+=("$I_DESC" "$I_URL" "$I_FILE" "$I_SIZE" "$I_ON_UPDATE" 0)
+                recs+=("$I_DESC" "$I_URL" "$I_FILE" "$I_ON_UPDATE" "$I_SIZE" "$I_HASH" 0 0)
             fi
-            unset I_DESC I_URL I_FILE I_SIZE I_FILTER I_ON_UPDATE
+            unset I_DESC I_URL I_FILE I_SIZE I_HASH I_FILTER I_ON_UPDATE
         done < "$TOOLS_FILE"
     fi
 
-    if [ "${#files[@]}" -gt 0 ]; then
+    if [ "${#files_by_size[@]}" -gt 0 ]; then
         IDX=0
         while read -r SIZE; do
-            recs+=("${recs_check[@]:$(( 5 * IDX++)):5}" "$SIZE")
-        done < <(_get_size "${files[@]}")
+            recs+=("${checks_by_size[@]:$(( 6 * IDX++)):6}" "$SIZE" 0)
+        done < <(_get_size "${files_by_size[@]}")
+    fi
+
+    if [ "${#files_by_hash[@]}" -gt 0 ]; then
+        IDX=0
+        while read -r HASH; do
+            recs+=("${checks_by_hash[@]:$(( 6 * IDX++)):6}" 0 "$HASH")
+        done < <(_get_hash "${files_by_hash[@]}")
     fi
 
     # do something with a tool record
@@ -2550,16 +2595,22 @@ tools() {
         I_DESC="${recs[IDX++]}"
         I_URL="${recs[IDX++]}"
         I_FILE="${recs[IDX++]}"
-        I_SIZE="${recs[IDX++]}"
         I_ON_UPDATE="${recs[IDX++]}"
+        I_SIZE="${recs[IDX++]}"
+        I_HASH="${recs[IDX++]}"
         SIZE="${recs[IDX++]}"
+        HASH="${recs[IDX++]}"
         if [ "check" = "$CMD" ]; then
-            if [ "$SIZE" -eq 0 ]; then
+            if [ "$SIZE$HASH" -eq 0 ]; then
                 LINE="${COLOR_LIGHTRED}NOT FOUND${COLOR_GRAY}${COLOR_DEFAULT}"
                 SIZE="undef"
+                HASH="undef"
                 [ -n "$CHECK_STATE" ] || CHECK_STATE=1
             else
-                if [ "$I_SIZE" != "$SIZE" ]; then
+                if [ -n "$I_HASH" ] && [ "$I_HASH" != "$HASH" ]; then
+                    LINE="${COLOR_BROWN}OUTDATED ${COLOR_GRAY}${COLOR_DEFAULT}"
+                    CHECK_STATE=2
+                elif [ -n "$I_SIZE" ] && [ "$I_SIZE" != "$SIZE" ]; then
                     LINE="${COLOR_BROWN}OUTDATED ${COLOR_GRAY}${COLOR_DEFAULT}"
                     CHECK_STATE=2
                 else
@@ -2567,10 +2618,17 @@ tools() {
                 fi
             fi
             if [ "quick" != "$PARAM" ]; then
-                printf "%s ${COLOR_GRAY}[${COLOR_DEFAULT}Size current: %6s ${COLOR_GRAY}/${COLOR_DEFAULT} expected: %6s${COLOR_GRAY}]${COLOR_DEFAULT} %s\n" "$LINE" "$SIZE" "$I_SIZE" "${I_FILE/$HOME/\~}"
+                if [ -n "$I_SIZE" ]; then
+                    printf "%s ${COLOR_GRAY}[${COLOR_DEFAULT}Size current: %8s ${COLOR_GRAY}/${COLOR_DEFAULT} expected: %8s${COLOR_GRAY}]${COLOR_DEFAULT} %s\n" "$LINE" "$SIZE" "$I_SIZE" "${I_FILE/$HOME/\~}"
+                else
+                    printf "%s ${COLOR_GRAY}[${COLOR_DEFAULT}Hash current: %8s ${COLOR_GRAY}/${COLOR_DEFAULT} expected: %8s${COLOR_GRAY}]${COLOR_DEFAULT} %s\n" "$LINE" "$HASH" "$I_HASH" "${I_FILE/$HOME/\~}"
+                fi
             fi
         elif [ "update" = "$CMD" ]; then
-            [ "$PARAM" != "force" ] && [ "$SIZE" -eq "$I_SIZE" ] && continue || true
+            if [ "$PARAM" != "force" ]; then
+                [ -n "$I_HASH" ] && [ "$HASH" -eq "$I_HASH" ] && continue || true
+                [ -n "$I_SIZE" ] && [ "$SIZE" -eq "$I_SIZE" ] && continue || true
+            fi
             printf "Download: %s '%s'..." "$I_DESC" "${I_FILE##*/}"
             mkdir -p "${I_FILE%/*}"
             IS_ERROR=0

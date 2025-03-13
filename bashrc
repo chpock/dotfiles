@@ -571,7 +571,7 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=712A18FB
+LOCAL_TOOLS_FILE_HASH=FC6427C3
 COLOR_WHITE=$'\e[1;37m'
 COLOR_LIGHTGRAY=$'\e[0;37m'
 COLOR_GRAY=$'\e[1;30m'
@@ -604,6 +604,20 @@ B=$(( (B + A) % 65521 ))
 done
 } 2>/dev/null
 printf -v _HASH '%X' $(( A + ( B << 16 ) ))
+}
+_hash_file() {
+local SOURCE_FILE="$1" SOURCE_BASENAME="${1##*/}" SOURCE_PATH="${1%/*}"
+[ "$SOURCE_BASENAME" != "$SOURCE_PATH" ] || SOURCE_PATH="$PWD"
+local HASH_CACHE_PATH="$IAM_HOME/.cache/hash_file"
+_hash "$SOURCE_PATH"
+local HASH_FILE="$HASH_CACHE_PATH/${SOURCE_BASENAME}.${_HASH}.hash"
+if [ -f "$HASH_FILE" ] && [ "$HASH_FILE" -nt "$SOURCE_FILE" ]; then
+_HASH="$(<"$HASH_FILE")"
+else
+_hash < "$SOURCE_FILE"
+[ -d "$HASH_CACHE_PATH" ] || mkdir -p "$HASH_CACHE_PATH"
+printf '%s' "$_HASH" > "$HASH_FILE"
+fi
 }
 _cache() {
 _hash "$@"
@@ -638,6 +652,13 @@ else
 local a
 for a; do echo "unknown"; done
 fi
+}
+_get_hash() {
+while [ $# -gt 0 ]; do
+_hash_file "$1"
+echo "$_HASH"
+shift
+done
 }
 _get_url() {
 if [ "$1" = "-check" ]; then
@@ -1656,9 +1677,9 @@ HISTCONTROL=ignoreboth
 HISTTIMEFORMAT='%F %T '
 HISTIGNORE="&:[bf]g:exit:history:history *:reset:clear"
 HISTIGNORE="$HISTIGNORE:reload:reload current:mkcdtmp"
-if _is dockerenv; then
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
+if _is dockerenv; then
 HISTFILE="$IAM_HOME/bash_history"
 else
 HISTFILE_GLOBAL="$IAM_HOME/bash_history"
@@ -2376,7 +2397,7 @@ local PARAM="$2"
 local PARAM_EX="$3"
 local LINE
 local I_DESC I_URL I_FILE I_SIZE I_FILTER I_ON_UPDATE
-local SIZE
+local SIZE HASH
 local CHECK_STATE
 local IS_ERROR
 local IDX
@@ -2410,9 +2431,11 @@ disown $!
 return
 fi
 fi
-local files=() recs=() recs_check=() TOOLS_EXISTS=
+local recs=() TOOLS_EXISTS=
+local files_by_size=() checks_by_size=()
+local files_by_hash=() checks_by_hash=()
 if [ -f "$TOOLS_FILE" ]; then
-_hash < "$TOOLS_FILE"
+_hash_file "$TOOLS_FILE"
 [ "$_HASH" != "$LOCAL_TOOLS_FILE_HASH" ] || TOOLS_EXISTS=1
 fi
 if [ -z "$TOOLS_EXISTS" ]; then
@@ -2436,7 +2459,7 @@ if [ -n "$TOOLS_EXISTS" ]; then
 while IFS= read -r LINE || [ -n "$LINE" ]; do
 if [ "${LINE:0:5}" = "tool:" ]; then
 I_DESC="${LINE#*: }"
-unset I_URL I_FILE I_SIZE I_FILTER I_ON_UPDATE
+unset I_URL I_FILE I_SIZE I_HASH I_FILTER I_ON_UPDATE
 elif [ -z "$I_URL" ]; then
 I_URL="$LINE"
 elif [ -z "$I_FILE" ]; then
@@ -2445,7 +2468,7 @@ eval "I_FILE=\"${LINE//\\\$/\$}\""; # enable $VAR
 elif [ -z "$I_SIZE" ]; then
 local P1="${LINE%:*}"
 if [ "$P1" = "$LINE" ]; then
-I_SIZE="$LINE"
+[ "${LINE:0:1}" = "#" ] && I_HASH="${LINE:1}" || I_SIZE="$LINE"
 else
 if [ "$P1" = "filter" ]; then
 I_FILTER="${LINE#*: }"
@@ -2458,38 +2481,55 @@ fi
 else
 echo "ERROR: unexpected line in tools list: $LINE"
 fi
-[ -n "$I_SIZE" ] || continue
+[ -n "$I_SIZE$I_HASH" ] || continue
 if [ -n "$I_FILTER" ] && ! _is "$I_FILTER"; then continue; fi
 if [ -e "$I_FILE" ]; then
-recs_check+=("$I_DESC" "$I_URL" "$I_FILE" "$I_SIZE" "$I_ON_UPDATE")
-files+=("$I_FILE")
+if [ -n "$I_SIZE" ]; then
+files_by_size+=("$I_FILE")
+checks_by_size+=("$I_DESC" "$I_URL" "$I_FILE" "$I_ON_UPDATE" "$I_SIZE" "$I_HASH")
 else
-recs+=("$I_DESC" "$I_URL" "$I_FILE" "$I_SIZE" "$I_ON_UPDATE" 0)
+files_by_hash+=("$I_FILE")
+checks_by_hash+=("$I_DESC" "$I_URL" "$I_FILE" "$I_ON_UPDATE" "$I_SIZE" "$I_HASH")
 fi
-unset I_DESC I_URL I_FILE I_SIZE I_FILTER I_ON_UPDATE
+else
+recs+=("$I_DESC" "$I_URL" "$I_FILE" "$I_ON_UPDATE" "$I_SIZE" "$I_HASH" 0 0)
+fi
+unset I_DESC I_URL I_FILE I_SIZE I_HASH I_FILTER I_ON_UPDATE
 done < "$TOOLS_FILE"
 fi
-if [ "${#files[@]}" -gt 0 ]; then
+if [ "${#files_by_size[@]}" -gt 0 ]; then
 IDX=0
 while read -r SIZE; do
-recs+=("${recs_check[@]:$(( 5 * IDX++)):5}" "$SIZE")
-done < <(_get_size "${files[@]}")
+recs+=("${checks_by_size[@]:$(( 6 * IDX++)):6}" "$SIZE" 0)
+done < <(_get_size "${files_by_size[@]}")
+fi
+if [ "${#files_by_hash[@]}" -gt 0 ]; then
+IDX=0
+while read -r HASH; do
+recs+=("${checks_by_hash[@]:$(( 6 * IDX++)):6}" 0 "$HASH")
+done < <(_get_hash "${files_by_hash[@]}")
 fi
 IDX=0
 while [ $IDX -lt ${#recs[@]} ]; do
 I_DESC="${recs[IDX++]}"
 I_URL="${recs[IDX++]}"
 I_FILE="${recs[IDX++]}"
-I_SIZE="${recs[IDX++]}"
 I_ON_UPDATE="${recs[IDX++]}"
+I_SIZE="${recs[IDX++]}"
+I_HASH="${recs[IDX++]}"
 SIZE="${recs[IDX++]}"
+HASH="${recs[IDX++]}"
 if [ "check" = "$CMD" ]; then
-if [ "$SIZE" -eq 0 ]; then
+if [ "$SIZE$HASH" -eq 0 ]; then
 LINE="${COLOR_LIGHTRED}NOT FOUND${COLOR_GRAY}${COLOR_DEFAULT}"
 SIZE="undef"
+HASH="undef"
 [ -n "$CHECK_STATE" ] || CHECK_STATE=1
 else
-if [ "$I_SIZE" != "$SIZE" ]; then
+if [ -n "$I_HASH" ] && [ "$I_HASH" != "$HASH" ]; then
+LINE="${COLOR_BROWN}OUTDATED ${COLOR_GRAY}${COLOR_DEFAULT}"
+CHECK_STATE=2
+elif [ -n "$I_SIZE" ] && [ "$I_SIZE" != "$SIZE" ]; then
 LINE="${COLOR_BROWN}OUTDATED ${COLOR_GRAY}${COLOR_DEFAULT}"
 CHECK_STATE=2
 else
@@ -2497,10 +2537,17 @@ LINE="${COLOR_GREEN}OK       ${COLOR_GRAY}${COLOR_DEFAULT}"
 fi
 fi
 if [ "quick" != "$PARAM" ]; then
-printf "%s ${COLOR_GRAY}[${COLOR_DEFAULT}Size current: %6s ${COLOR_GRAY}/${COLOR_DEFAULT} expected: %6s${COLOR_GRAY}]${COLOR_DEFAULT} %s\n" "$LINE" "$SIZE" "$I_SIZE" "${I_FILE/$HOME/\~}"
+if [ -n "$I_SIZE" ]; then
+printf "%s ${COLOR_GRAY}[${COLOR_DEFAULT}Size current: %8s ${COLOR_GRAY}/${COLOR_DEFAULT} expected: %8s${COLOR_GRAY}]${COLOR_DEFAULT} %s\n" "$LINE" "$SIZE" "$I_SIZE" "${I_FILE/$HOME/\~}"
+else
+printf "%s ${COLOR_GRAY}[${COLOR_DEFAULT}Hash current: %8s ${COLOR_GRAY}/${COLOR_DEFAULT} expected: %8s${COLOR_GRAY}]${COLOR_DEFAULT} %s\n" "$LINE" "$HASH" "$I_HASH" "${I_FILE/$HOME/\~}"
+fi
 fi
 elif [ "update" = "$CMD" ]; then
-[ "$PARAM" != "force" ] && [ "$SIZE" -eq "$I_SIZE" ] && continue || true
+if [ "$PARAM" != "force" ]; then
+[ -n "$I_HASH" ] && [ "$HASH" -eq "$I_HASH" ] && continue || true
+[ -n "$I_SIZE" ] && [ "$SIZE" -eq "$I_SIZE" ] && continue || true
+fi
 printf "Download: %s '%s'..." "$I_DESC" "${I_FILE##*/}"
 mkdir -p "${I_FILE%/*}"
 IS_ERROR=0

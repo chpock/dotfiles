@@ -17,6 +17,11 @@ getSize() {
     stat -c '%s' "$1"
 }
 
+getHash() {
+    _hash "$1"
+    echo "#$_HASH"
+}
+
 _hash() {
     # here is Adler-32
     # disable messages during -x
@@ -118,6 +123,10 @@ process() {
             fn="${line#* }"
             fn="${fn/REPO_ROOT/..\/..\//}"
             getSize "$SRC_DIR/$fn"
+        elif [ "${line%% *}" = "@getHash" ]; then
+            fn="${line#* }"
+            fn="${fn/REPO_ROOT/..\/..\//}"
+            getHash "$SRC_DIR/$fn"
         elif [ "${line%% *}" = "@setHash" ]; then
             line="${line#* }"
             var="${line%% *}"
