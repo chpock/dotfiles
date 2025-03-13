@@ -191,6 +191,7 @@ _maybe_local() {
         fi
     fi
 }
+_has_potentially() { [ -n "$__INSTALL_FUNCTIONS_AVAILABLE" ] && _check _is_install_available "$1" && return 0 || return 1; }
 
 __vercomp() {
     local i IFS=.
@@ -526,6 +527,16 @@ then
     ln -sf /usr/bin/vim.basic "$IAM_HOME/tools/bin/vim"
 fi
 
+# Load functions-install.sh as other scripts may depend on functions defined there
+SCRIPT="$IAM_HOME/shell.rc/functions-install.sh"
+# Something like this can't be used here, as it would disable error checking
+# when loading the script:
+#   [ -e $SCRIPT ] && _once ... && source $SCRIPT || true
+if [ -e "$SCRIPT" ] && _once "PS1 -> source $SCRIPT"; then
+    source "$SCRIPT"
+fi
+unset SCRIPT
+
 hostinfo() {
 
     local UNAME_MACHINE UNAME_RELEASE UNAME_ALL
@@ -701,37 +712,33 @@ hostinfo() {
         local width=15
 
         for f in "$@"; do
+            local part color
+            local feature="${f%:*}"
+            local state="${f#*:}"
 
-            local feature
-            local state
-            local part
-            local color
-
-            feature="${f%:*}"
-            state="${f#*:}"
-
-            if [ "$feature" = "$state" ]; then
-                _has_executable "$feature" && state=0 || state=1
-            elif [ "$state" != 1 ] && [ "$state" != 0 ]; then
-                _has_executable "$state" && state=0 || state=1
+            # state:
+            # 0 - exists and is not local
+            # 1 - doesn't exist and is not available to install
+            # 2 - exists and is local
+            # 3 - doesn't exist, but is available to install
+            if [ "$state" != "1" ] && [ "$state" != "0" ]; then
+                if _has_executable "$state"; then
+                    _has_local "$state" && state=2 || state=0
+                else
+                    _has_potentially "$state" && state=3 || state=1
+                fi
             fi
 
-            if [ "$state" = "0" ]; then
-                color="$COLOR_GREEN"
-            elif [ "$state" = "1" ]; then
-                color="$COLOR_DEFAULT"
-            else
-                color="$COLOR_RED"
-            fi
+            case "$state" in
+                0) color="$COLOR_GREEN" ;;
+                1) color="$COLOR_DEFAULT" ;;
+                2) color="$COLOR_LIGHTGREEN" ;;
+                3) color="$COLOR_BLUE" ;;
+                *) color="$COLOR_RED" ;;
+            esac
 
-            part="$(printf "${COLOR_GRAY}[ %s%-${width}s${COLOR_GRAY} ]${COLOR_DEFAULT}" "$color" "$feature")"
-
-            if [ -z "$line" ]; then
-                line="$part"
-            else
-                line="$line $part"
-            fi
-
+            printf -v part "${COLOR_GRAY}[ %s%-${width}s${COLOR_GRAY} ]${COLOR_DEFAULT}" "$color" "$feature"
+            [ -z "$line" ] && line="$part" || line="$line $part"
         done
 
         echo "$line"
@@ -982,16 +989,6 @@ hostinfo() {
 }
 
 _is tmux || hostinfo
-
-# Load functions-install.sh as other scripts may depend on functions defined there
-SCRIPT="$IAM_HOME/shell.rc/functions-install.sh"
-# Something like this can't be used here, as it would disable error checking
-# when loading the script:
-#   [ -e $SCRIPT ] && _once ... && source $SCRIPT || true
-if [ -e "$SCRIPT" ] && _once "PS1 -> source $SCRIPT"; then
-    source "$SCRIPT"
-fi
-unset SCRIPT
 
 mkdir -p "$IAM_HOME/state"
 
