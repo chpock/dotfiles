@@ -6,8 +6,8 @@ __INSTALL_VERSION="
   dive          0.12.0
   gzip-portable 1.13
   jq            1.7.1
-  k9s           0.40.7
-  kdash         0.6.1
+  k9s           0.40.8
+  kdash         0.6.2
   kl            0.6.0
   ktop          0.3.7
   kube-capacity 0.8.0
