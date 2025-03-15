@@ -998,10 +998,10 @@ if
 then
 ln -sf /usr/bin/vim.basic "$IAM_HOME/tools/bin/vim"
 fi
-SCRIPT="$IAM_HOME/shell.rc/functions-install.sh"
-if [ -e "$SCRIPT" ] && _once "PS1 -> source $SCRIPT"; then
-source "$SCRIPT"
-fi
+for SCRIPT in "$IAM_HOME"/shell.rc/*; do
+[ -e "$SCRIPT" ] || continue
+! _once "PS1 -> source $SCRIPT" || source "$SCRIPT"
+done
 unset SCRIPT
 hostinfo() {
 local UNAME_MACHINE UNAME_RELEASE UNAME_ALL
@@ -1681,9 +1681,9 @@ fi
 _SHELL_SESSION_DIR="$IAM_HOME/shell_sessions/plain-$_SHELL_SESSION_ID"
 if _is dockerenv; then
 HISTFILE="$IAM_HOME/bash_history"
+else
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
-else
 HISTFILE_GLOBAL="$IAM_HOME/bash_history"
 if _is tmux; then
 if _TMUX_SESSION_ID="$(tmux show-env _TMUX_SESSION_ID 2>/dev/null)"; then
@@ -2031,12 +2031,11 @@ history -a
 else
 history -a /dev/stdout | tee -a "$HISTFILE_GLOBAL" >> "$HISTFILE"
 fi
-if [ -d "$IAM_HOME"/shell.rc ]; then
-for i in "$IAM_HOME"/shell.rc/*; do
-! _once "PS1 -> source $i" && [ "$_SHELL_SESSION_STAMP" -nt "$i" ] && continue || source "$i"
+local SCRIPT
+for SCRIPT in "$IAM_HOME"/shell.rc/*; do
+[ -e "$SCRIPT" ] || continue
+! _once "PS1 -> source $SCRIPT" && [ "$_SHELL_SESSION_STAMP" -nt "$SCRIPT" ] || source "$SCRIPT"
 done
-unset i
-fi
 unset _PS1_STATUS_LINE
 if [ -z "$VIRTUAL_ENV" ]; then
 if [ -f "$PWD/.venv/bin/activate" ]; then

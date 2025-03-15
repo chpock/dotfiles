@@ -536,14 +536,11 @@ then
     ln -sf /usr/bin/vim.basic "$IAM_HOME/tools/bin/vim"
 fi
 
-# Load functions-install.sh as other scripts may depend on functions defined there
-SCRIPT="$IAM_HOME/shell.rc/functions-install.sh"
-# Something like this can't be used here, as it would disable error checking
-# when loading the script:
-#   [ -e $SCRIPT ] && _once ... && source $SCRIPT || true
-if [ -e "$SCRIPT" ] && _once "PS1 -> source $SCRIPT"; then
-    source "$SCRIPT"
-fi
+# Load shell.rc scripts now as other scripts may depend on functions defined there
+for SCRIPT in "$IAM_HOME"/shell.rc/*; do
+    [ -e "$SCRIPT" ] || continue
+    ! _once "PS1 -> source $SCRIPT" || source "$SCRIPT"
+done
 unset SCRIPT
 
 hostinfo() {
@@ -1983,12 +1980,11 @@ function promptcmd () {
         history -a /dev/stdout | tee -a "$HISTFILE_GLOBAL" >> "$HISTFILE"
     fi
 
-    if [ -d "$IAM_HOME"/shell.rc ]; then
-        for i in "$IAM_HOME"/shell.rc/*; do
-            ! _once "PS1 -> source $i" && [ "$_SHELL_SESSION_STAMP" -nt "$i" ] && continue || source "$i"
-        done
-        unset i
-    fi
+    local SCRIPT
+    for SCRIPT in "$IAM_HOME"/shell.rc/*; do
+        [ -e "$SCRIPT" ] || continue
+        ! _once "PS1 -> source $SCRIPT" && [ "$_SHELL_SESSION_STAMP" -nt "$SCRIPT" ] || source "$SCRIPT"
+    done
 
     unset _PS1_STATUS_LINE
 
