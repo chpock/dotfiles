@@ -29,6 +29,7 @@ _has tmux || return
             tmux list-sessions -F "#S${SEP}#{_TMUX_SESSION_ID}" >"$BACKUP_FILE_IDS"
             ;;
         restore)
+            [ -e "$BACKUP_FILE" ] || return 0
             while IFS="$SEP" read session_name window_name current_path; do
                 if tmux has-session -t "$session_name" 2>/dev/null; then
                     # restore the windows if we need to restore this session
