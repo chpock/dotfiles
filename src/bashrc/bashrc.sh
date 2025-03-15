@@ -348,6 +348,15 @@ _is() {
 
 _isnot() { _is "$1" && return 1 || return 0; }
 
+_unexport() {
+    local TMPVAL TMPVAR
+    for TMPVAR; do
+        TMPVAL="${!TMPVAR}"
+        unset "$TMPVAR"
+        printf -v "$TMPVAR" '%s' "$TMPVAL"
+    done
+}
+
 _addpath -start "$IAM_HOME/tools/bin"
 _addpath "/usr/local/bin"
 [ -d "$IAM_HOME/tools/bin" ] || mkdir -p "$IAM_HOME/tools/bin"
@@ -1437,10 +1446,7 @@ if [ -z "$_SHELL_SESSION_ID" ]; then
 else
     # If _SHELL_SESSION_ID exists here, then we might want to preserve it.
     # But now we need to remove it from the export to avoid unwanted inheritance.
-    _SHELL_SESSION_ID_SAVE="$_SHELL_SESSION_ID"
-    unset _SHELL_SESSION_ID
-    _SHELL_SESSION_ID="$_SHELL_SESSION_ID_SAVE"
-    unset _SHELL_SESSION_ID_SAVE
+    _unexport _SHELL_SESSION_ID
 fi
 
 # append history rather than overwrite

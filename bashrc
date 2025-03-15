@@ -853,6 +853,14 @@ printf -v "$V" '%s' "$R"
 return "${!V}"
 }
 _isnot() { _is "$1" && return 1 || return 0; }
+_unexport() {
+local TMPVAL TMPVAR
+for TMPVAR; do
+TMPVAL="${!TMPVAR}"
+unset "$TMPVAR"
+printf -v "$TMPVAR" '%s' "$TMPVAL"
+done
+}
 _addpath -start "$IAM_HOME/tools/bin"
 _addpath "/usr/local/bin"
 [ -d "$IAM_HOME/tools/bin" ] || mkdir -p "$IAM_HOME/tools/bin"
@@ -1660,10 +1668,7 @@ export LESS
 if [ -z "$_SHELL_SESSION_ID" ]; then
 _random -v _SHELL_SESSION_ID
 else
-_SHELL_SESSION_ID_SAVE="$_SHELL_SESSION_ID"
-unset _SHELL_SESSION_ID
-_SHELL_SESSION_ID="$_SHELL_SESSION_ID_SAVE"
-unset _SHELL_SESSION_ID_SAVE
+_unexport _SHELL_SESSION_ID
 fi
 shopt -s histappend
 shopt -s cmdhist
@@ -1672,9 +1677,9 @@ HISTSIZE=1000000
 HISTCONTROL=ignoreboth
 HISTTIMEFORMAT='%F %T '
 HISTIGNORE="&:[bf]g:exit:history:history *:reset:clear"
-HISTIGNORE="$HISTIGNORE:reload:reload current:mkcdtmp"
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
+HISTIGNORE="$HISTIGNORE:reload:reload current:mkcdtmp"
 if _is dockerenv; then
 HISTFILE="$IAM_HOME/bash_history"
 else
