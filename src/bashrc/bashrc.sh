@@ -2198,12 +2198,19 @@ __debug_trap() {
     : echo "> PS1_COMMAND = $PS1_COMMAND '$IN_PS_COMMAND'"
 }
 
+__cleanup_trap() {
+    local RC=$?
+    rm -rf "$_SHELL_SESSION_DIR"
+    exit $RC
+}
+
 #PROMPT_COMMAND="promptcmd \$?"
 #PROMPT_COMMAND="__debug_trap off \$? && __EC=0 || __EC=\$?; promptcmd \$__EC; unset __EC; __debug_trap on"
 PROMPT_COMMAND="{ __debug_trap off \$? && __EC=0 || __EC=\$?; promptcmd \$__EC; unset __EC; __debug_trap on; } 2>/dev/null"
 
 #trap __debug_trap DEBUG
 trap '{ __debug_trap; } 2>/dev/null' DEBUG
+trap '__cleanup_trap' EXIT
 
 # Fixes for specific OS
 

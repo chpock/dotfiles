@@ -1679,10 +1679,10 @@ else
 _unexport _SHELL_SESSION_ID
 fi
 _SHELL_SESSION_DIR="$IAM_HOME/shell_sessions/plain-$_SHELL_SESSION_ID"
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 if _is dockerenv; then
 HISTFILE="$IAM_HOME/bash_history"
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 else
 HISTFILE_GLOBAL="$IAM_HOME/bash_history"
 if _is tmux; then
@@ -2180,8 +2180,14 @@ __debug_trap() {
 PS1_COMMAND="$BASH_COMMAND"
 : echo "> PS1_COMMAND = $PS1_COMMAND '$IN_PS_COMMAND'"
 }
+__cleanup_trap() {
+local RC=$?
+rm -rf "$_SHELL_SESSION_DIR"
+exit $RC
+}
 PROMPT_COMMAND="{ __debug_trap off \$? && __EC=0 || __EC=\$?; promptcmd \$__EC; unset __EC; __debug_trap on; } 2>/dev/null"
 trap '{ __debug_trap; } 2>/dev/null' DEBUG
+trap '__cleanup_trap' EXIT
 if _is hpux; then
 stty intr '^C' kill '^U' susp '^Z'
 elif _is macos; then
