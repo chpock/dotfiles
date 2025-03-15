@@ -2,25 +2,21 @@
 
 _has python3 || _has python || return
 
-if _has python3; then
+_hasnot python3 || python() {
+    if [ -n "$VIRTUAL_ENV" ]; then
+        command python "$@"
+    else
+        command python3 "$@"
+    fi
+}
 
-    python() {
-        if [ -n "$VIRTUAL_ENV" ]; then
-            command python "$@"
-        else
-            command python3 "$@"
-        fi
-    }
-
-    pip() {
-        if [ -n "$VIRTUAL_ENV" ]; then
-            command pip "$@"
-        else
-            command pip3 "$@"
-        fi
-    }
-
-fi
+_hasnot pip3 || pip() {
+    if [ -n "$VIRTUAL_ENV" ]; then
+        command pip "$@"
+    else
+        command pip3 "$@"
+    fi
+}
 
 ,venv() {
 
