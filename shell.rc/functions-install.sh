@@ -20,7 +20,26 @@ __INSTALL_VERSION="
   grpcurl       1.9.3
   yazi          25.3.2
   httptap       0.1.1
+  systemctl-tui 0.4.0
 "
+
+__install_systemctl_tui() {
+    local VERSION="$1" EXECUTABLE="$2"
+
+    if [ "$VERSION" = "-check" ]; then
+        __install_check_version "$EXECUTABLE" --version \
+            | head -n 1 | awk '{print $NF}'
+        return 0
+    elif [ "$VERSION" = "-latest" ]; then
+        __install_get_latest_github "rgwood/systemctl-tui"
+        return 0
+    fi
+
+    local FORMAT URL="https://github.com/rgwood/systemctl-tui/releases/download/v${VERSION}/systemctl-tui-"
+    __install_make_url "
+        linux-x64   x86_64-unknown-linux-musl.tar.gz
+    " && __install_download && __install_unpack &&  __install_bin || return $?
+}
 
 __install_httptap() {
     local VERSION="$1" EXECUTABLE="$2"
@@ -667,6 +686,11 @@ unset __INSTALL_VERSION
         fi
     done
     env httptap "$@"
+}
+
+! _has_function "systemctl-tui" || systemctl-tui() {
+    _maybe_local "systemctl-tui"
+    sudo "$IAM_HOME/tools/bin/systemctl-tui" "$@"
 }
 
 __INSTALL_FUNCTIONS_AVAILABLE=1
