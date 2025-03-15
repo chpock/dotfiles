@@ -18,7 +18,26 @@ __INSTALL_VERSION="
   vim-portable  9.0.2094
   yq            4.45.1
   grpcurl       1.9.3
+  yazi          25.3.2
 "
+
+__install_yazi() {
+    local VERSION="$1" EXECUTABLE="$2"
+
+    if [ "$VERSION" = "-check" ]; then
+        __install_check_version "$EXECUTABLE" --version \
+            | awk '{print $2}'
+        return 0
+    elif [ "$VERSION" = "-latest" ]; then
+        __install_get_latest_github "sxyazi/yazi"
+        return 0
+    fi
+
+    local FORMAT URL="https://github.com/sxyazi/yazi/releases/download/v${VERSION}/yazi-"
+    __install_make_url "
+        linux-x64   x86_64-unknown-linux-gnu.zip
+    " && __install_download && __install_unpack &&  __install_bin || return $?
+}
 
 __install_mcfly() {
     local VERSION="$1" EXECUTABLE="$2"
@@ -598,6 +617,18 @@ while read -r TOOL VERSION; do
 done < <(echo "$__INSTALL_VERSION")
 unset R TOOL VERSION EXECUTABLE TOOL_FUNC
 unset __INSTALL_VERSION
+
+# Define simple wrappers for tools
+
+! _has_function "yazi" || yazi() {
+    _maybe_local "yazi"
+    local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+    env YAZI_CONFIG_HOME="$IAM_HOME/yazi-config" yazi "$@" --cwd-file="$tmp"
+    if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+        builtin cd -- "$cwd"
+    fi
+    rm -f -- "$tmp"
+}
 
 __INSTALL_FUNCTIONS_AVAILABLE=1
 
