@@ -19,7 +19,26 @@ __INSTALL_VERSION="
   yq            4.45.1
   grpcurl       1.9.3
   yazi          25.3.2
+  httptap       0.1.1
 "
+
+__install_httptap() {
+    local VERSION="$1" EXECUTABLE="$2"
+
+    if [ "$VERSION" = "-check" ]; then
+        # httptap has no command line option to check its version. Thus, we will
+        # only check for its presence.
+        return 1
+    elif [ "$VERSION" = "-latest" ]; then
+        __install_get_latest_github "monasticacademy/httptap"
+        return 0
+    fi
+
+    local FORMAT URL="https://github.com/monasticacademy/httptap/releases/download/v${VERSION}/httptap_"
+    __install_make_url "
+        linux-x64   linux_x86_64.tar.gz
+    " && __install_download && __install_unpack &&  __install_bin || return $?
+}
 
 __install_yazi() {
     local VERSION="$1" EXECUTABLE="$2"
@@ -628,6 +647,26 @@ unset __INSTALL_VERSION
         builtin cd -- "$cwd"
     fi
     rm -f -- "$tmp"
+}
+
+! _has_function "httptap" || httptap() {
+    _maybe_local "httptap"
+    local VAL VAR
+    for VAR in \
+        "kernel.apparmor_restrict_unprivileged_unconfined" \
+        "kernel.apparmor_restrict_unprivileged_userns"
+    do
+        if VAL="$(sysctl -n "$VAR" 2>/dev/null)" && [ "$VAL" != "0" ]; then
+            printf '%s\n' \
+                "Error: $VAR = $VAL" \
+                "" \
+                "Execute to fix:" \
+                "  sudo sysctl -w ${VAR}=0" \
+                >&2
+            return 1
+        fi
+    done
+    env httptap "$@"
 }
 
 __INSTALL_FUNCTIONS_AVAILABLE=1
