@@ -1441,14 +1441,6 @@ export LESS
 #PAGER=less
 #export PAGER
 
-if [ -z "$_SHELL_SESSION_ID" ]; then
-    _random -v _SHELL_SESSION_ID
-else
-    # If _SHELL_SESSION_ID exists here, then we might want to preserve it.
-    # But now we need to remove it from the export to avoid unwanted inheritance.
-    _unexport _SHELL_SESSION_ID
-fi
-
 # append history rather than overwrite
 shopt -s histappend
 # one command per line
@@ -1465,6 +1457,16 @@ HISTIGNORE="&:[bf]g:exit:history:history *:reset:clear"
 # reload - is my function to reload current shell
 HISTIGNORE="$HISTIGNORE:reload:reload current:mkcdtmp"
 
+if [ -z "$_SHELL_SESSION_ID" ]; then
+    _random -v _SHELL_SESSION_ID
+else
+    # If _SHELL_SESSION_ID exists here, then we might want to preserve it.
+    # But now we need to remove it from the export to avoid unwanted inheritance.
+    _unexport _SHELL_SESSION_ID
+fi
+
+_SHELL_SESSION_DIR="$IAM_HOME/shell_sessions/plain-$_SHELL_SESSION_ID"
+
 if _is dockerenv; then
     # In Docker, we don't want to do anything complicated with the shell command history.
     HISTFILE="$IAM_HOME/bash_history"
@@ -1472,9 +1474,7 @@ else
 
     HISTFILE_GLOBAL="$IAM_HOME/bash_history"
 
-    if _isnot tmux; then
-        _SHELL_SESSION_DIR="$IAM_HOME/shell_sessions/plain-$_SHELL_SESSION_ID"
-    else
+    if _is tmux; then
         if _TMUX_SESSION_ID="$(tmux show-env _TMUX_SESSION_ID 2>/dev/null)"; then
             # Strip variable name
             _TMUX_SESSION_ID="${_TMUX_SESSION_ID#*=}"
@@ -1486,8 +1486,6 @@ else
         _SHELL_SESSION_DIR="$_TMUX_SESSION_DIR/$_SHELL_SESSION_ID"
     fi
 
-    mkdir -p "$_SHELL_SESSION_DIR"
-
     HISTFILE="$_SHELL_SESSION_DIR/bash_history"
 
     # Read global history file
@@ -1496,6 +1494,15 @@ else
     # Session history file will be read automatically
 
 fi
+
+mkdir -p "$_SHELL_SESSION_DIR"
+# Here we create a file where timestamp is the time when this shell instance
+# was last active. It will later be used in PROMPT_COMMAND to detect when
+# shell.rc functions have been updated and need to be reloaded. It will also
+# be used to clean up orphaned shell sessions. We use 'echo' instead of
+# 'touch' because 'echo' is a built-in bash command and is much faster.
+_SHELL_SESSION_STAMP="$_SHELL_SESSION_DIR/stamp"
+echo > "$_SHELL_SESSION_STAMP"
 
 __kubectl_status() {
 
@@ -1978,8 +1985,9 @@ function promptcmd () {
 
     if [ -d "$IAM_HOME"/shell.rc ]; then
         for i in "$IAM_HOME"/shell.rc/*; do
-            ! _once "PS1 -> source $i" || source "$i"
+            ! _once "PS1 -> source $i" && [ "$_SHELL_SESSION_STAMP" -nt "$i" ] && continue || source "$i"
         done
+        unset i
     fi
 
     unset _PS1_STATUS_LINE
@@ -2137,6 +2145,10 @@ function promptcmd () {
     if _is tmux && [ -n "$__TMUX_FUNCTIONS_AVAILABLE" ]; then
         ,tmux autosave
     fi
+
+    # We use 'echo' instead of 'touch' because 'echo' is a built-in
+    # bash command and is much faster.
+    echo > "$_SHELL_SESSION_STAMP"
 
 }
 
