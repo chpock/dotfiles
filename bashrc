@@ -804,7 +804,7 @@ _is() {
 local CONDITION="${1//-/_}"
 local V="__CACHE_IS_$CONDITION"
 [ -z "${!V}" ] || return "${!V}"
-local R=0
+local R=0 TMPVAL
 case "$CONDITION" in
 x86_64|aarch64_be|aarch64|armv8b|armv8l)
 _cache __uname_machine
@@ -841,6 +841,9 @@ dockerenv)   [ -f /.dockerenv ] || R=1 ;;
 sudo)        [ -n "$SUDO_USER" ] || R=1 ;;
 tmux)        [ -n "$TMUX" ] || R=1 ;;
 aws)         _is cloud && curl -s -I http://169.254.169.254 | grep -qF 'Server: EC2ws' || R=1 ;;
+aws_metadata_available)
+_is aws && TMPVAL="$(_aws_metadata instance-id)" && [ -n "$TMPVAL" ] || R=1
+;;
 cloud)
 _has curl && curl -s -I --connect-timeout 0.1 -o /dev/null http://169.254.169.254 || R=1
 ;;
@@ -1003,6 +1006,38 @@ for SCRIPT in "$IAM_HOME"/shell.rc/*; do
 ! _once "PS1 -> source $SCRIPT" || source "$SCRIPT"
 done
 unset SCRIPT
+_isnot "aws" || _aws_metadata() {
+local METADATA_URL="http://169.254.169.254/latest"
+if [ -z "$_AWS_METADATA_ACCESS_TYPE" ]; then
+local STATUS_CODE="$(command curl -s -f --connect-timeout 0.1 -o /dev/null -I -w "%{http_code}" "$METADATA_URL/meta-data/instance-id")"
+if [ "$STATUS_CODE" = "200" ]; then
+_AWS_METADATA_ACCESS_TYPE="plain"
+elif [ "$STATUS_CODE" = "401" ]; then
+_AWS_METADATA_ACCESS_TYPE="token"
+else
+_AWS_METADATA_ACCESS_TYPE="no"
+fi
+fi
+[ "$_AWS_METADATA_ACCESS_TYPE" != "no" ] || return 1
+set -- command curl -s -f --connect-timeout 1 "$METADATA_URL/meta-data/$1"
+if [ "$_AWS_METADATA_ACCESS_TYPE" = "token" ]; then
+[ "$_AWS_METADATA_TOKEN" != "error" ] || return 1
+local CURRENT_TIMESTAMP="$(date +%s)" DURATION_HOURS_LEFT=0
+[ -z "$_AWS_METADATA_TOKEN_TIMESTAMP" ] || DURATION_HOURS_LEFT=$(( ( 21600 + _AWS_METADATA_TOKEN_TIMESTAMP - CURRENT_TIMESTAMP ) / 3600 ))
+if [ "$DURATION_HOURS_LEFT" -le 0 ]; then
+if ! _AWS_METADATA_TOKEN="$(command curl -s -f --connect-timeout 1 -X PUT \
+-H "X-aws-ec2-metadata-token-ttl-seconds: 21600" \
+"$METADATA_URL/api/token")" || [ -z "$_AWS_METADATA_TOKEN" ]
+then
+_AWS_METADATA_TOKEN="error"
+return 1
+fi
+_AWS_METADATA_TOKEN_TIMESTAMP="$CURRENT_TIMESTAMP"
+fi
+set -- "$@" -H "X-aws-ec2-metadata-token: $_AWS_METADATA_TOKEN"
+fi
+"$@"
+}
 hostinfo() {
 local UNAME_MACHINE UNAME_RELEASE UNAME_ALL
 local MSHELL="unknown"
@@ -1136,6 +1171,11 @@ done < <(/sbin/ifconfig 2>&1 || /sbin/ifconfig -a)
 printf -- "-------------------------------------------------------------------[ Network ]--\n"
 fi
 fi
+fi
+if ! _is dockerenv && ! _is sudo && _is aws_metadata_available; then
+printf -- "Instance  : %s (%s)\n" "$(_aws_metadata instance-type)" "$(_aws_metadata instance-id)"
+printf -- "Region    : %s (%s)\n" "$(_aws_metadata placement/region)" "$(_aws_metadata placement/availability-zone)"
+printf -- "----------------------------------------------------------------[ Cloud: AWS ]--\n"
 fi
 _showfeature() {
 local line
@@ -1358,6 +1398,9 @@ mkdir -p "$GNUPGHOME"
 chmod 0700 "$GNUPGHOME"
 GPG_TTY="$(tty)"
 export GPG_TTY
+fi
+if ! _is dockerenv && _is aws_metadata_available; then
+AWS_DEFAULT_REGION="$(_aws_metadata placement/region)" && export AWS_DEFAULT_REGION || unset AWS_DEFAULT_REGION
 fi
 stty -ixon
 set -o notify
@@ -1663,6 +1706,8 @@ cat "$fn" > "${fn}.fix-permissions"
 mv -f "${fn}.fix-permissions" "$fn"
 done
 }
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
 shopt -s histappend
@@ -1682,8 +1727,6 @@ _SHELL_SESSION_DIR="$IAM_HOME/shell_sessions/plain-$_SHELL_SESSION_ID"
 if _is dockerenv; then
 HISTFILE="$IAM_HOME/bash_history"
 else
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 HISTFILE_GLOBAL="$IAM_HOME/bash_history"
 if _is tmux; then
 if _TMUX_SESSION_ID="$(tmux show-env _TMUX_SESSION_ID 2>/dev/null)"; then

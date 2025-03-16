@@ -281,7 +281,7 @@ _is() {
     local CONDITION="${1//-/_}"
     local V="__CACHE_IS_$CONDITION"
     [ -z "${!V}" ] || return "${!V}"
-    local R=0
+    local R=0 TMPVAL
     case "$CONDITION" in
         # Architecture
         x86_64|aarch64_be|aarch64|armv8b|armv8l)
@@ -323,6 +323,9 @@ _is() {
         tmux)        [ -n "$TMUX" ] || R=1 ;;
         # Clouds
         aws)         _is cloud && curl -s -I http://169.254.169.254 | grep -qF 'Server: EC2ws' || R=1 ;;
+        aws_metadata_available)
+            _is aws && TMPVAL="$(_aws_metadata instance-id)" && [ -n "$TMPVAL" ] || R=1
+            ;;
         cloud)
             # We have only one stable way to detect if the current machine
             # is in the cloud, and that is to try to query the metadata URL http://169.254.169.254.
@@ -543,6 +546,71 @@ for SCRIPT in "$IAM_HOME"/shell.rc/*; do
 done
 unset SCRIPT
 
+_isnot "aws" || _aws_metadata() {
+
+    local METADATA_URL="http://169.254.169.254/latest"
+
+    # When detecting the metadata access type, we use a connection timeout of
+    # 100 milliseconds. This will allow an error to be returned without delay
+    # if there are problems accessing metadata.
+    #
+    # Other curl requests use 1 a connection timeout of 1 second. Since we
+    # already know that the metadata can be accessed, we use a larger timeout
+    # to avoid failures due to CPU/network overload.
+
+    # Check AWS metadata access type
+
+    if [ -z "$_AWS_METADATA_ACCESS_TYPE" ]; then
+        local STATUS_CODE="$(command curl -s -f --connect-timeout 0.1 -o /dev/null -I -w "%{http_code}" "$METADATA_URL/meta-data/instance-id")"
+        if [ "$STATUS_CODE" = "200" ]; then
+            _AWS_METADATA_ACCESS_TYPE="plain"
+        elif [ "$STATUS_CODE" = "401" ]; then
+            _AWS_METADATA_ACCESS_TYPE="token"
+        else
+            _AWS_METADATA_ACCESS_TYPE="no"
+        fi
+    fi
+    [ "$_AWS_METADATA_ACCESS_TYPE" != "no" ] || return 1
+
+    set -- command curl -s -f --connect-timeout 1 "$METADATA_URL/meta-data/$1"
+
+    # Get access token if it is required
+
+    if [ "$_AWS_METADATA_ACCESS_TYPE" = "token" ]; then
+        # returns 'error' if the previous attempt to return the metadata token
+        # failed with an error
+        [ "$_AWS_METADATA_TOKEN" != "error" ] || return 1
+        local CURRENT_TIMESTAMP="$(date +%s)" DURATION_HOURS_LEFT=0
+        # If _AWS_METADATA_TOKEN_TIMESTAMP exists, then compute current session
+        # duration as "6 hours + <old timestamp> - <current timestamp>".
+        # If _AWS_METADATA_TOKEN_TIMESTAMP does not exist, DURATION_HOURS_LEFT
+        # will have an initial value of '0'.
+        #
+        # 21600 - 6 hours, 3600 - 1 hour
+        [ -z "$_AWS_METADATA_TOKEN_TIMESTAMP" ] || DURATION_HOURS_LEFT=$(( ( 21600 + _AWS_METADATA_TOKEN_TIMESTAMP - CURRENT_TIMESTAMP ) / 3600 ))
+        if [ "$DURATION_HOURS_LEFT" -le 0 ]; then
+            # Try to get a token. If the curl command fails or an empty response is
+            # received, return 'error'.
+            # 21600 - 6 hours
+            if ! _AWS_METADATA_TOKEN="$(command curl -s -f --connect-timeout 1 -X PUT \
+                -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" \
+                "$METADATA_URL/api/token")" || [ -z "$_AWS_METADATA_TOKEN" ]
+            then
+                _AWS_METADATA_TOKEN="error"
+                return 1
+            fi
+            # Remember the token's timestamp
+            _AWS_METADATA_TOKEN_TIMESTAMP="$CURRENT_TIMESTAMP"
+        fi
+        set -- "$@" -H "X-aws-ec2-metadata-token: $_AWS_METADATA_TOKEN"
+    fi
+
+    # Run curl
+
+    "$@"
+
+}
+
 hostinfo() {
 
     local UNAME_MACHINE UNAME_RELEASE UNAME_ALL
@@ -710,6 +778,12 @@ hostinfo() {
                 printf -- "-------------------------------------------------------------------[ Network ]--\n"
             fi
         fi
+    fi
+
+    if ! _is dockerenv && ! _is sudo && _is aws_metadata_available; then
+        printf -- "Instance  : %s (%s)\n" "$(_aws_metadata instance-type)" "$(_aws_metadata instance-id)"
+        printf -- "Region    : %s (%s)\n" "$(_aws_metadata placement/region)" "$(_aws_metadata placement/availability-zone)"
+        printf -- "----------------------------------------------------------------[ Cloud: AWS ]--\n"
     fi
 
     _showfeature() {
@@ -1024,6 +1098,10 @@ if _has gpg; then
     GPG_TTY="$(tty)"
     export GPG_TTY
 
+fi
+
+if ! _is dockerenv && _is aws_metadata_available; then
+    AWS_DEFAULT_REGION="$(_aws_metadata placement/region)" && export AWS_DEFAULT_REGION || unset AWS_DEFAULT_REGION
 fi
 
 # See http://stackoverflow.com/questions/791765/unable-to-forward-search-bash-history-similarly-as-with-ctrl-r to make ctrl-s work forward
