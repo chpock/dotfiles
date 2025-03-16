@@ -2682,7 +2682,7 @@ tools() {
         while IFS= read -r LINE || [ -n "$LINE" ]; do
             if [ "${LINE:0:5}" = "tool:" ]; then
                 I_DESC="${LINE#*: }"
-                unset I_URL I_FILE I_SIZE I_HASH I_FILTER I_ON_UPDATE
+                unset I_URL I_FILE I_SIZE I_HASH I_FILTER_IS I_FILTER_HAS I_ON_UPDATE
             elif [ -z "$I_URL" ]; then
                 I_URL="$LINE"
             elif [ -z "$I_FILE" ]; then
@@ -2693,8 +2693,10 @@ tools() {
                 if [ "$P1" = "$LINE" ]; then
                     [ "${LINE:0:1}" = "#" ] && I_HASH="${LINE:1}" || I_SIZE="$LINE"
                 else
-                    if [ "$P1" = "filter" ]; then
-                        I_FILTER="${LINE#*: }"
+                    if [ "$P1" = "is" ]; then
+                        I_FILTER_IS="${LINE#*: }"
+                    if [ "$P1" = "has" ]; then
+                        I_FILTER_HAS="${LINE#*: }"
                     elif [ "$P1" = "on update" ]; then
                         I_ON_UPDATE="${LINE#*: }"
                     else
@@ -2706,7 +2708,8 @@ tools() {
             fi
             # continue the loop if a tool record is incomplete
             [ -n "$I_SIZE$I_HASH" ] || continue
-            if [ -n "$I_FILTER" ] && ! _is "$I_FILTER"; then continue; fi
+            [ -n "$I_FILTER_IS" ] && ! _is "$I_FILTER_IS" && continue || :
+            [ -n "$I_FILTER_HAS" ] && ! _has "$I_FILTER_HAS" && continue || :
             if [ -e "$I_FILE" ]; then
                 if [ -n "$I_SIZE" ]; then
                     files_by_size+=("$I_FILE")

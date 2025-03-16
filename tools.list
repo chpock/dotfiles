@@ -5,10 +5,12 @@ $IAM_HOME/shell.rc/functions-install.sh
 tool: git functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-git.sh
 $IAM_HOME/shell.rc/functions-git.sh
+has: git
 4110
 tool: docker functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-docker.sh
 $IAM_HOME/shell.rc/functions-docker.sh
+has: docker
 3739
 tool: AWS CLI functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-awscli.sh
@@ -21,6 +23,7 @@ $IAM_HOME/shell.rc/functions-kubectl.sh
 tool: tmux function
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-tmux.sh
 $IAM_HOME/shell.rc/functions-tmux.sh
+has: tmux
 3196
 tool: python functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-python.sh
@@ -33,14 +36,17 @@ $IAM_HOME/shell.rc/bashrc.rc.sh
 tool: bash completion
 https://raw.githubusercontent.com/docker/cli/master/contrib/completion/bash/docker
 $IAM_HOME/tools/bash_completion/docker.completion.bash
+has: docker
 114527
 tool: bash completion
 https://raw.githubusercontent.com/docker/machine/master/contrib/completion/bash/docker-machine.bash
 $IAM_HOME/tools/bash_completion/docker-machine.completion.bash
+has: docker
 12211
 tool: bash completion
 https://raw.githubusercontent.com/docker/compose/master/contrib/completion/bash/docker-compose
 $IAM_HOME/tools/bash_completion/docker-compose.completion.bash
+has: docker
 13500
 tool: bash completion
 https://raw.githubusercontent.com/Bash-it/bash-it/master/completion/available/virtualbox.completion.bash
@@ -53,10 +59,12 @@ $IAM_HOME/tools/bash_completion/makefile.completion.bash
 tool: bash completion
 https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash
 $IAM_HOME/tools/bash_completion/git-completion.bash
+has: git
 93804
 tool: bash completion
 https://raw.githubusercontent.com/chpock/tmux-bash-completion/master/completions/tmux
 $IAM_HOME/tools/bash_completion/tmux-completion.bash
+has: tmux
 6102
 tool: mydu tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/mydu
@@ -69,16 +77,17 @@ $IAM_HOME/tools/bin/colors
 tool: apt-cyg tool
 https://raw.githubusercontent.com/kou1okada/apt-cyg/master/apt-cyg
 $IAM_HOME/tools/bin/orig-apt-cyg
-filter: cygwin
+is: cygwin
 73293
 tool: dependency check for apt-cyg tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/apt-cyg
 $IAM_HOME/tools/bin/apt-cyg
-filter: cygwin
+is: cygwin
 826
 tool: tmux-helper tool
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/tmux-helper
 $IAM_HOME/tools/bin/tmux-helper
+has: tmux
 6045
 tool: install-docker
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-docker

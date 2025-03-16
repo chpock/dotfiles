@@ -571,7 +571,7 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=D3101A06
+LOCAL_TOOLS_FILE_HASH=82043724
 COLOR_WHITE=$'\e[1;37m'
 COLOR_LIGHTGRAY=$'\e[0;37m'
 COLOR_GRAY=$'\e[1;30m'
@@ -1732,9 +1732,9 @@ echo "Copied to Windows clipboard" 1>&2
 local fn T
 for fn; do
 cat "$fn" > "${fn}.fix-permissions"
+mv -f "${fn}.fix-permissions" "$fn"
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
-mv -f "${fn}.fix-permissions" "$fn"
 done
 }
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
@@ -2553,7 +2553,7 @@ if [ -n "$TOOLS_EXISTS" ]; then
 while IFS= read -r LINE || [ -n "$LINE" ]; do
 if [ "${LINE:0:5}" = "tool:" ]; then
 I_DESC="${LINE#*: }"
-unset I_URL I_FILE I_SIZE I_HASH I_FILTER I_ON_UPDATE
+unset I_URL I_FILE I_SIZE I_HASH I_FILTER_IS I_FILTER_HAS I_ON_UPDATE
 elif [ -z "$I_URL" ]; then
 I_URL="$LINE"
 elif [ -z "$I_FILE" ]; then
@@ -2564,8 +2564,10 @@ local P1="${LINE%:*}"
 if [ "$P1" = "$LINE" ]; then
 [ "${LINE:0:1}" = "#" ] && I_HASH="${LINE:1}" || I_SIZE="$LINE"
 else
-if [ "$P1" = "filter" ]; then
-I_FILTER="${LINE#*: }"
+if [ "$P1" = "is" ]; then
+I_FILTER_IS="${LINE#*: }"
+if [ "$P1" = "has" ]; then
+I_FILTER_HAS="${LINE#*: }"
 elif [ "$P1" = "on update" ]; then
 I_ON_UPDATE="${LINE#*: }"
 else
@@ -2576,7 +2578,8 @@ else
 echo "ERROR: unexpected line in tools list: $LINE"
 fi
 [ -n "$I_SIZE$I_HASH" ] || continue
-if [ -n "$I_FILTER" ] && ! _is "$I_FILTER"; then continue; fi
+[ -n "$I_FILTER_IS" ] && ! _is "$I_FILTER_IS" && continue || :
+[ -n "$I_FILTER_HAS" ] && ! _has "$I_FILTER_HAS" && continue || :
 if [ -e "$I_FILE" ]; then
 if [ -n "$I_SIZE" ]; then
 files_by_size+=("$I_FILE")
