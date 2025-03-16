@@ -2695,7 +2695,7 @@ tools() {
                 else
                     if [ "$P1" = "is" ]; then
                         I_FILTER_IS="${LINE#*: }"
-                    if [ "$P1" = "has" ]; then
+                    elif [ "$P1" = "has" ]; then
                         I_FILTER_HAS="${LINE#*: }"
                     elif [ "$P1" = "on update" ]; then
                         I_ON_UPDATE="${LINE#*: }"
