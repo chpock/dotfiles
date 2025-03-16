@@ -1429,7 +1429,7 @@ fi
 if ! _is dockerenv && _is aws_metadata_available; then
 AWS_DEFAULT_REGION="$(_aws_metadata placement/region)" && export AWS_DEFAULT_REGION || unset AWS_DEFAULT_REGION
 fi
-_unexport SSH_PUB_KEY _GIT_USER_NAME _GIT_USER_NAME
+_unexport SSH_PUB_KEY _GIT_USER_EMAIL _GIT_USER_NAME
 stty -ixon
 set -o notify
 shopt -s cdspell
@@ -1625,7 +1625,7 @@ tmux send-keys -t $wid 'reload current' C-m
 done
 fi
 export _SHELL_SESSION_ID
-export SSH_PUB_KEY _GIT_USER_NAME _GIT_USER_NAME
+export SSH_PUB_KEY _GIT_USER_EMAIL _GIT_USER_NAME
 exec bash --rcfile "$IAM_HOME/bashrc" -i
 }
 ,ssh() {
