@@ -22,21 +22,6 @@ COLOR_BOLD=$'\e[1m'
 COLOR_ERROR=$'\e[41m\e[1m\e[97m'
 COLOR_SIGN=$'\e[38;5;136m'
 
-_hash() {
-    # here is Adler-32
-    # disable messages during -x
-    {
-        local A=1 B=0 M="$@" C i
-        [ -n "$M" ] || IFS= read -r -d '' M || :
-        local L=${#M}
-        for (( i = 0; i < $L; i++ )); do
-            printf -v C '%d' "'${M:$i:1}"
-            A=$(( (A + C) % 65521 ))
-            B=$(( (B + A) % 65521 ))
-        done
-    } 2>/dev/null
-    printf -v _HASH '%X' $(( A + ( B << 16 ) ))
-}
 _hash_file() {
     local SOURCE_FILE="$1" SOURCE_BASENAME="${1##*/}" SOURCE_PATH="${1%/*}"
     # If variables SOURCE_BASENAME and SOURCE_PATH are equivalent, it means
@@ -192,6 +177,57 @@ _maybe_local() {
     fi
 }
 _has_potentially() { [ -n "$__INSTALL_FUNCTIONS_AVAILABLE" ] && _check _is_install_available "$1" && return 0 || return 1; }
+
+_hash() {
+    # here is Adler-32
+    # disable messages during -x
+    {
+        if [ $# -eq 0 ]; then
+            _hash_in
+        else
+            # Set C locale to avoid processing strings as Unicode. This will
+            # improve performance.
+            local LC_ALL=C LC_TYPE=C
+            local A=1 B=0 C i M="$@"
+            local L=${#M}
+            for (( i = 0; i < L; i++ )); do
+                printf -v C '%d' "'${M:i:1}"
+                (( A = (A + C) % 65521 )) || :
+                (( B = (B + A) % 65521 )) || :
+            done
+            printf -v _HASH '%08X' $(( A + ( B << 16 ) ))
+        fi
+    } 2>/dev/null
+    # For debugging only
+    : _HASH = $_HASH
+}
+
+if _has perl; then
+    _hash_in() {
+        _HASH="$(command perl -e '$a=1;$b=0;while(read(STDIN,$c,1)){$a=($a+ord$c)%65521;$b=($b+$a)%65521}printf("%08X",($b<<16)|$a)')"
+    }
+elif _has python3; then
+    _hash_in() {
+        _HASH="$(command python3 -c 'import sys;a,b=1,0;exec("for c in sys.stdin.buffer.read(): a=(a+c)%65521; b=(b+a)%65521");print(f"{(b<<16)|a:08X}",end="")')"
+    }
+else
+    _hash_in() {
+        # here is Adler-32
+        # disable messages during -x
+        {
+            # Set C locale to avoid processing strings as Unicode. This will
+            # improve performance.
+            local LC_ALL=C LC_TYPE=C
+            local A=1 B=0 C
+            while IFS= read -d '' -r -n1 C; do
+                printf -v C '%d' "'$C"
+                (( A = (A + C) % 65521 )) || :
+                (( B = (B + A) % 65521 )) || :
+            done
+            printf -v _HASH '%08X' $(( A + ( B << 16 ) ))
+        } 2>/dev/null
+    }
+fi
 
 __vercomp() {
     local i IFS=.

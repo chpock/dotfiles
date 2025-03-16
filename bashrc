@@ -592,19 +592,6 @@ COLOR_DEFAULT=$'\e[0m'
 COLOR_BOLD=$'\e[1m'
 COLOR_ERROR=$'\e[41m\e[1m\e[97m'
 COLOR_SIGN=$'\e[38;5;136m'
-_hash() {
-{
-local A=1 B=0 M="$@" C i
-[ -n "$M" ] || IFS= read -r -d '' M || :
-local L=${#M}
-for (( i = 0; i < $L; i++ )); do
-printf -v C '%d' "'${M:$i:1}"
-A=$(( (A + C) % 65521 ))
-B=$(( (B + A) % 65521 ))
-done
-} 2>/dev/null
-printf -v _HASH '%X' $(( A + ( B << 16 ) ))
-}
 _hash_file() {
 local SOURCE_FILE="$1" SOURCE_BASENAME="${1##*/}" SOURCE_PATH="${1%/*}"
 [ "$SOURCE_BASENAME" != "$SOURCE_PATH" ] || SOURCE_PATH="$PWD"
@@ -733,6 +720,46 @@ fi
 fi
 }
 _has_potentially() { [ -n "$__INSTALL_FUNCTIONS_AVAILABLE" ] && _check _is_install_available "$1" && return 0 || return 1; }
+_hash() {
+{
+if [ $# -eq 0 ]; then
+_hash_in
+else
+local LC_ALL=C LC_TYPE=C
+local A=1 B=0 C i M="$@"
+local L=${#M}
+for (( i = 0; i < L; i++ )); do
+printf -v C '%d' "'${M:i:1}"
+(( A = (A + C) % 65521 )) || :
+(( B = (B + A) % 65521 )) || :
+done
+printf -v _HASH '%08X' $(( A + ( B << 16 ) ))
+fi
+} 2>/dev/null
+: _HASH = $_HASH
+}
+if _has perl; then
+_hash_in() {
+_HASH="$(command perl -e '$a=1;$b=0;while(read(STDIN,$c,1)){$a=($a+ord$c)%65521;$b=($b+$a)%65521}printf("%08X",($b<<16)|$a)')"
+}
+elif _has python3; then
+_hash_in() {
+_HASH="$(command python3 -c 'import sys;a,b=1,0;exec("for c in sys.stdin.buffer.read(): a=(a+c)%65521; b=(b+a)%65521");print(f"{(b<<16)|a:08X}",end="")')"
+}
+else
+_hash_in() {
+{
+local LC_ALL=C LC_TYPE=C
+local A=1 B=0 C
+while IFS= read -d '' -r -n1 C; do
+printf -v C '%d' "'$C"
+(( A = (A + C) % 65521 )) || :
+(( B = (B + A) % 65521 )) || :
+done
+printf -v _HASH '%08X' $(( A + ( B << 16 ) ))
+} 2>/dev/null
+}
+fi
 __vercomp() {
 local i IFS=.
 local v1=($1) v2=($2)
@@ -1704,12 +1731,12 @@ local fn T
 for fn; do
 cat "$fn" > "${fn}.fix-permissions"
 mv -f "${fn}.fix-permissions" "$fn"
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 done
 }
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 shopt -s histappend
 shopt -s cmdhist
 unset HISTFILESIZE
