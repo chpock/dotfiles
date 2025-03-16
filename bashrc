@@ -1733,10 +1733,10 @@ local fn T
 for fn; do
 cat "$fn" > "${fn}.fix-permissions"
 mv -f "${fn}.fix-permissions" "$fn"
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 done
 }
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
 shopt -s histappend
@@ -2875,6 +2875,12 @@ echo "Make sure that 'mountFsTab = true' exists under the section '[automount]'"
 echo
 fi
 fi
+V="$(__magic_ssh)"
+if [ "${#V}" -ge 131072 ]; then
+echo "${COLOR_RED}WARNING:${COLOR_DEFAULT} __magic_ssh() returns a string of length ${#V}, which exceeds the maximum allowed length of 131071."
+echo
+fi
+unset V
 tools check quick update
 j -prompt
 if [ -n "$__KITTY_ID" ] && [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID/pwd" ]; then

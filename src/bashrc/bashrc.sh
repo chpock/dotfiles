@@ -3041,6 +3041,16 @@ if _isnot tmux; then
         fi
     fi
 
+    # Validate __magic_ssh. We use it as argument to "docker run ..."/"ssh ...".
+    # It should be less than MAX_ARG_STRLEN (131072) to be compatible with Linux.
+    # See: https://docs.opensvc.com/latest/_static/argmax.html
+    V="$(__magic_ssh)"
+    if [ "${#V}" -ge 131072 ]; then
+        echo "${COLOR_RED}WARNING:${COLOR_DEFAULT} __magic_ssh() returns a string of length ${#V}, which exceeds the maximum allowed length of 131071."
+        echo
+    fi
+    unset V
+
     # if we are in cygwin, but not in ssh, then just create 3 detached sessions
     #if [ -z "$SSH_CLIENT" ]; then
     #    tmux -L local new-session -d
