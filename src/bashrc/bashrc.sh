@@ -1140,6 +1140,8 @@ if ! _is dockerenv && _is aws_metadata_available; then
     AWS_DEFAULT_REGION="$(_aws_metadata placement/region)" && export AWS_DEFAULT_REGION || unset AWS_DEFAULT_REGION
 fi
 
+_unexport SSH_PUB_KEY
+
 # See http://stackoverflow.com/questions/791765/unable-to-forward-search-bash-history-similarly-as-with-ctrl-r to make ctrl-s work forward
 stty -ixon
 
@@ -1417,6 +1419,7 @@ reload() {
     # Reloaded shell should be with the same _SHELL_SESSION_ID.
     # It will be removed from exports by launched shell instance.
     export _SHELL_SESSION_ID
+    export SSH_PUB_KEY
     exec bash --rcfile "$IAM_HOME/bashrc" -i
 }
 ,ssh() {
@@ -2596,7 +2599,7 @@ if [ ! -x "$IAM_HOME/tools/bin/geturl" ]; then
     [ -d "$IAM_HOME/tools/bin" ] || mkdir -p "$IAM_HOME/tools/bin"
     {
         echo '#!/usr/bin/env bash'
-        declare -f _hash _check _has _catch _get_url
+        declare -f _hash _hash_in _check _has _catch _get_url
         echo '_get_url "$@"'
     } > "$IAM_HOME/tools/bin/geturl"
     chmod +x "$IAM_HOME/tools/bin/geturl"

@@ -1429,6 +1429,7 @@ fi
 if ! _is dockerenv && _is aws_metadata_available; then
 AWS_DEFAULT_REGION="$(_aws_metadata placement/region)" && export AWS_DEFAULT_REGION || unset AWS_DEFAULT_REGION
 fi
+_unexport SSH_PUB_KEY
 stty -ixon
 set -o notify
 shopt -s cdspell
@@ -1624,6 +1625,7 @@ tmux send-keys -t $wid 'reload current' C-m
 done
 fi
 export _SHELL_SESSION_ID
+export SSH_PUB_KEY
 exec bash --rcfile "$IAM_HOME/bashrc" -i
 }
 ,ssh() {
@@ -1730,9 +1732,9 @@ echo "Copied to Windows clipboard" 1>&2
 local fn T
 for fn; do
 cat "$fn" > "${fn}.fix-permissions"
-mv -f "${fn}.fix-permissions" "$fn"
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
+mv -f "${fn}.fix-permissions" "$fn"
 done
 }
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
@@ -2478,7 +2480,7 @@ if [ ! -x "$IAM_HOME/tools/bin/geturl" ]; then
 [ -d "$IAM_HOME/tools/bin" ] || mkdir -p "$IAM_HOME/tools/bin"
 {
 echo '#!/usr/bin/env bash'
-declare -f _hash _check _has _catch _get_url
+declare -f _hash _hash_in _check _has _catch _get_url
 echo '_get_url "$@"'
 } > "$IAM_HOME/tools/bin/geturl"
 chmod +x "$IAM_HOME/tools/bin/geturl"
