@@ -35,7 +35,7 @@ $IAM_HOME/shell.rc/bashrc.rc.sh
 358
 tool: tmux.conf
 https://raw.githubusercontent.com/chpock/dotfiles/master/tmux.conf.template
-$IAM_HOME/shell.rc/tmux.conf.template
+$IAM_HOME/tmux.conf.template
 has: tmux
 4397
 tool: bash completion
