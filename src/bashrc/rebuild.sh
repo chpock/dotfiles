@@ -8,6 +8,8 @@ BASHRC_OUT_FILE="$OUT_DIR/bashrc"
 BASHRC_SRC_FILE="$SRC_DIR/skeleton"
 TOOLS_OUT_FILE="$OUT_DIR/tools.list"
 TOOLS_SRC_FILE="$SRC_DIR/tools.list"
+TMUX_CONF_OUT_FILE="$OUT_DIR/tmux.conf.template"
+TMUX_CONF_SRC_FILE="$SRC_DIR/tmux.conf"
 
 plain() {
     while IFS= read -r line; do echo "$line"; done
@@ -181,6 +183,10 @@ process() {
 
 [ "$1" = "silent" ] || printf "Build tools.list ..."
 cat "$TOOLS_SRC_FILE" | tools-list | process > "$TOOLS_OUT_FILE"
+[ "$1" = "silent" ] || echo " OK"
+
+[ "$1" = "silent" ] || printf "Build tmux.conf ..."
+cat "$TMUX_CONF_SRC_FILE" | tmux-conf | process > "$TMUX_CONF_OUT_FILE"
 [ "$1" = "silent" ] || echo " OK"
 
 [ "$1" = "silent" ] || printf "Build bashrc ..."

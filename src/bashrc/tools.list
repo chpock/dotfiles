@@ -45,6 +45,12 @@ https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/bashrc.rc.sh
 $IAM_HOME/shell.rc/bashrc.rc.sh
 @getSize REPO_ROOT/shell.rc/bashrc.rc.sh
 
+tool: tmux.conf
+https://raw.githubusercontent.com/chpock/dotfiles/master/tmux.conf.template
+$IAM_HOME/shell.rc/tmux.conf.template
+has: tmux
+@getSize REPO_ROOT/tmux.conf.template
+
 # Bash completions
 
 tool: bash completion

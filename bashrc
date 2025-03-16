@@ -31,106 +31,6 @@ TclReadLine::interact
 }
 EOF
 
-cat <<'EOF' > "$IAM_HOME/tmux.conf.template"
-set -g default-command "exec bash --rcfile \"$IAM_HOME/bashrc\" -i"
-unbind C-b
-set -g prefix C-a
-bind C-a send-prefix
-bind r run '"$IAM_HOME/tools/bin/tmux-helper" reset-options-to-default' \; \
-    source-file "$IAM_HOME/tmux.conf" \; \
-    display-message "$IAM_HOME/tmux.conf reloaded."
-bind Tab last-window
-bind q confirm-before kill-pane
-bind Q confirm-before kill-window
-bind Up    select-pane -U
-bind Down  select-pane -D
-bind Left  select-pane -L
-bind Right select-pane -R
-set -g default-terminal "tmux-256color"
-set -g terminal-overrides ',xterm-256color:Tc'
-set -g base-index 1
-set -g pane-base-index 1
-set -s escape-time 50
-3.3+:set -g allow-passthrough on
-set -g history-limit 1000000
-set -g automatic-rename on
-set -g renumber-windows on
-set -g set-titles on
-set -g set-titles-string '#h > #S'
-set -g status-interval 10
-set -g display-time 2000
-set -g monitor-activity on
-set -g visual-activity off
-set -g aggressive-resize on
-set -g bell-action none
-set -g status-keys vi
-set -g mode-keys vi
-set -ug update-environment
-set -ag update-environment "__KITTY_ID"
--2.1:# UTF status bar for tmux < 2.2
--2.1:set -g status-utf8 on
-2.1+:set -g mouse on
--2.0:set -g mode-mouse on
--2.0:set -g mouse-resize-pane on
--2.0:set -g mouse-select-pane on
--2.0:set -g mouse-select-window on
-unbind -n MouseDown3Pane
-unbind -T copy-mode-vi MouseDragEnd1Pane
-bind -T copy-mode-vi MouseDown1Pane select-pane\; send-keys -X clear-selection
-bind -n MouseDrag1Pane if -Ft= '#{mouse_any_flag}' 'if -Ft= \"#{pane_in_mode}\" \"copy-mode -eM\" \"send-keys -M\"' 'copy-mode -eM'
-bind - split-window -v -c "#{pane_current_path}"
-bind \\ split-window -h -c "#{pane_current_path}"
-bind c new-window -c "#{pane_current_path}"
-bind i set monitor-activity \; display-message "Monitor activity for windows #I is #{?monitor-activity,ON,OFF}"
-bind -n M-1 select-window -t 1
-bind -n M-2 select-window -t 2
-bind -n M-3 select-window -t 3
-bind -n M-4 select-window -t 4
-bind -n M-5 select-window -t 5
-bind -n M-6 select-window -t 6
-bind -n M-7 select-window -t 7
-bind -n M-8 select-window -t 8
-bind -n M-9 select-window -t 9
-bind -n M-Left  select-pane -L
-bind -n M-Right select-pane -R
-bind -n M-Up    select-pane -U
-bind -n M-Down  select-pane -D
-bind -n M-S-Left swap-window -t -1 \; select-window -t -1
-bind -n M-S-Right swap-window -t +1 \; select-window -t +1
-set-hook -ug after-kill-pane
-set-hook -ag after-kill-pane 'run "$IAM_HOME/tools/bin/tmux-helper cleanup-stale-panes -w \"#{hook_window}\" 2>/dev/null"'
-set-hook -ug pane-exited
-set-hook -ag pane-exited 'run "$IAM_HOME/tools/bin/tmux-helper cleanup-stale-panes -w \"#{hook_window}\" 2>/dev/null"'
-set -g @ind_t_prefix ' WAIT '
-set -g @ind_s_prefix 'bg=blue,fg=white'
-set -g @ind_t_copy   ' COPY '
-set -g @ind_s_copy   'bg=yellow,fg=black'
-set -g @ind_t_none   ' TMUX '
-set -g @ind_s_none   'bg=cyan,fg=black'
-set -g @automatic-rename-append-format "#[nobold,fg=white]:#[fg=yellow]"
-set -g automatic-rename-format "#{?pane_in_mode,[tmux],#{pane_current_command}#{?#{!=:#{@automatic-rename-append},},#{@automatic-rename-append-format}#{@automatic-rename-append},}}#{?pane_dead,[dead],}"
-set-hook -ug window-renamed
-set-hook -ag window-renamed 'run "$IAM_HOME/tools/bin/tmux-helper update-automatic-rename-append -w \"#{hook_window}\" 2>/dev/null"'
-set -g clock-mode-colour colour135
-set -g mode-style 'fg=colour196,bg=colour238,bold'
-set -g pane-border-style 'bg=colour235,fg=colour238'
-set -g pane-active-border-style 'bg=colour236,fg=colour51'
-set -g status on
-set -g status-position top
-set -g status-style 'bg=colour234,fg=colour137,dim'
-set -g status-left '#{?client_prefix,#[#{@ind_s_prefix}]#{@ind_t_prefix},#{?pane_in_mode,#[#{@ind_s_copy}]#{@ind_t_copy},#[#{@ind_s_none}]#{@ind_t_none}}}#[fg=colour245,bg=colour234]|'
-set -g status-left-length 20
-set -g status-right '#[fg=colour245]|#[bg=colour175,fg=black] #S '
-set -g status-right-length 50
-set -g window-status-current-format ' #I#[fg=colour250]:#[fg=colour255]#W#[fg=colour50]#F '
-set -g window-status-current-style  'fg=colour81,bg=colour238,bold'
-set -g window-status-format ' #I#[fg=colour237]:#[fg=colour250]#W#{?monitor-activity,,#[fg=colour250]###[]}#[fg=colour50]#F '
-set -g window-status-style  'fg=colour138,bg=colour235,none'
-set -g window-status-bell-style 'fg=colour255,bg=colour1,bold'
-set -g window-status-activity-style 'default'
-set -g message-style 'fg=colour232,bg=colour166,bold'
-EOF
-
 cat <<'EOF' > "$IAM_HOME/vimrc"
 set nocompatible
 set t_Co=256
@@ -571,7 +471,7 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=82043724
+LOCAL_TOOLS_FILE_HASH=5B1F6BAA
 COLOR_WHITE=$'\e[1;37m'
 COLOR_LIGHTGRAY=$'\e[0;37m'
 COLOR_GRAY=$'\e[1;30m'
@@ -949,34 +849,7 @@ LANG="en_US.UTF-8"
 export LANG
 fi
 if _has tmux; then
-if [ -e "$IAM_HOME/tmux.conf" ]; then
-if [ "$(_get_size "$IAM_HOME/tmux.conf.template")" = "$(head -n 1 ~/.kk_home/tmux.conf | sed -E 's/^.+[[:space:]]//')" ]; then
-TMUX_CONF_CACHED=1
-fi
-fi
-[ -z "$TMUX_CONF_CACHED" ] && {
-echo "# generated from tmux.conf.template, size: $(_get_size "$IAM_HOME/tmux.conf.template")"
-ver="$(tmux -V | sed -E -e 's/^.*[[:space:]][^[:digit:]]*//' -e 's/[^[:digit:]]*$//')"
-unset blank
-while IFS= read -r line; do
-[ -z "$line" ] && [ -n "$blank" ] && continue || true
-unset min_ver max_ver
-case "$line" in
-[0-9].[0-9][+-]:*) min_ver="${line:0:3}"; line="${line:5}" ;;
--[0-9].[0-9]:*)    max_ver="${line:1:3}"; line="${line:5}" ;;
-[0-9].[0-9]-[0-9].[0-9]:*)
-min_ver="${line:0:3}"
-max_ver="${line:4:3}"
-line="${line:8}"
-;;
-esac
-[ -z "$min_ver" ] || { _vercomp "$min_ver" '<=' "$ver" || continue; }
-[ -z "$max_ver" ] || { _vercomp "$max_ver" '>=' "$ver" || continue; }
-[ -z "$line" ] && blank=1 || unset blank
-echo "$line"
-done
-unset min_ver max_ver line ver blank
-} < "$IAM_HOME/tmux.conf.template" > "$IAM_HOME/tmux.conf" || unset TMUX_CONF_CACHED
+[ -n "$__TMUX_FUNCTIONS_AVAILABLE" ] && _tmux_generate_conf || :
 TMUX_TMPDIR="$IAM_HOME/tmux_sessions"
 export TMUX_TMPDIR
 [ -e "$TMUX_TMPDIR" ] || mkdir -p "$TMUX_TMPDIR"
@@ -1596,7 +1469,6 @@ printf '%s\n' \
 "export TERMINFO" \
 "tic \"\$IAM_HOME/terminfo/.terminfo\" >/dev/null 2>&1 || true" \
 "fi" \
-"echo \"$(cat ${IAM_HOME}/tmux.conf.template | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/tmux.conf.template\"" \
 "echo \"$(cat ${IAM_HOME}/vimrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/vimrc\"" \
 "echo \"$(cat ${IAM_HOME}/local_tools | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/local_tools\"" \
 "echo \"$(cat ${HOME}/.tclshrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$HOME/.tclshrc\"" \
@@ -1735,10 +1607,10 @@ cat "$fn" > "${fn}.fix-permissions"
 mv -f "${fn}.fix-permissions" "$fn"
 done
 }
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 shopt -s histappend
 shopt -s cmdhist
 unset HISTFILESIZE

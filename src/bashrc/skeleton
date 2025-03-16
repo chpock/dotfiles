@@ -21,10 +21,6 @@ cat <<'EOF' > "$HOME/.tclshrc"
 @include tclshrc.tcl
 EOF
 
-cat <<'EOF' > "$IAM_HOME/tmux.conf.template"
-@include tmux.conf
-EOF
-
 cat <<'EOF' > "$IAM_HOME/vimrc"
 @include vimrc
 EOF

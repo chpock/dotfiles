@@ -471,36 +471,7 @@ fi
 
 if _has tmux; then
 
-    if [ -e "$IAM_HOME/tmux.conf" ]; then
-        if [ "$(_get_size "$IAM_HOME/tmux.conf.template")" = "$(head -n 1 ~/.kk_home/tmux.conf | sed -E 's/^.+[[:space:]]//')" ]; then
-            TMUX_CONF_CACHED=1
-        fi
-    fi
-
-    [ -z "$TMUX_CONF_CACHED" ] && {
-        # strip beta prefix for versions like '3.0a', '3.1c', etc.
-        echo "# generated from tmux.conf.template, size: $(_get_size "$IAM_HOME/tmux.conf.template")"
-        ver="$(tmux -V | sed -E -e 's/^.*[[:space:]][^[:digit:]]*//' -e 's/[^[:digit:]]*$//')"
-        unset blank
-        while IFS= read -r line; do
-            [ -z "$line" ] && [ -n "$blank" ] && continue || true
-            unset min_ver max_ver
-            case "$line" in
-                [0-9].[0-9][+-]:*) min_ver="${line:0:3}"; line="${line:5}" ;;
-                -[0-9].[0-9]:*)    max_ver="${line:1:3}"; line="${line:5}" ;;
-                [0-9].[0-9]-[0-9].[0-9]:*)
-                    min_ver="${line:0:3}"
-                    max_ver="${line:4:3}"
-                    line="${line:8}"
-                    ;;
-            esac
-            [ -z "$min_ver" ] || { _vercomp "$min_ver" '<=' "$ver" || continue; }
-            [ -z "$max_ver" ] || { _vercomp "$max_ver" '>=' "$ver" || continue; }
-            [ -z "$line" ] && blank=1 || unset blank
-            echo "$line"
-        done
-        unset min_ver max_ver line ver blank
-    } < "$IAM_HOME/tmux.conf.template" > "$IAM_HOME/tmux.conf" || unset TMUX_CONF_CACHED
+    [ -n "$__TMUX_FUNCTIONS_AVAILABLE" ] && _tmux_generate_conf || :
 
     # don't store session sockets in /tmp because they can be
     # cleared by anyone at any time
@@ -1387,7 +1358,6 @@ __magic_ssh() {
         "export TERMINFO" \
         "tic \"\$IAM_HOME/terminfo/.terminfo\" >/dev/null 2>&1 || true" \
         "fi" \
-        "echo \"$(cat ${IAM_HOME}/tmux.conf.template | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/tmux.conf.template\"" \
         "echo \"$(cat ${IAM_HOME}/vimrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/vimrc\"" \
         "echo \"$(cat ${IAM_HOME}/local_tools | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/local_tools\"" \
         "echo \"$(cat ${HOME}/.tclshrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$HOME/.tclshrc\"" \

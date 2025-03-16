@@ -76,6 +76,41 @@ _has tmux || return
     esac
 }
 
+_tmux_generate_conf() {
+
+    local TMUX_CONF_TEMPLATE="$IAM_HOME/tmux.conf.template"
+    local TMUX_CONF="$IAM_HOME/tmux.conf"
+
+    # return if there is no tmux.conf template
+    [ -e "$TMUX_CONF_TEMPLATE" ] || return 0
+    # return if tmux.conf exists and its timestamp is newer than the tmux.conf template
+    [ -e "$TMUX_CONF" ] && [ "$TMUX_CONF" -nt "$TMUX_CONF_TEMPLATE" ] && return 0 || :
+
+    # strip beta prefix for versions like '3.0a', '3.1c', etc.
+    local ver="$(command tmux -V | sed -E -e 's/^.*[[:space:]][^[:digit:]]*//' -e 's/[^[:digit:]]*$//')"
+
+    local min_ver max_ver line blank
+    unset blank
+    while IFS= read -r line; do
+        [ -z "$line" ] && [ -n "$blank" ] && continue || true
+        unset min_ver max_ver
+        case "$line" in
+            [0-9].[0-9][+-]:*) min_ver="${line:0:3}"; line="${line:5}" ;;
+            -[0-9].[0-9]:*)    max_ver="${line:1:3}"; line="${line:5}" ;;
+            [0-9].[0-9]-[0-9].[0-9]:*)
+                min_ver="${line:0:3}"
+                max_ver="${line:4:3}"
+                line="${line:8}"
+                ;;
+        esac
+        [ -z "$min_ver" ] || { _vercomp "$min_ver" '<=' "$ver" || continue; }
+        [ -z "$max_ver" ] || { _vercomp "$max_ver" '>=' "$ver" || continue; }
+        [ -z "$line" ] && blank=1 || unset blank
+        echo "$line"
+    done < "$TMUX_CONF_TEMPLATE" > "$TMUX_CONF"
+
+}
+
 __TMUX_FUNCTIONS_AVAILABLE=1
 
 complete -W 'save restore memory clean' ,tmux
