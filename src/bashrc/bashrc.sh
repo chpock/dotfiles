@@ -1760,7 +1760,7 @@ __git_status() {
     # run only once per session
     _check _git-config-check
 
-    local __GIT_REPO_ROOT="$(git rev-parse --git-dir 2>/dev/null)"
+    local __GIT_REPO_ROOT="$(command git rev-parse --git-dir 2>/dev/null)"
 
     if [ "$__GIT_REPO_ROOT" = ".git" ]; then
         __GIT_REPO_ROOT="$(pwd)"
@@ -1771,7 +1771,7 @@ __git_status() {
     local __GIT_IN_SUBMODULE=0
     # try to detect if we are inside submodule. This command may fail
     # on old git version.
-    if __GIT_TEMP="$(git rev-parse --show-superproject-working-tree 2>/dev/null)"; then
+    if __GIT_TEMP="$(command git rev-parse --show-superproject-working-tree 2>/dev/null)"; then
         # the command didn't fail
         if [ -n "$__GIT_TEMP" ]; then
             __GIT_IN_SUBMODULE=1
@@ -1785,8 +1785,8 @@ __git_status() {
 
     # check configuration only once per session
     if _once "git check core.autocrlf in $PWD"; then
-        if [ "$(set +e; LC_ALL=C git config --get core.autocrlf)" != "false" ]; then
-            git config core.autocrlf false
+        if [ "$(LC_ALL=C command git config --get core.autocrlf)" != "false" ]; then
+            command git config core.autocrlf false
         fi
     fi
 
@@ -1819,7 +1819,7 @@ __git_status() {
     done <<< "${__GIT_STATUS}"
 
     if [ "$__GIT_BRANCH" = "!ERROR!" ]; then
-        if TMP_VAL="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)"; then
+        if TMP_VAL="$(command git rev-parse --abbrev-ref HEAD 2>/dev/null)"; then
             __GIT_BRANCH="$TMP_VAL"
         fi
     fi
@@ -1835,8 +1835,24 @@ __git_status() {
     fi
     __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}branch${COLOR_GRAY}: $COLOR_PURPLE$__GIT_BRANCH"
 
+    if [ "$__GIT_BRANCH" != "HEAD" ]; then
+        if ! command git show-ref --verify "refs/remotes/origin/$__GIT_BRANCH" >/dev/null 2>&1; then
+            __GIT_OUTPUT="${__GIT_OUTPUT} ${COLOR_GRAY}(${COLOR_BROWN}local only${COLOR_GRAY})"
+        elif ! TMP_VAL="$(command git rev-list --count "${__GIT_BRANCH}..origin/${__GIT_BRANCH}" 2>&1)"; then
+            __GIT_OUTPUT="${__GIT_OUTPUT} ${COLOR_GRAY}(${COLOR_LIGHTRED}ERROR${COLOR_GRAY}: ${COLOR_DEFAULT}$TMP_VAL${COLOR_GRAY})"
+        elif [ "$TMP_VAL" != "0" ]; then
+            __GIT_OUTPUT="${__GIT_OUTPUT} ${COLOR_GRAY}(${COLOR_RED}needs push force${COLOR_GRAY})"
+        elif ! TMP_VAL="$(command git rev-list --count "origin/${__GIT_BRANCH}..${__GIT_BRANCH}" 2>&1)"; then
+            __GIT_OUTPUT="${__GIT_OUTPUT} ${COLOR_GRAY}(${COLOR_LIGHTRED}ERROR${COLOR_GRAY}: ${COLOR_DEFAULT}$TMP_VAL${COLOR_GRAY})"
+        elif [ "$TMP_VAL" = "1" ]; then
+            __GIT_OUTPUT="${__GIT_OUTPUT} ${COLOR_GRAY}(${COLOR_BROWN}${TMP_VAL} commit ahead remote${COLOR_DEFAULT}${COLOR_GRAY})"
+        elif [ "$TMP_VAL" != "0" ]; then
+            __GIT_OUTPUT="${__GIT_OUTPUT} ${COLOR_GRAY}(${COLOR_BROWN}${TMP_VAL} commits ahead remote${COLOR_DEFAULT}${COLOR_GRAY})"
+        fi
+    fi
+
     local __GIT_TAG
-    if __GIT_TAG="$(git describe --exact-match --tags $(git rev-parse HEAD) 2>/dev/null)"; then
+    if __GIT_TAG="$(command git describe --exact-match --tags $(command git rev-parse HEAD) 2>/dev/null)"; then
         __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}tag${COLOR_GRAY}: $COLOR_PURPLE$__GIT_TAG"
     fi
 
@@ -1864,14 +1880,14 @@ __git_status() {
 
     local __GIT_SIGN
 
-    if TMP_VAL="$(set +e; git config --local --get commit.gpgsign 2>/dev/null)"; then
+    if TMP_VAL="$(command git config --local --get commit.gpgsign 2>/dev/null)"; then
         if [ "$TMP_VAL" = "true" ]; then
             TMP_VAL="${COLOR_GREEN}$TMP_VAL"
             __GIT_SIGN=1
         else
             TMP_VAL="${COLOR_RED}$TMP_VAL"
         fi
-    elif ! TMP_VAL="$(set +e; git config --get commit.gpgsign 2>/dev/null)"; then
+    elif ! TMP_VAL="$(command git config --get commit.gpgsign 2>/dev/null)"; then
         TMP_VAL="${COLOR_LIGHTRED}undef"
     elif [ "$TMP_VAL" = "true" ]; then
         TMP_VAL="${COLOR_GREEN}$TMP_VAL${COLOR_GRAY}(${COLOR_DEFAULT}G${COLOR_GRAY})"
@@ -1889,7 +1905,7 @@ __git_status() {
 
         __GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY};${COLOR_DEFAULT} author${COLOR_GRAY}:"
 
-        if TMP_VAL="$(set +e; LC_ALL=C git config --local --get user.email 2>/dev/null)"; then
+        if TMP_VAL="$(LC_ALL=C command git config --local --get user.email 2>/dev/null)"; then
             if [ "$TMP_VAL" = "$_GIT_USER_EMAIL" ]; then
                 __GIT_AUTHOR_EMAIL="$TMP_VAL"
                 TMP_VAL="${COLOR_GREEN}ON"
@@ -1897,7 +1913,7 @@ __git_status() {
                 __GIT_AUTHOR_EMAIL="$TMP_VAL"
                 TMP_VAL="${COLOR_BROWN}$TMP_VAL"
             fi
-        elif ! TMP_VAL="$(set +e; LC_ALL=C git config --get user.email 2>/dev/null)"; then
+        elif ! TMP_VAL="$(LC_ALL=C command git config --get user.email 2>/dev/null)"; then
             TMP_VAL="${COLOR_LIGHTRED}undef"
         elif [ "$TMP_VAL" = "$_GIT_USER_EMAIL" ]; then
             __GIT_AUTHOR_EMAIL="$TMP_VAL"
@@ -1920,9 +1936,9 @@ __git_status() {
         if ! _has gpg; then
             TMP_VAL="${COLOR_LIGHTRED}unavailable"
         else
-            if TMP_VAL="$(set +e; LC_ALL=C git config --local --get user.signingkey 2>/dev/null)"; then
+            if TMP_VAL="$(LC_ALL=C command git config --local --get user.signingkey 2>/dev/null)"; then
                 __GIT_SIGN_KEY="$TMP_VAL"
-            elif TMP_VAL="$(set +e; LC_ALL=C git config --get user.signingkey 2>/dev/null)"; then
+            elif TMP_VAL="$(LC_ALL=C command git config --get user.signingkey 2>/dev/null)"; then
                 __GIT_SIGN_KEY="$TMP_VAL"
             else
                 : nothing available
@@ -1930,10 +1946,10 @@ __git_status() {
 
             if [ -z "$__GIT_SIGN_KEY" ]; then
                 TMP_VAL="${COLOR_LIGHTRED}not set"
-            elif ! TMP_VAL="$(set +e; LC_ALL=C gpg --list-secret-keys "$__GIT_SIGN_KEY" 2>/dev/null)"; then
+            elif ! TMP_VAL="$(LC_ALL=C command gpg --list-secret-keys "$__GIT_SIGN_KEY" 2>/dev/null)"; then
                 TMP_VAL="${COLOR_RED}no key '$__GIT_SIGN_KEY'"
             else
-                if ! TMP_VAL="$(set +e; LC_ALL=C gpg --with-colons --list-secret-keys "$__GIT_AUTHOR_EMAIL" 2>/dev/null | cut -d: -f5 | head -n 1)"; then
+                if ! TMP_VAL="$(LC_ALL=C command gpg --with-colons --list-secret-keys "$__GIT_AUTHOR_EMAIL" 2>/dev/null | cut -d: -f5 | head -n 1)"; then
                     TMP_VAL="${COLOR_RED}wrong key, no key for '$__GIT_AUTHOR_EMAIL'"
                 elif [ "$TMP_VAL" != "$__GIT_SIGN_KEY" ]; then
                     TMP_VAL="${COLOR_RED}wrong key, set: $__GIT_SIGN_KEY; expected: $TMP_VAL"
