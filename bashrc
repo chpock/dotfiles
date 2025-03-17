@@ -848,29 +848,6 @@ if [ "$LANG" != "en_US.UTF-8" ] && _has locale && [ "$(LANG=en_US.UTF-8 locale c
 LANG="en_US.UTF-8"
 export LANG
 fi
-if _has tmux; then
-[ -n "$__TMUX_FUNCTIONS_AVAILABLE" ] && _tmux_generate_conf || :
-TMUX_TMPDIR="$IAM_HOME/tmux_sessions"
-export TMUX_TMPDIR
-[ -e "$TMUX_TMPDIR" ] || mkdir -p "$TMUX_TMPDIR"
-if _isnot tmux; then
-if [ -n "$__KITTY_ID" ] && [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID/tmux" ]; then
-SID="$(sed -E 's/,([^,]+),([^,]+)$/\1$\2/' "$IAM_HOME/kitty_sessions/$__KITTY_ID/tmux")"
-if SID="$(tmux list-sessions -F"#{socket_path}#{pid}#{session_id}@@@@@#{session_name}" | grep --fixed-string "$SID" | sed -E 's/^.+@@@@@//')" ; then
-exec tmux attach-session -t "$SID"
-fi
-fi
-tmux() {
-if [ -z "$1" ]; then
-exec tmux -f "$IAM_HOME/tmux.conf" new
-else
-command tmux -f "$IAM_HOME/tmux.conf" "$@"
-fi
-}
-else
-alias tmux="tmux -f \"$IAM_HOME/tmux.conf\""
-fi
-fi; # tmux
 if [ -f ~/gcloud/google-cloud-sdk/path.bash.inc ]; then
 . ~/gcloud/google-cloud-sdk/path.bash.inc
 fi
@@ -906,6 +883,29 @@ for SCRIPT in "$IAM_HOME"/shell.rc/*; do
 ! _once "PS1 -> source $SCRIPT" || source "$SCRIPT"
 done
 unset SCRIPT
+if _has tmux; then
+[ -n "$__TMUX_FUNCTIONS_AVAILABLE" ] && _tmux_generate_conf || :
+TMUX_TMPDIR="$IAM_HOME/tmux_sessions"
+export TMUX_TMPDIR
+[ -e "$TMUX_TMPDIR" ] || mkdir -p "$TMUX_TMPDIR"
+if _isnot tmux; then
+if [ -n "$__KITTY_ID" ] && [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID/tmux" ]; then
+SID="$(sed -E 's/,([^,]+),([^,]+)$/\1$\2/' "$IAM_HOME/kitty_sessions/$__KITTY_ID/tmux")"
+if SID="$(tmux list-sessions -F"#{socket_path}#{pid}#{session_id}@@@@@#{session_name}" | grep --fixed-string "$SID" | sed -E 's/^.+@@@@@//')" ; then
+exec tmux attach-session -t "$SID"
+fi
+fi
+tmux() {
+if [ -z "$1" ]; then
+exec tmux -f "$IAM_HOME/tmux.conf" new
+else
+command tmux -f "$IAM_HOME/tmux.conf" "$@"
+fi
+}
+else
+alias tmux="tmux -f \"$IAM_HOME/tmux.conf\""
+fi
+fi; # tmux
 _isnot "aws" || _aws_metadata() {
 local METADATA_URL="http://169.254.169.254/latest"
 if [ -z "$_AWS_METADATA_ACCESS_TYPE" ]; then
@@ -1464,16 +1464,16 @@ printf '%s\n' \
 "if [ \"\$TERM\" = 'xterm-256color' -o \"\$TERM\" = 'tmux-256color' ] && command -v tic >/dev/null 2>&1; then" \
 "rm -rf \"\$IAM_HOME/terminfo\"" \
 "mkdir \"\$IAM_HOME/terminfo\"" \
-"echo \"$(cat ${IAM_HOME}/terminfo/.terminfo | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/terminfo/.terminfo\"" \
+"cat >\"\$IAM_HOME/terminfo/.terminfo\" <<'EOF'" "$(cat "$IAM_HOME/terminfo/.terminfo")" "EOF" \
 "TERMINFO=\"\$IAM_HOME/terminfo\"" \
 "export TERMINFO" \
 "tic \"\$IAM_HOME/terminfo/.terminfo\" >/dev/null 2>&1 || true" \
 "fi" \
-"echo \"$(cat ${IAM_HOME}/vimrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/vimrc\"" \
-"echo \"$(cat ${IAM_HOME}/local_tools | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/local_tools\"" \
-"echo \"$(cat ${HOME}/.tclshrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$HOME/.tclshrc\"" \
-"echo \"$(cat ${IAM_HOME}/bashrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/bashrc\"" \
-"echo \"$(cat ${IAM_HOME}/shellrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/shellrc\"" \
+"cat >\"\$IAM_HOME/vimrc\" <<'EOF'" "$(cat "$IAM_HOME/vimrc")" "EOF" \
+"cat >\"\$IAM_HOME/bashrc\" <<'EOF'" "$(cat "$IAM_HOME/bashrc")" "EOF" \
+"cat >\"\$IAM_HOME/shellrc\" <<'EOF'" "$(cat "$IAM_HOME/shellrc")" "EOF" \
+"cat >\"\$IAM_HOME/local_tools\" <<'EOF'" "$(cat "$IAM_HOME/local_tools" 2>/dev/null || :)" "EOF" \
+"cat >\"\$HOME/.tclshrc\" <<'EOF'" "$(cat "$HOME/.tclshrc")" "EOF" \
 "chmod +x \"\$IAM_HOME/shellrc\"" \
 "exec \"\$IAM_HOME/shellrc\""
 }
