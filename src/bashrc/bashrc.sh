@@ -535,12 +535,15 @@ if _has tmux; then
             SID="$(sed -E 's/,([^,]+),([^,]+)$/\1$\2/' "$IAM_HOME/kitty_sessions/$__KITTY_ID/tmux")"
             # tmux v3.0a doesn't support filter for 'list-sessions'
             if SID="$(tmux list-sessions -F"#{socket_path}#{pid}#{session_id}@@@@@#{session_name}" | grep --fixed-string "$SID" | sed -E 's/^.+@@@@@//')" ; then
+                # these environment variable don't matter when we attach to existing
+                # tmux session: SSH_PUB_KEY _GIT_USER_EMAIL _GIT_USER_NAME
                 exec tmux attach-session -t "$SID"
             fi
         fi
 
         tmux() {
             if [ -z "$1" ]; then
+                export SSH_PUB_KEY _GIT_USER_EMAIL _GIT_USER_NAME
                 exec tmux -f "$IAM_HOME/tmux.conf" new
             else
                 command tmux -f "$IAM_HOME/tmux.conf" "$@"
@@ -1370,20 +1373,20 @@ __magic_ssh() {
 reload() {
     if _is tmux && [ "$1" != "current" ]; then
         local current_wid wid cmd
-        current_wid="$(tmux display-message -p -t $TMUX_PANE '#{window_id}')"
-        for wid in $(tmux list-windows -F '#{window_id}'); do
+        current_wid="$(command tmux display-message -p -t $TMUX_PANE '#{window_id}')"
+        for wid in $(command tmux list-windows -F '#{window_id}'); do
             [ "$wid" != "$current_wid" ] || continue
-            cmd="$(tmux display-message -p -t "$wid" '#{pane_current_command}')"
+            cmd="$(command tmux display-message -p -t "$wid" '#{pane_current_command}')"
             if [ "$cmd" != "bash" ]; then
-                echo "Error: can't reload window '$(tmux display-message -p -t "$wid" '#{window_index}:#{window_name}')' as its command '$cmd' is not 'bash'."
+                echo "Error: can't reload window '$(command tmux display-message -p -t "$wid" '#{window_index}:#{window_name}')' as its command '$cmd' is not 'bash'."
                 return 1
             fi
         done
         "$IAM_HOME/tools/bin/tmux-helper" reset-options-to-default >/dev/null 2>&1 || true
-        tmux source-file "$IAM_HOME/tmux.conf"
-        for wid in $(tmux list-windows -F '#{window_id}'); do
+        command tmux source-file "$IAM_HOME/tmux.conf"
+        for wid in $(command tmux list-windows -F '#{window_id}'); do
             [ "$wid" != "$current_wid" ] || continue
-            tmux send-keys -t $wid 'reload current' C-m
+            command tmux send-keys -t $wid 'reload current' C-m
         done
     fi
     # Reloaded shell should be with the same _SHELL_SESSION_ID.
@@ -1559,12 +1562,12 @@ else
     HISTFILE_GLOBAL="$IAM_HOME/bash_history"
 
     if _is tmux; then
-        if _TMUX_SESSION_ID="$(tmux show-env _TMUX_SESSION_ID 2>/dev/null)"; then
+        if _TMUX_SESSION_ID="$(command tmux show-env _TMUX_SESSION_ID 2>/dev/null)"; then
             # Strip variable name
             _TMUX_SESSION_ID="${_TMUX_SESSION_ID#*=}"
         elif [ "$__TMUX_FUNCTIONS_AVAILABLE" != "1" ] || ! _TMUX_SESSION_ID="$(,tmux _get-id-from-backup)"; then
             _random -v _TMUX_SESSION_ID
-            tmux set-env _TMUX_SESSION_ID "$_TMUX_SESSION_ID"
+            command tmux set-env _TMUX_SESSION_ID "$_TMUX_SESSION_ID"
         fi
         _TMUX_SESSION_DIR="$IAM_HOME/shell_sessions/tmux-$_TMUX_SESSION_ID"
         _SHELL_SESSION_DIR="$_TMUX_SESSION_DIR/$_SHELL_SESSION_ID"
@@ -1983,29 +1986,29 @@ _ps1_show_status() {
         echo "$1"
         return
     fi
-    [ -n "$_PS1_TMUX_CURRENT_WINDOW" ] || _PS1_TMUX_CURRENT_WINDOW="$(tmux display-message -p -t "$TMUX_PANE" '#{window_id}')"
+    [ -n "$_PS1_TMUX_CURRENT_WINDOW" ] || _PS1_TMUX_CURRENT_WINDOW="$(command tmux display-message -p -t "$TMUX_PANE" '#{window_id}')"
     if [ -z "$_PS1_TMUX_CURRENT_STATUS" ]; then
         # we may have a status pane and lost its ID after reload.
         # #{pane_dead} doesn't work in tmux 3.0a. Status pane is not marked as dead.
         # However, #{pane_pid} works everywhere. Empty pane has 0 pane_pid.
-        _PS1_TMUX_CURRENT_STATUS="$(tmux list-panes -t "$_PS1_TMUX_CURRENT_WINDOW" -F '#{pane_pid} #{pane_id}' | grep '^0 ' | awk '{print $2}' | tail -n 1)"
+        _PS1_TMUX_CURRENT_STATUS="$(command tmux list-panes -t "$_PS1_TMUX_CURRENT_WINDOW" -F '#{pane_pid} #{pane_id}' | grep '^0 ' | awk '{print $2}' | tail -n 1)"
         # no panes, create one
-        [ -n "$_PS1_TMUX_CURRENT_STATUS" ] || _PS1_TMUX_CURRENT_STATUS="$(tmux split-window -d -l 1 -v -t "$TMUX_PANE" -P -F '#{pane_id}' '')"
-        #tmux select-pane -t "$_PS1_TMUX_CURRENT_STATUS" -P 'bg=colour236'
-        #tmux select-pane -t "$TMUX_PANE"
+        [ -n "$_PS1_TMUX_CURRENT_STATUS" ] || _PS1_TMUX_CURRENT_STATUS="$(command tmux split-window -d -l 1 -v -t "$TMUX_PANE" -P -F '#{pane_id}' '')"
+        #command tmux select-pane -t "$_PS1_TMUX_CURRENT_STATUS" -P 'bg=colour236'
+        #command tmux select-pane -t "$TMUX_PANE"
         # defaults are:
         # pane-border-style bg=colour235,fg=colour238
         # pane-active-border-style bg=colour236,fg=colour51
-        tmux set -p -t "$TMUX_PANE" pane-border-style 'bg=default,fg=colour238'
-        tmux set -p -t "$TMUX_PANE" pane-active-border-style 'bg=default,fg=colour238'
-        tmux set -p -t "$_PS1_TMUX_CURRENT_STATUS" pane-border-style 'bg=default,fg=colour238'
-        tmux set -p -t "$_PS1_TMUX_CURRENT_STATUS" pane-active-border-style 'bg=default,fg=colour238'
+        command tmux set -p -t "$TMUX_PANE" pane-border-style 'bg=default,fg=colour238'
+        command tmux set -p -t "$TMUX_PANE" pane-active-border-style 'bg=default,fg=colour238'
+        command tmux set -p -t "$_PS1_TMUX_CURRENT_STATUS" pane-border-style 'bg=default,fg=colour238'
+        command tmux set -p -t "$_PS1_TMUX_CURRENT_STATUS" pane-active-border-style 'bg=default,fg=colour238'
     fi
     [ -z "${_PS1_STATUS_LINE}" ] && _PS1_STATUS_LINE=1 || _PS1_STATUS_LINE=$(( _PS1_STATUS_LINE + 1 ))
-    tmux resize-pane -y "$_PS1_STATUS_LINE" -t "$_PS1_TMUX_CURRENT_STATUS"
+    command tmux resize-pane -y "$_PS1_STATUS_LINE" -t "$_PS1_TMUX_CURRENT_STATUS"
     # "\033[?7l" / "\033[?7h" - disables/enables word wrap in tmux
     # https://github.com/tmux/tmux/issues/969#issuecomment-307659989
-    printf "\n\033[?7l%s\033[?7h" "$1" | tmux display-message -t "$_PS1_TMUX_CURRENT_STATUS" -I
+    printf "\n\033[?7l%s\033[?7h" "$1" | command tmux display-message -t "$_PS1_TMUX_CURRENT_STATUS" -I
 }
 
 # Function to set prompt_command to.
@@ -2134,15 +2137,15 @@ function promptcmd () {
     __git_status
 
     if [ -z "$_PS1_STATUS_LINE" ] && [ -n "$_PS1_TMUX_CURRENT_STATUS" ]; then
-        tmux kill-pane -t "$_PS1_TMUX_CURRENT_STATUS"
-        tmux set-hook -u -w -t "$TMUX_PANE" 'pane-exited[879]'
+        command tmux kill-pane -t "$_PS1_TMUX_CURRENT_STATUS"
+        command tmux set-hook -u -w -t "$TMUX_PANE" 'pane-exited[879]'
         unset _PS1_TMUX_CURRENT_STATUS
     fi
 
     if _is tmux && [ -n "$TMUX_PANE" ]; then
         # Forcing the window name to be updated, since we may have changed the working directory.
         # Run it in the background and silently ignore any errors.
-        tmux set-hook -R -t "$TMUX_PANE" window-renamed >/dev/null 2>&1 &
+        command tmux set-hook -R -t "$TMUX_PANE" window-renamed >/dev/null 2>&1 &
         disown $!
     fi
 
@@ -3045,8 +3048,9 @@ if _isnot tmux; then
     fi
 
     if _has tmux; then
-        [ -z "$__TMUX_FUNCTIONS_AVAILABLE" ] || ,tmux restore
-        if tmux list-sessions -F '#{session_attached}' 2>/dev/null | grep --silent --fixed-strings '0'; then
+        [ -z "$__TMUX_FUNCTIONS_AVAILABLE" ] \
+            || SSH_PUB_KEY="$SSH_PUB_KEY" _GIT_USER_EMAIL="$_GIT_USER_EMAIL" _GIT_USER_NAME="$_GIT_USER_NAME" ,tmux restore
+        if command tmux list-sessions -F '#{session_attached}' 2>/dev/null | grep --silent --fixed-strings '0'; then
             echo "${COLOR_GRAY}[${COLOR_CYAN}TMUX${COLOR_GRAY}] ${COLOR_DEFAULT}Current environment has the following unattached tmux sessions: \"$(tmux list-sessions -F '#{session_attached} #{session_name}' | grep '^0' | sed -E 's/^[[:digit:]][[:space:]]+//' | sed ':a;N;$!ba; s/\n/", "/g')\""
             echo "${COLOR_GRAY}[${COLOR_CYAN}TMUX${COLOR_GRAY}] ${COLOR_DEFAULT}Type to attach: tmux attach-session -t <session name>"
 
