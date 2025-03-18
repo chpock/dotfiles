@@ -471,7 +471,7 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=A0B9684A
+LOCAL_TOOLS_FILE_HASH=17466850
 COLOR_WHITE=$'\e[1;37m'
 COLOR_LIGHTGRAY=$'\e[0;37m'
 COLOR_GRAY=$'\e[1;30m'
@@ -1400,10 +1400,7 @@ fi
 export EDITOR
 alias vi=vim
 vim() {
-local CMD="vim"
-if ! _has_executable vim && [ -n "$__INSTALL_FUNCTIONS_AVAILABLE" ] && ,install vim-portable; then
-CMD="vim-portable"
-fi
+_maybe_local "vim"
 if _isnot tmux; then
 if [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID" ]; then
 if [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim" ]; then
@@ -1413,7 +1410,7 @@ echo "$@" > "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim"
 fi
 fi
 fi
-command "$CMD" -u "$IAM_HOME/vimrc" -i "$IAM_HOME/viminfo" "$@"
+command vim -u "$IAM_HOME/vimrc" -i "$IAM_HOME/viminfo" "$@"
 if _isnot tmux && [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID" ]; then
 rm -f "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim"
 fi
@@ -1610,9 +1607,9 @@ done
 }
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
+shopt -s histappend
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
-shopt -s histappend
 shopt -s cmdhist
 unset HISTFILESIZE
 HISTSIZE=1000000

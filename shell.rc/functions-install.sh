@@ -15,7 +15,7 @@ __INSTALL_VERSION="
   kubecolor     0.5.0
   mcfly         0.9.3
   tar-portable  1.35
-  vim-portable  9.0.2094
+  vim           9.0.2094
   xz-portable   5.6.4
   yq            4.45.1
   grpcurl       1.9.3
@@ -318,7 +318,7 @@ __install_tar_portable() {
     __install_download && __install_bin "archive" || return $?
 }
 
-__install_vim_portable() {
+__install_vim() {
     local VERSION="$1" EXECUTABLE="$2"
 
     if [ "$VERSION" = "-check" ]; then

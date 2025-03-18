@@ -1283,10 +1283,7 @@ export EDITOR
 
 alias vi=vim
 vim() {
-    local CMD="vim"
-    if ! _has_executable vim && [ -n "$__INSTALL_FUNCTIONS_AVAILABLE" ] && ,install vim-portable; then
-        CMD="vim-portable"
-    fi
+    _maybe_local "vim"
     if _isnot tmux; then
         if [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID" ]; then
             if [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim" ]; then
@@ -1296,7 +1293,7 @@ vim() {
             fi
         fi
     fi
-    command "$CMD" -u "$IAM_HOME/vimrc" -i "$IAM_HOME/viminfo" "$@"
+    command vim -u "$IAM_HOME/vimrc" -i "$IAM_HOME/viminfo" "$@"
     if _isnot tmux && [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID" ]; then
         rm -f "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim"
     fi
