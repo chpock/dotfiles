@@ -85,7 +85,7 @@ aws() {
                 return 1
             fi
             REGION="$AWS_DEFAULT_REGION"
-            if ! ACCOUNT="$(aws sts get-caller-identity --query Account --output text 2>&1)"; then
+            if ! ACCOUNT="$(command aws sts get-caller-identity --query Account --output text 2>&1)"; then
                 # Trim possible leading spaces
                 ACCOUNT=${ACCOUNT#"${ACCOUNT%%[![:space:]]*}"}
                 echo "Error retrieving AWS account: $ACCOUNT"
@@ -158,7 +158,7 @@ __,aws() {
         ;;
     ecr-auth-docker)
         if [ $COMP_CWORD -eq 2 ]; then
-            printf '\nEnter the ECR host name here or leave it blank for automatic detection'
+            printf '\nEnter the ECR host name here or leave it blank for automatic detection.'
             COMPREPLY=('~=~=~=~=~=~' '=~=~=~=~=~=')
             return
         fi
@@ -172,9 +172,9 @@ __,aws() {
 
 __,aws --install-completion
 
-if [ -x "/usr/local/aws/bin/aws_completer" ]; then
-    complete -C '/usr/local/aws/bin/aws_completer' aws
-elif _has aws_completer; then
+if _has aws_completer; then
     complete -C "$(command -v aws_completer)" aws
+elif [ -x "/usr/local/aws/bin/aws_completer" ]; then
+    complete -C '/usr/local/aws/bin/aws_completer' aws
 fi
 

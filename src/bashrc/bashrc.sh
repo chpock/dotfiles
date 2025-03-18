@@ -172,7 +172,7 @@ _has_function() { declare -f -F "$1" >/dev/null && return 0 || return 1; }
 _maybe_local() {
     if [ -n "$__INSTALL_FUNCTIONS_AVAILABLE" ] && _check _is_install_available "$1"; then
         if _has_local "$1" || ! _has_executable "$1"; then
-            ,install "$1" || :
+            ,install -executable "$1" || :
         fi
     fi
 }

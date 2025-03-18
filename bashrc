@@ -471,7 +471,7 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=53FB6860
+LOCAL_TOOLS_FILE_HASH=A0B9684A
 COLOR_WHITE=$'\e[1;37m'
 COLOR_LIGHTGRAY=$'\e[0;37m'
 COLOR_GRAY=$'\e[1;30m'
@@ -615,7 +615,7 @@ _has_function() { declare -f -F "$1" >/dev/null && return 0 || return 1; }
 _maybe_local() {
 if [ -n "$__INSTALL_FUNCTIONS_AVAILABLE" ] && _check _is_install_available "$1"; then
 if _has_local "$1" || ! _has_executable "$1"; then
-,install "$1" || :
+,install -executable "$1" || :
 fi
 fi
 }

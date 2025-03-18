@@ -2,7 +2,7 @@
 
 __INSTALL_VERSION="
   shellcheck    0.10.0
-  awscli:aws    2.24.20
+  awscli:aws    2.24.26
   kubectl       1.32.3
   dive          0.12.0
   gzip-portable 1.13
@@ -353,7 +353,7 @@ __install_awscli() {
 
     if [ "$VERSION" = "-check" ]; then
         __install_check_version "$EXECUTABLE" --version \
-            | aws --version | awk '{print $1}' | cut -d/ -f2
+            | awk '{print $1}' | cut -d/ -f2
         return 0
     elif [ "$VERSION" = "-latest" ]; then
         geturl https://raw.githubusercontent.com/aws/aws-cli/v2/CHANGELOG.rst 2>/dev/null \
@@ -366,15 +366,8 @@ __install_awscli() {
         linux-x64 awscli-exe-linux-x86_64-${VERSION}.zip
     " && __install_download && __install_unpack || return $?
 
-    if [ -e "/usr/local/bin/aws" ]; then
-        echo "Updating ..." >&2
-        sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update >/dev/null || return $?
-    else
-        echo "Installing ..." >&2
-        sudo ./aws/install >/dev/null || return $?
-    fi
-
-    ln -sf /usr/local/bin/aws "$EXECUTABLE"
+    local BASE_EXE_DIRECTORY="${EXECUTABLE%/*}"
+    ./aws/install --bin-dir "$BASE_EXE_DIRECTORY" --install-dir "$BASE_EXE_DIRECTORY/aws-cli-install" --update >/dev/null || return $?
 }
 
 
@@ -540,6 +533,12 @@ _is_install_available() {
 
 ,install() {
 
+    local BY_EXECUTABLE=""
+    if [ "$1" = "-executable" ]; then
+        BY_EXECUTABLE=1
+        shift
+    fi
+
     if [ -z "$1" ]; then
         echo "Available tools:"
         echo
@@ -555,25 +554,36 @@ _is_install_available() {
     fi
 
     local V="__CACHE_INSTALL_${1//-/_}"
+    # for debug
     #[ -z "${!V}" ] || return "${!V}"
 
-    local R=0 DISABLED TOOL VERSION EXECUTABLE
+    local R=1 DISABLED=1 TOOL VERSION EXECUTABLE
     while read -r DISABLED TOOL EXECUTABLE VERSION; do
+
         # Check if the current tool is the tool that was requested on
         # the command line.
-        if [ "$TOOL" = "$1" ]; then
-            if [ "$DISABLED" != "0" ]; then
-                echo "Error: tool '$1' is unavailable in current OS/architecture" >&2
-                unset TOOL
-            fi
-            break
+        if [ -n "$BY_EXECUTABLE" ]; then
+            [ "$EXECUTABLE" != "$1" ] || R=0
+        else
+            [ "$TOOL" != "$1" ] || R=0
         fi
-        unset TOOL DISABLED
+
+        # continue if R is not 0
+        [ "$R" -eq 0 ] || continue
+
+        # if the tool is disabled, then unset DISABLE variable as a flag
+        if [ "$DISABLED" != "0" ]; then
+            echo "Error: tool '$1' is unavailable in current OS/architecture" >&2
+            unset DISABLED
+            R=1
+        fi
+        break
+
     done < <(echo "$__INSTALL_VERSION_FILTERED")
 
-    if [ -z "$TOOL" ]; then
-        [ -n "$DISABLED" ] || echo "Error: tool '$1' is unknown" >&2
-        R=1
+    if [ $R -eq 1 ]; then
+        # if disable does not exist, then we have already printed the error message
+        [ -z "$DISABLED" ] || echo "Error: tool '$1' is unknown" >&2
     else
 
         local TOOL_FUNC="__install_${TOOL//-/_}"
@@ -601,7 +611,7 @@ _is_install_available() {
         if [ "$CHECK_VERSION" != "$VERSION" ]; then
 
             local TEMP_DIR="$(mktemp --directory)"
-            (cd "$TEMP_DIR"; "$TOOL_FUNC" "$VERSION" "$EXECUTABLE") && R=0 || R=$?
+            (cd "$TEMP_DIR"; "$TOOL_FUNC" "$VERSION" "$EXECUTABLE") || R=$?
             rm -rf "$TEMP_DIR"
 
         fi
