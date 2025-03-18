@@ -16,6 +16,7 @@ __INSTALL_VERSION="
   mcfly         0.9.3
   tar-portable  1.35
   vim-portable  9.0.2094
+  xz-portable   5.6.4
   yq            4.45.1
   grpcurl       1.9.3
   yazi          25.3.2
@@ -269,6 +270,25 @@ __install_gzip_portable() {
 
     local VERSION_REPO="v0.0.0"
     local URL="https://github.com/chpock/dotfiles/releases/download/${VERSION_REPO}/gzip-portable.${VERSION}."
+    __install_make_url -noformat "
+        linux-x64   linux.x86_64
+    " && __install_download && __install_bin "archive" || return $?
+}
+
+__install_xz_portable() {
+    local VERSION="$1" EXECUTABLE="$2"
+
+    if [ "$VERSION" = "-check" ]; then
+        __install_check_version "$EXECUTABLE" --version \
+            | head -n 1 | awk '{print $NF}'
+        return 0
+    elif [ "$VERSION" = "-latest" ]; then
+        echo "skip"
+        return 0
+    fi
+
+    local VERSION_REPO="v0.0.0"
+    local URL="https://github.com/chpock/dotfiles/releases/download/${VERSION_REPO}/xz-portable.${VERSION}."
     __install_make_url -noformat "
         linux-x64   linux.x86_64
     " && __install_download && __install_bin "archive" || return $?
