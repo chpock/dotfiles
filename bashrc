@@ -4,17 +4,16 @@ IAM_HOME="$HOME/.${IAM}_home" && export IAM_HOME
 SSH_PUB_KEY="ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEApJEHtvysrpZeN7xfBS5GY0JjFD8eL5UCYZFbwcUhKXKNXsjtLl9FtwA9sS0cJhqM8CSSGAcceSirACC5L5PSLckeUh2eofYlqJPBkNzU2Uycwc7CSKJRaVTY+yNAJrdpO+7fJPxzis5H3CEB6roguEr+ZqDF9BSEZ0CO8l4wTGgsmqZ2UJuEKfVpPMg6cqGCUj6NvoADavMyrOPRKVCvKikJaWd3NJK4UXueLW0pc/lNoKvbVYRyXO0VruwsAAeciPtn/M1po/iz3+pQW9fk6uM1YContqmR3Ga7TfF249cSyml2gSO8VeNoPbm3RM/KPMZ8F9eyfwQUf6bic2IRoQ== kkushnir" && export SSH_PUB_KEY
 _GIT_USER_NAME="Konstantin Kushnir" && export _GIT_USER_NAME
 _GIT_USER_EMAIL="chpock@gmail.com" && export _GIT_USER_EMAIL
-[ -d "$IAM_HOME" ] || mkdir -p "$IAM_HOME"
+[ -d "$IAM_HOME/terminfo" ] || mkdir -p "$IAM_HOME/terminfo"
 
-if [ "$TERM" = "xterm-256color" -o "$TERM" = "tmux-256color" ] && command -v tic >/dev/null 2>&1; then
-    rm -rf "$IAM_HOME/terminfo"
-    mkdir -p "$IAM_HOME/terminfo"
-    cat <<'EOF' > "$IAM_HOME/terminfo/.terminfo"
+cat <<'EOF' > "$IAM_HOME/terminfo/.terminfo"
 xterm-256color|xterm with 256 colors,
  am,bce,ccc,xenl,km,hs,mir,msgr,xon,npc,mc5i,it#8,colors#256,pairs#32767,acsc=``aaffggiijjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}}~~,cbt=\E[Z,bel=^G,cr=^M,csr=\E[%i%p1%d;%p2%dr,tbc=\E[3g,clear=\E[H\E[J,el1=\E[1K,el=\E[K,ed=\E[J,hpa=\E[%i%p1%dG,cup=\E[%i%p1%d;%p2%dH,home=\E[H,civis=\E[?25l,cub1=^H,cnorm=\E[34h\E[?25h,cud1=\E[B,cuf1=\E[C,cuu1=\E[A,cvvis=\E[34l\E[?25h,dch1=\E[P,dl1=\E[M,dsl=\E]0;\007,dispc=%?%p1%{8}%=%t\E%%G\342\227\230\E%%@%e%p1%{10}%=%t\E%%G\342\227\231\E%%@%e%p1%{12}%=%t\E%%G\342\231\0\E%%@%e%p1%{13}%=%t\E%%G\342\231\252\E%%@%e%p1%{14}%=%t\E%%G\342\231\253\E%%@%e%p1%{15}%=%t\E%%G\342\230\274\E%%@%e%p1%{27}%=%t\E%%G\342\206\220\E%%@%e%p1%{155}%=%t\E%%G\340\202\242\E%%@%e%p1%c%;,enacs=\E(B\E)0,smacs=\E(0,smam=\E[?7h,blink=\E[5m,bold=\E[1m,smcup=\E[?1049h,swidm=\E#6,smir=\E[4h,smpch=\E[11m,rev=\E[7m,smso=\E[7m,smul=\E[4m,ech=\E[%p1%dX,rmacs=\E(B,rmam=\E[?7l,sgr0=\E[m\E(B,rmcup=\E[?1049l,rmir=\E[4l,rmpch=\E[10m,rmso=\E[27m,rmul=\E[24m,flash=\E[?5h$<100/>\E[?5l,fsl=^G,is2=\E[34h\E[?25h\E[4l\E[?7h\E[?1;4;6;1047l\E[2J\E[H\E>\E[r\E[m\E]R\E[?1000l\E[?1002l,initc@,ich1=\E[@,il1=\E[L,ka1=\EOw,ka3=\EOy,kb2=\EOu,kc1=\EOq,kc3=\EOs,kbs=\177,kcbt=\E[Z,kdch1=\E[3~,kend=\E[4~,kent=\EOM,kf1=\E[11~,kf2=\E[12~,kf3=\E[13~,kf4=\E[14~,kf5=\E[15~,kf6=\E[17~,kf7=\E[18~,kf8=\E[19~,kf9=\E[20~,kf10=\E[21~,kf11=\E[23~,kf12=\E[24~,kf13=\E[25~,kf14=\E[26~,kf15=\E[28~,kf16=\E[29~,kf17=\E[31~,kf18=\E[32~,kf19=\E[33~,kf20=\E[34~,kf21=\E[20;2~,kf22=\E[21;2~,kf23=\E[23;2~,kf24=\E[24;2~,kf25=\EO5P,kf26=\EO5Q,kf27=\EO5R,kf28=\EO5S,kf29=\E[15;5~,kf30=\E[17;5~,kf31=\E[18;5~,kf32=\E[19;5~,kf33=\E[20;5~,kf34=\E[21;5~,kf35=\E[23;5~,kf36=\E[24;5~,kf37=\EO6P,kf38=\EO6Q,kf39=\EO6R,kf40=\EO6S,kf41=\E[15;6~,kf42=\E[17;6~,kf43=\E[18;6~,kf44=\E[19;6~,kf45=\E[20;6~,kf46=\E[21;6~,kf47=\E[23;6~,kf48=\E[24;6~,kf49=\EO3P,kf50=\EO3Q,kf51=\EO3R,kf52=\EO3S,kf53=\E[15;3~,kf54=\E[17;3~,kf55=\E[18;3~,kf56=\E[19;3~,kf57=\E[20;3~,kf58=\E[21;3~,kf59=\E[23;3~,kf60=\E[24;3~,kf61=\EO4P,kf62=\EO4Q,kf63=\EO4R,khome=\E[1~,kich1=\E[2~,kcub1=\EOD,kcuf1=\EOC,kcuu1=\EOA,kcud1=\EOB,kmous=\E[M,knp=\E[6~,kpp=\E[5~,rmkx=\E[?1l\E>,smkx=\E[?1h\E=,oc=\E]R,op=\E[39;49m,dch=\E[%p1%dP,dl=\E[%p1%dM,cud=\E[%p1%dB,ich=\E[%p1%d@,indn=\E[%p1%dS,il=\E[%p1%dL,cub=\E[%p1%dD,cuf=\E[%p1%dC,rin=\E[%p1%dT,cuu=\E[%p1%dA,mc0=\E[i,mc4=\E[4i,mc5=\E[5i,rs1=\Ec,rs2=\E<\E["p\E[50;6"p\Ec\E[?3l\E]R\E[?1000l,rc=\E8,vpa=\E[%i%p1%dd,sc=\E7,ind=^J,ri=\EM,s0ds=\E[10m,s1ds=\E[11m,s2ds=\E[12m,setab=\E[%?%p1%{8}%<%t4%p1%d%e%p1%{16}%<%t10%p1%{8}%-%d%e48;5;%p1%d%;m,setaf=\E[%?%p1%{8}%<%t3%p1%d%e%p1%{16}%<%t9%p1%{8}%-%d%e38;5;%p1%d%;m,sgr=\E[0%?%p1%p6%|%t;1%;%?%p2%t;4%;%?%p1%p3%|%t;7%;%?%p4%t;5%;m%?%p9%t\016%e\017%;,hts=\EH,ht=^I,tsl=\E]0;,u6=\E[%i%d;%dR,u7=\E[6n,u8=\E[?6c,u9=\E[c,
 tmux-256color|tmux with 256 colors,
  am, hs, km, mir, msgr, xenl,colors#0x100, cols#80, it#8, lines#24, pairs#0x10000,acsc=++\,\,--..00``aaffgghhiijjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}}~~,bel=^G, blink=\E[5m, bold=\E[1m, cbt=\E[Z, civis=\E[?25l,clear=\E[H\E[J, cnorm=\E[34h\E[?25h, cr=\r,csr=\E[%i%p1%d;%p2%dr, cub=\E[%p1%dD, cub1=^H,cud=\E[%p1%dB, cud1=\n, cuf=\E[%p1%dC, cuf1=\E[C,cup=\E[%i%p1%d;%p2%dH, cuu=\E[%p1%dA, cuu1=\EM,cvvis=\E[34l, dch=\E[%p1%dP, dch1=\E[P, dim=\E[2m,dl=\E[%p1%dM, dl1=\E[M, dsl=\E]0;\007, ed=\E[J, el=\E[K,el1=\E[1K, enacs=\E(B\E)0, flash=\Eg, fsl=^G, home=\E[H,hpa=\E[%i%p1%dG, ht=^I, hts=\EH, ich=\E[%p1%d@,il=\E[%p1%dL, il1=\E[L, ind=\n, indn=\E[%p1%dS,invis=\E[8m, is2=\E)0, kDC=\E[3;2~, kEND=\E[1;2F,kHOM=\E[1;2H, kIC=\E[2;2~, kLFT=\E[1;2D, kNXT=\E[6;2~,kPRV=\E[5;2~, kRIT=\E[1;2C, kbs=^?, kcbt=\E[Z, kcub1=\EOD,kcud1=\EOB, kcuf1=\EOC, kcuu1=\EOA, kdch1=\E[3~,kend=\E[4~, kf1=\EOP, kf10=\E[21~, kf11=\E[23~,kf12=\E[24~, kf13=\E[1;2P, kf14=\E[1;2Q, kf15=\E[1;2R,kf16=\E[1;2S, kf17=\E[15;2~, kf18=\E[17;2~,kf19=\E[18;2~, kf2=\EOQ, kf20=\E[19;2~, kf21=\E[20;2~,kf22=\E[21;2~, kf23=\E[23;2~, kf24=\E[24;2~,kf25=\E[1;5P, kf26=\E[1;5Q, kf27=\E[1;5R, kf28=\E[1;5S,kf29=\E[15;5~, kf3=\EOR, kf30=\E[17;5~, kf31=\E[18;5~,kf32=\E[19;5~, kf33=\E[20;5~, kf34=\E[21;5~,kf35=\E[23;5~, kf36=\E[24;5~, kf37=\E[1;6P, kf38=\E[1;6Q,kf39=\E[1;6R, kf4=\EOS, kf40=\E[1;6S, kf41=\E[15;6~,kf42=\E[17;6~, kf43=\E[18;6~, kf44=\E[19;6~,kf45=\E[20;6~, kf46=\E[21;6~, kf47=\E[23;6~,kf48=\E[24;6~, kf49=\E[1;3P, kf5=\E[15~, kf50=\E[1;3Q,kf51=\E[1;3R, kf52=\E[1;3S, kf53=\E[15;3~, kf54=\E[17;3~,kf55=\E[18;3~, kf56=\E[19;3~, kf57=\E[20;3~,kf58=\E[21;3~, kf59=\E[23;3~, kf6=\E[17~, kf60=\E[24;3~,kf61=\E[1;4P, kf62=\E[1;4Q, kf63=\E[1;4R, kf7=\E[18~,kf8=\E[19~, kf9=\E[20~, khome=\E[1~, kich1=\E[2~,kind=\E[1;2B, kmous=\E[M, knp=\E[6~, kpp=\E[5~,kri=\E[1;2A, nel=\EE, op=\E[39;49m, rc=\E8, rev=\E[7m,ri=\EM, rin=\E[%p1%dT, ritm=\E[23m, rmacs=^O,rmcup=\E[?1049l, rmir=\E[4l, rmkx=\E[?1l\E>, rmso=\E[27m,rmul=\E[24m, rs2=\Ec\E[?1000l\E[?25h, sc=\E7,setab=\E[%?%p1%{8}%<%t4%p1%d%e%p1%{16}%<%t10%p1%{8}%-%d%e48;5;%p1%d%;m,setaf=\E[%?%p1%{8}%<%t3%p1%d%e%p1%{16}%<%t9%p1%{8}%-%d%e38;5;%p1%d%;m,sgr=\E[0%?%p6%t;1%;%?%p2%t;4%;%?%p1%p3%|%t;7%;%?%p4%t;5%;%?%p5%t;2%;%?%p7%t;8%;m%?%p9%t\016%e\017%;,sgr0=\E[m\017, sitm=\E[3m, smacs=^N, smcup=\E[?1049h,smir=\E[4h, smkx=\E[?1h\E=, smso=\E[7m, smul=\E[4m,tbc=\E[3g, tsl=\E]0;, u6=\E[%i%d;%dR, u7=\E[6n,u8=\E[?1;2c, u9=\E[c, vpa=\E[%i%p1%dd,
 EOF
+
+if [ "$TERM" = "xterm-256color" -o "$TERM" = "tmux-256color" ] && command -v tic >/dev/null 2>&1; then
     TERMINFO="$IAM_HOME/terminfo"
     export TERMINFO
     tic "$IAM_HOME/terminfo/.terminfo" >/dev/null 2>&1 || true
@@ -1464,12 +1463,10 @@ printf '%s\n' \
 "SSH_PUB_KEY=\"$SSH_PUB_KEY\" && export SSH_PUB_KEY" \
 "_GIT_USER_NAME=\"$_GIT_USER_NAME\" && export _GIT_USER_NAME" \
 "_GIT_USER_EMAIL=\"$_GIT_USER_EMAIL\" && export _GIT_USER_EMAIL" \
-"[ -d \"\$IAM_HOME\" ] || mkdir -p \"\$IAM_HOME\"" \
+"[ -d \"\$IAM_HOME/terminfo\" ] || mkdir -p \"\$IAM_HOME/terminfo\"" \
+"cat >\"\$IAM_HOME/terminfo/.terminfo\" <<'EOF'" "$(cat "$IAM_HOME/terminfo/.terminfo")" "EOF" \
 "if [ \"\$TERM\" = 'xterm' ]; then TERM='xterm-256color'; export TERM; fi" \
 "if [ \"\$TERM\" = 'xterm-256color' -o \"\$TERM\" = 'tmux-256color' ] && command -v tic >/dev/null 2>&1; then" \
-"rm -rf \"\$IAM_HOME/terminfo\"" \
-"mkdir -p \"\$IAM_HOME/terminfo\"" \
-"cat >\"\$IAM_HOME/terminfo/.terminfo\" <<'EOF'" "$(cat "$IAM_HOME/terminfo/.terminfo")" "EOF" \
 "TERMINFO=\"\$IAM_HOME/terminfo\"" \
 "export TERMINFO" \
 "tic \"\$IAM_HOME/terminfo/.terminfo\" >/dev/null 2>&1 || true" \
@@ -1540,11 +1537,7 @@ SSH_PUB_KEY=\"$SSH_PUB_KEY\" && export SSH_PUB_KEY && \
 IAM_HOME=\"\$HOME/.${IAM}_home\" && export IAM_HOME && \
 _GIT_USER_NAME=\"$_GIT_USER_NAME\" && export _GIT_USER_NAME && \
 _GIT_USER_EMAIL=\"$_GIT_USER_EMAIL\" && export _GIT_USER_EMAIL && \
-rm -rf \"\$HOME/.${IAM}_terminfo\" && \
-if [ ! -d \"\$IAM_HOME\" ]; then mkdir \"\$IAM_HOME\"; fi && \
-rm -rf \"\$IAM_HOME/terminfo\" && \
-mkdir \"\$IAM_HOME/terminfo\" && \
-mkdir -p \"\$IAM_HOME/vim_swap\" && \
+if [ ! -d \"\$IAM_HOME/terminfo\" ]; then mkdir \"\$IAM_HOME/terminfo\"; fi && \
 echo \"$(cat ${IAM_HOME}/terminfo/.terminfo | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/terminfo/.terminfo\" &&
 TERMINFO=\"\$IAM_HOME/terminfo\" && \
 export TERMINFO && \
@@ -1554,16 +1547,12 @@ echo \"$(cat ${IAM_HOME}/local_tools | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HO
 echo \"$(cat ${HOME}/.tclshrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$HOME/.tclshrc\" && \
 echo \"$(cat ${IAM_HOME}/bashrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/bashrc\"" \
 | wsl -d Ubuntu
-wsl -d Ubuntu /bin/bash -c "IAM=\"$IAM\" && export IAM && \
+wsl -d Ubuntu /bin/bash -ci "IAM=\"$IAM\" && export IAM && \
 SSH_PUB_KEY=\"$SSH_PUB_KEY\" && export SSH_PUB_KEY && \
 IAM_HOME=\"\$HOME/.${IAM}_home\" && export IAM_HOME && \
 _GIT_USER_NAME=\"$_GIT_USER_NAME\" && export _GIT_USER_NAME && \
 _GIT_USER_EMAIL=\"$_GIT_USER_EMAIL\" && export _GIT_USER_EMAIL && \
-rm -rf \"\$HOME/.${IAM}_terminfo\" && \
-if [ ! -d \"\\\$IAM_HOME\" ]; then mkdir \"\\\$IAM_HOME\"; fi && \
-rm -rf \"\\\$IAM_HOME/terminfo\" && \
-mkdir \"\\\$IAM_HOME/terminfo\" && \
-mkdir -p \"\\\$IAM_HOME/vim_swap\" && \
+if [ ! -d \"\\\$IAM_HOME/terminfo\" ]; then mkdir \"\\\$IAM_HOME/terminfo\"; fi && \
 echo \"$(cat $IAM_HOME/terminfo/.terminfo | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\\\$IAM_HOME/terminfo/.terminfo\" &&
 TERMINFO=\"\\\$IAM_HOME/terminfo\" && \
 export TERMINFO && \
@@ -1618,10 +1607,10 @@ done
 }
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 shopt -s histappend
 shopt -s cmdhist
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 unset HISTFILESIZE
 HISTSIZE=1000000
 HISTCONTROL=ignoreboth

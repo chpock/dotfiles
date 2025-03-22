@@ -1355,12 +1355,10 @@ __magic_ssh() {
         "SSH_PUB_KEY=\"$SSH_PUB_KEY\" && export SSH_PUB_KEY" \
         "_GIT_USER_NAME=\"$_GIT_USER_NAME\" && export _GIT_USER_NAME" \
         "_GIT_USER_EMAIL=\"$_GIT_USER_EMAIL\" && export _GIT_USER_EMAIL" \
-        "[ -d \"\$IAM_HOME\" ] || mkdir -p \"\$IAM_HOME\"" \
+        "[ -d \"\$IAM_HOME/terminfo\" ] || mkdir -p \"\$IAM_HOME/terminfo\"" \
+        "cat >\"\$IAM_HOME/terminfo/.terminfo\" <<'EOF'" "$(cat "$IAM_HOME/terminfo/.terminfo")" "EOF" \
         "if [ \"\$TERM\" = 'xterm' ]; then TERM='xterm-256color'; export TERM; fi" \
         "if [ \"\$TERM\" = 'xterm-256color' -o \"\$TERM\" = 'tmux-256color' ] && command -v tic >/dev/null 2>&1; then" \
-        "rm -rf \"\$IAM_HOME/terminfo\"" \
-        "mkdir -p \"\$IAM_HOME/terminfo\"" \
-        "cat >\"\$IAM_HOME/terminfo/.terminfo\" <<'EOF'" "$(cat "$IAM_HOME/terminfo/.terminfo")" "EOF" \
         "TERMINFO=\"\$IAM_HOME/terminfo\"" \
         "export TERMINFO" \
         "tic \"\$IAM_HOME/terminfo/.terminfo\" >/dev/null 2>&1 || true" \
@@ -1444,11 +1442,7 @@ wsl() {
               IAM_HOME=\"\$HOME/.${IAM}_home\" && export IAM_HOME && \
               _GIT_USER_NAME=\"$_GIT_USER_NAME\" && export _GIT_USER_NAME && \
               _GIT_USER_EMAIL=\"$_GIT_USER_EMAIL\" && export _GIT_USER_EMAIL && \
-              rm -rf \"\$HOME/.${IAM}_terminfo\" && \
-              if [ ! -d \"\$IAM_HOME\" ]; then mkdir \"\$IAM_HOME\"; fi && \
-              rm -rf \"\$IAM_HOME/terminfo\" && \
-              mkdir \"\$IAM_HOME/terminfo\" && \
-              mkdir -p \"\$IAM_HOME/vim_swap\" && \
+              if [ ! -d \"\$IAM_HOME/terminfo\" ]; then mkdir \"\$IAM_HOME/terminfo\"; fi && \
               echo \"$(cat ${IAM_HOME}/terminfo/.terminfo | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/terminfo/.terminfo\" &&
               TERMINFO=\"\$IAM_HOME/terminfo\" && \
               export TERMINFO && \
@@ -1459,16 +1453,12 @@ wsl() {
               echo \"$(cat ${IAM_HOME}/bashrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/bashrc\"" \
         | wsl -d Ubuntu
 
-        wsl -d Ubuntu /bin/bash -c "IAM=\"$IAM\" && export IAM && \
+        wsl -d Ubuntu /bin/bash -ci "IAM=\"$IAM\" && export IAM && \
               SSH_PUB_KEY=\"$SSH_PUB_KEY\" && export SSH_PUB_KEY && \
               IAM_HOME=\"\$HOME/.${IAM}_home\" && export IAM_HOME && \
               _GIT_USER_NAME=\"$_GIT_USER_NAME\" && export _GIT_USER_NAME && \
               _GIT_USER_EMAIL=\"$_GIT_USER_EMAIL\" && export _GIT_USER_EMAIL && \
-              rm -rf \"\$HOME/.${IAM}_terminfo\" && \
-              if [ ! -d \"\\\$IAM_HOME\" ]; then mkdir \"\\\$IAM_HOME\"; fi && \
-              rm -rf \"\\\$IAM_HOME/terminfo\" && \
-              mkdir \"\\\$IAM_HOME/terminfo\" && \
-              mkdir -p \"\\\$IAM_HOME/vim_swap\" && \
+              if [ ! -d \"\\\$IAM_HOME/terminfo\" ]; then mkdir \"\\\$IAM_HOME/terminfo\"; fi && \
               echo \"$(cat $IAM_HOME/terminfo/.terminfo | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\\\$IAM_HOME/terminfo/.terminfo\" &&
               TERMINFO=\"\\\$IAM_HOME/terminfo\" && \
               export TERMINFO && \
