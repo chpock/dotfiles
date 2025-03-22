@@ -176,7 +176,11 @@ _maybe_local() {
         fi
     fi
 }
-_has_potentially() { [ -n "$__INSTALL_FUNCTIONS_AVAILABLE" ] && _check _is_install_available "$1" && return 0 || return 1; }
+_has_potentially() {
+    _hasnot "$1" || return 0
+    [ -n "$__INSTALL_FUNCTIONS_AVAILABLE" ] && _check _is_install_available "$1" && return 0 || return 1
+}
+_hasnot_potentially() { _has_potentially "$1" && return 1 || return 0; }
 
 _hash() {
     # here is Adler-32
@@ -1416,7 +1420,12 @@ gssh() {
     else
         sudo_cmd="sudo -u $1"
     fi
-    $sudo_cmd -H bash -c "$(__magic_ssh)"
+    $sudo_cmd -H bash -ci "$(__magic_ssh)"
+}
+_hasnot_potentially kpexec || ,kpexec() {
+    _maybe_local "kpexec"
+    command kpexec -ti -T "$@" -- bash -ci "$(__magic_ssh)"
+
 }
 wsl() {
     if [ -n "$1" ]; then
@@ -2497,6 +2506,19 @@ if [ -d "$IAM_HOME/tools/bash_completion" ]; then
     if [ ! -f "$IAM_HOME/tools/bash_completion/oc.completion.bash" ] && type -t _init_completion >/dev/null 2>&1 && _has oc; then
         echo "Generating bash completions for OpenShift..."
         oc completion bash >"$IAM_HOME/tools/bash_completion/oc.completion.bash" 2>/dev/null
+    fi
+
+    if [ ! -f "$IAM_HOME/tools/bash_completion/kpexec.completion.bash" ] && _has kpexec; then
+        echo "Generating bash completions for kpexec..."
+        if kpexec --completion bash >"$IAM_HOME/tools/bash_completion/kpexec.completion.bash" 2>/dev/null; then
+            echo '
+                if [ $(type -t compopt) = "builtin" ]; then
+                    complete -o default -F __start_kpexec ,kpexec
+                else
+                    complete -o default -o nospace -F __start_kpexec ,kpexec
+                fi
+            ' >>"$IAM_HOME/tools/bash_completion/kpexec.completion.bash"
+        fi
     fi
 
     if [ ! -f "$IAM_HOME/tools/bash_completion/pip.completion.bash" ]; then

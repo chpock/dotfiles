@@ -1,6 +1,6 @@
 #!/bin/bash
 
-_hasnot kubectl && ! _has_potentially kubectl && return || :
+_has_potentially kubectl || return
 
 k() {
 

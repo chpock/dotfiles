@@ -12,6 +12,7 @@ __INSTALL_VERSION="
   kl            0.6.0
   ktop          0.3.7
   kube-capacity 0.8.0
+  kpexec        0.4.1
   kubecolor     0.5.0
   mcfly         0.9.3
   tar-portable  1.35
@@ -242,6 +243,24 @@ __install_ktop() {
     local FORMAT URL="https://github.com/vladimirvivien/ktop/releases/download/v${VERSION}/ktop_v${VERSION}_"
     __install_make_url "
         linux-x64   linux_amd64.tar.gz
+    " && __install_download && __install_unpack &&  __install_bin || return $?
+}
+
+__install_kpexec() {
+    local VERSION="$1" EXECUTABLE="$2"
+
+    if [ "$VERSION" = "-check" ]; then
+        __install_check_version "$EXECUTABLE" --version \
+            | awk '{print $NF}' | tr -d 'v'
+        return 1
+    elif [ "$VERSION" = "-latest" ]; then
+        __install_get_latest_github "ssup2/kpexec"
+        return 0
+    fi
+
+    local FORMAT URL="https://github.com/ssup2/kpexec/releases/download/v${VERSION}/kpexec_v${VERSION}_"
+    __install_make_url "
+        linux-x64   Linux_amd64.tar.gz
     " && __install_download && __install_unpack &&  __install_bin || return $?
 }
 
