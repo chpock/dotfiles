@@ -1350,6 +1350,7 @@ man() {
 __magic_ssh() {
     printf '%s\n' \
         "IAM=\"$IAM\" && export IAM" \
+        "[ -n \"\$HOME\" ] || { HOME=\"/tmp\"; export HOME; }" \
         "IAM_HOME=\"\$HOME/.${IAM}_home\" && export IAM_HOME" \
         "SSH_PUB_KEY=\"$SSH_PUB_KEY\" && export SSH_PUB_KEY" \
         "_GIT_USER_NAME=\"$_GIT_USER_NAME\" && export _GIT_USER_NAME" \
