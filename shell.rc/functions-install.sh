@@ -23,7 +23,25 @@ __INSTALL_VERSION="
   httptap       0.1.1
   systemctl-tui 0.4.0
   kubectl-browse-pvc:kubectl-browse_pvc 1.2.0
+  kubectl-whoami                        0.0.46
 "
+
+__install_kubectl_whoami() {
+    local VERSION="$1" EXECUTABLE="$2"
+
+    if [ "$VERSION" = "-check" ]; then
+        __install_check_version "$EXECUTABLE" --version
+        return 0
+    elif [ "$VERSION" = "-latest" ]; then
+        __install_get_latest_github "rajatjindal/kubectl-whoami"
+        return 0
+    fi
+
+    local FORMAT URL="https://github.com/rajatjindal/kubectl-whoami/releases/download/v${VERSION}/kubectl-whoami_v${VERSION}_"
+    __install_make_url "
+        linux-x64   linux_amd64.tar.gz
+    " && __install_download && __install_unpack &&  __install_bin || return $?
+}
 
 __install_kubectl_browse_pvc() {
     local VERSION="$1" EXECUTABLE="$2"

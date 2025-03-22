@@ -8,6 +8,7 @@ k() {
 
     # Silently install/check kubectl plugins
     _maybe_local "kubectl-browse_pvc" >/dev/null 2>&1
+    _maybe_local "kubectl-whoami" >/dev/null 2>&1
 
     [ -z "$__KUBECTL_KUBECOLOR" ] \
         && [ -n "$__INSTALL_FUNCTIONS_AVAILABLE" ] \
