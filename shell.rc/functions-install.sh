@@ -22,7 +22,26 @@ __INSTALL_VERSION="
   yazi          25.3.2
   httptap       0.1.1
   systemctl-tui 0.4.0
+  kubectl-browse-pvc:kubectl-browse_pvc 1.2.0
 "
+
+__install_kubectl_browse_pvc() {
+    local VERSION="$1" EXECUTABLE="$2"
+
+    if [ "$VERSION" = "-check" ]; then
+        __install_check_version "$EXECUTABLE" --version \
+            | awk '{print $NF}' | tr -d 'v'
+        return 0
+    elif [ "$VERSION" = "-latest" ]; then
+        __install_get_latest_github "clbx/kubectl-browse-pvc"
+        return 0
+    fi
+
+    local FORMAT URL="https://github.com/clbx/kubectl-browse-pvc/releases/download/v${VERSION}/kubectl-browse-pvc-"
+    __install_make_url "
+        linux-x64   linux-x86_64.zip
+    " && __install_download && __install_unpack &&  __install_bin "kubectl-browse-pvc" || return $?
+}
 
 __install_systemctl_tui() {
     local VERSION="$1" EXECUTABLE="$2"
