@@ -8,7 +8,7 @@ _GIT_USER_EMAIL="chpock@gmail.com" && export _GIT_USER_EMAIL
 
 if [ "$TERM" = "xterm-256color" -o "$TERM" = "tmux-256color" ] && command -v tic >/dev/null 2>&1; then
     rm -rf "$IAM_HOME/terminfo"
-    mkdir "$IAM_HOME/terminfo"
+    mkdir -p "$IAM_HOME/terminfo"
     cat <<'EOF' > "$IAM_HOME/terminfo/.terminfo"
 @include xterm-256color.terminfo
 @include tmux-256color.terminfo

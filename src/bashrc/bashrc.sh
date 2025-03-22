@@ -1359,7 +1359,7 @@ __magic_ssh() {
         "if [ \"\$TERM\" = 'xterm' ]; then TERM='xterm-256color'; export TERM; fi" \
         "if [ \"\$TERM\" = 'xterm-256color' -o \"\$TERM\" = 'tmux-256color' ] && command -v tic >/dev/null 2>&1; then" \
         "rm -rf \"\$IAM_HOME/terminfo\"" \
-        "mkdir \"\$IAM_HOME/terminfo\"" \
+        "mkdir -p \"\$IAM_HOME/terminfo\"" \
         "cat >\"\$IAM_HOME/terminfo/.terminfo\" <<'EOF'" "$(cat "$IAM_HOME/terminfo/.terminfo")" "EOF" \
         "TERMINFO=\"\$IAM_HOME/terminfo\"" \
         "export TERMINFO" \
@@ -1425,7 +1425,13 @@ gssh() {
 }
 _hasnot_potentially kpexec || ,kpexec() {
     _maybe_local "kpexec"
-    command kpexec -ti -T "$@" -- bash -ci "$(__magic_ssh)"
+    # kpexec uses 'kubectl attach' to attach to the spawned pod&container.
+    # Due to an unknown bug in the k8s that is out there at this point in time,
+    # it may randomly hang. The command 'sleep ...' command somehow gets around
+    # this error. And the longer the delay, the less likely the error will be
+    # reproduced. One second is not enough, the error stops reproducing at 3x
+    # or more seconds.
+    command kpexec -ti -T "$@" -- bash -ci "sleep 3; $(__magic_ssh)"
 
 }
 wsl() {

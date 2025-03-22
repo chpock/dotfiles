@@ -8,7 +8,7 @@ _GIT_USER_EMAIL="chpock@gmail.com" && export _GIT_USER_EMAIL
 
 if [ "$TERM" = "xterm-256color" -o "$TERM" = "tmux-256color" ] && command -v tic >/dev/null 2>&1; then
     rm -rf "$IAM_HOME/terminfo"
-    mkdir "$IAM_HOME/terminfo"
+    mkdir -p "$IAM_HOME/terminfo"
     cat <<'EOF' > "$IAM_HOME/terminfo/.terminfo"
 xterm-256color|xterm with 256 colors,
  am,bce,ccc,xenl,km,hs,mir,msgr,xon,npc,mc5i,it#8,colors#256,pairs#32767,acsc=``aaffggiijjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}}~~,cbt=\E[Z,bel=^G,cr=^M,csr=\E[%i%p1%d;%p2%dr,tbc=\E[3g,clear=\E[H\E[J,el1=\E[1K,el=\E[K,ed=\E[J,hpa=\E[%i%p1%dG,cup=\E[%i%p1%d;%p2%dH,home=\E[H,civis=\E[?25l,cub1=^H,cnorm=\E[34h\E[?25h,cud1=\E[B,cuf1=\E[C,cuu1=\E[A,cvvis=\E[34l\E[?25h,dch1=\E[P,dl1=\E[M,dsl=\E]0;\007,dispc=%?%p1%{8}%=%t\E%%G\342\227\230\E%%@%e%p1%{10}%=%t\E%%G\342\227\231\E%%@%e%p1%{12}%=%t\E%%G\342\231\0\E%%@%e%p1%{13}%=%t\E%%G\342\231\252\E%%@%e%p1%{14}%=%t\E%%G\342\231\253\E%%@%e%p1%{15}%=%t\E%%G\342\230\274\E%%@%e%p1%{27}%=%t\E%%G\342\206\220\E%%@%e%p1%{155}%=%t\E%%G\340\202\242\E%%@%e%p1%c%;,enacs=\E(B\E)0,smacs=\E(0,smam=\E[?7h,blink=\E[5m,bold=\E[1m,smcup=\E[?1049h,swidm=\E#6,smir=\E[4h,smpch=\E[11m,rev=\E[7m,smso=\E[7m,smul=\E[4m,ech=\E[%p1%dX,rmacs=\E(B,rmam=\E[?7l,sgr0=\E[m\E(B,rmcup=\E[?1049l,rmir=\E[4l,rmpch=\E[10m,rmso=\E[27m,rmul=\E[24m,flash=\E[?5h$<100/>\E[?5l,fsl=^G,is2=\E[34h\E[?25h\E[4l\E[?7h\E[?1;4;6;1047l\E[2J\E[H\E>\E[r\E[m\E]R\E[?1000l\E[?1002l,initc@,ich1=\E[@,il1=\E[L,ka1=\EOw,ka3=\EOy,kb2=\EOu,kc1=\EOq,kc3=\EOs,kbs=\177,kcbt=\E[Z,kdch1=\E[3~,kend=\E[4~,kent=\EOM,kf1=\E[11~,kf2=\E[12~,kf3=\E[13~,kf4=\E[14~,kf5=\E[15~,kf6=\E[17~,kf7=\E[18~,kf8=\E[19~,kf9=\E[20~,kf10=\E[21~,kf11=\E[23~,kf12=\E[24~,kf13=\E[25~,kf14=\E[26~,kf15=\E[28~,kf16=\E[29~,kf17=\E[31~,kf18=\E[32~,kf19=\E[33~,kf20=\E[34~,kf21=\E[20;2~,kf22=\E[21;2~,kf23=\E[23;2~,kf24=\E[24;2~,kf25=\EO5P,kf26=\EO5Q,kf27=\EO5R,kf28=\EO5S,kf29=\E[15;5~,kf30=\E[17;5~,kf31=\E[18;5~,kf32=\E[19;5~,kf33=\E[20;5~,kf34=\E[21;5~,kf35=\E[23;5~,kf36=\E[24;5~,kf37=\EO6P,kf38=\EO6Q,kf39=\EO6R,kf40=\EO6S,kf41=\E[15;6~,kf42=\E[17;6~,kf43=\E[18;6~,kf44=\E[19;6~,kf45=\E[20;6~,kf46=\E[21;6~,kf47=\E[23;6~,kf48=\E[24;6~,kf49=\EO3P,kf50=\EO3Q,kf51=\EO3R,kf52=\EO3S,kf53=\E[15;3~,kf54=\E[17;3~,kf55=\E[18;3~,kf56=\E[19;3~,kf57=\E[20;3~,kf58=\E[21;3~,kf59=\E[23;3~,kf60=\E[24;3~,kf61=\EO4P,kf62=\EO4Q,kf63=\EO4R,khome=\E[1~,kich1=\E[2~,kcub1=\EOD,kcuf1=\EOC,kcuu1=\EOA,kcud1=\EOB,kmous=\E[M,knp=\E[6~,kpp=\E[5~,rmkx=\E[?1l\E>,smkx=\E[?1h\E=,oc=\E]R,op=\E[39;49m,dch=\E[%p1%dP,dl=\E[%p1%dM,cud=\E[%p1%dB,ich=\E[%p1%d@,indn=\E[%p1%dS,il=\E[%p1%dL,cub=\E[%p1%dD,cuf=\E[%p1%dC,rin=\E[%p1%dT,cuu=\E[%p1%dA,mc0=\E[i,mc4=\E[4i,mc5=\E[5i,rs1=\Ec,rs2=\E<\E["p\E[50;6"p\Ec\E[?3l\E]R\E[?1000l,rc=\E8,vpa=\E[%i%p1%dd,sc=\E7,ind=^J,ri=\EM,s0ds=\E[10m,s1ds=\E[11m,s2ds=\E[12m,setab=\E[%?%p1%{8}%<%t4%p1%d%e%p1%{16}%<%t10%p1%{8}%-%d%e48;5;%p1%d%;m,setaf=\E[%?%p1%{8}%<%t3%p1%d%e%p1%{16}%<%t9%p1%{8}%-%d%e38;5;%p1%d%;m,sgr=\E[0%?%p1%p6%|%t;1%;%?%p2%t;4%;%?%p1%p3%|%t;7%;%?%p4%t;5%;m%?%p9%t\016%e\017%;,hts=\EH,ht=^I,tsl=\E]0;,u6=\E[%i%d;%dR,u7=\E[6n,u8=\E[?6c,u9=\E[c,
@@ -1468,7 +1468,7 @@ printf '%s\n' \
 "if [ \"\$TERM\" = 'xterm' ]; then TERM='xterm-256color'; export TERM; fi" \
 "if [ \"\$TERM\" = 'xterm-256color' -o \"\$TERM\" = 'tmux-256color' ] && command -v tic >/dev/null 2>&1; then" \
 "rm -rf \"\$IAM_HOME/terminfo\"" \
-"mkdir \"\$IAM_HOME/terminfo\"" \
+"mkdir -p \"\$IAM_HOME/terminfo\"" \
 "cat >\"\$IAM_HOME/terminfo/.terminfo\" <<'EOF'" "$(cat "$IAM_HOME/terminfo/.terminfo")" "EOF" \
 "TERMINFO=\"\$IAM_HOME/terminfo\"" \
 "export TERMINFO" \
@@ -1529,7 +1529,7 @@ $sudo_cmd -H bash -ci "$(__magic_ssh)"
 }
 _hasnot_potentially kpexec || ,kpexec() {
 _maybe_local "kpexec"
-command kpexec -ti -T "$@" -- bash -ci "$(__magic_ssh)"
+command kpexec -ti -T "$@" -- bash -ci "sleep 3; $(__magic_ssh)"
 }
 wsl() {
 if [ -n "$1" ]; then
@@ -1618,9 +1618,9 @@ done
 }
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
-shopt -s histappend
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
+shopt -s histappend
 shopt -s cmdhist
 unset HISTFILESIZE
 HISTSIZE=1000000
