@@ -1339,6 +1339,8 @@ man() {
         man "$@"
 }
 
+,myip() { _get_url "https://checkip.amazonaws.com"; }
+
 #magic
 
 __magic_ssh() {

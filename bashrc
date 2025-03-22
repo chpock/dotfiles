@@ -1450,6 +1450,7 @@ LESS_TERMCAP_ue=$'\E[0m' \
 LESS_TERMCAP_us=$'\E[01;32m' \
 man "$@"
 }
+,myip() { _get_url "https://checkip.amazonaws.com"; }
 __magic_ssh() {
 printf '%s\n' \
 "IAM=\"$IAM\" && export IAM" \
@@ -1607,9 +1608,9 @@ done
 }
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
-shopt -s histappend
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
+shopt -s histappend
 shopt -s cmdhist
 unset HISTFILESIZE
 HISTSIZE=1000000
