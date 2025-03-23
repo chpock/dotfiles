@@ -727,7 +727,8 @@ _is_install_available() {
 
         if [ "$CHECK_VERSION" != "$VERSION" ]; then
 
-            local TEMP_DIR="$(mktemp --directory)"
+            # don't use '--directory' parameter here as it is not suppurted by busybox
+            local TEMP_DIR="$(mktemp -d)"
             (cd "$TEMP_DIR"; "$TOOL_FUNC" "$VERSION" "$EXECUTABLE") || R=$?
             rm -rf "$TEMP_DIR"
 

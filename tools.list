@@ -2,7 +2,7 @@ tool: install functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-install.sh
 $IAM_HOME/shell.rc/functions-install.sh
 important: true
-#F4CDDC49
+#DD6FF494
 tool: git functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-git.sh
 $IAM_HOME/shell.rc/functions-git.sh
@@ -102,7 +102,7 @@ $IAM_HOME/tools/bin/install-docker
 tool: tracer/debugger for perl
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/trace-perl
 $IAM_HOME/tools/bin/trace-perl
-3770
+3790
 tool: upkg tool
 https://raw.githubusercontent.com/chpock/upkg/main/upkg
 $IAM_HOME/tools/bin/upkg

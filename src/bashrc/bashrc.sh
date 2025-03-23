@@ -345,7 +345,7 @@ _is() {
             esac
             ;;
         wsl)
-            _is dockerenv && R=1 || {
+            _is in-container && R=1 || {
                 _cache __uname_kernel_release
                 [ -z ${_CACHE%%*-WSL2} ] || R=1
             }
@@ -358,7 +358,39 @@ _is() {
         macos_x64)   _is macos && _is x64   || R=1 ;;
         # Other
         root)        [ "$(id -u 2>/dev/null)" = "0" ] || R=1 ;;
-        dockerenv)   [ -f /.dockerenv ] || R=1 ;;
+        in_container)
+            # Let's assume that by default this is not a container
+            R=1
+            # As for now, we detect containers only on Linux
+            if _is linux; then
+                # Check for /proc/1/sched file. It is possible that procfs
+                # is not installed in the current environment. But it's quite
+                # hard to imagine a normal Linux environment without procfs.
+                # Therefore, we assume that this is a container environment,
+                # but not a normal environment when /proc does not exist.
+                # The same for PID #1. A normal environment should have
+                # a process with PID #1 that is started by the kernel.
+                # Let's assume a containerized environment if there is no
+                # process with PID #1.
+                if [ ! -f /proc/1/sched ]; then
+                    R=0
+                else
+                    # Read the first word from the first line of /proc/1/sched
+                    read -d ' ' -r TMPVAL < /proc/1/sched
+                    # It is expected that the first line in a normal environment
+                    # will be something like:
+                    #     init (1, #threads: 1)
+                    # or
+                    #     systemd (1, #threads: 1)
+                    # The first word is the executable file of the init process,
+                    # and it is usually 'init' or 'systemd'. Everything else
+                    # except the allowed values will indicate a container
+                    # environment.
+                    [ "$TMPVAL" != "init" ] && [ "$TMPVAL" != "systemd" ] && R=0 || R=1
+                fi
+            fi
+            ;;
+        in_docker)   _is in_container && [ -f /.dockerenv ] || R=1 ;;
         sudo)        [ -n "$SUDO_USER" ] || R=1 ;;
         tmux)        [ -n "$TMUX" ] || R=1 ;;
         # Clouds
@@ -988,7 +1020,7 @@ hostinfo() {
     printf -- "Release   : %s\n" "$UNAME_RELEASE"
     printf -- "------------------------------------------------------------------------[ OS ]--\n"
 
-    if ! _is dockerenv && ! _is sudo; then
+    if ! _is in-container && ! _is sudo; then
         if _is linux || _is macos || _is sunos; then
             if [ -e /sbin/ifconfig ]; then
                 # https://stackoverflow.com/questions/13322485/how-to-get-the-primary-ip-address-of-the-local-machine-on-linux-and-os-x
@@ -1047,7 +1079,7 @@ hostinfo() {
         fi
     fi
 
-    if ! _is dockerenv && ! _is sudo && _is aws_metadata_available; then
+    if ! _is in-container && ! _is sudo && _is aws_metadata_available; then
         printf -- "Instance  : %s (%s)\n" "$(_aws_metadata instance-type)" "$(_aws_metadata instance-id)"
         printf -- "Region    : %s (%s)\n" "$(_aws_metadata placement/region)" "$(_aws_metadata placement/availability-zone)"
         printf -- "----------------------------------------------------------------[ Cloud: AWS ]--\n"
@@ -1162,7 +1194,7 @@ hostinfo() {
 
     }
 
-    if ! _is dockerenv && ! _is sudo; then
+    if ! _is in-container && ! _is sudo; then
 
         local MEM_TOTAL="" MEM_FREE SWAP_TOTAL SWAP_FREE
 
@@ -1219,7 +1251,7 @@ hostinfo() {
 
     fi
 
-    if ! _is dockerenv && ! _is sudo; then
+    if ! _is in-container && ! _is sudo; then
         # df (GNU coreutils) 8.32
         #   Filesystem     1M-blocks  Used Available Use% Mounted on
         #   /dev/disk1s5      476612 10744    315301   4% /
@@ -1367,7 +1399,7 @@ if _has gpg; then
 
 fi
 
-if ! _is dockerenv && _is aws_metadata_available; then
+if ! _is in-container && _is aws_metadata_available; then
     AWS_DEFAULT_REGION="$(_aws_metadata placement/region)" && export AWS_DEFAULT_REGION || unset AWS_DEFAULT_REGION
 fi
 
@@ -1488,7 +1520,8 @@ _hasnot grep || grepzip() {
     done
     [ -n "$start_fn" ] || { echo "Error: zip files in command line were not found." >&2; return 1; }
     for (( i = $start_fn; $i <= $#; i++ )); do
-        local TEMP_DIR="$(mktemp --directory)"
+        # don't use '--directory' parameter here as it is not suppurted by busybox
+        local TEMP_DIR="$(mktemp -d)"
         if unzip -q "${!i}" -d "$TEMP_DIR"; then
             grep "${@:1:$(( start_fn - 1 ))}" -r "$TEMP_DIR" || true
         else
@@ -1812,7 +1845,7 @@ fi
 
 _SHELL_SESSION_DIR="$IAM_HOME/shell_sessions/plain-$_SHELL_SESSION_ID"
 
-if _is dockerenv; then
+if _is in-container; then
     # In Docker, we don't want to do anything complicated with the shell command history.
     HISTFILE="$IAM_HOME/bash_history"
 else
@@ -2452,9 +2485,12 @@ function promptcmd () {
     if _is wsl; then
         # WSL?
         PS1="${PS1}\[${COLOR_GRAY}\][\[${COLOR_DEFAULT}\]WSL\[${COLOR_GRAY}\]]\[${COLOR_DEFAULT}\]"
-    elif _is dockerenv; then
+    elif _is in-docker; then
         # Docker?
         PS1="${PS1}\[${COLOR_GRAY}\][\[${COLOR_DEFAULT}\]docker\[${COLOR_GRAY}\]]\[${COLOR_DEFAULT}\]"
+    elif _is in-container; then
+        # Docker?
+        PS1="${PS1}\[${COLOR_GRAY}\][\[${COLOR_DEFAULT}\]container\[${COLOR_GRAY}\]]\[${COLOR_DEFAULT}\]"
     elif _is aws; then
         # AWS instance?
         PS1="${PS1}\[${COLOR_GRAY}\][\[${COLOR_PURPLE}\]AWS\[${COLOR_GRAY}\]]\[${COLOR_DEFAULT}\]"
@@ -2657,7 +2693,7 @@ if [ ! -z "$FOUND" ]; then
     unset FOUND
 fi
 
-if _has ssh && _isnot dockerenv; then
+if _has ssh && _isnot in-container; then
     if ! RESULT="$(ssh -G 127.0.0.1 2>&1)"; then
         echo "${COLOR_GRAY}[${COLOR_LIGHTRED}Warning${COLOR_GRAY}]${COLOR_DEFAULT} unknown error while checking SSH ServerAliveInterval"
         echo
@@ -2814,7 +2850,7 @@ elif [ -f /usr/lib/google-cloud-sdk/completion.bash.inc ]; then
     . /usr/lib/google-cloud-sdk/completion.bash.inc
 fi
 
-if ! _is dockerenv; then
+if ! _is in-container; then
     SSH_PUB_KEY_ONLY="`echo $SSH_PUB_KEY | awk '{print $2}'`"
     if [ -z "$SSH_PUB_KEY_ONLY" ]; then
         echo "${COLOR_RED}SSH key is not defined${COLOR_DEFAULT}"

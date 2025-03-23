@@ -471,7 +471,7 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=225D6E8B
+LOCAL_TOOLS_FILE_HASH=692E6E83
 COLOR_WHITE=$'\e[1;37m'
 COLOR_LIGHTGRAY=$'\e[0;37m'
 COLOR_GRAY=$'\e[1;30m'
@@ -757,7 +757,7 @@ mingw)  [ "$_CACHE" = ${_CACHE#MINGW*} ]     && R=1 || : ;;
 esac
 ;;
 wsl)
-_is dockerenv && R=1 || {
+_is in-container && R=1 || {
 _cache __uname_kernel_release
 [ -z ${_CACHE%%*-WSL2} ] || R=1
 }
@@ -768,7 +768,18 @@ linux_x64)   _is linux && _is x64   || R=1 ;;
 windows_x64) _is windows && _is x64 || R=1 ;;
 macos_x64)   _is macos && _is x64   || R=1 ;;
 root)        [ "$(id -u 2>/dev/null)" = "0" ] || R=1 ;;
-dockerenv)   [ -f /.dockerenv ] || R=1 ;;
+in_container)
+R=1
+if _is linux; then
+if [ ! -f /proc/1/sched ]; then
+R=0
+else
+read -d ' ' -r TMPVAL < /proc/1/sched
+[ "$TMPVAL" != "init" ] && [ "$TMPVAL" != "systemd" ] && R=0 || R=1
+fi
+fi
+;;
+in_docker)   _is in_container && [ -f /.dockerenv ] || R=1 ;;
 sudo)        [ -n "$SUDO_USER" ] || R=1 ;;
 tmux)        [ -n "$TMUX" ] || R=1 ;;
 aws)         _is cloud && curl -s -I http://169.254.169.254 | grep -qF 'Server: EC2ws' || R=1 ;;
@@ -1250,7 +1261,7 @@ printf -- "Kernel    : %s\n" "$UNAME_ALL"
 printf -- "Machine   : %s\n" "$UNAME_MACHINE"
 printf -- "Release   : %s\n" "$UNAME_RELEASE"
 printf -- "------------------------------------------------------------------------[ OS ]--\n"
-if ! _is dockerenv && ! _is sudo; then
+if ! _is in-container && ! _is sudo; then
 if _is linux || _is macos || _is sunos; then
 if [ -e /sbin/ifconfig ]; then
 int2ip() {
@@ -1300,7 +1311,7 @@ printf -- "-------------------------------------------------------------------[ 
 fi
 fi
 fi
-if ! _is dockerenv && ! _is sudo && _is aws_metadata_available; then
+if ! _is in-container && ! _is sudo && _is aws_metadata_available; then
 printf -- "Instance  : %s (%s)\n" "$(_aws_metadata instance-type)" "$(_aws_metadata instance-id)"
 printf -- "Region    : %s (%s)\n" "$(_aws_metadata placement/region)" "$(_aws_metadata placement/availability-zone)"
 printf -- "----------------------------------------------------------------[ Cloud: AWS ]--\n"
@@ -1381,7 +1392,7 @@ add2=" ${COLOR_GRAY}$add2${COLOR_DEFAULT}"
 fi
 printf -- "%-9s : Free ${color}%9s${COLOR_DEFAULT} of %9s %s%s%s\n" "$infoType" "$free" "$total" "$gauge" "$add" "$add2"
 }
-if ! _is dockerenv && ! _is sudo; then
+if ! _is in-container && ! _is sudo; then
 local MEM_TOTAL="" MEM_FREE SWAP_TOTAL SWAP_FREE
 if [ -f /proc/meminfo ]; then
 local _buffers=0 _cached=0 _memTotal _memFree _swapTotal _swapFree
@@ -1425,7 +1436,7 @@ fi
 printf -- "--------------------------------------------------------------------[ Memory ]--\n"
 fi
 fi
-if ! _is dockerenv && ! _is sudo; then
+if ! _is in-container && ! _is sudo; then
 if _is linux; then
 while IFS=$' \t\r\n' read a b c d e f; do
 [ "$f" = "/dev/shm" ] && continue
@@ -1527,7 +1538,7 @@ chmod 0700 "$GNUPGHOME"
 GPG_TTY="$(tty)"
 export GPG_TTY
 fi
-if ! _is dockerenv && _is aws_metadata_available; then
+if ! _is in-container && _is aws_metadata_available; then
 AWS_DEFAULT_REGION="$(_aws_metadata placement/region)" && export AWS_DEFAULT_REGION || unset AWS_DEFAULT_REGION
 fi
 _unexport SSH_PUB_KEY _GIT_USER_EMAIL _GIT_USER_NAME
@@ -1589,7 +1600,7 @@ break
 done
 [ -n "$start_fn" ] || { echo "Error: zip files in command line were not found." >&2; return 1; }
 for (( i = $start_fn; $i <= $#; i++ )); do
-local TEMP_DIR="$(mktemp --directory)"
+local TEMP_DIR="$(mktemp -d)"
 if unzip -q "${!i}" -d "$TEMP_DIR"; then
 grep "${@:1:$(( start_fn - 1 ))}" -r "$TEMP_DIR" || true
 else
@@ -1627,6 +1638,8 @@ fi
 export EDITOR
 alias vi=vim
 vim() {
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 _maybe_local "vim"
 if _isnot tmux; then
 if [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID" ]; then
@@ -1642,8 +1655,6 @@ if _isnot tmux && [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID" ]; then
 rm -f "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim"
 fi
 }
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 [ -d "$IAM_HOME/vim_swap" ] || mkdir -p "$IAM_HOME/vim_swap"
 [ -d "$IAM_HOME/vim_runtime" ] || mkdir -p "$IAM_HOME/vim_runtime"
 _has apt-get && apt-get() {
@@ -1846,7 +1857,7 @@ else
 _unexport _SHELL_SESSION_ID
 fi
 _SHELL_SESSION_DIR="$IAM_HOME/shell_sessions/plain-$_SHELL_SESSION_ID"
-if _is dockerenv; then
+if _is in-container; then
 HISTFILE="$IAM_HOME/bash_history"
 else
 HISTFILE_GLOBAL="$IAM_HOME/bash_history"
@@ -2284,8 +2295,10 @@ PS1="${PS1}\u\[${COLOR_GRAY}\]@\[${COLOR_DEFAULT}\]"
 PS1="${PS1}\[${COLOR_LIGHTBLUE}\]\h\[${COLOR_DEFAULT}\]"
 if _is wsl; then
 PS1="${PS1}\[${COLOR_GRAY}\][\[${COLOR_DEFAULT}\]WSL\[${COLOR_GRAY}\]]\[${COLOR_DEFAULT}\]"
-elif _is dockerenv; then
+elif _is in-docker; then
 PS1="${PS1}\[${COLOR_GRAY}\][\[${COLOR_DEFAULT}\]docker\[${COLOR_GRAY}\]]\[${COLOR_DEFAULT}\]"
+elif _is in-container; then
+PS1="${PS1}\[${COLOR_GRAY}\][\[${COLOR_DEFAULT}\]container\[${COLOR_GRAY}\]]\[${COLOR_DEFAULT}\]"
 elif _is aws; then
 PS1="${PS1}\[${COLOR_GRAY}\][\[${COLOR_PURPLE}\]AWS\[${COLOR_GRAY}\]]\[${COLOR_DEFAULT}\]"
 fi
@@ -2429,7 +2442,7 @@ if [ ! -z "$FOUND" ]; then
 echo ""
 unset FOUND
 fi
-if _has ssh && _isnot dockerenv; then
+if _has ssh && _isnot in-container; then
 if ! RESULT="$(ssh -G 127.0.0.1 2>&1)"; then
 echo "${COLOR_GRAY}[${COLOR_LIGHTRED}Warning${COLOR_GRAY}]${COLOR_DEFAULT} unknown error while checking SSH ServerAliveInterval"
 echo
@@ -2558,7 +2571,7 @@ if [ -f ~/gcloud/google-cloud-sdk/completion.bash.inc ]; then
 elif [ -f /usr/lib/google-cloud-sdk/completion.bash.inc ]; then
 . /usr/lib/google-cloud-sdk/completion.bash.inc
 fi
-if ! _is dockerenv; then
+if ! _is in-container; then
 SSH_PUB_KEY_ONLY="`echo $SSH_PUB_KEY | awk '{print $2}'`"
 if [ -z "$SSH_PUB_KEY_ONLY" ]; then
 echo "${COLOR_RED}SSH key is not defined${COLOR_DEFAULT}"
