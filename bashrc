@@ -895,6 +895,7 @@ local IDX
 local TOOLS_FILE="$IAM_HOME/local_tools"
 local TOOLS_URL="https://raw.githubusercontent.com/chpock/dotfiles/master/tools.list"
 local UPDATE_IMPORTANT_BANNER="Updating important tools..."
+local UPDATE_IMPORTANT_BANNEX="                           "
 if [ "lock" = "$CMD" ]; then
 touch "$IAM_HOME/local_tools.locked"
 echo "Tools are locked now."
@@ -933,7 +934,7 @@ fi
 if [ -z "$TOOLS_EXISTS" ]; then
 local TMP="$(mktemp)"
 if [ "$PARAM" = "important" ]; then
-echo "$UPDATE_IMPORTANT_BANNER"
+printf '%s' "$UPDATE_IMPORTANT_BANNER"
 unset UPDATE_IMPORTANT_BANNER
 fi
 if ! _get_url "$TOOLS_URL" >"$TMP" 2>/dev/null; then
@@ -1057,7 +1058,7 @@ mkdir -p "${I_FILE%/*}"
 local TMP="$(mktemp)"
 if [ "$PARAM" = "important" ]; then
 if [ -n "$UPDATE_IMPORTANT_BANNER" ]; then
-echo "$UPDATE_IMPORTANT_BANNER"
+printf '%s' "$UPDATE_IMPORTANT_BANNER"
 unset UPDATE_IMPORTANT_BANNER
 fi
 _get_url "$I_URL" >"$TMP" 2>/dev/null || IS_ERROR=$?
@@ -1098,6 +1099,8 @@ echo "${COLOR_BROWN}Some or all local tools are outdated. Run the 'tools update'
 echo ""
 fi
 fi
+elif [ "update" = "$CMD" ] && [ "important" = "$PARAM" ] && [ -z "$UPDATE_IMPORTANT_BANNER" ]; then
+printf '\r%s\r' "$UPDATE_IMPORTANT_BANNEX"
 fi
 }
 complete -W "check update lock unlock" tools
@@ -1639,11 +1642,11 @@ if _isnot tmux && [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID" ]; then
 rm -f "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim"
 fi
 }
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 [ -d "$IAM_HOME/vim_swap" ] || mkdir -p "$IAM_HOME/vim_swap"
 [ -d "$IAM_HOME/vim_runtime" ] || mkdir -p "$IAM_HOME/vim_runtime"
 _has apt-get && apt-get() {
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 if [ "$(id -u)" -ne 0 ]; then
 echo "${COLOR_RED}The 'sudo' prefix was added automatically for the 'apt-get' command${COLOR_DEFAULT}" >&2
 sudo apt-get "$@"

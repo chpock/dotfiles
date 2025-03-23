@@ -527,7 +527,15 @@ tools() {
     local IDX
     local TOOLS_FILE="$IAM_HOME/local_tools"
     local TOOLS_URL="https://raw.githubusercontent.com/chpock/dotfiles/master/tools.list"
+    # This banner will be shown in case of 'update important' to be aware that
+    # we are interacting with something remote and may potentially get stuck.
+    # We need to understand why we are stuck in this case. After the update,
+    # we no longer need this message. It should be removed to avoid unnecessary
+    # noise. To achieve this, it will be shown without a newline character,
+    # and after 'important update' completion, cursor will return to
+    # the beginning of the line.
     local UPDATE_IMPORTANT_BANNER="Updating important tools..."
+    local UPDATE_IMPORTANT_BANNEX="                           "
 
     if [ "lock" = "$CMD" ]; then
         touch "$IAM_HOME/local_tools.locked"
@@ -573,7 +581,7 @@ tools() {
     if [ -z "$TOOLS_EXISTS" ]; then
         local TMP="$(mktemp)"
         if [ "$PARAM" = "important" ]; then
-            echo "$UPDATE_IMPORTANT_BANNER"
+            printf '%s' "$UPDATE_IMPORTANT_BANNER"
             unset UPDATE_IMPORTANT_BANNER
         fi
         if ! _get_url "$TOOLS_URL" >"$TMP" 2>/dev/null; then
@@ -706,7 +714,7 @@ tools() {
             local TMP="$(mktemp)"
             if [ "$PARAM" = "important" ]; then
                 if [ -n "$UPDATE_IMPORTANT_BANNER" ]; then
-                    echo "$UPDATE_IMPORTANT_BANNER"
+                    printf '%s' "$UPDATE_IMPORTANT_BANNER"
                     unset UPDATE_IMPORTANT_BANNER
                 fi
                 _get_url "$I_URL" >"$TMP" 2>/dev/null || IS_ERROR=$?
@@ -749,6 +757,8 @@ tools() {
                 echo ""
             fi
         fi
+    elif [ "update" = "$CMD" ] && [ "important" = "$PARAM" ] && [ -z "$UPDATE_IMPORTANT_BANNER" ]; then
+        printf '\r%s\r' "$UPDATE_IMPORTANT_BANNEX"
     fi
 
 }
