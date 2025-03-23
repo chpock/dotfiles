@@ -5,6 +5,7 @@
 tool: install functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-install.sh
 $IAM_HOME/shell.rc/functions-install.sh
+important: true
 @getHash REPO_ROOT/shell.rc/functions-install.sh
 
 tool: git functions

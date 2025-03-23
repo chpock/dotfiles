@@ -514,6 +514,249 @@ then
     ln -sf /usr/bin/vim.basic "$IAM_HOME/tools/bin/vim"
 fi
 
+tools() {
+
+    local CMD="$1"
+    local PARAM="$2"
+    local PARAM_EX="$3"
+    local LINE
+    local I_DESC I_URL I_FILE I_SIZE I_FILTER I_ON_UPDATE
+    local SIZE HASH
+    local CHECK_STATE
+    local IS_ERROR
+    local IDX
+    local TOOLS_FILE="$IAM_HOME/local_tools"
+    local TOOLS_URL="https://raw.githubusercontent.com/chpock/dotfiles/master/tools.list"
+    local UPDATE_IMPORTANT_BANNER="Updating important tools..."
+
+    if [ "lock" = "$CMD" ]; then
+        touch "$IAM_HOME/local_tools.locked"
+        echo "Tools are locked now."
+        return
+    fi
+
+    if [ "unlock" = "$CMD" ]; then
+        rm -f "$IAM_HOME/local_tools.locked"
+        echo "Tools are unlocked now."
+        return
+    fi
+
+    if [ "locked" = "$CMD" ]; then
+        [ -e "$IAM_HOME/local_tools.locked" ] && return 0 || return 1
+    fi
+
+    if [ "update" = "$CMD" ]; then
+        if tools locked; then
+            echo "${COLOR_BROWN}WARNING:${COLOR_DEFAULT} Tools are locked now and will not be updated."
+            return
+        fi
+        if ! _get_url -check; then
+            [ "$PARAM" = "important" ] || echo "${COLOR_RED}ERROR:${COLOR_DEFAULT} Could not update tools: curl/wget command not found"
+            return 1
+        fi
+        if [ "$PARAM" = "background" ]; then
+            tools update background-real >/dev/null 2>&1 &
+            disown $!
+            return
+        fi
+    fi
+
+    local recs=() TOOLS_EXISTS=
+    local files_by_size=() checks_by_size=()
+    local files_by_hash=() checks_by_hash=()
+
+    if [ -f "$TOOLS_FILE" ]; then
+        _hash_file "$TOOLS_FILE"
+        [ "$_HASH" != "$LOCAL_TOOLS_FILE_HASH" ] || TOOLS_EXISTS=1
+    fi
+
+    if [ -z "$TOOLS_EXISTS" ]; then
+        local TMP="$(mktemp)"
+        if [ "$PARAM" = "important" ]; then
+            echo "$UPDATE_IMPORTANT_BANNER"
+            unset UPDATE_IMPORTANT_BANNER
+        fi
+        if ! _get_url "$TOOLS_URL" >"$TMP" 2>/dev/null; then
+            rm -f "$TMP"
+            CHECK_STATE=1
+            [ "$PARAM" = "important" ] || echo "${COLOR_RED}ERROR:${COLOR_DEFAULT} An unexpected error occurred while updating the list of tools."
+        else
+            _hash < "$TMP"
+            if [ "$_HASH" != "$LOCAL_TOOLS_FILE_HASH" ]; then
+                rm -f "$TMP"
+                [ "$PARAM" = "important" ] || echo "${COLOR_BROWN}WARNING:${COLOR_DEFAULT} The list of tools is not properly updated. The downloaded file hash ${_HASH} doesn't match the expected hash ${LOCAL_TOOLS_FILE_HASH}."
+            else
+                mv -f "$TMP" "$TOOLS_FILE"
+                TOOLS_EXISTS=1
+            fi
+        fi
+    fi
+
+    if [ -n "$TOOLS_EXISTS" ]; then
+        while IFS= read -r LINE || [ -n "$LINE" ]; do
+            if [ "${LINE:0:5}" = "tool:" ]; then
+                I_DESC="${LINE#*: }"
+                unset I_URL I_FILE I_SIZE I_HASH I_FILTER_IS I_FILTER_HAS I_IMPORTANT I_ON_UPDATE
+            elif [ -z "$I_URL" ]; then
+                I_URL="$LINE"
+            elif [ -z "$I_FILE" ]; then
+                printf -v LINE '%q' "$LINE"; # quote string
+                eval "I_FILE=\"${LINE//\\\$/\$}\""; # enable $VAR
+            elif [ -z "$I_SIZE" ]; then
+                local P1="${LINE%:*}"
+                if [ "$P1" = "$LINE" ]; then
+                    [ "${LINE:0:1}" = "#" ] && I_HASH="${LINE:1}" || I_SIZE="$LINE"
+                else
+                    if [ "$P1" = "is" ]; then
+                        I_FILTER_IS="${LINE#*: }"
+                    elif [ "$P1" = "has" ]; then
+                        I_FILTER_HAS="${LINE#*: }"
+                    elif [ "$P1" = "on update" ]; then
+                        I_ON_UPDATE="${LINE#*: }"
+                    elif [ "$P1" = "important" ]; then
+                        I_IMPORTANT="${LINE#*: }"
+                        # tolower
+                        I_IMPORTANT="${I_IMPORTANT,,}"
+                        # Allow only 1/yes/true. Unset for anything else that
+                        # will mean 'false'.
+                        [ "$I_IMPORTANT" != "1" ] && [ "$I_IMPORTANT" != "yes" ] && [ "$I_IMPORTANT" != "true" ] && unset I_IMPORTANT || :
+                    else
+                        echo "ERROR: unexpected line in tools list: $LINE"
+                    fi
+                fi
+            else
+                echo "ERROR: unexpected line in tools list: $LINE"
+            fi
+            # continue the loop if a tool record is incomplete
+            [ -n "$I_SIZE$I_HASH" ] || continue
+            [ "$PARAM" = "important" ] && [ -z "$I_IMPORTANT" ] && continue || :
+            [ -n "$I_FILTER_IS" ] && ! _is "$I_FILTER_IS" && continue || :
+            [ -n "$I_FILTER_HAS" ] && ! _has "$I_FILTER_HAS" && continue || :
+            if [ -e "$I_FILE" ]; then
+                if [ -n "$I_SIZE" ]; then
+                    files_by_size+=("$I_FILE")
+                    checks_by_size+=("$I_DESC" "$I_URL" "$I_FILE" "$I_ON_UPDATE" "$I_SIZE" "$I_HASH")
+                else
+                    files_by_hash+=("$I_FILE")
+                    checks_by_hash+=("$I_DESC" "$I_URL" "$I_FILE" "$I_ON_UPDATE" "$I_SIZE" "$I_HASH")
+                fi
+            else
+                recs+=("$I_DESC" "$I_URL" "$I_FILE" "$I_ON_UPDATE" "$I_SIZE" "$I_HASH" 0 0)
+            fi
+            unset I_DESC I_URL I_FILE I_SIZE I_HASH I_FILTER I_ON_UPDATE
+        done < "$TOOLS_FILE"
+    fi
+
+    if [ "${#files_by_size[@]}" -gt 0 ]; then
+        IDX=0
+        while read -r SIZE; do
+            recs+=("${checks_by_size[@]:$(( 6 * IDX++)):6}" "$SIZE" 0)
+        done < <(_get_size "${files_by_size[@]}")
+    fi
+
+    if [ "${#files_by_hash[@]}" -gt 0 ]; then
+        IDX=0
+        while read -r HASH; do
+            recs+=("${checks_by_hash[@]:$(( 6 * IDX++)):6}" 0 "$HASH")
+        done < <(_get_hash "${files_by_hash[@]}")
+    fi
+
+    # do something with a tool record
+    IDX=0
+    while [ $IDX -lt ${#recs[@]} ]; do
+        I_DESC="${recs[IDX++]}"
+        I_URL="${recs[IDX++]}"
+        I_FILE="${recs[IDX++]}"
+        I_ON_UPDATE="${recs[IDX++]}"
+        I_SIZE="${recs[IDX++]}"
+        I_HASH="${recs[IDX++]}"
+        SIZE="${recs[IDX++]}"
+        HASH="${recs[IDX++]}"
+        if [ "check" = "$CMD" ]; then
+            if [ "$SIZE$HASH" = "00" ]; then
+                LINE="${COLOR_LIGHTRED}NOT FOUND${COLOR_GRAY}${COLOR_DEFAULT}"
+                SIZE="undef"
+                HASH="undef"
+                [ -n "$CHECK_STATE" ] || CHECK_STATE=1
+            else
+                if [ -n "$I_HASH" ] && [ "$I_HASH" != "$HASH" ]; then
+                    LINE="${COLOR_BROWN}OUTDATED ${COLOR_GRAY}${COLOR_DEFAULT}"
+                    CHECK_STATE=2
+                elif [ -n "$I_SIZE" ] && [ "$I_SIZE" -ne "$SIZE" ]; then
+                    LINE="${COLOR_BROWN}OUTDATED ${COLOR_GRAY}${COLOR_DEFAULT}"
+                    CHECK_STATE=2
+                else
+                    LINE="${COLOR_GREEN}OK       ${COLOR_GRAY}${COLOR_DEFAULT}"
+                fi
+            fi
+            if [ "quick" != "$PARAM" ]; then
+                if [ -n "$I_SIZE" ]; then
+                    printf "%s ${COLOR_GRAY}[${COLOR_DEFAULT}Size current: %8s ${COLOR_GRAY}/${COLOR_DEFAULT} expected: %8s${COLOR_GRAY}]${COLOR_DEFAULT} %s\n" "$LINE" "$SIZE" "$I_SIZE" "${I_FILE/$HOME/\~}"
+                else
+                    printf "%s ${COLOR_GRAY}[${COLOR_DEFAULT}Hash current: %8s ${COLOR_GRAY}/${COLOR_DEFAULT} expected: %8s${COLOR_GRAY}]${COLOR_DEFAULT} %s\n" "$LINE" "$HASH" "$I_HASH" "${I_FILE/$HOME/\~}"
+                fi
+            fi
+        elif [ "update" = "$CMD" ]; then
+            if [ "$PARAM" != "force" ]; then
+                [ -n "$I_HASH" ] && [ "$HASH" = "$I_HASH" ] && continue || true
+                [ -n "$I_SIZE" ] && [ "$SIZE" -eq "$I_SIZE" ] && continue || true
+            fi
+            IS_ERROR=0
+            mkdir -p "${I_FILE%/*}"
+            local TMP="$(mktemp)"
+            if [ "$PARAM" = "important" ]; then
+                if [ -n "$UPDATE_IMPORTANT_BANNER" ]; then
+                    echo "$UPDATE_IMPORTANT_BANNER"
+                    unset UPDATE_IMPORTANT_BANNER
+                fi
+                _get_url "$I_URL" >"$TMP" 2>/dev/null || IS_ERROR=$?
+            else
+                printf "Download: %s '%s'..." "$I_DESC" "${I_FILE##*/}"
+                _get_url "$I_URL" >"$TMP" || IS_ERROR=$?
+                if [ "$IS_ERROR" -ne 0 ]; then
+                    echo " ${COLOR_LIGHTRED}ERROR${COLOR_DEFAULT}"
+                else
+                    echo " ${COLOR_GREEN}OK${COLOR_DEFAULT}"
+                fi
+            fi
+            if [ "$IS_ERROR" -ne 0 ]; then
+                rm -f "$TMP"
+            else
+                mv -f "$TMP" "$I_FILE"
+                # +x for /bin/ scripts or files
+                [ -n "${I_FILE##*/bin/*}" ] || chmod +x "$I_FILE"
+                [ -z "$I_ON_UPDATE" ] || eval "$I_ON_UPDATE"
+            fi
+        fi
+    done
+
+    if [ "check" = "$CMD" ] && [ "quick" = "$PARAM" ] && [ -n "$CHECK_STATE" ]; then
+        if [ "$PARAM_EX" = "update" ]; then
+            if [ "$CHECK_STATE" -eq 1 ]; then
+                echo "${COLOR_BROWN}Some or all local tools are not exist and will be updated in background.${COLOR_DEFAULT}"
+                echo ""
+            elif [ "$CHECK_STATE" -eq 2 ]; then
+                echo "${COLOR_BROWN}Some or all local tools are outdated and will be updated in background.${COLOR_DEFAULT}"
+                echo ""
+            fi
+            tools update background
+        else
+            if [ "$CHECK_STATE" -eq 1 ]; then
+                echo "${COLOR_RED}Some or all local tools are not exist. Run the 'tools update' command.${COLOR_DEFAULT}"
+                echo ""
+            elif [ "$CHECK_STATE" -eq 2 ]; then
+                echo "${COLOR_BROWN}Some or all local tools are outdated. Run the 'tools update' command.${COLOR_DEFAULT}"
+                echo ""
+            fi
+        fi
+    fi
+
+}
+
+complete -W "check update lock unlock" tools
+
+tools update important
+
 # Load shell.rc scripts now as other scripts may depend on functions defined there
 for SCRIPT in "$IAM_HOME"/shell.rc/*; do
     [ -e "$SCRIPT" ] || continue
@@ -2595,223 +2838,6 @@ if [ ! -x "$IAM_HOME/tools/bin/geturl" ]; then
     } > "$IAM_HOME/tools/bin/geturl"
     chmod +x "$IAM_HOME/tools/bin/geturl"
 fi
-
-tools() {
-
-    local CMD="$1"
-    local PARAM="$2"
-    local PARAM_EX="$3"
-    local LINE
-    local I_DESC I_URL I_FILE I_SIZE I_FILTER I_ON_UPDATE
-    local SIZE HASH
-    local CHECK_STATE
-    local IS_ERROR
-    local IDX
-    local TOOLS_FILE="$IAM_HOME/local_tools"
-    local TOOLS_URL="https://raw.githubusercontent.com/chpock/dotfiles/master/tools.list"
-
-    if [ "lock" = "$CMD" ]; then
-        touch "$IAM_HOME/local_tools.locked"
-        echo "Tools are locked now."
-        return
-    fi
-
-    if [ "unlock" = "$CMD" ]; then
-        rm -f "$IAM_HOME/local_tools.locked"
-        echo "Tools are unlocked now."
-        return
-    fi
-
-    if [ "locked" = "$CMD" ]; then
-        [ -e "$IAM_HOME/local_tools.locked" ] && return 0 || return 1
-    fi
-
-    if [ "update" = "$CMD" ]; then
-        if tools locked; then
-            echo "${COLOR_BROWN}WARNING:${COLOR_DEFAULT} Tools are locked now and will not be updated."
-            return
-        fi
-        if ! _get_url -check; then
-            echo "${COLOR_RED}ERROR:${COLOR_DEFAULT} Could not update tools: curl/wget command not found"
-            return 1
-        fi
-        if [ "$PARAM" = "background" ]; then
-            tools update background-real >/dev/null 2>&1 &
-            disown $!
-            return
-        fi
-    fi
-
-    local recs=() TOOLS_EXISTS=
-    local files_by_size=() checks_by_size=()
-    local files_by_hash=() checks_by_hash=()
-
-    if [ -f "$TOOLS_FILE" ]; then
-        _hash_file "$TOOLS_FILE"
-        [ "$_HASH" != "$LOCAL_TOOLS_FILE_HASH" ] || TOOLS_EXISTS=1
-    fi
-
-    if [ -z "$TOOLS_EXISTS" ]; then
-        local TMP="$(mktemp)"
-        if ! _get_url "$TOOLS_URL" >"$TMP" 2>/dev/null; then
-            rm -f "$TMP"
-            CHECK_STATE=1
-            echo "${COLOR_RED}ERROR:${COLOR_DEFAULT} An unexpected error occurred while updating the list of tools."
-        else
-            _hash < "$TMP"
-            if [ "$_HASH" != "$LOCAL_TOOLS_FILE_HASH" ]; then
-                rm -f "$TMP"
-                echo "${COLOR_BROWN}WARNING:${COLOR_DEFAULT} The list of tools is not properly updated. The downloaded file hash ${_HASH} doesn't match the expected hash ${LOCAL_TOOLS_FILE_HASH}."
-            else
-                mv -f "$TMP" "$TOOLS_FILE"
-                TOOLS_EXISTS=1
-            fi
-        fi
-    fi
-
-    if [ -n "$TOOLS_EXISTS" ]; then
-        while IFS= read -r LINE || [ -n "$LINE" ]; do
-            if [ "${LINE:0:5}" = "tool:" ]; then
-                I_DESC="${LINE#*: }"
-                unset I_URL I_FILE I_SIZE I_HASH I_FILTER_IS I_FILTER_HAS I_ON_UPDATE
-            elif [ -z "$I_URL" ]; then
-                I_URL="$LINE"
-            elif [ -z "$I_FILE" ]; then
-                printf -v LINE '%q' "$LINE"; # quote string
-                eval "I_FILE=\"${LINE//\\\$/\$}\""; # enable $VAR
-            elif [ -z "$I_SIZE" ]; then
-                local P1="${LINE%:*}"
-                if [ "$P1" = "$LINE" ]; then
-                    [ "${LINE:0:1}" = "#" ] && I_HASH="${LINE:1}" || I_SIZE="$LINE"
-                else
-                    if [ "$P1" = "is" ]; then
-                        I_FILTER_IS="${LINE#*: }"
-                    elif [ "$P1" = "has" ]; then
-                        I_FILTER_HAS="${LINE#*: }"
-                    elif [ "$P1" = "on update" ]; then
-                        I_ON_UPDATE="${LINE#*: }"
-                    else
-                        echo "ERROR: unexpected line in tools list: $LINE"
-                    fi
-                fi
-            else
-                echo "ERROR: unexpected line in tools list: $LINE"
-            fi
-            # continue the loop if a tool record is incomplete
-            [ -n "$I_SIZE$I_HASH" ] || continue
-            [ -n "$I_FILTER_IS" ] && ! _is "$I_FILTER_IS" && continue || :
-            [ -n "$I_FILTER_HAS" ] && ! _has "$I_FILTER_HAS" && continue || :
-            if [ -e "$I_FILE" ]; then
-                if [ -n "$I_SIZE" ]; then
-                    files_by_size+=("$I_FILE")
-                    checks_by_size+=("$I_DESC" "$I_URL" "$I_FILE" "$I_ON_UPDATE" "$I_SIZE" "$I_HASH")
-                else
-                    files_by_hash+=("$I_FILE")
-                    checks_by_hash+=("$I_DESC" "$I_URL" "$I_FILE" "$I_ON_UPDATE" "$I_SIZE" "$I_HASH")
-                fi
-            else
-                recs+=("$I_DESC" "$I_URL" "$I_FILE" "$I_ON_UPDATE" "$I_SIZE" "$I_HASH" 0 0)
-            fi
-            unset I_DESC I_URL I_FILE I_SIZE I_HASH I_FILTER I_ON_UPDATE
-        done < "$TOOLS_FILE"
-    fi
-
-    if [ "${#files_by_size[@]}" -gt 0 ]; then
-        IDX=0
-        while read -r SIZE; do
-            recs+=("${checks_by_size[@]:$(( 6 * IDX++)):6}" "$SIZE" 0)
-        done < <(_get_size "${files_by_size[@]}")
-    fi
-
-    if [ "${#files_by_hash[@]}" -gt 0 ]; then
-        IDX=0
-        while read -r HASH; do
-            recs+=("${checks_by_hash[@]:$(( 6 * IDX++)):6}" 0 "$HASH")
-        done < <(_get_hash "${files_by_hash[@]}")
-    fi
-
-    # do something with a tool record
-    IDX=0
-    while [ $IDX -lt ${#recs[@]} ]; do
-        I_DESC="${recs[IDX++]}"
-        I_URL="${recs[IDX++]}"
-        I_FILE="${recs[IDX++]}"
-        I_ON_UPDATE="${recs[IDX++]}"
-        I_SIZE="${recs[IDX++]}"
-        I_HASH="${recs[IDX++]}"
-        SIZE="${recs[IDX++]}"
-        HASH="${recs[IDX++]}"
-        if [ "check" = "$CMD" ]; then
-            if [ "$SIZE$HASH" = "00" ]; then
-                LINE="${COLOR_LIGHTRED}NOT FOUND${COLOR_GRAY}${COLOR_DEFAULT}"
-                SIZE="undef"
-                HASH="undef"
-                [ -n "$CHECK_STATE" ] || CHECK_STATE=1
-            else
-                if [ -n "$I_HASH" ] && [ "$I_HASH" != "$HASH" ]; then
-                    LINE="${COLOR_BROWN}OUTDATED ${COLOR_GRAY}${COLOR_DEFAULT}"
-                    CHECK_STATE=2
-                elif [ -n "$I_SIZE" ] && [ "$I_SIZE" -ne "$SIZE" ]; then
-                    LINE="${COLOR_BROWN}OUTDATED ${COLOR_GRAY}${COLOR_DEFAULT}"
-                    CHECK_STATE=2
-                else
-                    LINE="${COLOR_GREEN}OK       ${COLOR_GRAY}${COLOR_DEFAULT}"
-                fi
-            fi
-            if [ "quick" != "$PARAM" ]; then
-                if [ -n "$I_SIZE" ]; then
-                    printf "%s ${COLOR_GRAY}[${COLOR_DEFAULT}Size current: %8s ${COLOR_GRAY}/${COLOR_DEFAULT} expected: %8s${COLOR_GRAY}]${COLOR_DEFAULT} %s\n" "$LINE" "$SIZE" "$I_SIZE" "${I_FILE/$HOME/\~}"
-                else
-                    printf "%s ${COLOR_GRAY}[${COLOR_DEFAULT}Hash current: %8s ${COLOR_GRAY}/${COLOR_DEFAULT} expected: %8s${COLOR_GRAY}]${COLOR_DEFAULT} %s\n" "$LINE" "$HASH" "$I_HASH" "${I_FILE/$HOME/\~}"
-                fi
-            fi
-        elif [ "update" = "$CMD" ]; then
-            if [ "$PARAM" != "force" ]; then
-                [ -n "$I_HASH" ] && [ "$HASH" = "$I_HASH" ] && continue || true
-                [ -n "$I_SIZE" ] && [ "$SIZE" -eq "$I_SIZE" ] && continue || true
-            fi
-            printf "Download: %s '%s'..." "$I_DESC" "${I_FILE##*/}"
-            mkdir -p "${I_FILE%/*}"
-            IS_ERROR=0
-            local TMP="$(mktemp)"
-            _get_url "$I_URL" > "$TMP" || IS_ERROR=$?
-            if [ "$IS_ERROR" -ne 0 ]; then
-                echo " ${COLOR_LIGHTRED}ERROR${COLOR_DEFAULT}"
-                rm -f "$TMP"
-            else
-                echo " ${COLOR_GREEN}OK${COLOR_DEFAULT}"
-                mv -f "$TMP" "$I_FILE"
-                # +x for /bin/ scripts or files
-                [ -n "${I_FILE##*/bin/*}" ] || chmod +x "$I_FILE"
-                [ -z "$I_ON_UPDATE" ] || eval "$I_ON_UPDATE"
-            fi
-        fi
-    done
-
-    if [ "check" = "$CMD" ] && [ "quick" = "$PARAM" ] && [ -n "$CHECK_STATE" ]; then
-        if [ "$PARAM_EX" = "update" ]; then
-            if [ "$CHECK_STATE" -eq 1 ]; then
-                echo "${COLOR_BROWN}Some or all local tools are not exist and will be updated in background.${COLOR_DEFAULT}"
-                echo ""
-            elif [ "$CHECK_STATE" -eq 2 ]; then
-                echo "${COLOR_BROWN}Some or all local tools are outdated and will be updated in background.${COLOR_DEFAULT}"
-                echo ""
-            fi
-            tools update background
-        else
-            if [ "$CHECK_STATE" -eq 1 ]; then
-                echo "${COLOR_RED}Some or all local tools are not exist. Run the 'tools update' command.${COLOR_DEFAULT}"
-                echo ""
-            elif [ "$CHECK_STATE" -eq 2 ]; then
-                echo "${COLOR_BROWN}Some or all local tools are outdated. Run the 'tools update' command.${COLOR_DEFAULT}"
-                echo ""
-            fi
-        fi
-    fi
-
-}
-
-complete -W "check update lock unlock" tools
 
 j() {
 
