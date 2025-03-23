@@ -5,7 +5,6 @@ __INSTALL_VERSION="
   awscli:aws    2.24.26
   kubectl       1.32.3
   dive          0.12.0
-  gzip-portable 1.13
   jq            1.7.1
   k9s           0.40.10
   kdash         0.6.2
@@ -15,9 +14,7 @@ __INSTALL_VERSION="
   kpexec        0.4.1
   kubecolor     0.5.0
   mcfly         0.9.3
-  tar-portable  1.35
   vim           9.0.2094
-  xz-portable   5.6.4
   yq            4.45.1
   grpcurl       1.9.3
   yazi          25.3.2
@@ -27,7 +24,29 @@ __INSTALL_VERSION="
   kubectl-whoami                        0.0.46
   kubectl-pod-lens:kubectl-pod_lens     0.3.1
   kubectl-node-shell:kubectl-node_shell 1.11.0
+  7z            24.09
+  tar-portable  1.35
+  gzip-portable 1.13
+  xz-portable   5.6.4
 "
+
+__install_7z() {
+    local VERSION="$1" EXECUTABLE="$2"
+
+    if [ "$VERSION" = "-check" ]; then
+        __install_check_version "$EXECUTABLE" \
+            | grep '^7-Zip' | awk '{print $3}'
+        return 0
+    elif [ "$VERSION" = "-latest" ]; then
+        __install_get_latest_github "ip7z/7zip"
+        return 0
+    fi
+
+    local FORMAT URL="https://github.com/ip7z/7zip/releases/download/${VERSION}/7z${VERSION//./}-"
+    __install_make_url "
+        linux-x64   linux-x64.tar.xz
+    " && __install_download && __install_unpack &&  __install_bin "7zzs" || return $?
+}
 
 __install_kubectl_node_shell() {
     local VERSION="$1" EXECUTABLE="$2"
@@ -551,9 +570,40 @@ __install_unpack() {
     echo "Extracting the archive ..." >&2
     local R=0
     case "$FORMAT" in
-        tar.gz) tar zxf archive || R=$? ;;
-        tar.xz) xzcat archive | tar x || R=$? ;;
-        zip)    unzip -qq archive || R=$? ;;
+        tar.gz)
+            local GZIP="gzip" TAR="tar"
+            if _hasnot gzip; then
+                ,install gzip-portable
+                GZIP="gzip-portable"
+            fi
+            if _hasnot tar; then
+                ,install tar-portable
+                GZIP="tar-portable"
+            fi
+            "$GZIP" -d < archive | "$TAR" x || R=$?
+            ;;
+        tar.xz)
+            local XZ="xz" TAR="tar"
+            if _hasnot "xz"; then
+                ,install xz-portable && XZ="xz-portable"
+            fi
+            if _hasnot tar; then
+                ,install tar-portable && GZIP="tar-portable"
+            fi
+            "$XZ" -d < archive | "$TAR" x || R=$?
+            ;;
+        zip)
+            if _has unzip; then
+                unzip -qq archive || R=$?
+            else
+                _maybe_local 7z
+                7z x -y -bd -bsp0 -bso0 archive || R=$?
+            fi
+            ;;
+        7z)
+            _maybe_local 7z
+            7z x -y -bd -bsp0 -bso0 archive || R=$?
+            ;;
         *)
             echo "Error: unknown archive format '$FORMAT'" >&2
             R=1
@@ -586,6 +636,7 @@ __install_make_url() {
                     *.tar.gz|*.tgz) FORMAT="tar.gz" ;;
                     *.tar.xz)       FORMAT="tar.xz" ;;
                     *.zip)          FORMAT="zip" ;;
+                    *.7z)           FORMAT="7z" ;;
                     *)
                         echo "Error: unknown format of the final file in the URL: $URL" >&2
                         return 1
