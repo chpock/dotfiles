@@ -471,7 +471,7 @@ __install_kubectl() {
             | grep -F 'Client Version' | awk '{print $NF}' | tr -d 'v'
         return 0
     elif [ "$VERSION" = "-latest" ]; then
-        geturl https://dl.k8s.io/release/stable.txt 2>/dev/null \
+        _get_url https://dl.k8s.io/release/stable.txt 2>/dev/null \
             | tr -d 'v'
         return 0
     fi
@@ -492,7 +492,7 @@ __install_awscli() {
             | awk '{print $1}' | cut -d/ -f2
         return 0
     elif [ "$VERSION" = "-latest" ]; then
-        geturl https://raw.githubusercontent.com/aws/aws-cli/v2/CHANGELOG.rst 2>/dev/null \
+        _get_url https://raw.githubusercontent.com/aws/aws-cli/v2/CHANGELOG.rst 2>/dev/null \
             | sed -n -e '/^===/{x;p;d;}' -e x | grep '^2\.' | head -n 1
         return 0
     fi
@@ -615,7 +615,7 @@ __install_unpack() {
 
 __install_download() {
     echo "Downloading $TOOL version $VERSION ..." >&2
-    if ! geturl "$URL" >archive; then
+    if ! _get_url "$URL" >archive; then
         echo "Error: failed to download tool '$TOOL'" >&2
         return 1
     fi
@@ -663,9 +663,9 @@ __install_get_latest_github() {
     # This is version that uses GitHub API. However, it has a limit for
     # unauthenticated users as only 60 requests per hour.
     #
-    # geturl "https://api.github.com/repos/$1/releases/latest" 2>/dev/null \
+    # _get_url "https://api.github.com/repos/$1/releases/latest" 2>/dev/null \
     #     | grep -F '"tag_name":' | cut -d'"' -f4 | sed 's/^[^0-9]*//'
-    geturl "https://github.com/$1/releases/latest" 2>/dev/null \
+    _get_url "https://github.com/$1/releases/latest" 2>/dev/null \
         | sed -n '/\/releases\/expanded_assets\// s#.*/releases/expanded_assets/[^0-9]*\([^"]*\).*#\1#p'
 }
 
