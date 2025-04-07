@@ -161,7 +161,7 @@ $IAM_HOME/vim_runtime/autoload/Colorizer.vim
 tool: vim plugin endwise
 https://raw.githubusercontent.com/tpope/vim-endwise/master/plugin/endwise.vim
 $IAM_HOME/vim_runtime/plugin/endwise.vim
-11172
+11183
 
 # DOC: https://github.com/tpope/vim-commentary/tree/master
 tool: vim plugin commentary
