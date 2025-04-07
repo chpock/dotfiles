@@ -112,9 +112,13 @@ _get_url() {
     fi
     local URL="$1"
     if _has curl; then
-        curl --fail --silent --show-error -k -L "$URL"
+        set -- --fail --silent --show-error -k -L "$URL"
+        _isnot need_proxy || set -- --proxy "http://127.0.0.1:52011" "$@"
+        curl "$@"
     elif _has wget; then
-        wget -q -O - "$URL"
+        set -- -q -O - "$URL"
+        isnot need_proxy || set -- -e "use_proxy=on" -e "https_proxy=http://127.0.0.1:52011" "$@"
+        wget "$@"
     elif [ -x /usr/lib/apt/apt-helper ]; then
         local R OUT ERR TMP="$(mktemp)"
         _catch OUT ERR /usr/lib/apt/apt-helper -oAcquire::https::Verify-Peer=false download-file "$URL" "$TMP" && R=0 || R=$?
@@ -411,6 +415,18 @@ _is() {
             # Unfortunatelly, this will lead to 100 millisecond delay in
             # non-cloud environments.
             _has curl && curl -s -I --connect-timeout 0.1 -o /dev/null http://169.254.169.254 || R=1
+            ;;
+        need_proxy)
+            # If /proc/net/tcp doesn't exists, then we don't need proxy
+            [ -r /proc/net/tcp ] && {
+                # Try to detect port listener. We expect out proxy to be
+                # listening 127.0.0.1:52011. Here is:
+                #   0100007F      - 127.0.0.1
+                #   CB2B          - 52011
+                #   00000000:0000 - remote address, 0.0.0.0:0 in our case
+                # If there is any error, consider that we don't need the proxy.
+                grep -qF ': 0100007F:CB2B 00000000:0000 ' /proc/net/tcp 2>/dev/null || R=1
+            } || R=1
             ;;
         *)
             echo "bashrc error: unknown _is '$CONDITION'" >&2
@@ -1018,6 +1034,11 @@ hostinfo() {
     printf -- "Kernel    : %s\n" "$UNAME_ALL"
     printf -- "Machine   : %s\n" "$UNAME_MACHINE"
     printf -- "Release   : %s\n" "$UNAME_RELEASE"
+
+    if _is need_proxy; then
+        printf -- "Proxy     : %s\n" "${COLOR_GREEN}Enabled${COLOR_DEFAULT}"
+    fi
+
     printf -- "------------------------------------------------------------------------[ OS ]--\n"
 
     if ! _is in-container && ! _is sudo; then
@@ -1614,6 +1635,15 @@ _has apt && apt() {
     else
         command apt "$@"
     fi
+}
+
+clear() {
+    # Due to unknown reason, clear command doesn't know how to clear scollback
+    # buffer when TERM=tmux-256color. Let's use 'TERM=tmux' as a workaround in
+    # this case. This will allow to clear tmux's scrollback buffer by this
+    # command.
+    [ "$TERM" != "tmux-256color" ] || set -- -T tmux "$@"
+    command clear "$@"
 }
 
 man() {
@@ -2879,7 +2909,7 @@ if [ ! -x "$IAM_HOME/tools/bin/geturl" ]; then
     [ -d "$IAM_HOME/tools/bin" ] || mkdir -p "$IAM_HOME/tools/bin"
     {
         echo '#!/usr/bin/env bash'
-        declare -f _hash _hash_in _check _has _catch _get_url
+        declare -f _is _isnot _hash _hash_in _check _has _catch _get_url
         echo '_get_url "$@"'
     } > "$IAM_HOME/tools/bin/geturl"
     chmod +x "$IAM_HOME/tools/bin/geturl"

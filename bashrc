@@ -557,9 +557,13 @@ fi
 fi
 local URL="$1"
 if _has curl; then
-curl --fail --silent --show-error -k -L "$URL"
+set -- --fail --silent --show-error -k -L "$URL"
+_isnot need_proxy || set -- --proxy "http://127.0.0.1:52011" "$@"
+curl "$@"
 elif _has wget; then
-wget -q -O - "$URL"
+set -- -q -O - "$URL"
+isnot need_proxy || set -- -e "use_proxy=on" -e "https_proxy=http://127.0.0.1:52011" "$@"
+wget "$@"
 elif [ -x /usr/lib/apt/apt-helper ]; then
 local R OUT ERR TMP="$(mktemp)"
 _catch OUT ERR /usr/lib/apt/apt-helper -oAcquire::https::Verify-Peer=false download-file "$URL" "$TMP" && R=0 || R=$?
@@ -788,6 +792,11 @@ _is aws && TMPVAL="$(_aws_metadata instance-id)" && [ -n "$TMPVAL" ] || R=1
 ;;
 cloud)
 _has curl && curl -s -I --connect-timeout 0.1 -o /dev/null http://169.254.169.254 || R=1
+;;
+need_proxy)
+[ -r /proc/net/tcp ] && {
+grep -qF ': 0100007F:CB2B 00000000:0000 ' /proc/net/tcp 2>/dev/null || R=1
+} || R=1
 ;;
 *)
 echo "bashrc error: unknown _is '$CONDITION'" >&2
@@ -1260,6 +1269,9 @@ printf -- "Hostname  : %s\n" "$HOSTNAME"
 printf -- "Kernel    : %s\n" "$UNAME_ALL"
 printf -- "Machine   : %s\n" "$UNAME_MACHINE"
 printf -- "Release   : %s\n" "$UNAME_RELEASE"
+if _is need_proxy; then
+printf -- "Proxy     : %s\n" "${COLOR_GREEN}Enabled${COLOR_DEFAULT}"
+fi
 printf -- "------------------------------------------------------------------------[ OS ]--\n"
 if ! _is in-container && ! _is sudo; then
 if _is linux || _is macos || _is sunos; then
@@ -1633,13 +1645,13 @@ elif _has vi; then
 EDITOR=vi
 else
 echo "${COLOR_RED}Warning: vi/vim not found${COLOR_DEFAULT}"
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 echo
 fi
 export EDITOR
 alias vi=vim
 vim() {
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 _maybe_local "vim"
 if _isnot tmux; then
 if [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID" ]; then
@@ -1678,6 +1690,10 @@ esac
 else
 command apt "$@"
 fi
+}
+clear() {
+[ "$TERM" != "tmux-256color" ] || set -- -T tmux "$@"
+command clear "$@"
 }
 man() {
 env \
@@ -2598,7 +2614,7 @@ if [ ! -x "$IAM_HOME/tools/bin/geturl" ]; then
 [ -d "$IAM_HOME/tools/bin" ] || mkdir -p "$IAM_HOME/tools/bin"
 {
 echo '#!/usr/bin/env bash'
-declare -f _hash _hash_in _check _has _catch _get_url
+declare -f _is _isnot _hash _hash_in _check _has _catch _get_url
 echo '_get_url "$@"'
 } > "$IAM_HOME/tools/bin/geturl"
 chmod +x "$IAM_HOME/tools/bin/geturl"
