@@ -25,6 +25,7 @@ __INSTALL_VERSION="
   kubectl-pod-lens:kubectl-pod_lens     0.3.1
   kubectl-node-shell:kubectl-node_shell 1.11.0
   7z            24.09
+  moar          1.31.4 auto
   tar-portable  1.35
   gzip-portable 1.13
   xz-portable   5.6.4
@@ -335,6 +336,24 @@ __install_k9s() {
     __install_make_url "
         linux-x64   Linux_amd64.tar.gz
     " && __install_download && __install_unpack &&  __install_bin || return $?
+}
+
+__install_moar() {
+    local VERSION="$1" EXECUTABLE="$2"
+
+    if [ "$VERSION" = "-check" ]; then
+        __install_check_version "$EXECUTABLE" --version \
+            | tr -d 'v'
+        return 0
+    elif [ "$VERSION" = "-latest" ]; then
+        __install_get_latest_github "walles/moar"
+        return 0
+    fi
+
+    local URL="https://github.com/walles/moar/releases/download/v${VERSION}/moar-v${VERSION}-"
+    __install_make_url -noformat "
+        linux-x64   linux-amd64
+    " && __install_download && __install_bin "archive" || return $?
 }
 
 __install_jq() {
@@ -707,6 +726,7 @@ _is_install_available() {
         shift
     fi
 
+    local TOOL
     if [ -z "$1" ]; then
         echo "Available tools:"
         echo
@@ -719,13 +739,18 @@ _is_install_available() {
     elif [ "$1" = "-check" ]; then
         __install_check_new_versions
         return
+    elif [ $# -gt 1 ]; then
+        for TOOL; do
+            ,install "$TOOL" || return $?
+        done
+        return
     fi
 
     local V="__CACHE_INSTALL_${1//-/_}"
     # for debug
     #[ -z "${!V}" ] || return "${!V}"
 
-    local R=1 DISABLED=1 TOOL VERSION EXECUTABLE
+    local R=1 DISABLED=1 VERSION EXECUTABLE
     while read -r DISABLED TOOL EXECUTABLE VERSION; do
 
         # Check if the current tool is the tool that was requested on
@@ -796,8 +821,9 @@ __install_complete() {
     COMPREPLY=()
 
     if [ $COMP_CWORD -lt 2 ]; then
-        COMPREPLY=($(compgen -W "-check $__INSTALL_AVAILABLE_TOOLS" -- "${COMP_WORDS[1]}"))
-        return
+        COMPREPLY=($(compgen -W "-check $__INSTALL_AVAILABLE_TOOLS" -- "${COMP_WORDS[COMP_CWORD]}"))
+    else
+        COMPREPLY=($(compgen -W "$__INSTALL_AVAILABLE_TOOLS" -- "${COMP_WORDS[COMP_CWORD]}"))
     fi
 }
 
@@ -806,7 +832,8 @@ complete -F __install_complete ,install
 unset __INSTALL_VERSION_FILTERED
 unset __INSTALL_AVAILABLE_TOOLS
 unset __INSTALL_AVAILABLE_EXECUTABLES
-while read -r TOOL VERSION; do
+unset __INSTALL_AUTO
+while read -r TOOL VERSION OPTIONS; do
     [ -n "$TOOL" ] || continue
     # Try extracting the executable name from the tool name by removing
     # all characters before the colon.
@@ -826,14 +853,28 @@ while read -r TOOL VERSION; do
             __INSTALL_AVAILABLE_TOOLS="$TOOL"
             __INSTALL_AVAILABLE_EXECUTABLES="$EXECUTABLE"
         fi
+        if [ "$OPTIONS" = "auto" ]; then
+            if [ -n "$__INSTALL_AUTO" ]; then
+                __INSTALL_AUTO="$__INSTALL_AUTO $TOOL"
+            else
+                __INSTALL_AUTO="$TOOL"
+            fi
+        fi
         _has_function "$EXECUTABLE" || eval "${EXECUTABLE}() {  _maybe_local \"\${FUNCNAME[0]}\"; env \"\${FUNCNAME[0]}\" \"\$@\"; }"
         R=0
     fi
     __INSTALL_VERSION_FILTERED="$R $TOOL $EXECUTABLE $VERSION
         $__INSTALL_VERSION_FILTERED"
 done < <(echo "$__INSTALL_VERSION")
-unset R TOOL VERSION EXECUTABLE TOOL_FUNC
+unset R TOOL VERSION OPTIONS EXECUTABLE TOOL_FUNC
 unset __INSTALL_VERSION
+
+if [ -n "$__INSTALL_AUTO" ]; then
+    # Install update auto-install tools
+    ,install $__INSTALL_AUTO >/dev/null 2>&1 &
+    disown $!
+    unset __INSTALL_AUTO
+fi
 
 # Define simple wrappers for tools
 

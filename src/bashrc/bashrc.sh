@@ -1846,6 +1846,8 @@ clip() {
 # -P Prompt. Must be last option
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
+
+_hasnot moar || export PAGER=moar
 #PAGER=less
 #export PAGER
 
