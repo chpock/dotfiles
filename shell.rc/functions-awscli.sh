@@ -75,10 +75,12 @@ aws() {
         fi
         (set -x; aws eks update-kubeconfig --name "$2")
         ;;
-    ecr-auth-docker)
+    ecr-auth-docker|ecr-auth-helm)
         local REGION
         local ECR_HOST
         local ACCOUNT
+        local LOGIN_TARGET
+        [ "$1" = "ecr-auth-docker" ] && LOGIN_TARGET="docker" || LOGIN_TARGET="helm registry"
         if [ -z "$2" ]; then
             if [ -z "$AWS_DEFAULT_REGION" ]; then
                 echo "Error: the default AWS region is not configured"
@@ -96,7 +98,7 @@ aws() {
             ECR_HOST="$2"
             REGION="$(echo "$ECR_HOST" | cut -d. -f4)"
         fi
-        (set -x; aws ecr get-login-password --region "$REGION" | docker login --username AWS --password-stdin "$ECR_HOST")
+        (set -x; aws ecr get-login-password --region "$REGION" | $LOGIN_TARGET login --username AWS --password-stdin "$ECR_HOST")
         ;;
     unset-environment-variables)
         unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_DEFAULT_REGION
@@ -124,7 +126,7 @@ __,aws() {
     COMPREPLY=()
 
     if [ $COMP_CWORD -eq 1 ]; then
-        COMPREPLY=($(compgen -W "on off local remote role region eks-update-kubeconfig ecr-auth-docker unset-environment-variables" -- "$CUR"))
+        COMPREPLY=($(compgen -W "on off local remote role region eks-update-kubeconfig ecr-auth-docker ecr-auth-helm unset-environment-variables" -- "$CUR"))
         return
     fi
 
