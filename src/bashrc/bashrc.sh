@@ -562,6 +562,38 @@ then
     ln -sf /usr/bin/vim.basic "$IAM_HOME/tools/bin/vim"
 fi
 
+#if _hasnot curl && [ ! -e "$IAM_HOME/tools/bin/curl-portable" ] && _has sha256sum && _is linux-x64; then
+#    printf 'Download curl-portable ...'
+#    HASH="354bbcb8cd73f1deafff9f82743e9396b27a8aece2893e8477156e23cca5ca30"
+#    URL_HOST="dotfiles.chpock.tk"
+#    URL_PORT="80"
+#    URL_PATH="/curl-portable.8.13.0.${HASH}.linux.x86_64"
+#    # This IP is from github manual:
+#    # https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site
+#    # As for now, there are 4 IPs:
+#    #   185.199.108.153
+#    #   185.199.109.153
+#    #   185.199.110.153
+#    #   185.199.111.153
+#    URL_IP="185.199.111.153"
+#    mkdir -p "$IAM_HOME/tools/bin"
+#    exec 3<>"/dev/tcp/$URL_IP/$URL_PORT"
+#    printf 'GET %s HTTP/1.1\r\nHost: %s\r\nConnection: close\r\n\r\n' "$URL_PATH" "$URL_HOST" >&3
+#    while IFS= read -r line <&3; do
+#        [[ "$line" == $'\r' || "$line" == "" ]] && break
+#    done
+#    cat <&3 >"$IAM_HOME/tools/bin/curl-portable"
+#    exec 3<&-
+#    exec 3>&-
+#    HASH_CALC="$(sha256sum "$IAM_HOME/tools/bin/curl-portable" | awk '{print $1}')"
+#    if [ "$HASH_CALC" = "$HASH" ]; then
+#        chmod +x "$IAM_HOME/tools/bin/curl-portable"
+#    else
+#        rm -f "$IAM_HOME/tools/bin/curl-portable"
+#    fi
+#    unset HASH HASH_CALC URL_HOST URL_PORT URL_PATH
+#fi
+
 tools() {
 
     local CMD="$1"
@@ -1847,7 +1879,7 @@ clip() {
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
 
-_hasnot moar || export PAGER=moar
+_hasnot moar || export PAGER="moar -quit-if-one-screen"
 #PAGER=less
 #export PAGER
 

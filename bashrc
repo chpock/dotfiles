@@ -471,7 +471,7 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=98516E94
+LOCAL_TOOLS_FILE_HASH=CE116E97
 COLOR_WHITE=$'\e[1;37m'
 COLOR_LIGHTGRAY=$'\e[0;37m'
 COLOR_GRAY=$'\e[1;30m'
@@ -1634,6 +1634,8 @@ env diff "$@"
 }
 alias mv='mv -i'
 alias mkdir='mkdir -p'
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 alias mkcd='_(){ mkdir -p $1; cd $1; }; _'
 alias mkcdtmp='_(){ cd "$(test -z "$1" && mktemp -d || mktemp -d -t "${1}.XXXXXXX")"; }; _'
 alias ..='cd ..'
@@ -1646,8 +1648,6 @@ EDITOR=vi
 else
 echo "${COLOR_RED}Warning: vi/vim not found${COLOR_DEFAULT}"
 echo
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 fi
 export EDITOR
 alias vi=vim
@@ -1859,7 +1859,7 @@ done
 }
 LESS="-F -X -R -i -w -z-4 -P spacebar\:page ahead b\:page back /\:search ahead \?\:search back h\:help q\:quit"
 export LESS
-_hasnot moar || export PAGER=moar
+_hasnot moar || export PAGER="moar -quit-if-one-screen"
 shopt -s histappend
 shopt -s cmdhist
 unset HISTFILESIZE
