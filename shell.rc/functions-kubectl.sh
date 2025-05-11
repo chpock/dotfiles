@@ -141,11 +141,22 @@ __kube_complete() {
 
 complete -F __kube_complete ,kube
 
-if type -t __start_kubectl >/dev/null 2>&1; then
-    if [ "$(type -t compopt)" = "builtin" ]; then
-        complete -o default -F __start_kubectl k
+# Full support for bash completion is not available when loading shell.rc
+# functions. Thus, the __start_kubectl function, which is usual to complete
+# the kubectl command, is not available. Thus, we can not use it here to complete
+# the alias 'k'. As a workaround, we will use wrapper function and call
+# __start_kubectl if it is available.
+__wrapper_start_kubectl() {
+    if type -t __start_kubectl >/dev/null 2>&1; then
+        __start_kubectl
     else
-        complete -o default -o nospace -F __start_kubectl k
+        # fallback: file completion as default behavior
+        COMPREPLY=( $(compgen -f -- "${COMP_WORDS[COMP_CWORD]}") )
     fi
-fi
+}
 
+if [ "$(type -t compopt)" = "builtin" ]; then
+    complete -o default -F __wrapper_start_kubectl k
+else
+    complete -o default -o nospace -F __wrapper_start_kubectl k
+fi
