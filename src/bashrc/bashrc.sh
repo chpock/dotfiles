@@ -1693,6 +1693,12 @@ man() {
 
 ,myip() { _get_url "https://checkip.amazonaws.com"; }
 
+,hostname() {
+    local FN="$IAM_HOME/hostname"
+    [ -z "$1" ] || { [ "$1" = "-" ] && rm -f "$FN" || echo "$1" > "$FN"; }
+    [ -f "$FN" ] && echo "Set hostname: $(cat "$FN")" || echo "Hostname is not set"
+}
+
 #magic
 
 __magic_ssh() {
@@ -2504,6 +2510,9 @@ function promptcmd () {
         disown $!
     fi
 
+    local _HOSTNAME='\h'
+    [ ! -f "$IAM_HOME/hostname" ] || _HOSTNAME="$(cat "$IAM_HOME/hostname")"
+
     # Here we initialize PS1. It should be initialized after everything related to
     # python virtual environment, since activating venv changes PS1.
     PS1=""
@@ -2514,7 +2523,7 @@ function promptcmd () {
             xterm*)
                 # No username in tab title
                 # PS1="${PS1}\[\033]0;\u@\h:\w\007\]"
-                PS1="${PS1}\[\033]0;\h:\w\007\]"
+                PS1="${PS1}\[\033]0;${_HOSTNAME}:\w\007\]"
             ;;
         esac
     fi
@@ -2544,7 +2553,7 @@ function promptcmd () {
     PS1="${PS1}\u\[${COLOR_GRAY}\]@\[${COLOR_DEFAULT}\]"
 
     # Host
-    PS1="${PS1}\[${COLOR_LIGHTBLUE}\]\h\[${COLOR_DEFAULT}\]"
+    PS1="${PS1}\[${COLOR_LIGHTBLUE}\]${_HOSTNAME}\[${COLOR_DEFAULT}\]"
 
     if _is wsl; then
         # WSL?

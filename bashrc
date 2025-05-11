@@ -471,7 +471,7 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=2DC56EA0
+LOCAL_TOOLS_FILE_HASH=B5466E98
 COLOR_WHITE=$'\e[1;37m'
 COLOR_LIGHTGRAY=$'\e[0;37m'
 COLOR_GRAY=$'\e[1;30m'
@@ -1634,11 +1634,11 @@ env diff "$@"
 }
 alias mv='mv -i'
 alias mkdir='mkdir -p'
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 alias mkcd='_(){ mkdir -p $1; cd $1; }; _'
 alias mkcdtmp='_(){ cd "$(test -z "$1" && mktemp -d || mktemp -d -t "${1}.XXXXXXX")"; }; _'
 alias ..='cd ..'
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 alias tailf='tail -F'
 alias ff='find . -name'
 if _has vim; then
@@ -1707,6 +1707,11 @@ LESS_TERMCAP_us=$'\E[01;32m' \
 man "$@"
 }
 ,myip() { _get_url "https://checkip.amazonaws.com"; }
+,hostname() {
+local FN="$IAM_HOME/hostname"
+[ -z "$1" ] || { [ "$1" = "-" ] && rm -f "$FN" || echo "$1" > "$FN"; }
+[ -f "$FN" ] && echo "Set hostname: $(cat "$FN")" || echo "Hostname is not set"
+}
 __magic_ssh() {
 printf '%s\n' \
 "IAM=\"$IAM\" && export IAM" \
@@ -2282,11 +2287,13 @@ if _is tmux && [ -n "$TMUX_PANE" ]; then
 command tmux set-hook -R -t "$TMUX_PANE" window-renamed >/dev/null 2>&1 &
 disown $!
 fi
+local _HOSTNAME='\h'
+[ ! -f "$IAM_HOME/hostname" ] || _HOSTNAME="$(cat "$IAM_HOME/hostname")"
 PS1=""
 if _isnot tmux; then
 case ${TERM} in
 xterm*)
-PS1="${PS1}\[\033]0;\h:\w\007\]"
+PS1="${PS1}\[\033]0;${_HOSTNAME}:\w\007\]"
 ;;
 esac
 fi
@@ -2309,7 +2316,7 @@ PS1="${PS1}\[${COLOR_BROWN}\]"
 fi
 fi
 PS1="${PS1}\u\[${COLOR_GRAY}\]@\[${COLOR_DEFAULT}\]"
-PS1="${PS1}\[${COLOR_LIGHTBLUE}\]\h\[${COLOR_DEFAULT}\]"
+PS1="${PS1}\[${COLOR_LIGHTBLUE}\]${_HOSTNAME}\[${COLOR_DEFAULT}\]"
 if _is wsl; then
 PS1="${PS1}\[${COLOR_GRAY}\][\[${COLOR_DEFAULT}\]WSL\[${COLOR_GRAY}\]]\[${COLOR_DEFAULT}\]"
 elif _is in-docker; then
