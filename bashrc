@@ -471,7 +471,7 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=2ABA6E90
+LOCAL_TOOLS_FILE_HASH=D1176E8B
 COLOR_WHITE=$'\e[1;37m'
 COLOR_LIGHTGRAY=$'\e[0;37m'
 COLOR_GRAY=$'\e[1;30m'
@@ -1639,8 +1639,6 @@ alias mkcdtmp='_(){ cd "$(test -z "$1" && mktemp -d || mktemp -d -t "${1}.XXXXXX
 alias ..='cd ..'
 alias tailf='tail -F'
 alias ff='find . -name'
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 if _has vim; then
 EDITOR="vim -u $IAM_HOME/vimrc -i $IAM_HOME/viminfo"
 elif _has vi; then
@@ -1652,6 +1650,8 @@ fi
 export EDITOR
 alias vi=vim
 vim() {
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 _maybe_local "vim"
 if _isnot tmux; then
 if [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID" ]; then
@@ -1945,6 +1945,7 @@ __aws_status() {
 local __AWS_OUTPUT
 local __AWS_INDENTITY
 local __AWS_USERID
+local __AWS_REGION
 _has aws || return 0
 if [ -z "$__AWS_INSTANCE_HAS_ROLE" ]; then
 _is aws \
@@ -1954,10 +1955,14 @@ _is aws \
 || __AWS_INSTANCE_HAS_ROLE=0
 fi
 [ "$__AWS_INSTANCE_HAS_ROLE" -eq 0 ] \
-&& [ -z "$AWS_ACCESS_KEY_ID$AWS_SECRET_ACCESS_KEY$AWS_SESSION_TOKEN" ] \
+&& [ -z "$AWS_ACCESS_KEY_ID$AWS_SECRET_ACCESS_KEY$AWS_SESSION_TOKEN$AWS_PROFILE" ] \
 && [ ! -e "$IAM_HOME/state/on_aws" ] \
 && return 0 \
 || true
+if [ -n "$AWS_ACCESS_KEY_ID$AWS_SECRET_ACCESS_KEY$AWS_SESSION_TOKEN" ] && [ -n "$AWS_PROFILE" ]; then
+AWS_PROFILE_INACTIVE="$AWS_PROFILE"
+unset AWS_PROFILE
+fi
 __AWS_OUTPUT="${COLOR_GRAY}[${COLOR_WHITE}AWS${COLOR_GRAY}: "
 if [ -e "$IAM_HOME/state/on_aws_localstack" ]; then
 __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_DEFAULT}localstack${COLOR_GRAY}:"
@@ -1972,7 +1977,9 @@ __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}]${COLOR_DEFAULT}"
 _ps1_show_status "$__AWS_OUTPUT"
 return 0
 fi
-if [ -z "$AWS_ACCESS_KEY_ID$AWS_SECRET_ACCESS_KEY$AWS_SESSION_TOKEN" ] && [ "$__AWS_INSTANCE_HAS_ROLE" -eq 1 ]; then
+if [ -n "$AWS_PROFILE" ]; then
+__AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_DEFAULT}profile${COLOR_GRAY}:${COLOR_GREEN} Y"
+elif [ -z "$AWS_ACCESS_KEY_ID$AWS_SECRET_ACCESS_KEY$AWS_SESSION_TOKEN" ] && [ "$__AWS_INSTANCE_HAS_ROLE" -eq 1 ]; then
 __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_DEFAULT}instance-profile${COLOR_GRAY}:${COLOR_GREEN} Y"
 else
 __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_DEFAULT}key${COLOR_GRAY}:"
@@ -1993,10 +2000,21 @@ __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_GREEN} Y"
 else
 __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_RED} N"
 fi
+if [ -n "$AWS_PROFILE_INACTIVE" ]; then
+__AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}; ${COLOR_BROWN}inactive-profile${COLOR_GRAY}:"
+__AWS_OUTPUT="$__AWS_OUTPUT${COLOR_GREEN} Y"
+fi
 fi
 __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}region${COLOR_GRAY}:"
-if declare -p AWS_DEFAULT_REGION >/dev/null 2>&1; then
-__AWS_OUTPUT="$__AWS_OUTPUT${COLOR_CYAN} $AWS_DEFAULT_REGION"
+if [ -n "$AWS_PROFILE" ] && [ -z "$AWS_DEFAULT_REGION" ]; then
+__AWS_REGION="$(aws configure list 2>/dev/null | awk '$1 == "region" { print $2 }')"
+[ "$__AWS_REGION" != "<not" ] || __AWS_REGION=""
+fi
+if [ -z "$__AWS_REGION" ] && declare -p AWS_DEFAULT_REGION >/dev/null 2>&1; then
+__AWS_REGION="$AWS_DEFAULT_REGION"
+fi
+if [ -n "$__AWS_REGION" ]; then
+__AWS_OUTPUT="$__AWS_OUTPUT${COLOR_CYAN} $__AWS_REGION"
 else
 __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_RED} N"
 fi

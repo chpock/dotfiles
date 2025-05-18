@@ -2019,6 +2019,7 @@ __aws_status() {
     local __AWS_OUTPUT
     local __AWS_INDENTITY
     local __AWS_USERID
+    local __AWS_REGION
 
     # Don't show AWS status if AWS CLI is not installed
     _has aws || return 0
@@ -2039,10 +2040,16 @@ __aws_status() {
     # If AWS-related environment variables exist, then we always show AWS status.
     # If they doesn't exist, then AWS status is controlled by the flag.
     [ "$__AWS_INSTANCE_HAS_ROLE" -eq 0 ] \
-        && [ -z "$AWS_ACCESS_KEY_ID$AWS_SECRET_ACCESS_KEY$AWS_SESSION_TOKEN" ] \
+        && [ -z "$AWS_ACCESS_KEY_ID$AWS_SECRET_ACCESS_KEY$AWS_SESSION_TOKEN$AWS_PROFILE" ] \
         && [ ! -e "$IAM_HOME/state/on_aws" ] \
         && return 0 \
         || true
+
+    # If we have AWS_PROFILE and other AWS variables, then mark the profile as inactive
+    if [ -n "$AWS_ACCESS_KEY_ID$AWS_SECRET_ACCESS_KEY$AWS_SESSION_TOKEN" ] && [ -n "$AWS_PROFILE" ]; then
+        AWS_PROFILE_INACTIVE="$AWS_PROFILE"
+        unset AWS_PROFILE
+    fi
 
     __AWS_OUTPUT="${COLOR_GRAY}[${COLOR_WHITE}AWS${COLOR_GRAY}: "
 
@@ -2066,10 +2073,12 @@ __aws_status() {
 
     fi
 
-    # If we do not have AWS credentials in the environment variables, but
-    # the current instance has an attached profile/role, then show only this
-    # to avoid unnecessary information.
-    if [ -z "$AWS_ACCESS_KEY_ID$AWS_SECRET_ACCESS_KEY$AWS_SESSION_TOKEN" ] && [ "$__AWS_INSTANCE_HAS_ROLE" -eq 1 ]; then
+    if [ -n "$AWS_PROFILE" ]; then
+        __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_DEFAULT}profile${COLOR_GRAY}:${COLOR_GREEN} Y"
+    elif [ -z "$AWS_ACCESS_KEY_ID$AWS_SECRET_ACCESS_KEY$AWS_SESSION_TOKEN" ] && [ "$__AWS_INSTANCE_HAS_ROLE" -eq 1 ]; then
+        # If we do not have AWS credentials in the environment variables, but
+        # the current instance has an attached profile/role, then show only this
+        # to avoid unnecessary information.
         __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_DEFAULT}instance-profile${COLOR_GRAY}:${COLOR_GREEN} Y"
     else
 
@@ -2094,11 +2103,26 @@ __aws_status() {
             __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_RED} N"
         fi
 
+        if [ -n "$AWS_PROFILE_INACTIVE" ]; then
+            __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}; ${COLOR_BROWN}inactive-profile${COLOR_GRAY}:"
+            __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_GREEN} Y"
+        fi
+
     fi
 
     __AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}region${COLOR_GRAY}:"
-    if declare -p AWS_DEFAULT_REGION >/dev/null 2>&1; then
-        __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_CYAN} $AWS_DEFAULT_REGION"
+
+    if [ -n "$AWS_PROFILE" ] && [ -z "$AWS_DEFAULT_REGION" ]; then
+        __AWS_REGION="$(aws configure list 2>/dev/null | awk '$1 == "region" { print $2 }')"
+        [ "$__AWS_REGION" != "<not" ] || __AWS_REGION=""
+    fi
+
+    if [ -z "$__AWS_REGION" ] && declare -p AWS_DEFAULT_REGION >/dev/null 2>&1; then
+        __AWS_REGION="$AWS_DEFAULT_REGION"
+    fi
+
+    if [ -n "$__AWS_REGION" ]; then
+        __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_CYAN} $__AWS_REGION"
     else
         __AWS_OUTPUT="$__AWS_OUTPUT${COLOR_RED} N"
     fi

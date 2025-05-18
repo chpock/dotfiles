@@ -58,14 +58,25 @@ aws() {
         echo "Role assumption: ok"
         ;;
     region)
-        if [ -n "$2" ]; then
-            AWS_DEFAULT_REGION="$2"
-            export AWS_DEFAULT_REGION
+        local __AWS_REGION="$AWS_DEFAULT_REGION"
+        if [ -n "$AWS_PROFILE" ] && [ -z "$__AWS_REGION" ]; then
+            if [ -n "$2" ]; then
+                aws configure set region "$2" --profile "$AWS_PROFILE"
+                aws configure set default.region "$2" --profile "$AWS_PROFILE"
+            fi
+            __AWS_REGION="$(aws configure list 2>/dev/null | awk '$1 == "region" { print $2 }')"
+            [ "$__AWS_REGION" != "<not" ] || __AWS_REGION=""
+        else
+            if [ -n "$2" ]; then
+                AWS_DEFAULT_REGION="$2"
+                __AWS_REGION="$2"
+                export AWS_DEFAULT_REGION
+            fi
         fi
-        if [ -z "$AWS_DEFAULT_REGION" ]; then
+        if [ -z "$__AWS_REGION" ]; then
             echo "Current AWS default region is not defined."
         else
-            echo "Current AWS default region: $AWS_DEFAULT_REGION"
+            echo "Current AWS default region: $__AWS_REGION"
         fi
         ;;
     eks-update-kubeconfig)
@@ -101,7 +112,32 @@ aws() {
         (set -x; aws ecr get-login-password --region "$REGION" | $LOGIN_TARGET login --username AWS --password-stdin "$ECR_HOST")
         ;;
     unset-environment-variables)
-        unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_DEFAULT_REGION
+        unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_DEFAULT_REGION AWS_PROFILE AWS_PROFILE_INACTIVE
+        ;;
+    profile)
+        if [ "$2" = "-" ]; then
+            unset AWS_PROFILE AWS_PROFILE_INACTIVE
+        elif [ -n "$2" ]; then
+            [ -z "$AWS_ACCESS_KEY_ID" ] && export AWS_PROFILE="$2" || AWS_PROFILE_INACTIVE="$2"
+        fi
+        if [ -n "$AWS_PROFILE" ]; then
+            echo "Active AWS profile: $AWS_PROFILE"
+        elif [ -n "$AWS_PROFILE" ]; then
+            echo "Inactive AWS profile: $AWS_PROFILE_INACTIVE"
+        else
+            echo "There is no active/inactive profile"
+        fi
+        ;;
+    update-profile)
+        if [ -z "$AWS_PROFILE_INACTIVE" ]; then
+            echo "Error: there is no inactive profile"
+            return 1
+        fi
+        aws configure set aws_access_key_id "$AWS_ACCESS_KEY_ID" --profile "$AWS_PROFILE_INACTIVE"
+        aws configure set aws_secret_access_key "$AWS_SECRET_ACCESS_KEY" --profile "$AWS_PROFILE_INACTIVE"
+        aws configure set aws_session_token "$AWS_SESSION_TOKEN" --profile "$AWS_PROFILE_INACTIVE"
+        export AWS_PROFILE="$AWS_PROFILE_INACTIVE"
+        unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_PROFILE_INACTIVE
         ;;
     *)
         echo "Unknown command: '$1'"
@@ -126,7 +162,7 @@ __,aws() {
     COMPREPLY=()
 
     if [ $COMP_CWORD -eq 1 ]; then
-        COMPREPLY=($(compgen -W "on off local remote role region eks-update-kubeconfig ecr-auth-docker ecr-auth-helm unset-environment-variables" -- "$CUR"))
+        COMPREPLY=($(compgen -W "on off local remote role region eks-update-kubeconfig ecr-auth-docker ecr-auth-helm unset-environment-variables profile update-profile" -- "$CUR"))
         return
     fi
 
@@ -165,6 +201,11 @@ __,aws() {
             return
         fi
         ;;
+    profile)
+        if [ $COMP_CWORD -eq 2 ]; then
+            COMPREPLY=($(compgen -W "$(aws configure list-profiles)" -- "$CUR"))
+            return
+        fi
     esac
 
     compopt -o default
