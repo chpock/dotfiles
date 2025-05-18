@@ -1699,6 +1699,15 @@ man() {
     [ -f "$FN" ] && echo "Set hostname: $(cat "$FN")" || echo "Hostname is not set"
 }
 
+,retry() {
+    local R
+    while true; do
+        "$@" && R=0 || R=$?
+        echo "Exit code: $R; Retry in 5 seconds ..."
+        sleep 5
+    done
+}
+
 #magic
 
 __magic_ssh() {

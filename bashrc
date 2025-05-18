@@ -1637,10 +1637,10 @@ alias mkdir='mkdir -p'
 alias mkcd='_(){ mkdir -p $1; cd $1; }; _'
 alias mkcdtmp='_(){ cd "$(test -z "$1" && mktemp -d || mktemp -d -t "${1}.XXXXXXX")"; }; _'
 alias ..='cd ..'
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 alias tailf='tail -F'
 alias ff='find . -name'
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 if _has vim; then
 EDITOR="vim -u $IAM_HOME/vimrc -i $IAM_HOME/viminfo"
 elif _has vi; then
@@ -1711,6 +1711,14 @@ man "$@"
 local FN="$IAM_HOME/hostname"
 [ -z "$1" ] || { [ "$1" = "-" ] && rm -f "$FN" || echo "$1" > "$FN"; }
 [ -f "$FN" ] && echo "Set hostname: $(cat "$FN")" || echo "Hostname is not set"
+}
+,retry() {
+local R
+while true; do
+"$@" && R=0 || R=$?
+echo "Exit code: $R; Retry in 5 seconds ..."
+sleep 5
+done
 }
 __magic_ssh() {
 printf '%s\n' \
