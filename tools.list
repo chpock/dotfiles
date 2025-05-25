@@ -2,17 +2,17 @@ tool: install functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-install.sh
 $IAM_HOME/shell.rc/functions-install.sh
 important: true
-#4312CA37
+#13FF95CB
 tool: git functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-git.sh
 $IAM_HOME/shell.rc/functions-git.sh
 has: git
-4110
+4071
 tool: docker functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-docker.sh
 $IAM_HOME/shell.rc/functions-docker.sh
 has: docker
-3739
+3713
 tool: AWS CLI functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-awscli.sh
 $IAM_HOME/shell.rc/functions-awscli.sh
@@ -20,7 +20,7 @@ $IAM_HOME/shell.rc/functions-awscli.sh
 tool: kubetcl function
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-kubectl.sh
 $IAM_HOME/shell.rc/functions-kubectl.sh
-5018
+4741
 tool: tmux function
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-tmux.sh
 $IAM_HOME/shell.rc/functions-tmux.sh
@@ -30,6 +30,10 @@ tool: python functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-python.sh
 $IAM_HOME/shell.rc/functions-python.sh
 1865
+tool: jumplist functions
+https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-jumplist.sh
+$IAM_HOME/shell.rc/functions-jumplist.sh
+5953
 tool: edit bashrc
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/bashrc.rc.sh
 $IAM_HOME/shell.rc/bashrc.rc.sh
@@ -102,6 +106,7 @@ $IAM_HOME/tools/bin/install-docker
 tool: tracer/debugger for perl
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/trace-perl
 $IAM_HOME/tools/bin/trace-perl
+has: perl
 3790
 tool: upkg tool
 https://raw.githubusercontent.com/chpock/upkg/main/upkg

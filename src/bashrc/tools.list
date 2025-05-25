@@ -41,6 +41,11 @@ https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-pyth
 $IAM_HOME/shell.rc/functions-python.sh
 @getSize REPO_ROOT/shell.rc/functions-python.sh
 
+tool: jumplist functions
+https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-jumplist.sh
+$IAM_HOME/shell.rc/functions-jumplist.sh
+@getSize REPO_ROOT/shell.rc/functions-jumplist.sh
+
 tool: edit bashrc
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/bashrc.rc.sh
 $IAM_HOME/shell.rc/bashrc.rc.sh
@@ -134,6 +139,7 @@ $IAM_HOME/tools/bin/install-docker
 tool: tracer/debugger for perl
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/trace-perl
 $IAM_HOME/tools/bin/trace-perl
+has: perl
 @getSize REPO_ROOT/tools/trace-perl
 
 # Universal package manager

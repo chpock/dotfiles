@@ -40,7 +40,7 @@ git() {
         fi
     elif [ "pull" = "$1" ]; then
         if ! "$GIT_BIN" rev-parse --abbrev-ref --symbolic-full-name '@{u}' >/dev/null 2>&1; then
-            echo "${COLOR_YELLOW}WARNING: ${COLOR_DEFAULT}There is no tracking information for the current branch. It will be set."
+            _warn 'There is no tracking information for the current branch. It will be set.'
             local BRANCH
             BRANCH="$("$GIT_BIN" rev-parse --abbrev-ref HEAD)"
             (set -x; "$GIT_BIN" branch "--set-upstream-to=origin/$BRANCH" "$BRANCH")

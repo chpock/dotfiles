@@ -34,7 +34,7 @@ k() {
     local __K8S_CONF
 
     if [ -n "$1" ] && ! _has kubectl; then
-        echo "${COLOR_RED}ERROR${COLOR_GRAY}:$COLOR_DEFAULT kubectl command is not available in this environment"
+        _err 'kubectl command is not available in this environment'
         return 1
     fi
 
@@ -47,7 +47,7 @@ k() {
         ;;
         conf)
             if [ -z "$2" ]; then
-                echo "${COLOR_RED}ERROR${COLOR_GRAY}:$COLOR_DEFAULT the kubeconfig is not specified"
+                _err 'the kubeconfig is not specified'
                 echo
                 echo "Usage: kube conf <kubeconfig file>"
                 return 1
@@ -57,7 +57,7 @@ k() {
                 __K8S_CONF="$PWD/$__K8S_CONF"
             fi
             if [ ! -f "$__K8S_CONF" ]; then
-                echo "${COLOR_RED}ERROR${COLOR_GRAY}:$COLOR_DEFAULT the specified kubeconfig file doesn't exist: '$__K8S_CONF'"
+                _err "the specified kubeconfig file doesn't exist: '%s'" "$__K8S_CONF"
                 echo
                 echo "Usage: kube conf <kubeconfig file>"
                 return 1
@@ -66,7 +66,7 @@ k() {
         ;;
         ns)
             if [ -z "$2" ]; then
-                echo "${COLOR_RED}ERROR${COLOR_GRAY}:$COLOR_DEFAULT the namespace is not specified"
+                _err "the namespace is not specified"
                 echo
                 echo "Usage: kube ns <namespace>"
                 return 1
@@ -75,7 +75,7 @@ k() {
         ;;
         context)
             if [ -z "$2" ]; then
-                echo "${COLOR_RED}ERROR${COLOR_GRAY}:$COLOR_DEFAULT the context is not specified"
+                _err "the context is not specified"
                 echo
                 echo "Usage: kube context <context>"
                 return 1
@@ -120,7 +120,7 @@ __kube_complete() {
         context)
             if ! __VAR="$(kubectl config get-contexts --output=name 2>&1)"; then
                 echo
-                printf '%s' "${COLOR_RED}ERROR${COLOR_GRAY}:$COLOR_DEFAULT $__VAR"
+                cprintf -n '~r~ERROR~K~: ~d~%s' "$__VAR"
                 COMPREPLY=('~=~=~=~=~=~' '=~=~=~=~=~=')
             else
                 COMPREPLY=($(compgen -W "$__VAR" -- "${COMP_WORDS[2]}"))
@@ -129,7 +129,7 @@ __kube_complete() {
         ns)
             if ! __VAR="$(kubectl get namespace -o jsonpath='{.items[*].metadata.name}' 2>&1)"; then
                 echo
-                printf '%s' "${COLOR_RED}ERROR${COLOR_GRAY}:$COLOR_DEFAULT $__VAR"
+                cprintf -n '~r~ERROR~K~: ~d~%s' "$__VAR"
                 COMPREPLY=('~=~=~=~=~=~' '=~=~=~=~=~=')
             else
                 COMPREPLY=($(compgen -W "$__VAR" -- "${COMP_WORDS[2]}"))

@@ -106,7 +106,7 @@ __,docker() {
             return
         fi
         if ! VAR="$(printf '%s\n%s' "$(docker ps --quiet 2>&1)" "$(docker ps --format '{{.Names}}' 2>&1)")"; then
-            printf '\n%s' "${COLOR_RED}ERROR${COLOR_GRAY}:$COLOR_DEFAULT $VAR"
+            cprintf -n '\n~r~ERROR~K~: ~d~%s' "$VAR"
             COMPREPLY=('~=~=~=~=~=~' '=~=~=~=~=~=')
         else
             COMPREPLY=($(compgen -W "$VAR" -- "$CUR"))

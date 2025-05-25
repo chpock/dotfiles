@@ -694,17 +694,17 @@ __install_check_new_versions() {
     while read -r DISABLED TOOL EXECUTABLE VERSION; do
         [ -n "$TOOL" ] || continue
         local TOOL_FUNC="__install_${TOOL//-/_}"
-        printf "${COLOR_CYAN}%s ${COLOR_BLUE}v${COLOR_LIGHTBLUE}%s${COLOR_DEFAULT} ..." "$TOOL" "$VERSION"
+        cprintf -n '~c~%s ~b~v~B~%s ~d~...' "$TOOLS" "$VERSION"
         VERSION_LATEST="$("$TOOL_FUNC" -latest "$EXECUTABLE" || :)"
-        printf '\b\b\b\b'"${COLOR_GRAY}:   "'\r\t\t\t'
+        cprintf -n '\b\b\b\b~K~:   \r\t\t\t'
         if [ -z "$VERSION_LATEST" ]; then
-            echo "${COLOR_LIGHTRED}unknown error${COLOR_DEFAULT}"
+            cprintf '~R~unknown error'
         elif [ "$VERSION_LATEST" = "skip" ]; then
-            echo "${COLOR_GREEN}OK ${COLOR_GRAY}(skipped)${COLOR_DEFAULT}"
+            cprintf '~g~OK ~K~(skipped)'
         elif [ "$VERSION_LATEST" = "$VERSION" ]; then
-            echo "${COLOR_GREEN}OK${COLOR_DEFAULT}"
+            cprintf '~g~OK'
         else
-            echo "${COLOR_DEFAULT}update available, new version: ${COLOR_BROWN}v${COLOR_YELLOW}$VERSION_LATEST${COLOR_DEFAULT}"
+            cprintf "update available, new version: ~y~v~Y~%s" "$VERSION_LATEST"
         fi
     done < <(echo "$__INSTALL_VERSION_FILTERED" | sort)
 }

@@ -471,27 +471,138 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=B70E6E49
-COLOR_WHITE=$'\e[1;37m'
-COLOR_LIGHTGRAY=$'\e[0;37m'
-COLOR_GRAY=$'\e[1;30m'
-COLOR_BLACK=$'\e[0;30m'
-COLOR_RED=$'\e[0;31m'
-COLOR_LIGHTRED=$'\e[1;31m'
-COLOR_GREEN=$'\e[0;32m'
-COLOR_LIGHTGREEN=$'\e[1;32m'
-COLOR_BROWN=$'\e[0;33m'
-COLOR_YELLOW=$'\e[1;33m'
-COLOR_BLUE=$'\e[0;34m'
-COLOR_LIGHTBLUE=$'\e[1;34m'
-COLOR_PURPLE=$'\e[0;35m'
-COLOR_PINK=$'\e[1;35m'
-COLOR_CYAN=$'\e[0;36m'
-COLOR_LIGHTCYAN=$'\e[1;36m'
-COLOR_DEFAULT=$'\e[0m'
-COLOR_BOLD=$'\e[1m'
-COLOR_ERROR=$'\e[41m\e[1m\e[97m'
-COLOR_SIGN=$'\e[38;5;136m'
+LOCAL_TOOLS_FILE_HASH=A017ACA9
+declare -A -r __CPRINTF_COLORS=(
+[fw]=$'\e[37m' [fW]=$'\e[97m'
+[fk]=$'\e[30m' [fK]=$'\e[90m'
+[fr]=$'\e[31m' [fR]=$'\e[91m'
+[fg]=$'\e[32m' [fG]=$'\e[92m'
+[fy]=$'\e[33m' [fY]=$'\e[93m'
+[fb]=$'\e[34m' [fB]=$'\e[94m'
+[fm]=$'\e[35m' [fM]=$'\e[95m'
+[fc]=$'\e[36m' [fC]=$'\e[96m'
+[bw]=$'\e[47m' [bW]=$'\e[107m'
+[bk]=$'\e[40m' [bK]=$'\e[100m'
+[br]=$'\e[41m' [bR]=$'\e[101m'
+[bg]=$'\e[42m' [bG]=$'\e[102m'
+[by]=$'\e[43m' [bY]=$'\e[103m'
+[bb]=$'\e[44m' [bB]=$'\e[104m'
+[bm]=$'\e[45m' [bM]=$'\e[105m'
+[bc]=$'\e[46m' [bC]=$'\e[106m'
+[d]=$'\e[0m'
+)
+cprintf() {
+{
+local LC_ALL=C LC_TYPE=C
+local __CPRINTF_VAR_NAME __CPRINTF_APPEND __CPRINTF_NEW_LINE=1 __CPRINTF_CLEAR=1 __CPRINTF_QUOTE __CPRINTF_QUOTE_SKIP
+local __CPRINTF_RESULT __CPRINTF_PROCESS __CPRINTF_PART __CPRINTF_HAS_COLOR __CPRINTF_HAS_BG
+local -a __CPRINTF_PARTS
+case "$1" in
+-a) __CPRINTF_VAR_NAME="$2"; __CPRINTF_APPEND=1; shift 2;;
+-A) __CPRINTF_VAR_NAME="$2"; __CPRINTF_APPEND=2; shift 2;;
+-v) __CPRINTF_VAR_NAME="$2"; shift 2;;
+-n) unset __CPRINTF_NEW_LINE; shift;;
+esac
+[ "$1" != "-c" ] || { unset __CPRINTF_CLEAR; shift; }
+[ "$1" != "--" ] || { shift; }
+IFS='~' read -ra __CPRINTF_PARTS <<< "$1"
+shift
+[ "$__CPRINTF_VAR_NAME" != "PS1" ] || __CPRINTF_QUOTE=1
+for __CPRINTF_PART in "${__CPRINTF_PARTS[@]}"; do
+if [ "$__CPRINTF_PROCESS" ]; then
+case "$__CPRINTF_PART" in
+d)
+__CPRINTF_PART=${__CPRINTF_COLORS["$__CPRINTF_PART"]}
+unset __CPRINTF_HAS_COLOR __CPRINTF_HAS_BG
+;;
+[wWkKrRgGyYbBmMcC])
+__CPRINTF_PART=${__CPRINTF_COLORS["f$__CPRINTF_PART"]}
+if [ -n "$__CPRINTF_HAS_BG" ]; then
+__CPRINTF_PART="${__CPRINTF_COLORS['d']}$__CPRINTF_PART"
+unset __CPRINTF_HAS_BG
+fi
+__CPRINTF_HAS_COLOR=1
+;;
+[wWkKrRgGyYbBmMcC][wWkKrRgGyYbBmMcC])
+__CPRINTF_PART="${__CPRINTF_COLORS["f${__CPRINTF_PART:0:1}"]}${__CPRINTF_COLORS["b${__CPRINTF_PART:1:1}"]}"
+__CPRINTF_HAS_COLOR=1
+__CPRINTF_HAS_BG=1
+;;
+[0-9]|[0-9][0-9]|[0-9][0-9][0-9])
+__CPRINTF_PART=$'\e[38;5;'"${__CPRINTF_PART}m"
+if [ -n "$__CPRINTF_HAS_BG" ]; then
+__CPRINTF_PART="${__CPRINTF_COLORS['d']}$__CPRINTF_PART"
+unset __CPRINTF_HAS_BG
+fi
+__CPRINTF_HAS_COLOR=1
+;;
+*)
+if [[ "$__CPRINTF_PART" =~ ^[0-9]{1,3}\ [0-9]{1,3}$ ]]; then
+__CPRINTF_PART=$'\e[38;5;'"${__CPRINTF_PART% *}m"$'\e[48;5;'"${__CPRINTF_PART#* }m"
+__CPRINTF_HAS_COLOR=1
+__CPRINTF_HAS_BG=1
+else
+__CPRINTF_PART="~${__CPRINTF_PART}~"
+__CPRINTF_QUOTE_SKIP=1
+fi
+;;
+esac
+if [ -n "$__CPRINTF_QUOTE" ]; then
+[ -n "$__CPRINTF_QUOTE_SKIP" ] \
+&& unset __CPRINTF_QUOTE_SKIP \
+|| __CPRINTF_PART="\\[${__CPRINTF_PART}\\]"
+fi
+unset __CPRINTF_PROCESS
+else
+__CPRINTF_PROCESS=1
+fi
+__CPRINTF_RESULT+=$__CPRINTF_PART
+done
+if [[ "$__CPRINTF_CLEAR" ]] && [[ "$__CPRINTF_HAS_COLOR" ]]; then
+__CPRINTF_RESULT+=${__CPRINTF_COLORS['d']}
+fi
+if [[ "$__CPRINTF_VAR_NAME" ]]; then
+if [[ "$__CPRINTF_APPEND" ]] && [[ "${!__CPRINTF_VAR_NAME}" ]]; then
+printf -v __CPRINTF_RESULT "$__CPRINTF_RESULT" "$@" 2>&3
+if [ "$__CPRINTF_APPEND" -eq 1 ]; then
+printf -v "$__CPRINTF_VAR_NAME" '%s%s' "${!__CPRINTF_VAR_NAME}" "$__CPRINTF_RESULT"
+else
+printf -v "$__CPRINTF_VAR_NAME" '%s %s' "${!__CPRINTF_VAR_NAME}" "$__CPRINTF_RESULT"
+fi
+else
+printf -v "$__CPRINTF_VAR_NAME" "$__CPRINTF_RESULT" "$@" 2>&3
+fi
+else
+if [[ "$__CPRINTF_NEW_LINE" ]]; then
+__CPRINTF_RESULT+='\n'
+fi
+printf "$__CPRINTF_RESULT" "$@" 2>&3
+fi
+} 3>&2 2>/dev/null
+}
+_warn() { cprintf "~y~WARNING~K~:~d~ $1" "${@:2}"; }
+_err() { cprintf "~r~ERROR~K~:~d~ $1" "${@:2}"; }
+_info() { cprintf "~r~Info~K~:~d~ $1" "${@:2}"; }
+_trim() {
+local __TRIM_VAR __TRIM_WHAT='[:space:]' __TRIM_L=1 __TRIM_R=1
+[ "$1" != "-r" ] || { unset __TRIM_L; shift; }
+[ "$1" != "-l" ] || { unset __TRIM_R; shift; }
+[ "$1" != "-v" ] || { __TRIM_VAR="$2"; shift 2; }
+[ "$1" != "--" ] || { shift; }
+[ -n "$2" ] && __TRIM_WHAT="$2" || local LC_ALL=C LC_TYPE=C
+local __TRIM_OUT="$1"
+[ -z "$__TRIM_L" ] || __TRIM_OUT=${__TRIM_OUT#"${__TRIM_OUT%%[!${__TRIM_WHAT}]*}"}
+[ -z "$__TRIM_R" ] || __TRIM_OUT=${__TRIM_OUT%"${__TRIM_OUT##*[!${__TRIM_WHAT}]}"}
+[ -z "$__TRIM_VAR" ] && echo "$__TRIM_OUT" || printf -v "$__TRIM_VAR" '%s' "$__TRIM_OUT"
+}
+_dirname() {
+local __DIRNAME_VAR
+[ "$1" != "-v" ] || { __DIRNAME_VAR="$2"; shift 2; }
+[ "$1" != "--" ] || { shift; }
+local __DIRNAME_OUT=${1%/*}
+[ "$__DIRNAME_OUT" != "$1" ] || __DIRNAME_OUT="."
+[ -z "$__DIRNAME_VAR" ] && echo "$__DIRNAME_OUT" || printf -v "$__DIRNAME_VAR" '%s' "$__DIRNAME_OUT"
+}
 _hash_file() {
 local SOURCE_FILE="$1" SOURCE_BASENAME="${1##*/}" SOURCE_PATH="${1%/*}"
 [ "$SOURCE_BASENAME" != "$SOURCE_PATH" ] || SOURCE_PATH="$PWD"
@@ -846,7 +957,7 @@ REAL_CMD="$(command -v "$fn" 2>/dev/null)"
 if [ -n "$REAL_CMD" ] && [ ! -x "$REAL_CMD" ]; then
 if ! chmod +x "$REAL_CMD" >/dev/null 2>&1; then
 [ -n "$WARN" ] || echo
-echo "${COLOR_RED}WARNING:${COLOR_DEFAULT} could not chmod +x '$REAL_CMD': Permission denied. Run it using gsudo or run WSL under elevated powershell."
+_warn "could not chmod +x '%s': Permission denied. Run it using gsudo or run WSL under elevated powershell." "$REAL_CMD"
 WARN=1
 fi
 fi
@@ -858,7 +969,7 @@ ln -sf "$REAL_CMD" "$IAM_HOME/tools/bin/$fn"
 if [ ! -x "$REAL_CMD" ]; then
 if ! chmod +x "$REAL_CMD" >/dev/null 2>&1; then
 [ -n "$WARN" ] || echo
-echo "${COLOR_RED}WARNING:${COLOR_DEFAULT} could not chmod +x '$REAL_CMD': Permission denied. Run it using gsudo."
+_warn "could not chmod +x '%s': Permission denied. Run it using gsudo." "$REAL_CMD"
 WARN=1
 fi
 fi
@@ -931,11 +1042,11 @@ if [ "locked" = "$CMD" ]; then
 fi
 if [ "update" = "$CMD" ]; then
 if tools locked; then
-echo "${COLOR_BROWN}WARNING:${COLOR_DEFAULT} Tools are locked now and will not be updated."
+_warn 'Tools are locked now and will not be updated.'
 return
 fi
 if ! _get_url -check; then
-[ "$PARAM" = "important" ] || echo "${COLOR_RED}ERROR:${COLOR_DEFAULT} Could not update tools: curl/wget command not found"
+[ "$PARAM" = "important" ] || _err "Could not update tools: curl/wget command not found"
 return 1
 fi
 if [ "$PARAM" = "background" ]; then
@@ -960,12 +1071,12 @@ fi
 if ! _get_url "$TOOLS_URL" >"$TMP" 2>/dev/null; then
 rm -f "$TMP"
 CHECK_STATE=1
-[ "$PARAM" = "important" ] || echo "${COLOR_RED}ERROR:${COLOR_DEFAULT} An unexpected error occurred while updating the list of tools."
+[ "$PARAM" = "important" ] || _err "An unexpected error occurred while updating the list of tools."
 else
 _hash < "$TMP"
 if [ "$_HASH" != "$LOCAL_TOOLS_FILE_HASH" ]; then
 rm -f "$TMP"
-[ "$PARAM" = "important" ] || echo "${COLOR_BROWN}WARNING:${COLOR_DEFAULT} The list of tools is not properly updated. The downloaded file hash ${_HASH} doesn't match the expected hash ${LOCAL_TOOLS_FILE_HASH}."
+[ "$PARAM" = "important" ] || _warn "The list of tools is not properly updated. The downloaded file hash %s doesn't match the expected hash %s." "$_HASH" "$LOCAL_TOOLS_FILE_HASH"
 else
 mv -f "$TMP" "$TOOLS_FILE"
 TOOLS_EXISTS=1
@@ -1046,26 +1157,26 @@ SIZE="${recs[IDX++]}"
 HASH="${recs[IDX++]}"
 if [ "check" = "$CMD" ]; then
 if [ "$SIZE$HASH" = "00" ]; then
-LINE="${COLOR_LIGHTRED}NOT FOUND${COLOR_GRAY}${COLOR_DEFAULT}"
+LINE="~R~NOT FOUND"
 SIZE="undef"
 HASH="undef"
 [ -n "$CHECK_STATE" ] || CHECK_STATE=1
 else
 if [ -n "$I_HASH" ] && [ "$I_HASH" != "$HASH" ]; then
-LINE="${COLOR_BROWN}OUTDATED ${COLOR_GRAY}${COLOR_DEFAULT}"
+LINE="~y~OUTDATED "
 CHECK_STATE=2
 elif [ -n "$I_SIZE" ] && [ "$I_SIZE" -ne "$SIZE" ]; then
-LINE="${COLOR_BROWN}OUTDATED ${COLOR_GRAY}${COLOR_DEFAULT}"
+LINE="~y~OUTDATED "
 CHECK_STATE=2
 else
-LINE="${COLOR_GREEN}OK       ${COLOR_GRAY}${COLOR_DEFAULT}"
+LINE="~g~OK       "
 fi
 fi
 if [ "quick" != "$PARAM" ]; then
 if [ -n "$I_SIZE" ]; then
-printf "%s ${COLOR_GRAY}[${COLOR_DEFAULT}Size current: %8s ${COLOR_GRAY}/${COLOR_DEFAULT} expected: %8s${COLOR_GRAY}]${COLOR_DEFAULT} %s\n" "$LINE" "$SIZE" "$I_SIZE" "${I_FILE/$HOME/\~}"
+cprintf "$LINE ~K~[~d~!Size current: %8s ~K~/~d~ expected: %8s~K~]~d~ %s" "$SIZE" "$I_SIZE" "${I_FILE/$HOME/\~}"
 else
-printf "%s ${COLOR_GRAY}[${COLOR_DEFAULT}Hash current: %8s ${COLOR_GRAY}/${COLOR_DEFAULT} expected: %8s${COLOR_GRAY}]${COLOR_DEFAULT} %s\n" "$LINE" "$HASH" "$I_HASH" "${I_FILE/$HOME/\~}"
+cprintf "$LINE ~K~[~d~!Hash current: %8s ~K~/~d~ expected: %8s~K~]~d~ %s" "$HASH" "$I_HASH" "${I_FILE/$HOME/\~}"
 fi
 fi
 elif [ "update" = "$CMD" ]; then
@@ -1086,9 +1197,9 @@ else
 printf "Download: %s '%s'..." "$I_DESC" "${I_FILE##*/}"
 _get_url "$I_URL" >"$TMP" || IS_ERROR=$?
 if [ "$IS_ERROR" -ne 0 ]; then
-echo " ${COLOR_LIGHTRED}ERROR${COLOR_DEFAULT}"
+cprintf " ~R~ERROR"
 else
-echo " ${COLOR_GREEN}OK${COLOR_DEFAULT}"
+cprintf " ~r~OK"
 fi
 fi
 if [ "$IS_ERROR" -ne 0 ]; then
@@ -1103,20 +1214,16 @@ done
 if [ "check" = "$CMD" ] && [ "quick" = "$PARAM" ] && [ -n "$CHECK_STATE" ]; then
 if [ "$PARAM_EX" = "update" ]; then
 if [ "$CHECK_STATE" -eq 1 ]; then
-echo "${COLOR_BROWN}Some or all local tools are not exist and will be updated in background.${COLOR_DEFAULT}"
-echo ""
+cprintf "~y~Some or all local tools are not exist and will be updated in background.\n"
 elif [ "$CHECK_STATE" -eq 2 ]; then
-echo "${COLOR_BROWN}Some or all local tools are outdated and will be updated in background.${COLOR_DEFAULT}"
-echo ""
+cprintf "~y~Some or all local tools are outdated and will be updated in background.\n"
 fi
 tools update background
 else
 if [ "$CHECK_STATE" -eq 1 ]; then
-echo "${COLOR_RED}Some or all local tools are not exist. Run the 'tools update' command.${COLOR_DEFAULT}"
-echo ""
+cprintf "~r~Some or all local tools are not exist. Run the 'tools update' command.\n"
 elif [ "$CHECK_STATE" -eq 2 ]; then
-echo "${COLOR_BROWN}Some or all local tools are outdated. Run the 'tools update' command.${COLOR_DEFAULT}"
-echo ""
+cprintf "~y~Some or all local tools are outdated. Run the 'tools update' command.\n"
 fi
 fi
 elif [ "update" = "$CMD" ] && [ "important" = "$PARAM" ] && [ -z "$UPDATE_IMPORTANT_BANNER" ]; then
@@ -1202,6 +1309,16 @@ _cache __uname_kernel_release
 UNAME_RELEASE="$_CACHE"
 _cache __uname_all
 UNAME_ALL="$_CACHE"
+sep() {
+local WIDTH=79
+[ -z "$1" ] || WIDTH=$(( WIDTH - ${#1} - 6 ))
+local BAR
+printf -v BAR "%${WIDTH}s"
+BAR="${BAR// /-}"
+cprintf -v BAR '~K~%s' "$BAR"
+[ -z "$1" ] || cprintf -a BAR '~K~[ ~d~%s ~K~]--' "$1"
+echo "$BAR"
+}
 if _is linux; then
 if [ -f /etc/redhat-release ]; then
 UNAME_RELEASE="$(cat /etc/redhat-release)"
@@ -1264,15 +1381,15 @@ esac
 unset TMPARCH
 UNAME_MACHINE="$UNAME_MACHINE (Kernel Type: $(isainfo -b)-bit)"
 fi
-printf -- "------------------------------------------------------------------------------\n"
+sep
 printf -- "Hostname  : %s\n" "$HOSTNAME"
 printf -- "Kernel    : %s\n" "$UNAME_ALL"
 printf -- "Machine   : %s\n" "$UNAME_MACHINE"
-printf -- "Release   : %s\n" "$UNAME_RELEASE"
+cprintf -- "Release   : ~c~%s" "$UNAME_RELEASE"
 if _is need_proxy; then
-printf -- "Proxy     : %s\n" "${COLOR_GREEN}Enabled${COLOR_DEFAULT}"
+cprintf -- "Proxy     : ~g~%s" "Enabled"
 fi
-printf -- "------------------------------------------------------------------------[ OS ]--\n"
+sep "OS"
 if ! _is in-container && ! _is sudo; then
 if _is linux || _is macos || _is sunos; then
 if [ -e /sbin/ifconfig ]; then
@@ -1319,20 +1436,20 @@ printf -- "Interface : %s (name: '%s', mask: %s%s)\n" "$myIp" "$iface" "$netMask
 }
 }
 done < <(/sbin/ifconfig 2>&1 || /sbin/ifconfig -a)
-printf -- "-------------------------------------------------------------------[ Network ]--\n"
+sep "Network"
 fi
 fi
 fi
 if ! _is in-container && ! _is sudo && _is aws_metadata_available; then
 printf -- "Instance  : %s (%s)\n" "$(_aws_metadata instance-type)" "$(_aws_metadata instance-id)"
 printf -- "Region    : %s (%s)\n" "$(_aws_metadata placement/region)" "$(_aws_metadata placement/availability-zone)"
-printf -- "----------------------------------------------------------------[ Cloud: AWS ]--\n"
+sep "Cloud: AWS"
 fi
 _showfeature() {
 local line
 local width=15
 for f in "$@"; do
-local part color
+local color
 local feature="${f%:*}"
 local state="${f#*:}"
 if [ "$state" != "1" ] && [ "$state" != "0" ]; then
@@ -1343,14 +1460,13 @@ _has_potentially "$state" && state=3 || state=1
 fi
 fi
 case "$state" in
-0) color="$COLOR_GREEN" ;;
-1) color="$COLOR_DEFAULT" ;;
-2) color="$COLOR_LIGHTGREEN" ;;
-3) color="$COLOR_BLUE" ;;
-*) color="$COLOR_RED" ;;
+0) color="~g~" ;;
+1) color="~d~" ;;
+2) color="~G~" ;;
+3) color="~b~" ;;
+*) color="~r~" ;;
 esac
-printf -v part "${COLOR_GRAY}[ %s%-${width}s${COLOR_GRAY} ]${COLOR_DEFAULT}" "$color" "$feature"
-[ -z "$line" ] && line="$part" || line="$line $part"
+cprintf -A line "~K~[${color} %-${width}s~K~ ]" "$feature"
 done
 echo "$line"
 }
@@ -1360,49 +1476,45 @@ local total="$2"
 local free="$3"
 local add="$4"
 local add2="$5"
-gauge() {
-local PRC1
-local PRC2
-PRC1=$(( 100 - 100 * ($1 - $2) / $1 ))
-PRC2=$(( $PRC1 / 4 ))
-PRC2="$(printf "%${PRC2}s")"
-PRC2="${PRC2// /=}"
-if [ "$PRC1" != '100' ]; then
-PRC1=$(printf '%02d' "$PRC1")
-fi
-printf "${COLOR_GRAY}[${COLOR_BLUE}%-25s${COLOR_GRAY}]${COLOR_DEFAULT} ${3}%3s%%${COLOR_DEFAULT}" "$PRC2" "$PRC1"
-}
-local color="$(( 100 - 100 * ($total - $free) / $total ))"
-if [ $color -gt 19 ]; then
-color="${COLOR_GREEN}"
-elif [ $color -gt 9 ]; then
-color="${COLOR_YELLOW}"
+local prc=$(( 100 - 100 * (total - free) / total ))
+local color
+if [ $prc -gt 19 ]; then
+color="~g~"
+elif [ $prc -gt 9 ]; then
+color="~Y~"
 else
-color="${COLOR_LIGHTRED}"
+color="~R~"
 fi
-local gauge=$(gauge $total $free $color)
+local bar=$(( prc / 4 ))
+printf -v bar "%${bar}s"
+bar="${bar// /=}"
+if [ "$prc" != '100' ]; then
+printf -v prc '%02d' "$prc"
+fi
 local units="MB"
 if [ "$total" -gt 1022976 ]; then
-total="$(( 100 * $total / 1024 / 1024 ))e-2"
-free="$(( 100 * $free / 1024 / 1024 ))e-2"
+total="$(( 100 * total / 1024 / 1024 ))e-2"
+free="$(( 100 * free / 1024 / 1024 ))e-2"
 units="TB"
 elif [ "$total" -gt 999 ]; then
-total="$(( 100 * $total / 1024 ))e-2"
-free="$(( 100 * $free / 1024 ))e-2"
+total="$(( 100 * total / 1024 ))e-2"
+free="$(( 100 * free / 1024 ))e-2"
 units="GB"
 else
-total="$(( 100 * $total ))e-2"
-free="$(( 100 * $free ))e-2"
+total="$(( 100 * total ))e-2"
+free="$(( 100 * free ))e-2"
 fi
-total="$(printf '%.2f %s' "$total" "$units")"
-free="$(printf '%.2f %s' "$free" "$units")"
+printf -v total '%.2f %s' "$total" "$units"
+printf -v free '%.2f %s' "$free" "$units"
+local msg
+cprintf -v msg "%-9s : Free ${color}%9s~d~ of %9s ~K~[~b~%-25s~K~] ${color}%3s%%" "$infoType" "$free" "$total" "$bar" "$prc"
 if [ -n "$add" ]; then
-add="  ${COLOR_WHITE}$add${COLOR_DEFAULT}"
+cprintf -A msg '~W~%s' "$add"
 fi
 if [ -n "$add2" ]; then
-add2=" ${COLOR_GRAY}$add2${COLOR_DEFAULT}"
+cprintf -A msg '~K~%s' "$add2"
 fi
-printf -- "%-9s : Free ${color}%9s${COLOR_DEFAULT} of %9s %s%s%s\n" "$infoType" "$free" "$total" "$gauge" "$add" "$add2"
+echo "$msg"
 }
 if ! _is in-container && ! _is sudo; then
 local MEM_TOTAL="" MEM_FREE SWAP_TOTAL SWAP_FREE
@@ -1418,34 +1530,34 @@ SwapTotal) _swapTotal="$b";;
 SwapFree)  _swapFree="$b";;
 esac
 done < /proc/meminfo
-MEM_TOTAL=$(( $_memTotal / 1024 ))
-MEM_FREE=$(( ($_memFree + $_buffers + $_cached) / 1024 ))
-SWAP_TOTAL=$(( $_swapTotal / 1024 ))
-SWAP_FREE=$(( $_swapFree / 1024 ))
+MEM_TOTAL=$(( _memTotal / 1024 ))
+MEM_FREE=$(( (_memFree + _buffers + _cached) / 1024 ))
+SWAP_TOTAL=$(( _swapTotal / 1024 ))
+SWAP_FREE=$(( _swapFree / 1024 ))
 elif _has vm_stat; then
 read SWAP_TOTAL SWAP_FREE <<< $(sysctl vm.swapusage | awk '{ print $4 "\n" $10 }')
 SWAP_TOTAL="${SWAP_TOTAL%%.*}"
 SWAP_FREE="${SWAP_FREE%%.*}"
-MEM_TOTAL="$(sysctl hw.memsize | awk '{ print $NF }')"
-MEM_TOTAL="$(( $MEM_TOTAL / 1024 / 1024 ))"
+MEM_TOTAL=$(sysctl hw.memsize | awk '{ print $NF }')
+MEM_TOTAL=$(( MEM_TOTAL / 1024 / 1024 ))
 MEM_FREE=0
 while IFS=$':\r\n' read a b; do
 if [ "$a" = "Pages free" ] || [ "$a" = "Pages inactive" ] || [ "$a" = "Pages speculative" ]; then
 b="${b// /}"
 b="${b//./}"
-MEM_FREE="$(( $MEM_FREE + $b ))"
+MEM_FREE=$(( MEM_FREE + $b ))
 fi
 done < <(vm_stat)
-MEM_FREE="$(( $MEM_FREE * 4096 / 1024 / 1024 ))"
+MEM_FREE=$(( MEM_FREE * 4096 / 1024 / 1024 ))
 fi
 if [ -n "$MEM_TOTAL" ]; then
 _showinfo "RAM" "$MEM_TOTAL" "$MEM_FREE"
 if [ $SWAP_TOTAL -eq 0 ]; then
-printf -- "Swap      : %s\n" "${COLOR_BROWN}Not installed${COLOR_DEFAULT}"
+cprintf -- "Swap      : ~y~%s" "Not installed"
 else
 _showinfo "Swap" "$SWAP_TOTAL" "$SWAP_FREE"
 fi
-printf -- "--------------------------------------------------------------------[ Memory ]--\n"
+sep "Memory"
 fi
 fi
 if ! _is in-container && ! _is sudo; then
@@ -1485,14 +1597,14 @@ while IFS=$' \t\r\n' read a b c d e f; do
 [ "$f" = "/var/run" ] && continue
 [ "$f" = "/etc/svc/volatile" ] && continue
 [ "$f" = "/lib/libc.so.1" ]  && continue
-b="$(( $b / 1024 ))"
-d="$(( $d / 1024 ))"
+b=$(( b / 1024 ))
+d=$(( d / 1024 ))
 _showinfo "Mount" "$b" "$d" "$f"
 done < <(df -k -t | tail -n +2 | grep -v -E ' +0 +0 +0 +0%')
 elif _is hpux; then
 while IFS=$' \t\r\n' read a b c d e f; do
-b="$(( $b / 1024 ))"
-d="$(( $d / 1024 ))"
+b=$(( b / 1024 ))
+d=$(( d / 1024 ))
 _showinfo "Mount" "$b" "$d" "$f"
 done < <(df -P -k | tail -n +2)
 elif _is aix; then
@@ -1502,19 +1614,19 @@ done < <(df -m -P | tail -n +2 | grep -v -E ' +- +- +0 +-')
 elif _is windows; then
 while IFS=$' ,\t\r\n' read a b c d; do
 [ -z "$c" ] && continue
-b="$(( $b / 1024 / 1024 ))"
-c="$(( $c / 1024 / 1024 ))"
+b=$(( b / 1024 / 1024 ))
+c=$(( c / 1024 / 1024 ))
 _showinfo "Mount" "$c" "$b" "$a"
 done < <(wmic logicaldisk get Caption,FreeSpace,Size | tail -n +2)
 fi
 unset a b c d e f g h i
-printf -- "----------------------------------------------------------------[ Filesystem ]--\n"
+sep "Filesystem"
 fi
 printf -- "Username  : %s\n" "$(id --user --name 2>/dev/null || id -u -n)"
 printf -- "Shell     : %s\n" "$MSHELL"
-printf -- "----------------------------------------------------------------------[ User ]--\n"
+sep "User"
 local DOCKER_COMPOSE_V2=1
-if _has docker && docker compose version >/dev/null 2>&1; then
+if _has docker && [ -x "/usr/libexec/docker/cli-plugins/docker-compose" ]; then
 DOCKER_COMPOSE_V2=0
 fi
 _showfeature "AWS CLI:aws" "localstack" "gcloud CLI:gcloud"
@@ -1523,19 +1635,23 @@ _showfeature "kubectl" "eksctl" "OpenShift CLI:oc"
 _showfeature "vim" "git" "curl" "wget"
 _showfeature "gpg" "tmux"
 if _has sudo; then
-local SUDO_STATUS="$(printf '' | LC_ALL=C sudo -l -S 2>&1)"
-local SUDO_AVAIL="$(echo "$SUDO_STATUS" | grep --fixed-strings --silent 'may run'; echo $?)"
-local SUDO_NOPASS="$(echo "$SUDO_STATUS" | grep --fixed-strings --silent 'NOPASSWD'; echo $?)"
+local SUDO_STATUS SUDO_AVAIL=1 SUDO_NOPASS=1
+if SUDO_STATUS="$(printf '' | LC_ALL=C sudo -l -S 2>&1)"; then
+! _glob_match "* may run *" "$SUDO_STATUS" || SUDO_AVAIL=0
+! _glob_match "* NOPASSWD: ALL*" "$SUDO_STATUS" || SUDO_NOPASS=0
+fi
 _showfeature \
 "sudo avail:$SUDO_AVAIL" \
 "sudo nopass:$SUDO_NOPASS"
 fi
-printf -- "------------------------------------------------------------------[ Features ]--\n\n"
+sep "Features"
 }
 _is tmux || hostinfo
 mkdir -p "$IAM_HOME/state"
 KUBECONFIG="$IAM_HOME/kubeconfig"
 export KUBECONFIG
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 unset MAILCHECK
 if _has git; then
 __GIT_VERSION="$(command git --version | awk '{print $3}')"
@@ -1644,14 +1760,11 @@ EDITOR="vim -u $IAM_HOME/vimrc -i $IAM_HOME/viminfo"
 elif _has vi; then
 EDITOR=vi
 else
-echo "${COLOR_RED}Warning: vi/vim not found${COLOR_DEFAULT}"
-echo
+_warn 'vi/vim not found\n'
 fi
 export EDITOR
 alias vi=vim
 vim() {
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 _maybe_local "vim"
 if _isnot tmux; then
 if [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID" ]; then
@@ -1671,7 +1784,7 @@ fi
 [ -d "$IAM_HOME/vim_runtime" ] || mkdir -p "$IAM_HOME/vim_runtime"
 _has apt-get && apt-get() {
 if [ "$(id -u)" -ne 0 ]; then
-echo "${COLOR_RED}The 'sudo' prefix was added automatically for the 'apt-get' command${COLOR_DEFAULT}" >&2
+cprintf "~r~The 'sudo' prefix was added automatically for the 'apt-get' comman" >&2
 sudo apt-get "$@"
 else
 command apt-get "$@"
@@ -1681,7 +1794,7 @@ _has apt && apt() {
 if [ "$(id -u)" -ne 0 ]; then
 case "$1" in
 install|remove|purge|autoremove|update|upgrade|full-upgrade|edit-sources)
-echo "${COLOR_RED}The 'sudo' prefix was added automatically for the 'apt' command${COLOR_DEFAULT}" >&2
+cprintf "~r~The 'sudo' prefix was added automatically for the 'apt' command" >&2
 sudo apt "$@"
 ;;
 *) command apt "$@"
@@ -1721,6 +1834,7 @@ sleep 5
 done
 }
 __magic_ssh() {
+{
 printf '%s\n' \
 "IAM=\"$IAM\" && export IAM" \
 "[ -n \"\$HOME\" ] || { HOME=\"/tmp\"; export HOME; }" \
@@ -1743,6 +1857,7 @@ printf '%s\n' \
 "cat >\"\$HOME/.tclshrc\" <<'EOF'" "$(cat "$HOME/.tclshrc")" "EOF" \
 "chmod +x \"\$IAM_HOME/shellrc\"" \
 "exec \"\$IAM_HOME/shellrc\""
+} 2>/dev/null
 }
 reload() {
 if _is tmux && [ "$1" != "current" ]; then
@@ -1770,9 +1885,7 @@ exec bash --rcfile "$IAM_HOME/bashrc" -i
 ,ssh() {
 local ARG
 for ARG in "$@"; do :; done
-if ! _glob_match "*@*" "$ARG"; then
-echo "${COLOR_LIGHTRED}WARNING${COLOR_GRAY}:${COLOR_DEFAULT} the remote user is not provided. Current user '$USER' will be used on the remove machine."
-fi
+_glob_match "*@*" "$ARG" || _warn "the remote user is not provided. Current user '%s' will be used on the remove machine." "$USER"
 ssh -t "$@" "$(__magic_ssh)"
 }
 gssh() {
@@ -1907,50 +2020,57 @@ fi
 mkdir -p "$_SHELL_SESSION_DIR"
 _SHELL_SESSION_STAMP="$_SHELL_SESSION_DIR/stamp"
 echo > "$_SHELL_SESSION_STAMP"
+_homify() {
+local __HOMIFY_VAR __HOMIFY_DIR __HOMIFY_WIDTH=20 __HOMIFY_TRUNC='...'
+[ "$1" != "-v" ] || { __HOMIFY_VAR="$2"; shift 2; }
+[ -z "$COLUMNS" ] || __HOMIFY_WIDTH=$(( COLUMNS / 4 ))
+[ -n "$1" ] && __HOMIFY_DIR="$1" || __HOMIFY_DIR="$PWD"
+if [ "$__HOMIFY_DIR" = "$HOME" ] || _glob_match "$HOME/*" "$__HOMIFY_DIR"; then
+__HOMIFY_DIR="~${__HOMIFY_DIR#$HOME}"
+fi
+if [ ${#__HOMIFY_DIR} -gt $__HOMIFY_WIDTH ]; then
+__HOMIFY_DIR="$__HOMIFY_TRUNC${__HOMIFY_DIR:$(( ${#__HOMIFY_DIR} - __HOMIFY_WIDTH - ${#__HOMIFY_TRUNC} ))}"
+fi
+[ -n "$__HOMIFY_VAR" ] && printf -v "$__HOMIFY_VAR" '%s' "$__HOMIFY_DIR" || echo "$__HOMIFY_DIR"
+}
 __kubectl_status() {
-local __K8S_CONTEXT
-local __K8S_CONF
-local __K8S_OUTPUT
-local __K8S_NS
-local __K8S_ERR
 if ! _has kubectl || [ ! -e "$IAM_HOME/state/on_kube" ]; then
 return 0
 fi
+local CONFIG CONFIG_MSG MSG CONTEXT STDERR
 if [ -z "$KUBECONFIG" ]; then
-__K8S_CONF="$HOME/.kube/config"
+CONFIG="$HOME/.kube/config"
 else
-__K8S_CONF="$KUBECONFIG"
+CONFIG="$KUBECONFIG"
 fi
-__K8S_OUTPUT="${COLOR_GRAY}[${COLOR_WHITE}K8S${COLOR_GRAY}: $COLOR_CYAN$(prompt_workingdir "$__K8S_CONF")"
-if [ ! -e "$__K8S_CONF" ]; then
-__K8S_OUTPUT="${__K8S_OUTPUT}${COLOR_DEFAULT} - ${COLOR_RED}DOESN'T EXIST"
+_homify -v CONFIG_MSG "$CONFIG"
+cprintf -v MSG '~K~[~W~K8S~K~: ~c~%s' "$CONFIG_MSG"
+if [ ! -e "$CONFIG" ]; then
+cprintf -A MSG "- ~r~DOESN'T EXIST"
 else
-__K8S_OUTPUT="${__K8S_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}cluster${COLOR_GRAY}: "
-if ! _catch __K8S_CONTEXT __K8S_ERR kubectl config current-context; then
-__K8S_CONTEXT="${__K8S_ERR#* }"
-__K8S_OUTPUT="${__K8S_OUTPUT}${COLOR_LIGHTRED}$__K8S_ERR"
-elif [ -n "$__K8S_ERR" ]; then
-__K8S_OUTPUT="${__K8S_OUTPUT}${COLOR_LIGHTRED}$__K8S_ERR"
+cprintf -a MSG '~K~; ~d~cluster~K~:'
+if ! _catch CONTEXT STDERR kubectl config current-context; then
+STDERR="${STDERR#* }"
+cprintf -A MSG '~R~%s' "$STDERR"
+elif [ -n "$STDERR" ]; then
+cprintf -A MSG '~R~%s' "$STDERR"
 else
-__K8S_OUTPUT="${__K8S_OUTPUT}${COLOR_PURPLE}$__K8S_CONTEXT"
-__K8S_NS="$(kubectl config view -o=jsonpath="{.contexts[?(@.name==\"$__K8S_CONTEXT\")].context.namespace}")"
-[ -z "$__K8S_NS" ] && __K8S_NS="default"
-__K8S_OUTPUT="${__K8S_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}namespace${COLOR_GRAY}: ${COLOR_PURPLE}$__K8S_NS"
+cprintf -A MSG '~m~%s' "$CONTEXT"
+local NS="$(command kubectl config view -o=jsonpath="{.contexts[?(@.name==\"$CONTEXT\")].context.namespace}")"
+[ -n "$NS" ] || NS="default"
+cprintf -a MSG '~K~; ~d~namespace~K~: ~B~%s' "$NS"
 fi
 fi
-__K8S_OUTPUT="${__K8S_OUTPUT}${COLOR_GRAY}]${COLOR_DEFAULT}"
-_ps1_show_status "$__K8S_OUTPUT"
+cprintf -a MSG '~K~]'
+_ps1_show_status "$MSG"
 }
 __aws_status() {
-local __AWS_OUTPUT
-local __AWS_INDENTITY
-local __AWS_USERID
-local __AWS_REGION
 _has aws || return 0
 if [ -z "$__AWS_INSTANCE_HAS_ROLE" ]; then
+local USERID
 _is aws \
-&& __AWS_USERID="$(aws sts get-caller-identity --query 'UserId' --output text 2>&1)" \
-&& _glob_match "*:i-*" "$__AWS_USERID" \
+&& USERID="$(aws sts get-caller-identity --query 'UserId' --output text 2>&1)" \
+&& _glob_match "*:i-*" "$USERID" \
 && __AWS_INSTANCE_HAS_ROLE=1 \
 || __AWS_INSTANCE_HAS_ROLE=0
 fi
@@ -1963,247 +2083,216 @@ if [ -n "$AWS_ACCESS_KEY_ID$AWS_SECRET_ACCESS_KEY$AWS_SESSION_TOKEN" ] && [ -n "
 AWS_PROFILE_INACTIVE="$AWS_PROFILE"
 unset AWS_PROFILE
 fi
-__AWS_OUTPUT="${COLOR_GRAY}[${COLOR_WHITE}AWS${COLOR_GRAY}: "
+local MSG
+cprintf -v MSG '~K~[~W~AWS~K~:'
 if [ -e "$IAM_HOME/state/on_aws_localstack" ]; then
-__AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_DEFAULT}localstack${COLOR_GRAY}:"
+cprintf -A MSG 'localstack~K~:'
 if ! _has curl; then
-__AWS_OUTPUT="$__AWS_OUTPUT${COLOR_BROWN} unknown (curl doesn't exist)"
+cprintf -A MSG "~y~unknown (curl doesn't exist)"
 elif curl --silent --fail -o /dev/null http://localhost:4566; then
-__AWS_OUTPUT="$__AWS_OUTPUT${COLOR_GREEN} running"
+cprintf -A MSG "~g~running"
 else
-__AWS_OUTPUT="$__AWS_OUTPUT${COLOR_RED} not running"
+cprintf -A MSG "~r~not running"
 fi
-__AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}]${COLOR_DEFAULT}"
-_ps1_show_status "$__AWS_OUTPUT"
+cprintf -a MSG '~K~]'
+_ps1_show_status "$MSG"
 return 0
 fi
 if [ -n "$AWS_PROFILE" ]; then
-__AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_DEFAULT}profile${COLOR_GRAY}:${COLOR_GREEN} Y"
+cprintf -A MSG 'profile~K~: ~m~%s' "$AWS_PROFILE"
 elif [ -z "$AWS_ACCESS_KEY_ID$AWS_SECRET_ACCESS_KEY$AWS_SESSION_TOKEN" ] && [ "$__AWS_INSTANCE_HAS_ROLE" -eq 1 ]; then
-__AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_DEFAULT}instance-profile${COLOR_GRAY}:${COLOR_GREEN} Y"
+cprintf -A MSG 'instance-profile~K~: ~g~Y'
 else
-__AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_DEFAULT}key${COLOR_GRAY}:"
-if declare -p AWS_ACCESS_KEY_ID >/dev/null 2>&1; then
-__AWS_OUTPUT="$__AWS_OUTPUT${COLOR_GREEN} Y"
-else
-__AWS_OUTPUT="$__AWS_OUTPUT${COLOR_RED} N"
+local KEY SECRET SESSION
+[ -z "$AWS_ACCESS_KEY_ID" ]     && KEY="~r~N"     || KEY="~g~Y"
+[ -z "$AWS_SECRET_ACCESS_KEY" ] && SECRET="~r~N"  || SECRET="~g~Y"
+[ -z "$AWS_SESSION_TOKEN" ]     && SESSION="~r~N" || SESSION="~g~Y"
+cprintf -A MSG "key~K~: $KEY~K~; ~d~secret~K~: $SECRET~K~; ~d~session~K~: $SESSION"
+[ -z "$AWS_PROFILE_INACTIVE" ] \
+|| cprintf -a MSG '~K~; ~y~inactive-profile~K~: ~g~%s' "$AWS_PROFILE_INACTIVE"
 fi
-__AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}secret${COLOR_GRAY}:"
-if declare -p AWS_SECRET_ACCESS_KEY >/dev/null 2>&1; then
-__AWS_OUTPUT="$__AWS_OUTPUT${COLOR_GREEN} Y"
-else
-__AWS_OUTPUT="$__AWS_OUTPUT${COLOR_RED} N"
-fi
-__AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}session${COLOR_GRAY}:"
-if declare -p AWS_SESSION_TOKEN >/dev/null 2>&1; then
-__AWS_OUTPUT="$__AWS_OUTPUT${COLOR_GREEN} Y"
-else
-__AWS_OUTPUT="$__AWS_OUTPUT${COLOR_RED} N"
-fi
-if [ -n "$AWS_PROFILE_INACTIVE" ]; then
-__AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}; ${COLOR_BROWN}inactive-profile${COLOR_GRAY}:"
-__AWS_OUTPUT="$__AWS_OUTPUT${COLOR_GREEN} Y"
-fi
-fi
-__AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}region${COLOR_GRAY}:"
+cprintf -a MSG '~K~; ~d~region~K~:'
+local REGION
 if [ -n "$AWS_PROFILE" ] && [ -z "$AWS_DEFAULT_REGION" ]; then
-__AWS_REGION="$(aws configure list 2>/dev/null | awk '$1 == "region" { print $2 }')"
-[ "$__AWS_REGION" != "<not" ] || __AWS_REGION=""
+REGION="$(command aws configure list 2>/dev/null | awk '$1 == "region" { print $2 }')"
+[ "$REGION" != "<not" ] || unset REGION
 fi
-if [ -z "$__AWS_REGION" ] && declare -p AWS_DEFAULT_REGION >/dev/null 2>&1; then
-__AWS_REGION="$AWS_DEFAULT_REGION"
+if [ -z "$REGION" ] && [ -n "$AWS_DEFAULT_REGION" ]; then
+REGION="$AWS_DEFAULT_REGION"
 fi
-if [ -n "$__AWS_REGION" ]; then
-__AWS_OUTPUT="$__AWS_OUTPUT${COLOR_CYAN} $__AWS_REGION"
+[ -n "$REGION" ] \
+&& cprintf -A MSG '~c~%s' "$REGION" \
+|| cprintf -A MSG '~r~%s' "N"
+cprintf -a MSG '~K~; ~d~indentity~K~:'
+local INDENTITY
+if ! INDENTITY="$(aws sts get-caller-identity --query 'Arn' --output text 2>&1)"; then
+INDENTITY="${INDENTITY//$'\n'/}"
+INDENTITY="${INDENTITY#*:}"
+_trim -v INDENTITY -- "$INDENTITY"
+cprintf -A MSG '~R~%s' "$INDENTITY"
 else
-__AWS_OUTPUT="$__AWS_OUTPUT${COLOR_RED} N"
+cprintf -A MSG '~g~%s' "$INDENTITY"
 fi
-__AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}indentity${COLOR_GRAY}:"
-if ! __AWS_INDENTITY="$(aws sts get-caller-identity --query 'Arn' --output text 2>&1)"; then
-__AWS_INDENTITY="${__AWS_INDENTITY/$'\n'/}"
-__AWS_INDENTITY="${__AWS_INDENTITY#*:}"
-__AWS_INDENTITY=${__AWS_INDENTITY#"${__AWS_INDENTITY%%[![:space:]]*}"}
-__AWS_OUTPUT="$__AWS_OUTPUT${COLOR_LIGHTRED} $__AWS_INDENTITY"
-else
-__AWS_OUTPUT="$__AWS_OUTPUT${COLOR_GREEN} $__AWS_INDENTITY"
-fi
-__AWS_OUTPUT="${__AWS_OUTPUT}${COLOR_GRAY}]${COLOR_DEFAULT}"
-_ps1_show_status "$__AWS_OUTPUT"
+cprintf -a MSG '~K~]'
+_ps1_show_status "$MSG"
 }
 __git_status() {
-local __GIT_STATUS __GIT_TEMP
-local TMP_VAL
 _has git || return 0
+local GIT_STATUS
 if _check _vercomp 1.8.0 '<' "$__GIT_VERSION"; then
-__GIT_STATUS="$(LC_ALL=C command git status --porcelain 2>/dev/null)" || return 0
+GIT_STATUS="$(LC_ALL=C command git status --porcelain 2>/dev/null)" || return 0
 else
-__GIT_STATUS="$(LC_ALL=C command git status --porcelain --branch 2>/dev/null)" || return 0
+GIT_STATUS="$(LC_ALL=C command git status --porcelain --branch 2>/dev/null)" || return 0
 fi
 _check _git-config-check
-local __GIT_REPO_ROOT="$(command git rev-parse --git-dir 2>/dev/null)"
-if [ "$__GIT_REPO_ROOT" = ".git" ]; then
-__GIT_REPO_ROOT="$(pwd)"
-else
-__GIT_REPO_ROOT="$(dirname "$__GIT_REPO_ROOT")"
-fi
-local __GIT_IN_SUBMODULE=0
-if __GIT_TEMP="$(command git rev-parse --show-superproject-working-tree 2>/dev/null)"; then
-if [ -n "$__GIT_TEMP" ]; then
-__GIT_IN_SUBMODULE=1
-fi
-else
-if [ "${__GIT_REPO_ROOT%*/.git/modules}" != "$__GIT_REPO_ROOT" ]; then
-__GIT_IN_SUBMODULE=1
-fi
-fi
 if _once "git check core.autocrlf in $PWD"; then
 if [ "$(LC_ALL=C command git config --get core.autocrlf)" != "false" ]; then
 command git config core.autocrlf false
 fi
 fi
-local __GIT_BRANCH="!ERROR!"
-local __GIT_NUM_STAGED=0
-local __GIT_NUM_CHANGED=0
-local __GIT_NUM_CONFLICT=0
-local __GIT_NUM_UNTRACKED=0
+local MSG TMP_VAL
+local GIT_REPO_ROOT="$(command git rev-parse --git-dir 2>/dev/null)"
+if [ "$GIT_REPO_ROOT" = ".git" ]; then
+GIT_REPO_ROOT="$PWD"
+else
+_dirname -v GIT_REPO_ROOT -- "$GIT_REPO_ROOT"
+fi
+local GIT_BRANCH="!ERROR!" GIT_NUM_STAGED=0 GIT_NUM_CHANGED=0 GIT_NUM_CONFLICT=0 GIT_NUM_UNTRACKED=0
 local line status
-while IFS='' read -r line || [[ -n "${line}" ]]; do
+while IFS='' read -r line || [ -n "$line" ]; do
 status="${line:0:2}"
-while [[ -n ${status} ]]; do
-case "${status}" in
-\#\#) __GIT_BRANCH="${line/\.\.\./^}"; break ;;
-\?\?) ((__GIT_NUM_UNTRACKED++)); break ;;
-U?) ((__GIT_NUM_CONFLICT++)); break;;
-?U) ((__GIT_NUM_CONFLICT++)); break;;
-DD) ((__GIT_NUM_CONFLICT++)); break;;
-AA) ((__GIT_NUM_CONFLICT++)); break;;
-?M) ((__GIT_NUM_CHANGED++)) ;;
-?D) ((__GIT_NUM_CHANGED++)) ;;
+while [ -n "$status" ]; do
+case "$status" in
+\#\#) GIT_BRANCH="${line/\.\.\./^}"; break ;;
+\?\?) ((GIT_NUM_UNTRACKED++)); break ;;
+U?) ((GIT_NUM_CONFLICT++)); break;;
+?U) ((GIT_NUM_CONFLICT++)); break;;
+DD) ((GIT_NUM_CONFLICT++)); break;;
+AA) ((GIT_NUM_CONFLICT++)); break;;
+?M) ((GIT_NUM_CHANGED++)) ;;
+?D) ((GIT_NUM_CHANGED++)) ;;
 ?\ ) ;;
-U) ((__GIT_NUM_CONFLICT++)) ;;
+U) ((GIT_NUM_CONFLICT++)) ;;
 \ ) ;;
-*) ((__GIT_NUM_STAGED++)) ;;
+*) ((GIT_NUM_STAGED++)) ;;
 esac
-status="${status:0:(${#status}-1)}"
+status=${status:0:(${#status}-1)}
 done
-done <<< "${__GIT_STATUS}"
-if [ "$__GIT_BRANCH" = "!ERROR!" ]; then
+done <<< "$GIT_STATUS"
+if [ "$GIT_BRANCH" = "!ERROR!" ]; then
 if TMP_VAL="$(command git rev-parse --abbrev-ref HEAD 2>/dev/null)"; then
-__GIT_BRANCH="$TMP_VAL"
+GIT_BRANCH="$TMP_VAL"
 fi
 fi
-local __GIT_BRANCH_FIELDS
-IFS="^" read -ra __GIT_BRANCH_FIELDS <<< "${__GIT_BRANCH/\#\# }"
-__GIT_BRANCH="${__GIT_BRANCH_FIELDS[0]}"
-local __GIT_OUTPUT
-__GIT_OUTPUT="${COLOR_GRAY}[${COLOR_WHITE}GIT${COLOR_GRAY}: $COLOR_CYAN$(prompt_workingdir "$__GIT_REPO_ROOT")"
-if [ "$__GIT_IN_SUBMODULE" -eq 1 ]; then
-__GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}(${COLOR_DEFAULT}submodule${COLOR_GRAY})"
+local GIT_BRANCH_FIELDS
+IFS="^" read -ra GIT_BRANCH_FIELDS <<< "${GIT_BRANCH/\#\# }"
+GIT_BRANCH="${GIT_BRANCH_FIELDS[0]}"
+_homify -v GIT_REPO_ROOT "$GIT_REPO_ROOT"
+cprintf -v MSG '~K~[~W~GIT~K~: ~c~%s' "$GIT_REPO_ROOT"
+local IS_IN_SUBMODULE
+if TMP_VAL="$(command git rev-parse --show-superproject-working-tree 2>/dev/null)"; then
+[ -z "$TMP_VAL" ] || IS_IN_SUBMODULE=1
+else
+[ "${GIT_REPO_ROOT%*/.git/modules}" == "$GIT_REPO_ROOT" ] || IS_IN_SUBMODULE=1
 fi
-__GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}branch${COLOR_GRAY}: $COLOR_PURPLE$__GIT_BRANCH"
-if [ "$__GIT_BRANCH" != "HEAD" ]; then
-if ! command git show-ref --verify "refs/remotes/origin/$__GIT_BRANCH" >/dev/null 2>&1; then
-__GIT_OUTPUT="${__GIT_OUTPUT} ${COLOR_GRAY}(${COLOR_BROWN}local only${COLOR_GRAY})"
-elif ! TMP_VAL="$(command git rev-list --count "${__GIT_BRANCH}..origin/${__GIT_BRANCH}" 2>&1)"; then
-__GIT_OUTPUT="${__GIT_OUTPUT} ${COLOR_GRAY}(${COLOR_LIGHTRED}ERROR${COLOR_GRAY}: ${COLOR_DEFAULT}$TMP_VAL${COLOR_GRAY})"
+[ -z "$IS_IN_SUBMODULE" ] \
+|| cprintf -A MSG '~K~(~d~submodule~K~)'
+cprintf -a MSG '~K~; ~d~branch~K~: ~m~%s' "$GIT_BRANCH"
+if [ "$GIT_BRANCH" != "HEAD" ]; then
+if ! command git show-ref --verify "refs/remotes/origin/$GIT_BRANCH" >/dev/null 2>&1; then
+cprintf -A MSG '~K~(~y~local only~K~)'
+elif ! TMP_VAL="$(command git rev-list --count "${GIT_BRANCH}..origin/${GIT_BRANCH}" 2>&1)"; then
+cprintf -A MSG '~K~(~R~ERROR~K~: ~d~%s~K~)' "$TMP_VAL"
 elif [ "$TMP_VAL" != "0" ]; then
-__GIT_OUTPUT="${__GIT_OUTPUT} ${COLOR_GRAY}(${COLOR_RED}needs push force${COLOR_GRAY})"
-elif ! TMP_VAL="$(command git rev-list --count "origin/${__GIT_BRANCH}..${__GIT_BRANCH}" 2>&1)"; then
-__GIT_OUTPUT="${__GIT_OUTPUT} ${COLOR_GRAY}(${COLOR_LIGHTRED}ERROR${COLOR_GRAY}: ${COLOR_DEFAULT}$TMP_VAL${COLOR_GRAY})"
+cprintf -A MSG '~K~(~r~needs push force~K~)'
+elif ! TMP_VAL="$(command git rev-list --count "origin/${GIT_BRANCH}..${GIT_BRANCH}" 2>&1)"; then
+cprintf -A MSG '~K~(~R~ERROR~K~: ~d~%s~K~)' "$TMP_VAL"
 elif [ "$TMP_VAL" = "1" ]; then
-__GIT_OUTPUT="${__GIT_OUTPUT} ${COLOR_GRAY}(${COLOR_BROWN}${TMP_VAL} commit ahead remote${COLOR_DEFAULT}${COLOR_GRAY})"
+cprintf -A MSG '~K~(~y~%s commit ahead remote~K~)' "$TMP_VAL"
 elif [ "$TMP_VAL" != "0" ]; then
-__GIT_OUTPUT="${__GIT_OUTPUT} ${COLOR_GRAY}(${COLOR_BROWN}${TMP_VAL} commits ahead remote${COLOR_DEFAULT}${COLOR_GRAY})"
+cprintf -A MSG '~K~(~y~%s commits ahead remote~K~)' "$TMP_VAL"
 fi
 fi
-local __GIT_TAG
-if __GIT_TAG="$(command git describe --exact-match --tags $(command git rev-parse HEAD) 2>/dev/null)"; then
-__GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}tag${COLOR_GRAY}: $COLOR_PURPLE$__GIT_TAG"
+local GIT_TAG
+if GIT_TAG="$(command git describe --exact-match --tags $(command git rev-parse HEAD) 2>/dev/null)"; then
+cprintf -a MSG '~K~; ~d~tag~K~: ~m~%s' "$GIT_TAG"
 fi
-if [ "$__GIT_NUM_CONFLICT" -ne 0 ]; then
-__GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}; ${COLOR_LIGHTRED}conflict${COLOR_GRAY}: $COLOR_DEFAULT$__GIT_NUM_CONFLICT"
-fi
-if [ "$__GIT_NUM_STAGED" -ne 0 ]; then
-__GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}; ${COLOR_GREEN}staged${COLOR_GRAY}: $COLOR_DEFAULT$__GIT_NUM_STAGED"
-fi
-if [ "$__GIT_NUM_CHANGED" -ne 0 ]; then
-__GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}; ${COLOR_BROWN}changed${COLOR_GRAY}: $COLOR_DEFAULT$__GIT_NUM_CHANGED"
-fi
-if [ "$__GIT_NUM_UNTRACKED" -ne 0 ]; then
-__GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}; ${COLOR_DEFAULT}untracked${COLOR_GRAY}: $COLOR_LIGHTRED$__GIT_NUM_UNTRACKED"
-fi
-__GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}]${COLOR_DEFAULT}"
-__GIT_OUTPUT="${__GIT_OUTPUT} ${COLOR_GRAY}[${COLOR_DEFAULT}sign${COLOR_GRAY}:"
-local __GIT_SIGN
+[ "$GIT_NUM_CONFLICT" -eq 0 ] \
+|| cprintf -a MSG '~K~; ~R~conflict~K~: ~d~%i' "$GIT_NUM_CONFLICT"
+[ "$GIT_NUM_STAGED" -eq 0 ] \
+|| cprintf -a MSG '~K~; ~g~staged~K~: ~d~%i' "$GIT_NUM_STAGED"
+[ "$GIT_NUM_CHANGED" -eq 0 ] \
+|| cprintf -a MSG '~K~; ~y~changed~K~: ~d~%i' "$GIT_NUM_CHANGED"
+[ "$GIT_NUM_UNTRACKED" -eq 0 ] \
+|| cprintf -a MSG '~K~; ~d~untracked~K~: ~R~%i' "$GIT_NUM_UNTRACKED"
+cprintf -a MSG '~K~]'
+cprintf -A MSG '~K~[~d~sign~K~:'
+local GIT_SIGN
 if TMP_VAL="$(command git config --local --get commit.gpgsign 2>/dev/null)"; then
 if [ "$TMP_VAL" = "true" ]; then
-TMP_VAL="${COLOR_GREEN}$TMP_VAL"
-__GIT_SIGN=1
+cprintf -a MSG '~g~true'
+GIT_SIGN=1
 else
-TMP_VAL="${COLOR_RED}$TMP_VAL"
+cprintf -a MSG '~r~%s' "$TMP_VAL"
 fi
 elif ! TMP_VAL="$(command git config --get commit.gpgsign 2>/dev/null)"; then
-TMP_VAL="${COLOR_LIGHTRED}undef"
+cprintf -a MSG '~R~undef'
 elif [ "$TMP_VAL" = "true" ]; then
-TMP_VAL="${COLOR_GREEN}$TMP_VAL${COLOR_GRAY}(${COLOR_DEFAULT}G${COLOR_GRAY})"
-__GIT_SIGN=1
+cprintf -a MSG '~g~true~K~(~d~G~K~)'
+GIT_SIGN=1
 else
-TMP_VAL="${COLOR_RED}$TMP_VAL${COLOR_GRAY}(${COLOR_DEFAULT}G${COLOR_GRAY})"
+cprintf -a MSG '~r~%s~K~(~d~G~K~)' "$TMP_VAL"
 fi
-__GIT_OUTPUT="${__GIT_OUTPUT}$TMP_VAL"
-local __GIT_AUTHOR_EMAIL
-if [ "$__GIT_IN_SUBMODULE" -eq 0 ]; then
-__GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY};${COLOR_DEFAULT} author${COLOR_GRAY}:"
+local GIT_AUTHOR_EMAIL
+if [ -z "$IS_IN_SUBMODULE" ]; then
+cprintf -a MSG '~K~; ~d~author~K~:'
 if TMP_VAL="$(LC_ALL=C command git config --local --get user.email 2>/dev/null)"; then
-if [ "$TMP_VAL" = "$_GIT_USER_EMAIL" ]; then
-__GIT_AUTHOR_EMAIL="$TMP_VAL"
-TMP_VAL="${COLOR_GREEN}ON"
+GIT_AUTHOR_EMAIL="$TMP_VAL"
+if [ "$GIT_AUTHOR_EMAIL" = "$_GIT_USER_EMAIL" ]; then
+cprintf -a MSG '~g~ON'
 else
-__GIT_AUTHOR_EMAIL="$TMP_VAL"
-TMP_VAL="${COLOR_BROWN}$TMP_VAL"
+cprintf -a MSG '~y~%s' "$GIT_AUTHOR_EMAIL"
 fi
 elif ! TMP_VAL="$(LC_ALL=C command git config --get user.email 2>/dev/null)"; then
-TMP_VAL="${COLOR_LIGHTRED}undef"
-elif [ "$TMP_VAL" = "$_GIT_USER_EMAIL" ]; then
-__GIT_AUTHOR_EMAIL="$TMP_VAL"
-TMP_VAL="${COLOR_GREEN}ON${COLOR_GRAY}(${COLOR_DEFAULT}G${COLOR_GRAY})"
+cprintf -a MSG '~R~undef'
 else
-__GIT_AUTHOR_EMAIL="$TMP_VAL"
-TMP_VAL="${COLOR_BROWN}$TMP_VAL${COLOR_GRAY}(${COLOR_DEFAULT}G${COLOR_GRAY})"
+GIT_AUTHOR_EMAIL="$TMP_VAL"
+if [ "$GIT_AUTHOR_EMAIL" = "$_GIT_USER_EMAIL" ]; then
+cprintf -a MSG '~g~ON'
+else
+cprintf -a MSG '~y~%s' "$GIT_AUTHOR_EMAIL"
 fi
-__GIT_OUTPUT="${__GIT_OUTPUT}$TMP_VAL"
+cprintf -a MSG '~K~(~d~G~K~)'
 fi
-local __GIT_SIGN_KEY
-if [ -n "$__GIT_SIGN" ] && [ -n "$__GIT_AUTHOR_EMAIL" ]; then
-__GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY};${COLOR_DEFAULT} gpg${COLOR_GRAY}:"
+fi
+local GIT_SIGN_KEY
+if [ -n "$GIT_SIGN" ] && [ -n "$GIT_AUTHOR_EMAIL" ]; then
+cprintf -a MSG '~K~; ~d~gpg~K~:'
 if ! _has gpg; then
-TMP_VAL="${COLOR_LIGHTRED}unavailable"
+cprintf -a MSG '~R~unavailable'
 else
 if TMP_VAL="$(LC_ALL=C command git config --local --get user.signingkey 2>/dev/null)"; then
-__GIT_SIGN_KEY="$TMP_VAL"
+GIT_SIGN_KEY="$TMP_VAL"
 elif TMP_VAL="$(LC_ALL=C command git config --get user.signingkey 2>/dev/null)"; then
-__GIT_SIGN_KEY="$TMP_VAL"
+GIT_SIGN_KEY="$TMP_VAL"
+fi
+if [ -z "$GIT_SIGN_KEY" ]; then
+cprintf -a MSG '~R~not set'
+elif ! TMP_VAL="$(LC_ALL=C command gpg --list-secret-keys "$GIT_SIGN_KEY" 2>/dev/null)"; then
+cprintf -a MSG "~r~no key '%s'" "$GIT_SIGN_KEY"
 else
-: nothing available
-fi
-if [ -z "$__GIT_SIGN_KEY" ]; then
-TMP_VAL="${COLOR_LIGHTRED}not set"
-elif ! TMP_VAL="$(LC_ALL=C command gpg --list-secret-keys "$__GIT_SIGN_KEY" 2>/dev/null)"; then
-TMP_VAL="${COLOR_RED}no key '$__GIT_SIGN_KEY'"
+if ! TMP_VAL="$(LC_ALL=C command gpg --with-colons --list-secret-keys "$GIT_AUTHOR_EMAIL" 2>/dev/null | cut -d: -f5 | head -n 1)"; then
+cprintf -a MSG "~r~wrong key, no key for '%s'" "$GIT_AUTHOR_EMAIL"
+elif [ "$TMP_VAL" != "$GIT_SIGN_KEY" ]; then
+cprintf -a MSG "~r~wrong key, set: %s; expected: '%s'" "$GIT_SIGN_KEY" "$TMP_VAL"
 else
-if ! TMP_VAL="$(LC_ALL=C command gpg --with-colons --list-secret-keys "$__GIT_AUTHOR_EMAIL" 2>/dev/null | cut -d: -f5 | head -n 1)"; then
-TMP_VAL="${COLOR_RED}wrong key, no key for '$__GIT_AUTHOR_EMAIL'"
-elif [ "$TMP_VAL" != "$__GIT_SIGN_KEY" ]; then
-TMP_VAL="${COLOR_RED}wrong key, set: $__GIT_SIGN_KEY; expected: $TMP_VAL"
-else
-TMP_VAL="${COLOR_GREEN}ON"
+cprintf -a MSG "~g~ON"
 fi
 fi
 fi
-__GIT_OUTPUT="${__GIT_OUTPUT}$TMP_VAL"
 fi
-__GIT_OUTPUT="${__GIT_OUTPUT}${COLOR_GRAY}]${COLOR_DEFAULT}"
-_ps1_show_status "$__GIT_OUTPUT"
+cprintf -a MSG "~K~]"
+_ps1_show_status "$MSG"
 }
 _ps1_show_status() {
 if _isnot tmux; then
@@ -2229,10 +2318,9 @@ local CURPOS SAVE_STTY="$(stty -g)"
 stty raw -echo min 0
 echo -en "\033[6n" && read -sdR CURPOS
 stty "$SAVE_STTY"
-[ ${CURPOS##*;} -eq 1 ] || echo "${COLOR_ERROR}%${COLOR_DEFAULT}"
+[ ${CURPOS##*;} -eq 1 ] || cprintf '~Wr~%%'
 if [ "$exitcode" -ne 0 ] && [ -n "$PS1_COMMAND" ]; then
-local SIG="" MSG
-MSG="${COLOR_RED}Exit code: $exitcode"
+local SIG
 if [ "$exitcode" -eq 130 ]; then
 SIG="<Ctrl-C>"
 elif [ "$exitcode" -eq 127 ]; then
@@ -2244,14 +2332,14 @@ SIG="SIG$SIG"
 elif [ "$exitcode" -ge 64 ] && [ "$exitcode" -le 78 ] && SIG="$(echo ':64:USAGE:65:DATAERR:66:NOINPUT:67:NOUSER:68:NOHOST:69:UNAVAILABLE:70:SOFTWARE:71:OSERR:72:OSFILE:73:CANTCREAT:74:IOERR:75:TEMPFAIL:76:PROTOCOL:77:NOPERM:78:CONFIG:' | grep -o ":${exitcode}:[^:]*")"; then
 SIG="EX_${SIG##*:}"
 fi
-[ -z "$SIG" ] || MSG="${MSG} [$SIG]"
-echo "$MSG${COLOR_DEFAULT}"
+[ -z "$SIG" ] || SIG=" ~K~[~y~${SIG}~K~]"
+cprintf "~r~Exit code~K~: ~R~%i$SIG" "$exitcode"
 fi
 if [ ! -d "$PWD" ]; then
-echo "${COLOR_RED}Warning: Current directory doesn't exist${COLOR_DEFAULT}"
+_warn "Warning: Current directory doesn't exist"
 elif _check stat -c '%i' . && [ ! -L "$PWD" ] && [ "$(stat -c '%i' . 2>&1)" != "$(stat -c '%i' "$PWD")" ]; then
-echo "${COLOR_BROWN}Current directory is a zombie. Fixing it.${COLOR_DEFAULT}"
-cd ../"$(basename "$PWD")"
+cprintf '~y~Current directory is a zombie. Fixing it.'
+cd ../"${PWD##*/}"
 fi
 if [ -n "$__KITTY_ID" ]; then
 [ -d "$IAM_HOME/kitty_sessions/$__KITTY_ID" ] || mkdir -p "$IAM_HOME/kitty_sessions/$__KITTY_ID"
@@ -2323,91 +2411,47 @@ PS1="${PS1}\[\033]0;${_HOSTNAME}:\w\007\]"
 ;;
 esac
 fi
-PS1="${PS1}\[${COLOR_GRAY}${COLOR_BOLD}\][\[${COLOR_DEFAULT}\]"
-if [ ${UID} -eq 0 ] ; then
-if [ "${USER}" == "${LOGNAME}" ]; then
-if [[ ${SUDO_USER} ]]; then
-PS1="${PS1}\[${COLOR_RED}\]"
+local USER_COLOR
+if [ "$UID" -eq 0 ] ; then
+if [ "$USER" = "$LOGNAME" ]; then
+[ -n "$SUDO_USER" ] \
+&& USER_COLOR="~r~" \
+|| USER_COLOR="~R~"
 else
-PS1="${PS1}\[${COLOR_LIGHTRED}\]"
+USER_COLOR="~Y~"
 fi
 else
-PS1="${PS1}\[${COLOR_YELLOW}\]"
+[ "$USER" = "$LOGNAME" ] \
+&& USER_COLOR="~g~" \
+|| USER_COLOR="~y~"
 fi
-else
-if [ ${USER} == ${LOGNAME} ]; then
-PS1="${PS1}\[${COLOR_GREEN}\]"
-else
-PS1="${PS1}\[${COLOR_BROWN}\]"
-fi
-fi
-PS1="${PS1}\u\[${COLOR_GRAY}\]@\[${COLOR_DEFAULT}\]"
-PS1="${PS1}\[${COLOR_LIGHTBLUE}\]${_HOSTNAME}\[${COLOR_DEFAULT}\]"
+cprintf -a PS1 "~K~[${USER_COLOR}%s~K~@~B~%s" '\u' "$_HOSTNAME"
 if _is wsl; then
-PS1="${PS1}\[${COLOR_GRAY}\][\[${COLOR_DEFAULT}\]WSL\[${COLOR_GRAY}\]]\[${COLOR_DEFAULT}\]"
+cprintf -a PS1 '~K~[~d~WSL~K~]'
 elif _is in-docker; then
-PS1="${PS1}\[${COLOR_GRAY}\][\[${COLOR_DEFAULT}\]docker\[${COLOR_GRAY}\]]\[${COLOR_DEFAULT}\]"
+cprintf -a PS1 '~K~[~d~docker~K~]'
 elif _is in-container; then
-PS1="${PS1}\[${COLOR_GRAY}\][\[${COLOR_DEFAULT}\]container\[${COLOR_GRAY}\]]\[${COLOR_DEFAULT}\]"
+cprintf -a PS1 '~K~[~d~container~K~]'
 elif _is aws; then
-PS1="${PS1}\[${COLOR_GRAY}\][\[${COLOR_PURPLE}\]AWS\[${COLOR_GRAY}\]]\[${COLOR_DEFAULT}\]"
+cprintf -a PS1 '~K~[~m~AWS~K~]'
 fi
 if [ -n "$VIRTUAL_ENV" ]; then
-PS1="${PS1}\[${COLOR_GRAY}\][\[${COLOR_BROWN}\]VENV\[${COLOR_GRAY}\]]\[${COLOR_DEFAULT}\]"
+cprintf -a PS1 '~K~[~y~VENV~K~]'
 fi
-PS1="${PS1}\[${COLOR_GRAY}${COLOR_BOLD}\]:\[${COLOR_DEFAULT}\]"
-if [ -w "${PWD}" ]; then
-PS1="${PS1}\[${COLOR_GREEN}\]$(prompt_workingdir)"
-else
-PS1="${PS1}\[${COLOR_RED}\]$(prompt_workingdir)"
-fi
-PS1="${PS1}\[${COLOR_GRAY}${COLOR_BOLD}\]]\[${COLOR_DEFAULT}\]"
-local BKGJBS=$(jobs -r | wc -l )
-if [ ${BKGJBS} -gt 2 ]; then
-PS1="${PS1}\[${COLOR_RED}\][bg:${BKGJBS}]\[${COLOR_DEFAULT}\]"
-elif [ ${BKGJBS} -gt 0 ]; then
-PS1="${PS1}\[${COLOR_YELLOW}\][bg:${BKGJBS}]\[${COLOR_DEFAULT}\]"
-fi
-local STPJBS=$(jobs -s | wc -l )
-if [ ${STPJBS} -gt 2 ]; then
-PS1="${PS1}\[${COLOR_RED}\][stp:${STPJBS}]\[${COLOR_DEFAULT}\]"
-elif [ ${STPJBS} -gt 0 ]; then
-PS1="${PS1}\[${COLOR_YELLOW}\][stp:${STPJBS}]\[${COLOR_DEFAULT}\]"
-fi
-if [ ${UID} -eq 0 ] ; then
-PS1="${PS1}\[${COLOR_RED}\]"'#'"\[${COLOR_DEFAULT}\] "
-else
-PS1="${PS1}\[${COLOR_SIGN}\]\\$\[${COLOR_DEFAULT}\] "
-fi
+local PWD_MSG PWD_COLOR
+_homify -v PWD_MSG "$PWD"
+[ -w "$PWD" ] \
+&& PWD_COLOR="~g~" \
+|| PWD_COLOR="~r~"
+cprintf -a PS1 "~K~:${PWD_COLOR}%s~K~]" "$PWD_MSG"
+[ "$UID" -eq 0 ] \
+&& cprintf -a PS1 '~r~# ~d~' \
+|| cprintf -a PS1 '~136~$ ~d~'
 unset PS1_COMMAND
 if _is tmux && [ -n "$__TMUX_FUNCTIONS_AVAILABLE" ]; then
 ,tmux autosave
 fi
 echo > "$_SHELL_SESSION_STAMP"
-}
-function prompt_workingdir () {
-local MY_PWD newPWD
-if [ "x$COLUMNS" = "x" ]; then
-local pwdmaxlen=20
-else
-local pwdmaxlen=$(( COLUMNS / 4 ))
-fi
-local trunc_symbol="..."
-if [ -z "$1" ]; then
-MY_PWD="$PWD"
-else
-MY_PWD="$1"
-fi
-if [[ $MY_PWD == $HOME* ]]; then
-newPWD="~${MY_PWD#$HOME}"
-else
-newPWD="$MY_PWD"
-fi
-if [ ${#newPWD} -gt $pwdmaxlen ]; then
-local pwdoffset=$(( ${#newPWD} - $pwdmaxlen + 3 ))
-newPWD="${trunc_symbol}${newPWD:$pwdoffset:$pwdmaxlen}"
-fi
-echo $newPWD
 }
 __debug_trap() {
 : $BASH_COMMAND
@@ -2485,7 +2529,7 @@ fi
 for VAR in LD_LIBRARY_PATH LIBPATH SHLIB_PATH DYLD_LIBRARY_PATH LD_PRELOAD LD_RUN_PATH; do
 if [ ! -z "${!VAR}" ]; then
 FOUND=1
-echo "${COLOR_GRAY}[${COLOR_LIGHTRED}Warning${COLOR_GRAY}]${COLOR_DEFAULT} $VAR ${COLOR_GRAY}=${COLOR_DEFAULT} ${!VAR}"
+_warn 'environment variable defined: %s = "%s"' "$VAR" "${!VAR}"
 fi
 done; unset VAR
 if [ ! -z "$FOUND" ]; then
@@ -2494,22 +2538,19 @@ unset FOUND
 fi
 if _has ssh && _isnot in-container; then
 if ! RESULT="$(ssh -G 127.0.0.1 2>&1)"; then
-echo "${COLOR_GRAY}[${COLOR_LIGHTRED}Warning${COLOR_GRAY}]${COLOR_DEFAULT} unknown error while checking SSH ServerAliveInterval"
-echo
+_warn 'unknown error while checking SSH ServerAliveInterval\n'
 else
 if ! RESULT="$(echo "$RESULT" | grep '^serveraliveinterval ')"; then
-echo "${COLOR_GRAY}[${COLOR_LIGHTRED}Warning${COLOR_GRAY}]${COLOR_DEFAULT} could not find ServerAliveInterval in SSH output"
-echo
+_warn 'could not find ServerAliveInterval in SSH output\n'
 else
 RESULT="${RESULT#* }"
 case "$RESULT" in
 ''|*[!0-9]*)
-echo "${COLOR_GRAY}[${COLOR_LIGHTRED}Warning${COLOR_GRAY}]${COLOR_DEFAULT} SSH ServerAliveInterval is expected to be a number, but got: '$RESULT'"
-echo
+_warn 'SSH ServerAliveInterval is expected to be a number, but got: "%s"\n' "$RESULT"
 ;;
 *)
 if [ "$RESULT" -ne 60 ]; then
-echo "${COLOR_GRAY}[${COLOR_GREEN}Info${COLOR_GRAY}]${COLOR_DEFAULT} SSH ServerAliveInterval is '$RESULT'. Adding correct value (60) to ~/.ssh/config"
+_info 'SSH ServerAliveInterval is "%s". Adding correct value (60) to ~/.ssh/config' "$RESULT"
 if [ ! -d ~/.ssh ]; then
 mkdir -p ~/.ssh
 chmod 0700 ~/.ssh
@@ -2544,42 +2585,38 @@ elif [ -f /usr/local/etc/bash_completion ]; then
 fi
 if getent group docker >/dev/null 2>&1; then
 if ! id -nG | grep -qw "docker"; then
-echo "${COLOR_RED}Current user is not in docker group. Run: sudo usermod -a -G docker $(id --user --name)${COLOR_DEFAULT}"
-echo ""
+_warn 'Current user is not in docker group. Run: ~c~sudo usermod -a -G docker %s\n' "$USER"
 fi
 fi
 if [ "$TERM" != "xterm-256color" ] && [ "$TERM" != "tmux-256color" ]; then
 unset TERMINFO
-echo "${COLOR_RED}Unexpected TERM type: '$TERM'${COLOR_DEFAULT}"
-echo ""
+_warn 'Unexpected TERM type: "%s"\n' "$TERM"
 elif [ ! -e "$IAM_HOME/terminfo"/*/xterm-256color ]; then
-echo "${COLOR_RED}Terminfo file '$IAM_HOME/terminfo/*/xterm-256color' not found. Perhaps the 'tic' command doesn't exist in the environment.${COLOR_DEFAULT}"
-echo ""
+_warn 'Terminfo file "%s" not found. Perhaps the "tic" command does not exist in the environment.\n' "$IAM_HOME/terminfo/*/xterm-256color"
 unset TERMINFO
 fi
 if ! type _init_completion >/dev/null 2>&1; then
-echo "${COLOR_RED}The original bash completion package is not installed on this machine. Some of the completions may not be available.${COLOR_DEFAULT}"
-echo ""
+_warn 'The original bash completion package is not installed on this machine. Some of the completions may not be available.\n'
 fi
 if [ -d "$IAM_HOME/tools/bash_completion" ]; then
 if [ ! -f "$IAM_HOME/tools/bash_completion/kubectl.completion.bash" ] && type -t _init_completion >/dev/null 2>&1 && _has kubectl; then
-echo "Generating bash completions for kubectl..."
+_info "Generating bash completions for kubectl..."
 kubectl completion bash >"$IAM_HOME/tools/bash_completion/kubectl.completion.bash" 2>/dev/null
 fi
 if [ ! -f "$IAM_HOME/tools/bash_completion/eksctl.completion.bash" ] && type -t _init_completion >/dev/null 2>&1 && _has eksctl; then
-echo "Generating bash completions for eksctl..."
+_info "Generating bash completions for eksctl..."
 eksctl completion bash >"$IAM_HOME/tools/bash_completion/eksctl.completion.bash" 2>/dev/null
 fi
 if [ ! -f "$IAM_HOME/tools/bash_completion/helm.completion.bash" ] && type -t _init_completion >/dev/null 2>&1 && _has helm; then
-echo "Generating bash completions for helm..."
+_info "Generating bash completions for helm..."
 helm completion bash >"$IAM_HOME/tools/bash_completion/helm.completion.bash" 2>/dev/null
 fi
 if [ ! -f "$IAM_HOME/tools/bash_completion/oc.completion.bash" ] && type -t _init_completion >/dev/null 2>&1 && _has oc; then
-echo "Generating bash completions for OpenShift..."
+_info "Generating bash completions for OpenShift..."
 oc completion bash >"$IAM_HOME/tools/bash_completion/oc.completion.bash" 2>/dev/null
 fi
 if [ ! -f "$IAM_HOME/tools/bash_completion/kpexec.completion.bash" ] && _has kpexec; then
-echo "Generating bash completions for kpexec..."
+_info "Generating bash completions for kpexec..."
 if kpexec --completion bash >"$IAM_HOME/tools/bash_completion/kpexec.completion.bash" 2>/dev/null; then
 echo '
 if [ $(type -t compopt) = "builtin" ]; then
@@ -2592,16 +2629,16 @@ fi
 fi
 if [ ! -f "$IAM_HOME/tools/bash_completion/pip.completion.bash" ]; then
 if _has pip3; then
-echo "Generating bash completions for pip3..."
+_info "Generating bash completions for pip3..."
 pip3 completion --bash | tr -d '\r' >"$IAM_HOME/tools/bash_completion/pip.completion.bash" 2>/dev/null && \
 echo 'complete -o default -F _pip_completion pip' >>"$IAM_HOME/tools/bash_completion/pip.completion.bash"
 elif _has pip; then
-echo "Generating bash completions for pip..."
+_info "Generating bash completions for pip..."
 pip completion --bash | tr -d '\r' >"$IAM_HOME/tools/bash_completion/pip.completion.bash" 2>/dev/null
 fi
 fi
 if [ ! -f "$IAM_HOME/tools/bash_completion/upkg.bash" ] && _has upkg && upkg supported silent; then
-echo "Generating bash completions for upkg..."
+_info "Generating bash completions for upkg..."
 upkg generate bash-completion >"$IAM_HOME/tools/bash_completion/upkg.bash" 2>/dev/null
 fi
 rm -f \
@@ -2611,10 +2648,10 @@ rm -f \
 for i in "$IAM_HOME/tools/bash_completion"/*.bash; do
 source $i
 done
+unset i
 fi
 if _has git && _vercomp 1.7.9 '>' "$__GIT_VERSION"; then
-echo "${COLOR_RED}WARNING:${COLOR_DEFAULT} git v$__GIT_VERSION is too old and doesn't support signatures, v1.7.9 or higher is required."
-echo ""
+_warn 'git v%s is too old and does not support signatures, v1.7.9 or higher is required.\n' "$__GIT_VERSION"
 fi
 if [ -f ~/gcloud/google-cloud-sdk/completion.bash.inc ]; then
 . ~/gcloud/google-cloud-sdk/completion.bash.inc
@@ -2624,8 +2661,7 @@ fi
 if ! _is in-container; then
 SSH_PUB_KEY_ONLY="`echo $SSH_PUB_KEY | awk '{print $2}'`"
 if [ -z "$SSH_PUB_KEY_ONLY" ]; then
-echo "${COLOR_RED}SSH key is not defined${COLOR_DEFAULT}"
-echo ""
+_warn 'SSH key is not defined\n'
 else
 if [ ! -d ~/.ssh ]; then
 mkdir ~/.ssh
@@ -2634,12 +2670,10 @@ fi
 if [ ! -f ~/.ssh/authorized_keys ]; then
 echo "$SSH_PUB_KEY" > ~/.ssh/authorized_keys
 chmod 0600 ~/.ssh/authorized_keys
-echo "${COLOR_GREEN}SSH key installed${COLOR_DEFAULT}"
-echo ""
+_info 'SSH key installed\n'
 elif ! grep "$SSH_PUB_KEY_ONLY" ~/.ssh/authorized_keys >/dev/null 2>&1; then
 echo "$SSH_PUB_KEY" >> ~/.ssh/authorized_keys
-echo "${COLOR_GREEN}SSH key installed${COLOR_DEFAULT}"
-echo ""
+_info 'SSH key installed\n'
 fi
 fi
 unset SSH_PUB_KEY_ONLY
@@ -2653,190 +2687,17 @@ echo '_get_url "$@"'
 } > "$IAM_HOME/tools/bin/geturl"
 chmod +x "$IAM_HOME/tools/bin/geturl"
 fi
-j() {
-local JUMP_FILE="$IAM_HOME/jumplist.txt"
-local JUMP_FILE_TEMP="${JUMP_FILE}.tmp"
-local NAME
-local DIR
-if [ -n "$COMP_CWORD" ]; then
-local CURRENT="${COMP_WORDS[COMP_CWORD]}"
-COMPREPLY=()
-if [ "$COMP_CWORD" -eq 1 ]; then
-case "$CURRENT" in
--*)
-COMPREPLY=($(compgen -W "-add -del -list -help -rename -last" -- "$CURRENT"))
-return
-;;
-esac
-else
-case "$3" in
--add|-list|-help)
-return
-;;
-esac
-compopt -o nospace -o filenames
-if [ -e "$JUMP_FILE" ]; then
-while IFS=$'\t' read -r NAME DIR; do
-[ "$NAME" != "${COMP_WORDS[1]}" ] || break
-unset DIR
-done < "$JUMP_FILE"
-fi
-[ -n "$DIR" ] || return
-local LINE
-while IFS=$'\n' read -r LINE; do
-LINE="${LINE:${#DIR}+1}"
-[ ! -d "$LINE" ] && [ "${LINE:${#LINE}-1}" != "/" ] && LINE+="/" || :
-COMPREPLY+=("$LINE")
-done < <(compgen -d -- "${DIR}/$CURRENT")
-return
-fi
-if [ "${COMP_WORDS[1]}" = "-rename" ] && [ $COMP_CWORD -gt 2 ]; then
-return
-fi
-COMPREPLY=($(COMP_CWORD= j -complete "$CURRENT"))
-return
-fi
-rm -f "$JUMP_FILE_TEMP"
-if [ "X$1" = "X-last" ]; then
-if [ -e "$IAM_HOME/jumplist_last_pwd" ]; then
-cd "$(cat "$IAM_HOME/jumplist_last_pwd")"
-else
-echo "JumpList: last directory is unknown"
-fi
-return
-fi
-if [ "X$1" = "X-add" ]; then
-DIR="$(pwd)"
-NAME="$2"
-[ -z "$NAME" ] && NAME="$(basename "$DIR")" || true
-printf '%s\t%s\n' "$NAME" "$DIR" >>"$JUMP_FILE"
-echo "JumpList: added '$NAME' for '$DIR'"
-return
-fi
-if [ "X$1" = "X-del" ]; then
-if [ -z "$2" ]; then
-echo "JumpList: ERROR: The name is not specified."
-echo "Usage: j -del <name>"
-return 1
-fi
-local FOUND
-if [ -e "$JUMP_FILE" ]; then
-while IFS=$'\t' read -r NAME DIR; do
-if [ "X$NAME" != "X$2" ]; then
-printf '%s\t%s\n' "$NAME" "$DIR" >>"$JUMP_FILE_TEMP"
-else
-FOUND=1
-fi
-done < "$JUMP_FILE"
-fi
-if [ -z "$FOUND" ]; then
-echo "JumpList: the name was not found: '$2'"
-rm -f "$JUMP_FILE_TEMP"
-return 1
-fi
-echo "JumpList: the name '$2' was removed."
-[ -e "$JUMP_FILE_TEMP" ] && mv -f "$JUMP_FILE_TEMP" "$JUMP_FILE" || rm -f "$JUMP_FILE"
-return
-fi
-if [ "X$1" = "X-rename" ]; then
-if [ -z "$2" ] || [ -z "$3" ]; then
-if [ -z "$2" ]; then
-echo "JumpList: ERROR: The original name is not specified."
-else
-echo "JumpList: ERROR: The new name is not specified."
-fi
-echo "Usage: j -rename <name> <new name>"
-return 1
-fi
-local FOUND
-if [ -e "$JUMP_FILE" ]; then
-while IFS=$'\t' read -r NAME DIR; do
-if [ "X$NAME" != "X$2" ]; then
-printf '%s\t%s\n' "$NAME" "$DIR" >>"$JUMP_FILE_TEMP"
-else
-printf '%s\t%s\n' "$3" "$DIR" >>"$JUMP_FILE_TEMP"
-FOUND=1
-fi
-done < "$JUMP_FILE"
-fi
-if [ -z "$FOUND" ]; then
-echo "JumpList: the name was not found: '$2'"
-rm -f "$JUMP_FILE_TEMP"
-return 1
-fi
-echo "JumpList: renamed '$2' -> '$3'"
-[ -e "$JUMP_FILE_TEMP" ] && mv -f "$JUMP_FILE_TEMP" "$JUMP_FILE" || rm -f "$JUMP_FILE"
-return
-fi
-if [ "X$1" = "X-list" ] || [ "X$1" = "X" ]; then
-if [ -e "$JUMP_FILE" ]; then
-local COUNTER=1
-while IFS=$'\t' read -r NAME DIR; do
-printf "[%2i] %-20s %s\n" "$COUNTER" "$NAME" "$DIR"
-COUNTER="$(expr 1 + "$COUNTER")"
-done < "$JUMP_FILE"
-else
-echo "JumpList: no directories"
-fi
-return
-fi
-if [ "X$1" = "X-complete" ]; then
-if [ -e "$JUMP_FILE" ]; then
-while IFS=$'\t' read -r NAME DIR; do
-case "$NAME" in $2*) echo "$NAME" ;; esac
-done < "$JUMP_FILE"
-fi
-return
-fi
-if [ "X$1" = "X-prompt" ]; then
-if [ -e "$JUMP_FILE" ]; then
-local NAME_LIST
-while IFS=$'\t' read -r NAME DIR; do
-if [ -z "$NAME_LIST" ]; then
-NAME_LIST="$NAME"
-else
-NAME_LIST="$NAME_LIST${COLOR_GRAY}, ${COLOR_DEFAULT}$NAME"
-fi
-done < "$JUMP_FILE"
-echo "${COLOR_GRAY}[${COLOR_CYAN}JumpList${COLOR_GRAY}] ${COLOR_DEFAULT}$NAME_LIST"
-fi
-return
-fi
-if [ "X$1" = "X-help" ]; then
-echo "JumpList: Usage:"
-echo "  j -add [<name>]"
-echo "  j -del <name>"
-echo "  j -rename <name> <new name>"
-echo "  j -list"
-echo "  j -help"
-return
-fi
-local JUMP
-if [ -e "$JUMP_FILE" ]; then
-while IFS=$'\t' read -r NAME DIR; do
-if [ "X$NAME" = "X$1" ]; then
-JUMP="$DIR"
-fi
-done < "$JUMP_FILE"
-fi
-if [ -z "$JUMP" ]; then
-echo "JumpList: there is no directory '$1'"
-return 1
-fi
-cd "$JUMP/$2"
-}
-complete -F j j
 if _isnot tmux; then
 if _is wsl; then
 if [ ! -f /etc/wsl.conf ] || ! grep -q -E '^options\s*=.*metadata' /etc/wsl.conf; then
-echo "${COLOR_RED}WARNING:${COLOR_DEFAULT} /etc/wsl.conf doesn't contain 'option=metadata' in the section '[autoconf]'. This is necessary to preserve the linux permissions on the Windows file system."
+_warn 'etc/wsl.conf does not contain "option=metadata" in the section "[autoconf]". This is necessary to preserve the linux permissions on the Windows file system.'
 echo "Launch 'sudo vi /etc/wsl.conf' and add the following under the section '[automount]':"
 echo "    options = \"metadata,umask=22,fmask=11,case=off\""
 echo "Restart WSL after that."
 echo
 fi
 if [ ! -d /usr/bin/windows/System32 ]; then
-echo "${COLOR_RED}WARNING:${COLOR_DEFAULT} /usr/bin/windows/System32 is unavailable. Windows standard exes will not work. Do the following:"
+_warn "/usr/bin/windows/System32 is unavailable. Windows standard exes will not work. Do the following:"
 echo "\$ sudo mkdir -p /usr/bin/windows"
 echo "\$ sudo vi /etc/fstab"
 echo 'c:\\Windows /usr/bin/windows drvfs ro,noatime,metadata 0 0'
@@ -2845,14 +2706,15 @@ echo "Make sure that 'mountFsTab = true' exists under the section '[automount]'"
 echo
 fi
 fi
+{ # disable messages duing +x
 V="$(__magic_ssh)"
+} 2>/dev/null
 if [ "${#V}" -ge 131072 ]; then
-echo "${COLOR_RED}WARNING:${COLOR_DEFAULT} __magic_ssh() returns a string of length ${#V}, which exceeds the maximum allowed length of 131071."
-echo
+_warn "__magic_ssh() returns a string of length %s, which exceeds the maximum allowed length of 131071.\n" "${#V}"
 fi
 unset V
 tools check quick update
-j -prompt
+[ -z "$__JUMPLIST_FUNCTIONS_AVAILABLE" ] || j -prompt
 if [ -n "$__KITTY_ID" ] && [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID/pwd" ]; then
 if [ "$(expr $(date +"%s") - $(date -r "$IAM_HOME/kitty_sessions/$__KITTY_ID/pwd" +"%s"))" -gt 259200 ]; then
 rm -rf "$IAM_HOME/kitty_sessions/$__KITTY_ID"
@@ -2865,8 +2727,9 @@ if _has tmux; then
 [ -z "$__TMUX_FUNCTIONS_AVAILABLE" ] \
 || SSH_PUB_KEY="$SSH_PUB_KEY" _GIT_USER_EMAIL="$_GIT_USER_EMAIL" _GIT_USER_NAME="$_GIT_USER_NAME" ,tmux restore
 if command tmux list-sessions -F '#{session_attached}' 2>/dev/null | grep --silent --fixed-strings '0'; then
-echo "${COLOR_GRAY}[${COLOR_CYAN}TMUX${COLOR_GRAY}] ${COLOR_DEFAULT}Current environment has the following unattached tmux sessions: \"$(tmux list-sessions -F '#{session_attached} #{session_name}' | grep '^0' | sed -E 's/^[[:digit:]][[:space:]]+//' | sed ':a;N;$!ba; s/\n/", "/g')\""
-echo "${COLOR_GRAY}[${COLOR_CYAN}TMUX${COLOR_GRAY}] ${COLOR_DEFAULT}Type to attach: tmux attach-session -t <session name>"
+cprintf "~K~[~c~TMUX~K~] ~d~Current environment has the following unattached tmux sessions: \"%s\"" \
+"$(tmux list-sessions -F '#{session_attached} #{session_name}' | grep '^0' | sed -E 's/^[[:digit:]][[:space:]]+//' | sed ':a;N;$!ba; s/\n/", "/g')"
+cprintf "~K~[~c~TMUX~K~] ~d~Type to attach: tmux attach-session -t <session name>"
 fi
 fi
 fi
