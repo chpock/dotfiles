@@ -84,7 +84,16 @@ aws() {
             echo "Error: EKS cluster name not specified"
             return 1
         fi
-        (set -x; aws eks update-kubeconfig --name "$2")
+        (set -x; aws eks update-kubeconfig --name "$2" --alias "eks/$2")
+        # By default, aws eks update-kubeconfig uses cluster ARN as context name,
+        # cluster name, user name. However, this string is too long and makes
+        # the k9s UI look ugly. It is possible to correct context name/user name
+        # using --alias/--user-alias parameters, but there is no option to
+        # correct cluster name (see: https://github.com/aws/aws-cli/issues/8195)
+        # Cluster name is the crucial parameter. K9s displays column size
+        # according to it. Thus, here we have a hack to shorten the cluster
+        # name by sed.
+        sed -i 's#arn:aws:\(eks\):[^:]*:[0-9]*:cluster\(/.*\)#\1\2#' $KUBECONFIG
         ;;
     ecr-auth-docker|ecr-auth-helm)
         local REGION
