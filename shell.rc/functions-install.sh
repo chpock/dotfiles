@@ -29,6 +29,7 @@ __INSTALL_VERSION="
   tar-portable  1.35
   gzip-portable 1.13
   xz-portable   5.6.4
+  pdu           0.11.0
 "
 
 __install_7z() {
@@ -371,6 +372,24 @@ __install_jq() {
     local URL="https://github.com/jqlang/jq/releases/download/jq-${VERSION}/jq-"
     __install_make_url -noformat "
         linux-x64   linux-amd64
+    " && __install_download && __install_bin "archive" || return $?
+}
+
+__install_pdu() {
+    local VERSION="$1" EXECUTABLE="$2"
+
+    if [ "$VERSION" = "-check" ]; then
+        __install_check_version "$EXECUTABLE" --version \
+            | awk '{print $NF}'
+        return 0
+    elif [ "$VERSION" = "-latest" ]; then
+        __install_get_latest_github "KSXGitHub/parallel-disk-usage"
+        return 0
+    fi
+
+    local URL="https://github.com/KSXGitHub/parallel-disk-usage/releases/download/${VERSION}/pdu-"
+    __install_make_url -noformat "
+        linux-x64   x86_64-unknown-linux-gnu
     " && __install_download && __install_bin "archive" || return $?
 }
 
@@ -913,6 +932,10 @@ fi
     sudo "$IAM_HOME/tools/bin/systemctl-tui" "$@"
 }
 
-__INSTALL_FUNCTIONS_AVAILABLE=1
+! _has_function "pdu" || pdu() {
+    _maybe_local "pdu"
+    command pdu --progress --top-down --max-depth 2 "$@"
+}
 
+__INSTALL_FUNCTIONS_AVAILABLE=1
 
