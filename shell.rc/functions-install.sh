@@ -770,9 +770,9 @@ __install_check_new_versions() {
     while read -r DISABLED TOOL EXECUTABLE VERSION; do
         [ -n "$TOOL" ] || continue
         local TOOL_FUNC="__install_${TOOL//-/_}"
-        cprintf -n '~c~%s ~b~v~B~%s ~d~...' "$TOOLS" "$VERSION"
+        cprintf -n '~c~%s ~b~v~B~%s ~d~...' "$TOOL" "$VERSION"
         VERSION_LATEST="$("$TOOL_FUNC" -latest "$EXECUTABLE" || :)"
-        cprintf -n '\b\b\b\b~K~:   \r\t\t\t'
+        cprintf -n '\b\b\b\b~K~:   \r\t\t\t\t\t'
         if [ -z "$VERSION_LATEST" ]; then
             cprintf '~R~unknown error'
         elif [ "$VERSION_LATEST" = "skip" ]; then
