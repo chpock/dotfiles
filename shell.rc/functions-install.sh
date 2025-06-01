@@ -19,6 +19,7 @@ __INSTALL_VERSION="
   grpcurl       1.9.3
   yazi          25.3.2
   httptap       0.1.1
+  tracexec      0.12.0
   systemctl-tui 0.4.0
   kubectl-browse-pvc:kubectl-browse_pvc 1.2.0
   kubectl-whoami                        0.0.46
@@ -157,6 +158,24 @@ __install_httptap() {
     local FORMAT URL="https://github.com/monasticacademy/httptap/releases/download/v${VERSION}/httptap_"
     __install_make_url "
         linux-x64   linux_x86_64.tar.gz
+    " && __install_download && __install_unpack &&  __install_bin || return $?
+}
+
+__install_tracexec() {
+    local VERSION="$1" EXECUTABLE="$2"
+
+    if [ "$VERSION" = "-check" ]; then
+        __install_check_version "$EXECUTABLE" --version \
+            | awk '{print $NF}'
+        return 0
+    elif [ "$VERSION" = "-latest" ]; then
+        __install_get_latest_github "kxxt/tracexec"
+        return 0
+    fi
+
+    local FORMAT URL="https://github.com/kxxt/tracexec/releases/download/v${VERSION}/tracexec-"
+    __install_make_url "
+        linux-x64   x86_64-unknown-linux-gnu.tar.gz
     " && __install_download && __install_unpack &&  __install_bin || return $?
 }
 
