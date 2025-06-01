@@ -32,7 +32,26 @@ __INSTALL_VERSION="
   xz-portable   5.6.4
   pdu           0.11.0
   cidr          2.2.0
+  lnav          0.13.0-rc2
 "
+
+__install_lnav() {
+    local VERSION="$1" EXECUTABLE="$2"
+
+    if [ "$VERSION" = "-check" ]; then
+        __install_check_version "$EXECUTABLE" -V \
+            | awk '{print $NF}'
+        return 0
+    elif [ "$VERSION" = "-latest" ]; then
+        __install_get_latest_github "tstack/lnav"
+        return 0
+    fi
+
+    local FORMAT URL="https://github.com/tstack/lnav/releases/download/v${VERSION}/lnav-${VERSION}-"
+    __install_make_url "
+        linux-x64   linux-musl-x86_64.zip
+    " && __install_download && __install_unpack &&  __install_bin || return $?
+}
 
 __install_cidr() {
     local VERSION="$1" EXECUTABLE="$2"
