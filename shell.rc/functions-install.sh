@@ -31,7 +31,26 @@ __INSTALL_VERSION="
   gzip-portable 1.13
   xz-portable   5.6.4
   pdu           0.11.0
+  cidr          2.2.0
 "
+
+__install_cidr() {
+    local VERSION="$1" EXECUTABLE="$2"
+
+    if [ "$VERSION" = "-check" ]; then
+        __install_check_version "$EXECUTABLE" --version \
+            | awk '{print $NF}'
+        return 0
+    elif [ "$VERSION" = "-latest" ]; then
+        __install_get_latest_github "bschaatsbergen/cidr"
+        return 0
+    fi
+
+    local FORMAT URL="https://github.com/bschaatsbergen/cidr/releases/download/v${VERSION}/cidr_${VERSION}_"
+    __install_make_url "
+        linux-x64   linux_amd64.tar.gz
+    " && __install_download && __install_unpack &&  __install_bin || return $?
+}
 
 __install_7z() {
     local VERSION="$1" EXECUTABLE="$2"
