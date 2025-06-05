@@ -3080,6 +3080,15 @@ if _isnot tmux; then
             echo "Make sure that 'mountFsTab = true' exists under the section '[automount]'"
             echo
         fi
+
+        # Check for WSL-Pro service from Ubuntu. This is unknown and useless
+        # thing that should be disabled.
+        if __RESULT="$(systemctl is-enabled wsl-pro.service 2>&1)" && [ "$__RESULT" = "enabled" ]; then
+            _warn '~B~%s~d~ is enabled. Run the following command to disable it: ~c~%s' \
+                "wsl-pro.service" "sudo systemctl disable --now wsl-pro.service"
+            echo
+        fi
+        unset __RESULT
     fi
 
     # Validate __magic_ssh. We use it as argument to "docker run ..."/"ssh ...".

@@ -471,7 +471,7 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=D428ACA0
+LOCAL_TOOLS_FILE_HASH=D44BACA0
 declare -A -r __CPRINTF_COLORS=(
 [fw]=$'\e[37m' [fW]=$'\e[97m'
 [fk]=$'\e[30m' [fK]=$'\e[90m'
@@ -1652,11 +1652,11 @@ sep "Features"
 }
 _is tmux || hostinfo
 mkdir -p "$IAM_HOME/state"
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 KUBECONFIG="$IAM_HOME/kubeconfig"
 export KUBECONFIG
 unset MAILCHECK
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 if _has git; then
 __GIT_VERSION="$(command git --version | awk '{print $3}')"
 GIT_CONFIG_GLOBAL="$IAM_HOME/gitconfig"
@@ -2709,6 +2709,12 @@ echo "\$ sudo vi /etc/wsl.conf"
 echo "Make sure that 'mountFsTab = true' exists under the section '[automount]'"
 echo
 fi
+if __RESULT="$(systemctl is-enabled wsl-pro.service 2>&1)" && [ "$__RESULT" = "enabled" ]; then
+_warn '~B~%s~d~ is enabled. Run the following command to disable it: ~c~%s' \
+"wsl-pro.service" "sudo systemctl disable --now wsl-pro.service"
+echo
+fi
+unset __RESULT
 fi
 { # disable messages duing +x
 V="$(__magic_ssh)"
