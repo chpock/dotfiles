@@ -12,7 +12,7 @@ __INSTALL_VERSION="
   ktop          0.3.7
   kube-capacity 0.8.0
   kpexec        0.4.1
-  kubecolor     0.5.0
+  kubecolor     0.5.1
   mcfly         0.9.3
   vim           9.0.2094
   yq            4.45.1
