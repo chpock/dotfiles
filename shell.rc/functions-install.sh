@@ -15,7 +15,7 @@ __INSTALL_VERSION="
   kubecolor     0.5.1
   mcfly         0.9.3
   vim           9.0.2094
-  yq            4.45.1
+  yq            4.45.4
   grpcurl       1.9.3
   yazi          25.3.2
   httptap       0.1.1
