@@ -5,7 +5,7 @@ __INSTALL_VERSION="
   awscli:aws    2.24.26
   kubectl       1.32.3
   dive          0.13.1
-  jq            1.7.1
+  jq            1.8.0
   k9s           0.50.6
   kdash         0.6.2
   kl            0.6.0
