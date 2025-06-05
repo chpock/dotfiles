@@ -17,7 +17,7 @@ __INSTALL_VERSION="
   vim           9.0.2094
   yq            4.45.4
   grpcurl       1.9.3
-  yazi          25.3.2
+  yazi          25.5.31
   httptap       0.1.1
   tracexec      0.12.0
   systemctl-tui 0.4.0
