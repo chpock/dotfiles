@@ -559,7 +559,11 @@ fi
 __CPRINTF_RESULT+=$__CPRINTF_PART
 done
 if [[ "$__CPRINTF_CLEAR" ]] && [[ "$__CPRINTF_HAS_COLOR" ]]; then
+if [ -n "$__CPRINTF_QUOTE" ]; then
+__CPRINTF_RESULT+="\\[${__CPRINTF_COLORS['d']}\\]"
+else
 __CPRINTF_RESULT+=${__CPRINTF_COLORS['d']}
+fi
 fi
 if [[ "$__CPRINTF_VAR_NAME" ]]; then
 if [[ "$__CPRINTF_APPEND" ]] && [[ "${!__CPRINTF_VAR_NAME}" ]]; then
@@ -582,7 +586,7 @@ fi
 }
 _warn() { cprintf "~y~WARNING~K~:~d~ $1" "${@:2}"; }
 _err() { cprintf "~r~ERROR~K~:~d~ $1" "${@:2}"; }
-_info() { cprintf "~r~Info~K~:~d~ $1" "${@:2}"; }
+_info() { cprintf "~g~Info~K~:~d~ $1" "${@:2}"; }
 _trim() {
 local __TRIM_VAR __TRIM_WHAT='[:space:]' __TRIM_L=1 __TRIM_R=1
 [ "$1" != "-r" ] || { unset __TRIM_L; shift; }
@@ -1648,10 +1652,10 @@ sep "Features"
 }
 _is tmux || hostinfo
 mkdir -p "$IAM_HOME/state"
-KUBECONFIG="$IAM_HOME/kubeconfig"
-export KUBECONFIG
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
+KUBECONFIG="$IAM_HOME/kubeconfig"
+export KUBECONFIG
 unset MAILCHECK
 if _has git; then
 __GIT_VERSION="$(command git --version | awk '{print $3}')"
