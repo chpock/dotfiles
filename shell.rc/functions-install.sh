@@ -26,7 +26,7 @@ __INSTALL_VERSION="
   kubectl-pod-lens:kubectl-pod_lens     0.3.1
   kubectl-node-shell:kubectl-node_shell 1.11.0
   7z            24.09
-  moar          1.31.4 auto
+  moar          1.31.8 auto
   tar-portable  1.35
   gzip-portable 1.13
   xz-portable   5.6.4
