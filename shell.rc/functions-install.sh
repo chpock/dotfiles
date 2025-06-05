@@ -21,7 +21,7 @@ __INSTALL_VERSION="
   httptap       0.1.1
   tracexec      0.12.0
   systemctl-tui 0.4.0
-  kubectl-browse-pvc:kubectl-browse_pvc 1.2.0
+  kubectl-browse-pvc:kubectl-browse_pvc 1.3.0
   kubectl-whoami                        0.0.46
   kubectl-pod-lens:kubectl-pod_lens     0.3.1
   kubectl-node-shell:kubectl-node_shell 1.11.0
