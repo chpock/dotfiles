@@ -4,7 +4,7 @@ __INSTALL_VERSION="
   shellcheck    0.10.0
   awscli:aws    2.24.26
   kubectl       1.32.3
-  dive          0.12.0
+  dive          0.13.1
   jq            1.7.1
   k9s           0.50.6
   kdash         0.6.2
