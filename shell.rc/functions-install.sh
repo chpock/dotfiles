@@ -25,6 +25,7 @@ __INSTALL_VERSION="
   kubectl-whoami                        0.0.46
   kubectl-pod-lens:kubectl-pod_lens     0.3.1
   kubectl-node-shell:kubectl-node_shell 1.11.0
+  eks-node-viewer                       0.7.4
   7z            24.09
   moar          1.31.8 auto
   tar-portable  1.35
@@ -394,6 +395,24 @@ __install_k9s() {
     __install_make_url "
         linux-x64   Linux_amd64.tar.gz
     " && __install_download && __install_unpack &&  __install_bin || return $?
+}
+
+__install_eks_node_viewer() {
+    local VERSION="$1" EXECUTABLE="$2"
+
+    if [ "$VERSION" = "-check" ]; then
+        __install_check_version "$EXECUTABLE" -version \
+            | head -n 1 | awk '{print $NF}'
+        return 0
+    elif [ "$VERSION" = "-latest" ]; then
+        __install_get_latest_github "awslabs/eks-node-viewer"
+        return 0
+    fi
+
+    local URL="https://github.com/awslabs/eks-node-viewer/releases/download/v${VERSION}/eks-node-viewer_"
+    __install_make_url -noformat "
+        linux-x64   Linux_x86_64
+    " && __install_download && __install_bin "archive" || return $?
 }
 
 __install_moar() {
@@ -993,6 +1012,12 @@ fi
     _maybe_local "pdu"
     command pdu --progress --top-down --max-depth 2 "$@"
 }
+
+! _has_function "eks-node-viewer" || eks-node-viewer() {
+    _maybe_local "eks-node-viewer"
+    command eks-node-viewer -resources cpu,memory -extra-labels topology.kubernetes.io/zone "$@"
+}
+
 
 __INSTALL_FUNCTIONS_AVAILABLE=1
 
