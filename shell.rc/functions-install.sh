@@ -25,6 +25,7 @@ __INSTALL_VERSION="
   kubectl-whoami                        0.0.46
   kubectl-pod-lens:kubectl-pod_lens     0.3.1
   kubectl-node-shell:kubectl-node_shell 1.11.0
+  kubectl-apidocs                       1.0.14
   eks-node-viewer                       0.7.4
   7z            24.09
   moar          1.31.8 auto
@@ -127,6 +128,24 @@ __install_kubectl_pod_lens() {
     __install_make_url "
         linux-x64   linux_amd64.tar.gz
     " && __install_download && __install_unpack &&  __install_bin "pod-lens" || return $?
+}
+
+__install_kubectl_apidocs() {
+    local VERSION="$1" EXECUTABLE="$2"
+
+    if [ "$VERSION" = "-check" ]; then
+        # apidocs has no command line option to check its version. Thus, we will
+        # only check for its presence.
+        return 1
+    elif [ "$VERSION" = "-latest" ]; then
+        __install_get_latest_github "hashmap-kz/kubectl-apidocs"
+        return 0
+    fi
+
+    local FORMAT URL="https://github.com/hashmap-kz/kubectl-apidocs/releases/download/v${VERSION}/kubectl-apidocs_v${VERSION}_"
+    __install_make_url "
+        linux-x64   linux_amd64.tar.gz
+    " && __install_download && __install_unpack &&  __install_bin || return $?
 }
 
 __install_kubectl_whoami() {
