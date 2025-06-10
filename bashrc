@@ -2033,7 +2033,7 @@ if [ "$__HOMIFY_DIR" = "$HOME" ] || _glob_match "$HOME/*" "$__HOMIFY_DIR"; then
 __HOMIFY_DIR="~${__HOMIFY_DIR#$HOME}"
 fi
 if [ ${#__HOMIFY_DIR} -gt $__HOMIFY_WIDTH ]; then
-__HOMIFY_DIR="$__HOMIFY_TRUNC${__HOMIFY_DIR:$(( ${#__HOMIFY_DIR} - __HOMIFY_WIDTH - ${#__HOMIFY_TRUNC} ))}"
+__HOMIFY_DIR="$__HOMIFY_TRUNC${__HOMIFY_DIR:$(( ${#__HOMIFY_DIR} - __HOMIFY_WIDTH + ${#__HOMIFY_TRUNC} ))}"
 fi
 [ -n "$__HOMIFY_VAR" ] && printf -v "$__HOMIFY_VAR" '%s' "$__HOMIFY_DIR" || echo "$__HOMIFY_DIR"
 }
