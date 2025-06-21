@@ -2228,7 +2228,7 @@ __kubectl_status() {
         return 0
     fi
 
-    local CONFIG CONFIG_MSG MSG CONTEXT STDERR
+    local CONFIG CONFIG_MSG MSG STDERR
 
     if [ -z "$KUBECONFIG" ]; then
         CONFIG="$HOME/.kube/config"
@@ -2245,7 +2245,11 @@ __kubectl_status() {
 
         cprintf -a MSG '~K~; ~d~cluster~K~:'
 
-        if ! _catch CONTEXT STDERR kubectl config current-context; then
+        local CONTEXT
+        if ! _catch CONTEXT STDERR \
+            command kubectl config view --minify \
+                -o=jsonpath="{.contexts[0].name}|{.contexts[0].context.namespace}"
+        then
             # convert from:
             #   error: current-context is not set
             # to:
@@ -2255,11 +2259,11 @@ __kubectl_status() {
         elif [ -n "$STDERR" ]; then
             cprintf -A MSG '~R~%s' "$STDERR"
         else
-            cprintf -A MSG '~m~%s' "$CONTEXT"
+            local NAMESPACE="${CONTEXT#*|}"
+            CONTEXT="${CONTEXT%|*}"
+            [ -n "$NAMESPACE" ] || NAMESPACE="default"
 
-            local NS="$(command kubectl config view -o=jsonpath="{.contexts[?(@.name==\"$CONTEXT\")].context.namespace}")"
-            [ -n "$NS" ] || NS="default"
-            cprintf -a MSG '~K~; ~d~namespace~K~: ~B~%s' "$NS"
+            cprintf -A MSG '~m~%s~K~; ~d~namespace~K~: ~B~%s' "$CONTEXT" "$NAMESPACE"
         fi
 
     fi

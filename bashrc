@@ -1663,10 +1663,10 @@ fi
 mkdir -p "$IAM_HOME/tools/bash_completion"
 if _has_function _init_completion; then
 if _has kubectl && [ ! -f "$IAM_HOME/tools/bash_completion/kubectl.completion.bash" ]; then
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 _info "Generating bash completions for kubectl..."
 kubectl completion bash >"$IAM_HOME/tools/bash_completion/kubectl.completion.bash" 2>/dev/null
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 fi
 if _has eksctl && [ ! -f "$IAM_HOME/tools/bash_completion/eksctl.completion.bash" ]; then
 _info "Generating bash completions for eksctl..."
@@ -2120,7 +2120,7 @@ __kubectl_status() {
 if ! _has kubectl || [ ! -e "$IAM_HOME/state/on_kube" ]; then
 return 0
 fi
-local CONFIG CONFIG_MSG MSG CONTEXT STDERR
+local CONFIG CONFIG_MSG MSG STDERR
 if [ -z "$KUBECONFIG" ]; then
 CONFIG="$HOME/.kube/config"
 else
@@ -2132,16 +2132,20 @@ if [ ! -e "$CONFIG" ]; then
 cprintf -A MSG "- ~r~DOESN'T EXIST"
 else
 cprintf -a MSG '~K~; ~d~cluster~K~:'
-if ! _catch CONTEXT STDERR kubectl config current-context; then
+local CONTEXT
+if ! _catch CONTEXT STDERR \
+command kubectl config view --minify \
+-o=jsonpath="{.contexts[0].name}|{.contexts[0].context.namespace}"
+then
 STDERR="${STDERR#* }"
 cprintf -A MSG '~R~%s' "$STDERR"
 elif [ -n "$STDERR" ]; then
 cprintf -A MSG '~R~%s' "$STDERR"
 else
-cprintf -A MSG '~m~%s' "$CONTEXT"
-local NS="$(command kubectl config view -o=jsonpath="{.contexts[?(@.name==\"$CONTEXT\")].context.namespace}")"
-[ -n "$NS" ] || NS="default"
-cprintf -a MSG '~K~; ~d~namespace~K~: ~B~%s' "$NS"
+local NAMESPACE="${CONTEXT#*|}"
+CONTEXT="${CONTEXT%|*}"
+[ -n "$NAMESPACE" ] || NAMESPACE="default"
+cprintf -A MSG '~m~%s~K~; ~d~namespace~K~: ~B~%s' "$CONTEXT" "$NAMESPACE"
 fi
 fi
 cprintf -a MSG '~K~]'
