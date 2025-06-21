@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Currently used service: https://0x0.st
+# Other services that can also be utilized:
+#   * https://www.file.io/developers
+#   * https://shellupload.com/
+
 _has curl || return
 
 ,share() {

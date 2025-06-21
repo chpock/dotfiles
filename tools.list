@@ -38,7 +38,7 @@ tool: ,share function
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-share.sh
 $IAM_HOME/shell.rc/functions-share.sh
 has: curl
-1943
+2097
 tool: edit bashrc
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/bashrc.rc.sh
 $IAM_HOME/shell.rc/bashrc.rc.sh
