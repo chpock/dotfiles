@@ -84,6 +84,15 @@ aws() {
             echo "Error: EKS cluster name not specified"
             return 1
         fi
+        # We will change $KUBECONFIG (see the comment below). In this case, we
+        # will patch the name of the cluster/user. With the new update,
+        # the information will not be replaced, but added. This will result
+        # in a broken $KUBECONFIG. We have no other option but to delete
+        # the old configuration. This will prevent the use of multiple contexts
+        # and the ability to switch between them. However, this is not
+        # a critical functionality, and it is easier to simply update
+        # the $KUBECONFIG for the other cluster to switch between them.
+        rm -f "$KUBECONFIG"
         (set -x; aws eks update-kubeconfig --name "$2" --alias "eks/$2")
         # By default, aws eks update-kubeconfig uses cluster ARN as context name,
         # cluster name, user name. However, this string is too long and makes
@@ -93,7 +102,7 @@ aws() {
         # Cluster name is the crucial parameter. K9s displays column size
         # according to it. Thus, here we have a hack to shorten the cluster
         # name by sed.
-        sed -i 's#arn:aws:\(eks\):[^:]*:[0-9]*:cluster\(/.*\)#\1\2#' $KUBECONFIG
+        sed -i 's#arn:aws:\(eks\):[^:]*:[0-9]*:cluster\(/.*\)#\1\2#' "$KUBECONFIG"
         ;;
     eks-tunnel)
         if [ -z "$2" ]; then
