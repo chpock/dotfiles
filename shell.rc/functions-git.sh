@@ -31,11 +31,26 @@ git() {
         # https://stackoverflow.com/a/55192451
         if ! "$GIT_BIN" rev-parse -q --verify MERGE_HEAD >/dev/null 2>&1; then
             # if we have upstream branch
-            if REMORE_BRANCH=$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>&1); then
+            if REMORE_BRANCH=$(command git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>&1); then
                 echo "The remove branch has been detected: '$REMOTE_BRANCH'"
-                (set -x; "$GIT_BIN" stash)
-                (set -x; "$GIT_BIN" pull --ff-only -f)
-                (set -x; "$GIT_BIN" stash pop --index --quiet)
+                # When we run "git stash", the current directory may be new,
+                # and the files in it may be in the list of changes.
+                # In this case, it will be deleted and later restored
+                # by "git stash pop". However, 'git pull ...' will fail as
+                # the current directory doesn't exist. To avoid this, we will
+                # change the current directory to the git repository root.
+                # We will run commands in subshell to automatically restore
+                # the current directory.
+                local SAFE_PWD="$(command git rev-parse --show-toplevel 2>/dev/null)"
+                (
+                    SAFE_PWD="$(command git rev-parse --show-toplevel 2>/dev/null)" && cd "$SAFE_PWD"
+                    set -x
+                    "$GIT_BIN" stash && "$GIT_BIN" pull --ff-only -f && "$GIT_BIN" stash pop --index --quiet
+                ) || return $?
+                # Refresh the current directory, as it may be deleted and
+                # restored. In this case, we are currently in a zombie
+                # directory.
+                cd "$PWD"
             fi
         fi
     elif [ "pull" = "$1" ]; then
