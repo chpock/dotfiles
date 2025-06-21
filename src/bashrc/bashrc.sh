@@ -1561,6 +1561,95 @@ hostinfo() {
 
 _is tmux || hostinfo
 
+if [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
+elif [ -f /etc/profile.d/bash_completion.sh ]; then
+    . /etc/profile.d/bash_completion.sh
+elif [ -f /usr/share/bash-completion/bash_completion ]; then
+    . /usr/share/bash-completion/bash_completion
+elif [ -f /usr/local/etc/bash_completion ]; then
+    . /usr/local/etc/bash_completion
+fi
+# files from /etc/bash_completion.d/* will be loaded automatically by the above
+
+mkdir -p "$IAM_HOME/tools/bash_completion"
+
+if _has_function _init_completion; then
+
+    if _has kubectl && [ ! -f "$IAM_HOME/tools/bash_completion/kubectl.completion.bash" ]; then
+        _info "Generating bash completions for kubectl..."
+        kubectl completion bash >"$IAM_HOME/tools/bash_completion/kubectl.completion.bash" 2>/dev/null
+    fi
+
+    if _has eksctl && [ ! -f "$IAM_HOME/tools/bash_completion/eksctl.completion.bash" ]; then
+        _info "Generating bash completions for eksctl..."
+        eksctl completion bash >"$IAM_HOME/tools/bash_completion/eksctl.completion.bash" 2>/dev/null
+    fi
+
+    if _has helm && [ ! -f "$IAM_HOME/tools/bash_completion/helm.completion.bash" ]; then
+        _info "Generating bash completions for helm..."
+        helm completion bash >"$IAM_HOME/tools/bash_completion/helm.completion.bash" 2>/dev/null
+    fi
+
+    if _has oc && [ ! -f "$IAM_HOME/tools/bash_completion/oc.completion.bash" ]; then
+        _info "Generating bash completions for OpenShift..."
+        oc completion bash >"$IAM_HOME/tools/bash_completion/oc.completion.bash" 2>/dev/null
+    fi
+
+else
+    _warn 'The original bash completion package is not installed on this machine. Some of the completions may not be available.\n'
+fi
+
+if _has kpexec && [ ! -f "$IAM_HOME/tools/bash_completion/kpexec.completion.bash" ];  then
+    _info "Generating bash completions for kpexec..."
+    if kpexec --completion bash >"$IAM_HOME/tools/bash_completion/kpexec.completion.bash" 2>/dev/null; then
+        echo '
+            if [ $(type -t compopt) = "builtin" ]; then
+                complete -o default -F __start_kpexec ,kpexec
+            else
+                complete -o default -o nospace -F __start_kpexec ,kpexec
+            fi
+        ' >>"$IAM_HOME/tools/bash_completion/kpexec.completion.bash"
+    fi
+fi
+
+if [ ! -f "$IAM_HOME/tools/bash_completion/pip.completion.bash" ]; then
+    # Remove '\r' here, as Python can be compiled for Windows, and pip in
+    # this case creates scripts with CRLF new lines.
+    if _has pip3; then
+        _info "Generating bash completions for pip3..."
+        # pip3 adds completions only for 'pip3' command, but we have 'pip' alias for it.
+        # Let's add it, but only if 'pip3 completion --bash' was successful.
+        pip3 completion --bash | tr -d '\r' >"$IAM_HOME/tools/bash_completion/pip.completion.bash" 2>/dev/null && \
+            echo 'complete -o default -F _pip_completion pip' >>"$IAM_HOME/tools/bash_completion/pip.completion.bash"
+    elif _has pip; then
+        _info "Generating bash completions for pip..."
+        pip completion --bash | tr -d '\r' >"$IAM_HOME/tools/bash_completion/pip.completion.bash" 2>/dev/null
+    fi
+fi
+
+if _has upkg && [ ! -f "$IAM_HOME/tools/bash_completion/upkg.bash" ] && upkg supported silent; then
+    _info "Generating bash completions for upkg..."
+    upkg generate bash-completion >"$IAM_HOME/tools/bash_completion/upkg.bash" 2>/dev/null
+fi
+
+# Remove outdated bash completions if they exist
+rm -f \
+    "$IAM_HOME/tools/bash_completion"/ecconfigure.completion.bash \
+    "$IAM_HOME/tools/bash_completion"/ectool.completion.bash \
+    "$IAM_HOME/tools/bash_completion"/electricflow.completion.bash
+
+for i in "$IAM_HOME/tools/bash_completion"/*.bash; do
+    source "$i"
+done
+unset i
+
+if [ -f ~/gcloud/google-cloud-sdk/completion.bash.inc ]; then
+    . ~/gcloud/google-cloud-sdk/completion.bash.inc
+elif [ -f /usr/lib/google-cloud-sdk/completion.bash.inc ]; then
+    . /usr/lib/google-cloud-sdk/completion.bash.inc
+fi
+
 mkdir -p "$IAM_HOME/state"
 
 KUBECONFIG="$IAM_HOME/kubeconfig"
@@ -1845,6 +1934,24 @@ man() {
         sleep 5
     done
 }
+
+_comp_,retry() {
+    # Here we first try to use _comp_command_offset if it exists. This is a new
+    # function that is intended to replace _command_offset. However, it only
+    # exists in bash-completion v2.12. Also, the _command_offset function
+    # is marked as deprecated in this version of the package.
+    if _has_function _comp_command_offset; then
+        _comp_command_offset 1
+    elif _has_function _command_offset; then
+        # The _command_offset function expects a list of words in the 'words'
+        # variable. This we initialize this variable in local scope.
+        local cur prev words cword split
+        _init_completion -s || return
+        _command_offset 1
+    fi
+}
+
+complete -F _comp_,retry ,retry
 
 #magic
 
@@ -2917,17 +3024,6 @@ if _has ssh && _isnot in-container; then
     unset RESULT
 fi
 
-if [ -f /etc/bash_completion ]; then
-    . /etc/bash_completion
-elif [ -f /etc/profile.d/bash_completion.sh ]; then
-    . /etc/profile.d/bash_completion.sh
-elif [ -f /usr/share/bash-completion/bash_completion ]; then
-    . /usr/share/bash-completion/bash_completion
-elif [ -f /usr/local/etc/bash_completion ]; then
-    . /usr/local/etc/bash_completion
-fi
-# files from /etc/bash_completion.d/* will be loaded automatically by the above
-
 # show warning if docker group exists, but current user is not in the group
 if getent group docker >/dev/null 2>&1; then
     if ! id -nG | grep -qw "docker"; then
@@ -2944,86 +3040,8 @@ elif [ ! -e "$IAM_HOME/terminfo"/*/xterm-256color ]; then
     unset TERMINFO
 fi
 
-if ! type _init_completion >/dev/null 2>&1; then
-    _warn 'The original bash completion package is not installed on this machine. Some of the completions may not be available.\n'
-fi
-
-if [ -d "$IAM_HOME/tools/bash_completion" ]; then
-
-    if [ ! -f "$IAM_HOME/tools/bash_completion/kubectl.completion.bash" ] && type -t _init_completion >/dev/null 2>&1 && _has kubectl; then
-        _info "Generating bash completions for kubectl..."
-        kubectl completion bash >"$IAM_HOME/tools/bash_completion/kubectl.completion.bash" 2>/dev/null
-    fi
-
-    if [ ! -f "$IAM_HOME/tools/bash_completion/eksctl.completion.bash" ] && type -t _init_completion >/dev/null 2>&1 && _has eksctl; then
-        _info "Generating bash completions for eksctl..."
-        eksctl completion bash >"$IAM_HOME/tools/bash_completion/eksctl.completion.bash" 2>/dev/null
-    fi
-
-    if [ ! -f "$IAM_HOME/tools/bash_completion/helm.completion.bash" ] && type -t _init_completion >/dev/null 2>&1 && _has helm; then
-        _info "Generating bash completions for helm..."
-        helm completion bash >"$IAM_HOME/tools/bash_completion/helm.completion.bash" 2>/dev/null
-    fi
-
-    if [ ! -f "$IAM_HOME/tools/bash_completion/oc.completion.bash" ] && type -t _init_completion >/dev/null 2>&1 && _has oc; then
-        _info "Generating bash completions for OpenShift..."
-        oc completion bash >"$IAM_HOME/tools/bash_completion/oc.completion.bash" 2>/dev/null
-    fi
-
-    if [ ! -f "$IAM_HOME/tools/bash_completion/kpexec.completion.bash" ] && _has kpexec; then
-        _info "Generating bash completions for kpexec..."
-        if kpexec --completion bash >"$IAM_HOME/tools/bash_completion/kpexec.completion.bash" 2>/dev/null; then
-            echo '
-                if [ $(type -t compopt) = "builtin" ]; then
-                    complete -o default -F __start_kpexec ,kpexec
-                else
-                    complete -o default -o nospace -F __start_kpexec ,kpexec
-                fi
-            ' >>"$IAM_HOME/tools/bash_completion/kpexec.completion.bash"
-        fi
-    fi
-
-    if [ ! -f "$IAM_HOME/tools/bash_completion/pip.completion.bash" ]; then
-        # Remove '\r' here, as Python can be compiled for Windows, and pip in
-        # this case creates scripts with CRLF new lines.
-        if _has pip3; then
-            _info "Generating bash completions for pip3..."
-            # pip3 adds completions only for 'pip3' command, but we have 'pip' alias for it.
-            # Let's add it, but only if 'pip3 completion --bash' was successful.
-            pip3 completion --bash | tr -d '\r' >"$IAM_HOME/tools/bash_completion/pip.completion.bash" 2>/dev/null && \
-                echo 'complete -o default -F _pip_completion pip' >>"$IAM_HOME/tools/bash_completion/pip.completion.bash"
-        elif _has pip; then
-            _info "Generating bash completions for pip..."
-            pip completion --bash | tr -d '\r' >"$IAM_HOME/tools/bash_completion/pip.completion.bash" 2>/dev/null
-        fi
-    fi
-
-    if [ ! -f "$IAM_HOME/tools/bash_completion/upkg.bash" ] && _has upkg && upkg supported silent; then
-        _info "Generating bash completions for upkg..."
-        upkg generate bash-completion >"$IAM_HOME/tools/bash_completion/upkg.bash" 2>/dev/null
-    fi
-
-    # Remove outdated bash completions if they exist
-    rm -f \
-        "$IAM_HOME/tools/bash_completion"/ecconfigure.completion.bash \
-        "$IAM_HOME/tools/bash_completion"/ectool.completion.bash \
-        "$IAM_HOME/tools/bash_completion"/electricflow.completion.bash
-
-    for i in "$IAM_HOME/tools/bash_completion"/*.bash; do
-        source $i
-    done
-    unset i
-
-fi
-
 if _has git && _vercomp 1.7.9 '>' "$__GIT_VERSION"; then
     _warn 'git v%s is too old and does not support signatures, v1.7.9 or higher is required.\n' "$__GIT_VERSION"
-fi
-
-if [ -f ~/gcloud/google-cloud-sdk/completion.bash.inc ]; then
-    . ~/gcloud/google-cloud-sdk/completion.bash.inc
-elif [ -f /usr/lib/google-cloud-sdk/completion.bash.inc ]; then
-    . /usr/lib/google-cloud-sdk/completion.bash.inc
 fi
 
 if ! _is in-container; then
