@@ -95,6 +95,42 @@ aws() {
         # name by sed.
         sed -i 's#arn:aws:\(eks\):[^:]*:[0-9]*:cluster\(/.*\)#\1\2#' $KUBECONFIG
         ;;
+    eks-tunnel)
+        if [ -z "$2" ]; then
+            echo "Usage: $0 $1 <user>@<bastion host>"
+            return 1
+        fi
+        local EKS_NAME="$(kubectl config view --minify -o jsonpath='{.clusters[].name}')"
+        if [ -n "$EKS_NAME" ]; then
+            echo "EKS name: $EKS_NAME"
+        else
+            echo "Error: could not get EKS name"
+            return
+        fi
+        local EKS_HOST="$(kubectl config view --minify -o jsonpath='{.clusters[].cluster.server}')"
+        # strip https://
+        EKS_HOST="${EKS_HOST##*/}"
+        if [ -n "$EKS_HOST" ]; then
+            echo "EKS host: $EKS_HOST"
+        else
+            echo "Error: could not get EKS host"
+            return
+        fi
+        _info "Patch /etc/hosts ..."
+        echo "127.0.0.1 $EKS_HOST" | sudo tee -a /etc/hosts > /dev/null
+        _info "Allow /usr/bin/ssh to bind system ports ..."
+        sudo setcap 'CAP_NET_BIND_SERVICE=+ep' /usr/bin/ssh
+        _info "Start tunnel ..."
+        (set -x; ssh -N -L "443:${EKS_HOST}:443" "$2")
+        echo
+        _info "Deny /usr/bin/ssh to bind system ports ..."
+        sudo setcap -r /usr/bin/ssh
+        _info "Unpatch /etc/hosts ..."
+        local TMP_FILE="$(mktemp)"
+        grep -vF "$EKS_HOST" /etc/hosts > "$TMP_FILE"
+        sudo tee /etc/hosts < "$TMP_FILE" > /dev/null
+        rm -f "$TMP_FILE"
+        ;;
     ecr-auth-docker|ecr-auth-helm)
         local REGION
         local ECR_HOST
@@ -171,7 +207,7 @@ __,aws() {
     COMPREPLY=()
 
     if [ $COMP_CWORD -eq 1 ]; then
-        COMPREPLY=($(compgen -W "on off local remote role region eks-update-kubeconfig ecr-auth-docker ecr-auth-helm unset-environment-variables profile update-profile" -- "$CUR"))
+        COMPREPLY=($(compgen -W "on off local remote role region eks-update-kubeconfig ecr-auth-docker ecr-auth-helm unset-environment-variables profile update-profile eks-tunnel" -- "$CUR"))
         return
     fi
 
@@ -200,6 +236,13 @@ __,aws() {
                 return
             fi
             COMPREPLY=($(compgen -W "$RESULT" -- "$CUR"))
+            return
+        fi
+        ;;
+    eks-tunnel)
+        if [ $COMP_CWORD -eq 2 ]; then
+            printf '\nEnter the bastion connection information in the format <user>@<bastion host>'
+            COMPREPLY=('~=~=~=~=~=~' '=~=~=~=~=~=')
             return
         fi
         ;;
