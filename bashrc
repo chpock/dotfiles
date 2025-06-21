@@ -471,7 +471,7 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=7727ACB9
+LOCAL_TOOLS_FILE_HASH=2B26E676
 declare -A -r __CPRINTF_COLORS=(
 [fw]=$'\e[37m' [fW]=$'\e[97m'
 [fk]=$'\e[30m' [fK]=$'\e[90m'
@@ -606,6 +606,17 @@ local __DIRNAME_VAR
 local __DIRNAME_OUT=${1%/*}
 [ "$__DIRNAME_OUT" != "$1" ] || __DIRNAME_OUT="."
 [ -z "$__DIRNAME_VAR" ] && echo "$__DIRNAME_OUT" || printf -v "$__DIRNAME_VAR" '%s' "$__DIRNAME_OUT"
+}
+_basename() {
+local __BASENAME_VAR
+[ "$1" != "-v" ] || { __BASENAME_VAR="$2"; shift 2; }
+[ "$1" != "--" ] || { shift; }
+local __BASENAME_OUT
+if [ -n "$1" ]; then
+_trim -r -v __BASENAME_OUT "$1" "/"
+[ -z "__BASENAME_OUT" ] && __BASENAME_OUT="/" || __BASENAME_OUT="${__BASENAME_OUT##*/}"
+fi
+[ -z "$__BASENAME_VAR" ] && echo "$__BASENAME_OUT" || printf -v "$__BASENAME_VAR" '%s' "$__BASENAME_OUT"
 }
 _hash_file() {
 local SOURCE_FILE="$1" SOURCE_BASENAME="${1##*/}" SOURCE_PATH="${1%/*}"
@@ -1661,12 +1672,12 @@ elif [ -f /usr/local/etc/bash_completion ]; then
 . /usr/local/etc/bash_completion
 fi
 mkdir -p "$IAM_HOME/tools/bash_completion"
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 if _has_function _init_completion; then
 if _has kubectl && [ ! -f "$IAM_HOME/tools/bash_completion/kubectl.completion.bash" ]; then
 _info "Generating bash completions for kubectl..."
 kubectl completion bash >"$IAM_HOME/tools/bash_completion/kubectl.completion.bash" 2>/dev/null
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 fi
 if _has eksctl && [ ! -f "$IAM_HOME/tools/bash_completion/eksctl.completion.bash" ]; then
 _info "Generating bash completions for eksctl..."

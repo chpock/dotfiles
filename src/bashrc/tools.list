@@ -46,6 +46,12 @@ https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-jump
 $IAM_HOME/shell.rc/functions-jumplist.sh
 @getSize REPO_ROOT/shell.rc/functions-jumplist.sh
 
+tool: ,share function
+https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-share.sh
+$IAM_HOME/shell.rc/functions-share.sh
+has: curl
+@getSize REPO_ROOT/shell.rc/functions-share.sh
+
 tool: edit bashrc
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/bashrc.rc.sh
 $IAM_HOME/shell.rc/bashrc.rc.sh
