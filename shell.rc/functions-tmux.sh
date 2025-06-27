@@ -5,10 +5,10 @@ _has tmux || return
 ,tmux() {
     local CMD="$1"
     local SEP=$'\t'
-    local BACKUP_FILE="$TMUX_TMPDIR/sessions-backup"
-    local BACKUP_FILE_IDS="$TMUX_TMPDIR/sessions-backup-ids"
-    local WANT_TO_RESTORE
-    local session_name window_name current_path session_id
+    local SESSION_BACKUP_FILE="$TMUX_TMPDIR/backup"
+    local session_name session_id session_persistent_id session_dir
+    local window_name window_id window_persistent_id current_path
+    local active_window_id active_window_persistent_id
     shift
 
     case "$CMD" in
@@ -25,24 +25,109 @@ _has tmux || return
             return 1
             ;;
         save)
-            tmux list-windows -a -F "#S${SEP}#W${SEP}#{pane_current_path}" >"$BACKUP_FILE"
-            tmux list-sessions -F "#S${SEP}#{_TMUX_SESSION_ID}" >"$BACKUP_FILE_IDS"
+            while IFS="$SEP" read session_name session_id session_persistent_id; do
+                echo "${session_name}${SEP}${session_persistent_id}"
+                session_dir="$TMUX_TMPDIR/id-$session_persistent_id"
+                active_window_id="$(command tmux display-message -t "$session_id" -p -F '#{window_id}' 2>/dev/null)"
+                rm -f "$session_dir/backup_active"
+                while IFS="$SEP" read window_name window_id current_path; do
+                    window_persistent_id="$(command tmux show -w -t "$window_id" -v '@persistent-id')"
+                    echo "${window_name}${SEP}${window_persistent_id}${SEP}${current_path}"
+                    if [ "$window_id" = "$active_window_id" ]; then
+                        echo "$window_persistent_id" > "$session_dir/backup_active"
+                    fi
+                done \
+                    < <(command tmux list-windows -t "$session_id" -F "#{window_name}${SEP}#{window_id}${SEP}#{pane_current_path}") \
+                    > "$session_dir/backup"
+            done \
+                < <(command tmux list-sessions -F "#{session_name}${SEP}#{session_id}${SEP}#{_TMUX_SESSION_ID}") \
+                > "$SESSION_BACKUP_FILE"
             ;;
         restore)
-            [ -e "$BACKUP_FILE" ] || return 0
-            while IFS="$SEP" read session_name window_name current_path; do
-                if tmux has-session -t "$session_name" 2>/dev/null; then
-                    # restore the windows if we need to restore this session
-                    if [ "$WANT_TO_RESTORE" = "$session_name" ]; then
-                        tmux new-window -d -t "${session_name}:" -n "$window_name" -c "$current_path"
+            [ -e "$SESSION_BACKUP_FILE" ] || return 0
+            local tmp_session_id tmp_session_persistent_id
+            local known_sessions="$(command tmux list-sessions -F "#{session_id}${SEP}#{_TMUX_SESSION_ID}" 2>/dev/null || true)"
+            local known_windows
+            local restore_full_session
+            local cols lines
+            cols="$(tput cols 2>/dev/null)" || cols="-"
+            lines="$(tput lines 2>/dev/null)" || lines="-"
+            while IFS="$SEP" read session_name session_persistent_id; do
+                # We don't use filter feature to find existing session as it is only available in tmux v3.3+.
+                unset session_id restore_full_session known_windows
+                session_dir="$TMUX_TMPDIR/id-$session_persistent_id"
+                while IFS="$SEP" read tmp_session_id tmp_session_persistent_id; do
+                    if [ "$tmp_session_persistent_id" = "$session_persistent_id" ]; then
+                        session_id="$tmp_session_id"
+                        break
                     fi
-                else
+                done <<< "$known_sessions"
+                if [ -z "$session_id" ]; then
+                    restore_full_session=1
+                    rm -f "$session_dir/sid"
                     echo "[TMUX] restore session: $session_name"
-                    (cd "$current_path" && tmux new-session -d -s "$session_name" -n "$window_name")
-                    # mark current session name as needed to be restored
-                    WANT_TO_RESTORE="$session_name"
+                    # We can use "tmux new-session -e _TMUX_SESSION_ID=XYZ ..." to set the environment
+                    # variable in the session being restored. However, this feature is only available
+                    # in tmux v3.1+. Thus, we will create a session with a dummy window and set
+                    # the environment variable there. After that, we will create all other real windows.
+
+                    # We should not use 'command tmux' here, as we want to use usual tmux function that
+                    # will use proper tmux config file.
+                    session_id="$(
+                        SSH_PUB_KEY="$SSH_PUB_KEY" \
+                        _GIT_USER_EMAIL="$_GIT_USER_EMAIL" \
+                        _GIT_USER_NAME="$_GIT_USER_NAME" \
+                        tmux new-session -d -x "$cols" -y "$lines" -s "$session_name" -P -F '#{session_id}' -n '__dummy__' 'sleep infinity' \
+                    )"
+                    command tmux set-env -t "$session_id" _TMUX_SESSION_ID "$session_persistent_id"
                 fi
-            done < "$BACKUP_FILE"
+                if [ -e "$session_dir/backup" ]; then
+                    while read window_id; do
+                        if window_persistent_id="$(tmux show -w -t "$window_id" -v '@persistent-id' 2>/dev/null)"; then
+                            known_windows+="${SEP}${window_persistent_id}"
+                        fi
+                    done < <(command tmux list-windows -t "$session_id" -F '#{window_id}')
+                    known_windows+="${SEP}"
+                    unset active_window_id
+                    [ -e "$session_dir/backup_active" ] \
+                        && active_window_persistent_id="$(< "$session_dir/backup_active")" \
+                        || unset active_window_persistent_id
+                    # It's a simple "touch", but using the built-in "echo" and without calling
+                    # an external "touch" utility.
+                    echo > "$session_dir/mode-restore"
+                    while IFS="$SEP" read window_name window_persistent_id current_path; do
+                        # Check if the current window is in the list of existing windows
+                        [ "$known_windows" = "${known_windows#*${SEP}$window_persistent_id${SEP}}" ] || continue
+                        if [ -z "$restore_full_session" ]; then
+                            echo "[TMUX] restore window '$window_name' with path '$current_path' (session: $session_name)"
+                        fi
+                        if ! window_id="$(tmux new-window -d -t "$session_id" -n "$window_name" -c "$current_path" -P -F '#{window_id}')"; then
+                            _warn "could not restore the window '%s' with current path '%s'" "$window_name" "$current_path"
+                            continue
+                        fi
+                        command tmux set -w -t "$window_id" '@persistent-id' "$window_persistent_id"
+                        [ "$window_persistent_id" != "$active_window_persistent_id" ] || active_window_id="$window_id"
+                    done < "$session_dir/backup"
+                    rm -f "$session_dir/mode-restore"
+                    [ -z "$active_window_id" ] || command tmux select-window -t "${session_id}:${active_window_id}"
+                fi
+                if [ -n "$restore_full_session" ]; then
+                    command tmux kill-window -t "${session_id}:__dummy__"
+                fi
+            done < "$SESSION_BACKUP_FILE"
+            #while IFS="$SEP" read session_name window_name current_path; do
+            #    if tmux has-session -t "$session_name" 2>/dev/null; then
+            #        # restore the windows if we need to restore this session
+            #        if [ "$WANT_TO_RESTORE" = "$session_name" ]; then
+            #            tmux new-window -d -t "${session_name}:" -n "$window_name" -c "$current_path"
+            #        fi
+            #    else
+            #        echo "[TMUX] restore session: $session_name"
+            #        (cd "$current_path" && tmux new-session -d -s "$session_name" -n "$window_name")
+            #        # mark current session name as needed to be restored
+            #        WANT_TO_RESTORE="$session_name"
+            #    fi
+            #done < "$BACKUP_FILE"
             ;;
         autosave)
             # Backup sessions every 10th invocation

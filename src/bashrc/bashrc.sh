@@ -125,6 +125,7 @@ cprintf() {
 _warn() { cprintf "~y~WARNING~K~:~d~ $1" "${@:2}"; }
 _err() { cprintf "~r~ERROR~K~:~d~ $1" "${@:2}"; }
 _info() { cprintf "~g~Info~K~:~d~ $1" "${@:2}"; }
+_dbg() { cprintf "~K~Debug:~d~ $1" "${@:2}"; }
 
 _trim() {
     local __TRIM_VAR __TRIM_WHAT='[:space:]' __TRIM_L=1 __TRIM_R=1
@@ -591,9 +592,9 @@ _unexport() {
     done
 }
 
+mkdir -p "$IAM_HOME/tools/bin"
 _addpath -start "$IAM_HOME/tools/bin"
 _addpath "/usr/local/bin"
-[ -d "$IAM_HOME/tools/bin" ] || mkdir -p "$IAM_HOME/tools/bin"
 
 if _is aix; then
     # Insert path to GNU utilities for AIX platform
@@ -623,45 +624,6 @@ elif _is wsl; then
     if [ -d /usr/bin/windows/System32 ]; then
         _addpath -start "/usr/bin/windows" "/usr/bin/windows/System32"
     fi
-
-fi
-
-# Add native Windows utilities to WSL. Don't run inside tmux to speed up reloads.
-if _isnot tmux; then
-    unset WARN
-    if _is wsl; then
-        for fn in gsudo gsudo.exe; do
-            REAL_CMD="$(command -v "$fn" 2>/dev/null)"
-            if [ -n "$REAL_CMD" ] && [ ! -x "$REAL_CMD" ]; then
-            if ! chmod +x "$REAL_CMD" >/dev/null 2>&1; then
-                [ -n "$WARN" ] || echo
-                _warn "could not chmod +x '%s': Permission denied. Run it using gsudo or run WSL under elevated powershell." "$REAL_CMD"
-                WARN=1
-            fi
-            fi
-        done
-        for fn in vagrant VBoxManage net sc notepad explorer reg; do
-            REAL_CMD="$(command -v "${fn}.exe" 2>/dev/null)"
-            if [ -n "$REAL_CMD" ]; then
-                ln -sf "$REAL_CMD" "$IAM_HOME/tools/bin/$fn"
-                if [ ! -x "$REAL_CMD" ]; then
-                    if ! chmod +x "$REAL_CMD" >/dev/null 2>&1; then
-                        [ -n "$WARN" ] || echo
-                        _warn "could not chmod +x '%s': Permission denied. Run it using gsudo." "$REAL_CMD"
-                        WARN=1
-                    fi
-                fi
-            fi
-        done
-    fi
-    [ -z "$WARN" ] || echo
-    unset fn REAL_CMD WARN
-fi
-
-# try to use en_US.UTF-8 locale if available
-if [ "$LANG" != "en_US.UTF-8" ] && _has locale && [ "$(LANG=en_US.UTF-8 locale charmap 2>/dev/null)" = "UTF-8" ]; then
-    LANG="en_US.UTF-8"
-    export LANG
 fi
 
 # GCP
@@ -705,6 +667,12 @@ then
     ln -sf /usr/bin/vim.basic "$IAM_HOME/tools/bin/vim"
 fi
 
+# try to use en_US.UTF-8 locale if available
+if [ "$LANG" != "en_US.UTF-8" ] && _has locale && [ "$(LANG=en_US.UTF-8 locale charmap 2>/dev/null)" = "UTF-8" ]; then
+    LANG="en_US.UTF-8"
+    export LANG
+fi
+
 #if _hasnot curl && [ ! -e "$IAM_HOME/tools/bin/curl-portable" ] && _has sha256sum && _is linux-x64; then
 #    printf 'Download curl-portable ...'
 #    HASH="354bbcb8cd73f1deafff9f82743e9396b27a8aece2893e8477156e23cca5ca30"
@@ -736,6 +704,40 @@ fi
 #    fi
 #    unset HASH HASH_CALC URL_HOST URL_PORT URL_PATH
 #fi
+
+# Remove outdated files/directories
+
+[ -e "$IAM_HOME/tmux_sessions/sessions-backup-ids" ] \
+    && TMUX_TMPDIR="$IAM_HOME/tmux_sessions" tmux kill-server >/dev/null 2>&1 || true
+
+[ -z "$IAM_HOME" ] || {
+    rm -rf \
+        "$IAM_HOME/kitty_sessions" \
+        "$IAM_HOME/shell_sessions" \
+        "$IAM_HOME/tmux_sessions"
+    # Remove outdated bash completions if they exist
+    rm -f \
+    "$IAM_HOME/tools/bash_completion"/ecconfigure.completion.bash \
+    "$IAM_HOME/tools/bash_completion"/ectool.completion.bash \
+    "$IAM_HOME/tools/bash_completion"/electricflow.completion.bash
+}
+
+if [ -n "$__KITTY_ID" ]; then
+    _TERM_SESSION_ID="$__KITTY_ID"
+    unset __KITTY_ID
+    #_dbg "_TERM_SESSION_ID=%s (from __KITTY_ID)" "$_TERM_SESSION_ID"
+#else
+    #_dbg "__KITTY_ID is not defined"
+fi
+
+if [ -n "$_TERM_SESSION_ID" ]; then
+    #_dbg "_TERM_SESSION_ID=%s" "$_TERM_SESSION_ID"
+    _unexport _TERM_SESSION_ID
+    _TERM_SESSION_DIR="$IAM_HOME/session/term/id-$_TERM_SESSION_ID"
+    mkdir -p "$_TERM_SESSION_DIR"
+#else
+    #_dbg "_TERM_SESSION_ID is not defined"
+fi
 
 tools() {
 
@@ -995,42 +997,165 @@ unset SCRIPT
 
 if _has tmux; then
 
-    [ -n "$__TMUX_FUNCTIONS_AVAILABLE" ] && _tmux_generate_conf || :
+    [ ! -n "$__TMUX_FUNCTIONS_AVAILABLE" ] || _tmux_generate_conf
 
     # don't store session sockets in /tmp because they can be
     # cleared by anyone at any time
-    TMUX_TMPDIR="$IAM_HOME/tmux_sessions"
+    TMUX_TMPDIR="$IAM_HOME/session/tmux"
     export TMUX_TMPDIR
     [ -e "$TMUX_TMPDIR" ] || mkdir -p "$TMUX_TMPDIR"
 
+    if _is tmux; then
+        if [ -n "$_TMUX_SESSION_ID" ]; then
+            #_dbg "_TMUX_SESSION_ID=%s (from tmux env)" "$_TMUX_SESSION_ID"
+            _unexport _TMUX_SESSION_ID
+        else
+            _random -v _TMUX_SESSION_ID
+            #_dbg "_TMUX_SESSION_ID=%s (random)" "$_TMUX_SESSION_ID"
+            command tmux set-env _TMUX_SESSION_ID "$_TMUX_SESSION_ID"
+        fi
+        _TMUX_SESSION_DIR="$TMUX_TMPDIR/id-$_TMUX_SESSION_ID"
+        mkdir -p "$_TMUX_SESSION_DIR"
+        [ -e "$_TMUX_SESSION_DIR/sid" ] || command tmux display-message -p '#{session_id}' > "$_TMUX_SESSION_DIR/sid"
+
+        if _TMUX_WINDOW_ID="$(tmux show -w -t "$TMUX_PANE" -v '@persistent-id' 2>/dev/null)"; then
+            #_dbg "_TMUX_WINDOW_ID=%s (from tmux options)" "$_TMUX_WINDOW_ID"
+            : no-op
+        elif [ -e "$_TMUX_SESSION_DIR/mode-restore" ]; then
+            #_dbg "this tmux session is in restore mode. Getting _TMUX_WINDOW_ID from tmux options ..."
+            while ! _TMUX_WINDOW_ID="$(tmux show -w -t "$TMUX_PANE" -v '@persistent-id' 2>/dev/null)"; do
+                #_dbg "_TMUX_WINDOW_ID is not yet defined"
+                sleep 1
+            done
+            #_dbg "_TMUX_WINDOW_ID=%s (from tmux options)" "$_TMUX_WINDOW_ID"
+        else
+            _random -v _TMUX_WINDOW_ID
+            command tmux set -w -t "$TMUX_PANE" '@persistent-id' "$_TMUX_WINDOW_ID"
+            #_dbg "_TMUX_WINDOW_ID=%s (random)" "$_TMUX_WINDOW_ID"
+        fi
+        _TMUX_WINDOW_DIR="$_TMUX_SESSION_DIR/wid-$_TMUX_WINDOW_ID"
+        mkdir -p "$_TMUX_WINDOW_DIR"
+    fi
+
     if _isnot tmux; then
 
-        # Restore tmux for session
-        if [ -n "$__KITTY_ID" ] && [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID/tmux" ]; then
-            # TMUX variable has session id without '$', also here we remove ',' between socker/server pid/session id
-            SID="$(sed -E 's/,([^,]+),([^,]+)$/\1$\2/' "$IAM_HOME/kitty_sessions/$__KITTY_ID/tmux")"
-            # tmux v3.0a doesn't support filter for 'list-sessions'
-            if SID="$(tmux list-sessions -F"#{socket_path}#{pid}#{session_id}@@@@@#{session_name}" | grep --fixed-string "$SID" | sed -E 's/^.+@@@@@//')" ; then
-                # these environment variable don't matter when we attach to existing
-                # tmux session: SSH_PUB_KEY _GIT_USER_EMAIL _GIT_USER_NAME
-                exec tmux attach-session -t "$SID"
-            fi
-        fi
-
         tmux() {
+            local _TMUX_SESSION_ID
+            local TMUX_CONFIG="$IAM_HOME/tmux.conf"
             if [ -z "$1" ]; then
-                export SSH_PUB_KEY _GIT_USER_EMAIL _GIT_USER_NAME
-                exec tmux -f "$IAM_HOME/tmux.conf" new
-            else
-                command tmux -f "$IAM_HOME/tmux.conf" "$@"
+                local _TMUX_SESSION_ID TMUX_SESSION
+                if ! TMUX_SESSION="$(
+                    export SSH_PUB_KEY _GIT_USER_EMAIL _GIT_USER_NAME
+                    command tmux -f "$TMUX_CONFIG" new-session -d -P -F '#{session_id}'
+                )"
+                then
+                    _err 'failed to create a new tmux session: %s' "$TMUX_SESSION"
+                    return 1
+                fi
+                # Wait for the new tmux session to set its _TMUX_SESSION_ID
+                local COUNT=1 MAX_COUNT=10
+                while ! _TMUX_SESSION_ID="$(command tmux show-env -t "$TMUX_SESSION" _TMUX_SESSION_ID 2>/dev/null)"; do
+                    echo "[$COUNT/$MAX_COUNT] wait for the new tmux session to set its _TMUX_SESSION_ID"
+                    sleep 1
+                done
+                # Strip variable name
+                _TMUX_SESSION_ID="${_TMUX_SESSION_ID#*=}"
+                set -- attach-session -t "$TMUX_SESSION"
             fi
+            if [ "$1" = "attach-session" ] || [ "$1" = "attach" ]; then
+                if [ -n "$_TERM_SESSION_DIR" ]; then
+                    if [ -z "$_TMUX_SESSION_ID" ]; then
+                        local ARG PREV_ARG
+                        for ARG; do
+                            if [ "$PREV_ARG" != "-t" ]; then
+                                PREV_ARG="$ARG"
+                                continue
+                            fi
+                            if ! _TMUX_SESSION_ID="$(command tmux show-env -t "$ARG" _TMUX_SESSION_ID 2>/dev/null)"; then
+                                unset _TMUX_SESSION_ID
+                            else
+                                # Strip variable name
+                                _TMUX_SESSION_ID="${_TMUX_SESSION_ID#*=}"
+                            fi
+                            break
+                        done
+                    fi
+                    if [ -n "$_TMUX_SESSION_ID" ]; then
+                        echo "$_TMUX_SESSION_ID" > "$_TERM_SESSION_DIR/tmux_session_id"
+                    fi
+                fi
+                exec tmux -f "$TMUX_CONFIG" "$@"
+            fi
+            command tmux -f "$TMUX_CONFIG" "$@"
         }
+
+        # The 'tmux' function should be available the moment we call ',tmux restore'. We execute 'tmux'
+        # with the correct tmux configuration file in the scope of this function.
+        [ -z "$__TMUX_FUNCTIONS_AVAILABLE" ] || ,tmux restore
+
+        # Restore tmux session for specific terminal. This should be done after restoring tmux sessions
+        # with ',tmux restore'.
+        if [ -n "$_TERM_SESSION_DIR" ] && [ -e "$_TERM_SESSION_DIR/tmux_session_id" ]; then
+            _TMUX_SESSION_ID="$(< "$_TERM_SESSION_DIR/tmux_session_id")"
+            _TMUX_SESSION_DIR="$TMUX_TMPDIR/id-$_TMUX_SESSION_ID"
+            if [ ! -e "$_TMUX_SESSION_DIR/sid" ]; then
+                _warn "this terminal session is associated with tmux session '%s', but its sid file does not exist: %s" \
+                    "$_TMUX_SESSION_ID" "$_TMUX_SESSION_DIR/sid"
+            else
+                TMUX_SESSION="$(< "$_TMUX_SESSION_DIR/sid")"
+                if ! command tmux has-session -t "$TMUX_SESSION" 2>/dev/null; then
+                    _warn "this terminal session is associated with tmux session '%s' (%s), but currently tmux doesn't have such a session" \
+                        "$_TMUX_SESSION_ID" "$TMUX_SESSION"
+                else
+                    exec tmux attach-session -t "$TMUX_SESSION"
+                fi
+                unset TMUX_SESSION
+            fi
+            unset _TMUX_SESSION_ID _TMUX_SESSION_DIR
+        fi
 
     else
         alias tmux="tmux -f \"$IAM_HOME/tmux.conf\""
     fi
 
 fi; # tmux
+
+if [ -z "$_SHELL_SESSION_ID" ]; then
+    if [ -n "$_TMUX_WINDOW_DIR" ] && [ -r "$_TMUX_WINDOW_DIR/shell_session_id" ]; then
+        _SHELL_SESSION_ID="$(< "$_TMUX_WINDOW_DIR/shell_session_id")"
+        #_dbg "_SHELL_SESSION_ID=%s (from _TMUX_WINDOW_ID)" "$_SHELL_SESSION_ID"
+    elif [ -n "$_TERM_SESSION_DIR" ] && [ -r "$_TERM_SESSION_DIR/shell_session_id" ]; then
+        _SHELL_SESSION_ID="$(< "$_TERM_SESSION_DIR/shell_session_id")"
+        #_dbg "_SHELL_SESSION_ID=%s (from _TERM_SESSION_ID)" "$_SHELL_SESSION_ID"
+    else
+        _random -v _SHELL_SESSION_ID
+        #_dbg "_SHELL_SESSION_ID=%s (random)" "$_SHELL_SESSION_ID"
+    fi
+else
+    # If _SHELL_SESSION_ID exists here, then we might want to preserve it.
+    # But now we need to remove it from the export to avoid unwanted inheritance.
+    _unexport _SHELL_SESSION_ID
+    #_dbg "_SHELL_SESSION_ID=%s (already defined)" "$_SHELL_SESSION_ID"
+fi
+
+_SHELL_SESSION_DIR="$IAM_HOME/session/shell/id-$_SHELL_SESSION_ID"
+mkdir -p "$_SHELL_SESSION_DIR"
+
+if [ -n "$_TMUX_WINDOW_DIR" ]; then
+    echo "$_SHELL_SESSION_ID" > "$_TMUX_WINDOW_DIR/shell_session_id"
+    #_dbg "Assign shell session '%s' to tmux window '%s'" "$_SHELL_SESSION_ID" "$_TMUX_WINDOW_ID"
+elif [ -n "$_TERM_SESSION_DIR" ]; then
+    echo "$_SHELL_SESSION_ID" > "$_TERM_SESSION_DIR/shell_session_id"
+    #_dbg "Assign shell session '%s' to term '%s'" "$_SHELL_SESSION_ID" "$_TERM_SESSION_ID"
+fi
+
+# Here we create a file where timestamp is the time when this shell instance
+# was last active. It will later be used in PROMPT_COMMAND to detect when
+# shell.rc functions have been updated and need to be reloaded. It will also
+# be used to clean up orphaned shell sessions. We use 'echo' instead of
+# 'touch' because 'echo' is a built-in bash command and is much faster.
+_SHELL_SESSION_STAMP="$_SHELL_SESSION_DIR/stamp"
+echo > "$_SHELL_SESSION_STAMP"
 
 _isnot "aws" || _aws_metadata() {
 
@@ -1645,12 +1770,6 @@ if _has upkg && [ ! -f "$IAM_HOME/tools/bash_completion/upkg.bash" ] && upkg sup
     upkg generate bash-completion >"$IAM_HOME/tools/bash_completion/upkg.bash" 2>/dev/null
 fi
 
-# Remove outdated bash completions if they exist
-rm -f \
-    "$IAM_HOME/tools/bash_completion"/ecconfigure.completion.bash \
-    "$IAM_HOME/tools/bash_completion"/ectool.completion.bash \
-    "$IAM_HOME/tools/bash_completion"/electricflow.completion.bash
-
 for i in "$IAM_HOME/tools/bash_completion"/*.bash; do
     source "$i"
 done
@@ -1866,23 +1985,20 @@ export EDITOR
 alias vi=vim
 vim() {
     _maybe_local "vim"
-    if _isnot tmux; then
-        if [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID" ]; then
-            if [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim" ]; then
-                set -- $(cat "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim")
-            else
-                echo "$@" > "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim"
-            fi
+    local VIM_SESSION_FILE="$_TERM_SESSION_DIR/vim"
+    [ -z "$_TERM_SESSION_DIR" ] || {
+        if [ -e "$VIM_SESSION_FILE" ]; then
+            set -- $(< "$VIM_SESSION_FILE")
+        else
+            printf '%q ' "$@" > "$VIM_SESSION_FILE"
         fi
-    fi
+    }
     command vim -u "$IAM_HOME/vimrc" -i "$IAM_HOME/viminfo" "$@"
-    if _isnot tmux && [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID" ]; then
-        rm -f "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim"
-    fi
+    [ -z "$_TERM_SESSION_DIR" ] || rm -f "$VIM_SESSION_FILE"
 }
 
-[ -d "$IAM_HOME/vim_swap" ] || mkdir -p "$IAM_HOME/vim_swap"
-[ -d "$IAM_HOME/vim_runtime" ] || mkdir -p "$IAM_HOME/vim_runtime"
+mkdir -p "$IAM_HOME/vim_swap"
+mkdir -p "$IAM_HOME/vim_runtime"
 
 _has apt-get && apt-get() {
     if [ "$(id -u)" -ne 0 ]; then
@@ -2016,7 +2132,7 @@ reload() {
     fi
     # Reloaded shell should be with the same _SHELL_SESSION_ID.
     # It will be removed from exports by launched shell instance.
-    export _SHELL_SESSION_ID
+    export _SHELL_SESSION_ID _TERM_SESSION_ID _TMUX_SESSION_ID
     export SSH_PUB_KEY _GIT_USER_EMAIL _GIT_USER_NAME
     exec bash --rcfile "$IAM_HOME/bashrc" -i
 }
@@ -2172,52 +2288,18 @@ HISTIGNORE="&:[bf]g:exit:history:history *:reset:clear"
 # reload - is my function to reload current shell
 HISTIGNORE="$HISTIGNORE:reload:reload current:mkcdtmp"
 
-if [ -z "$_SHELL_SESSION_ID" ]; then
-    _random -v _SHELL_SESSION_ID
-else
-    # If _SHELL_SESSION_ID exists here, then we might want to preserve it.
-    # But now we need to remove it from the export to avoid unwanted inheritance.
-    _unexport _SHELL_SESSION_ID
-fi
-
-_SHELL_SESSION_DIR="$IAM_HOME/shell_sessions/plain-$_SHELL_SESSION_ID"
-
 if _is in-container; then
     # In Docker, we don't want to do anything complicated with the shell command history.
     HISTFILE="$IAM_HOME/bash_history"
 else
-
     HISTFILE_GLOBAL="$IAM_HOME/bash_history"
-
-    if _is tmux; then
-        if _TMUX_SESSION_ID="$(command tmux show-env _TMUX_SESSION_ID 2>/dev/null)"; then
-            # Strip variable name
-            _TMUX_SESSION_ID="${_TMUX_SESSION_ID#*=}"
-        elif [ "$__TMUX_FUNCTIONS_AVAILABLE" != "1" ] || ! _TMUX_SESSION_ID="$(,tmux _get-id-from-backup)"; then
-            _random -v _TMUX_SESSION_ID
-            command tmux set-env _TMUX_SESSION_ID "$_TMUX_SESSION_ID"
-        fi
-        _TMUX_SESSION_DIR="$IAM_HOME/shell_sessions/tmux-$_TMUX_SESSION_ID"
-        _SHELL_SESSION_DIR="$_TMUX_SESSION_DIR/$_SHELL_SESSION_ID"
-    fi
-
     HISTFILE="$_SHELL_SESSION_DIR/bash_history"
 
     # Read global history file
     history -cr "$HISTFILE_GLOBAL"
 
     # Session history file will be read automatically
-
 fi
-
-mkdir -p "$_SHELL_SESSION_DIR"
-# Here we create a file where timestamp is the time when this shell instance
-# was last active. It will later be used in PROMPT_COMMAND to detect when
-# shell.rc functions have been updated and need to be reloaded. It will also
-# be used to clean up orphaned shell sessions. We use 'echo' instead of
-# 'touch' because 'echo' is a built-in bash command and is much faster.
-_SHELL_SESSION_STAMP="$_SHELL_SESSION_DIR/stamp"
-echo > "$_SHELL_SESSION_STAMP"
 
 _homify() {
     local __HOMIFY_VAR __HOMIFY_DIR __HOMIFY_WIDTH=20 __HOMIFY_TRUNC='...'
@@ -2692,17 +2774,21 @@ function promptcmd () {
         cd ../"${PWD##*/}"
     fi
 
-    if [ -n "$__KITTY_ID" ]; then
-        [ -d "$IAM_HOME/kitty_sessions/$__KITTY_ID" ] || mkdir -p "$IAM_HOME/kitty_sessions/$__KITTY_ID"
-        if _is tmux; then
-            echo "$TMUX" > "$IAM_HOME/kitty_sessions/$__KITTY_ID/tmux"
-        else
-            echo "$PWD" > "$IAM_HOME/kitty_sessions/$__KITTY_ID/pwd"
-        fi
-        if [ ! -e "$IAM_HOME/kitty_sessions/$__KITTY_ID/shell_session_id" ] && [ -n "$_SHELL_SESSION_ID" ]; then
-            echo "$_SHELL_SESSION_ID" > "$IAM_HOME/kitty_sessions/$__KITTY_ID/shell_session_id"
-        fi
+    if [ -n "$_TERM_SESSION_DIR" ]; then
+        echo "$PWD" > "$_TERM_SESSION_DIR/pwd"
     fi
+
+    #if [ -n "$__KITTY_ID" ]; then
+    #    [ -d "$IAM_HOME/kitty_sessions/$__KITTY_ID" ] || mkdir -p "$IAM_HOME/kitty_sessions/$__KITTY_ID"
+    #    if _is tmux; then
+    #        echo "$TMUX" > "$IAM_HOME/kitty_sessions/$__KITTY_ID/tmux"
+    #    else
+    #        echo "$PWD" > "$IAM_HOME/kitty_sessions/$__KITTY_ID/pwd"
+    #    fi
+    #    if [ ! -e "$IAM_HOME/kitty_sessions/$__KITTY_ID/shell_session_id" ] && [ -n "$_SHELL_SESSION_ID" ]; then
+    #        echo "$_SHELL_SESSION_ID" > "$IAM_HOME/kitty_sessions/$__KITTY_ID/shell_session_id"
+    #    fi
+    #fi
 
     echo "$PWD" > "$IAM_HOME/jumplist_last_pwd"
 
@@ -2983,6 +3069,38 @@ elif _is windows; then
     fi
 fi
 
+# Add native Windows utilities to WSL. Don't run inside tmux to speed up reloads.
+if _isnot tmux; then
+    unset WARN
+    if _is wsl; then
+        for fn in gsudo gsudo.exe; do
+            REAL_CMD="$(command -v "$fn" 2>/dev/null)"
+            if [ -n "$REAL_CMD" ] && [ ! -x "$REAL_CMD" ]; then
+            if ! chmod +x "$REAL_CMD" >/dev/null 2>&1; then
+                [ -n "$WARN" ] || echo
+                _warn "could not chmod +x '%s': Permission denied. Run it using gsudo or run WSL under elevated powershell." "$REAL_CMD"
+                WARN=1
+            fi
+            fi
+        done
+        for fn in vagrant VBoxManage net sc notepad explorer reg; do
+            REAL_CMD="$(command -v "${fn}.exe" 2>/dev/null)"
+            if [ -n "$REAL_CMD" ]; then
+                ln -sf "$REAL_CMD" "$IAM_HOME/tools/bin/$fn"
+                if [ ! -x "$REAL_CMD" ]; then
+                    if ! chmod +x "$REAL_CMD" >/dev/null 2>&1; then
+                        [ -n "$WARN" ] || echo
+                        _warn "could not chmod +x '%s': Permission denied. Run it using gsudo." "$REAL_CMD"
+                        WARN=1
+                    fi
+                fi
+            fi
+        done
+    fi
+    [ -z "$WARN" ] || echo
+    unset fn REAL_CMD WARN
+fi
+
 if [ -f ~/.${IAM}_customrc ]; then
     . ~/.${IAM}_customrc
 fi
@@ -3149,25 +3267,31 @@ if _isnot tmux; then
     tools check quick update
     [ -z "$__JUMPLIST_FUNCTIONS_AVAILABLE" ] || j -prompt
 
-    # Restore PWD for session, but not in tmux
-    if [ -n "$__KITTY_ID" ] && [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID/pwd" ]; then
-        # Remove a session older than 259200 seconds ( 60*60*24*3 ) or 3 days
-        if [ "$(expr $(date +"%s") - $(date -r "$IAM_HOME/kitty_sessions/$__KITTY_ID/pwd" +"%s"))" -gt 259200 ]; then
-            rm -rf "$IAM_HOME/kitty_sessions/$__KITTY_ID"
-        else
-            cd "$(cat "$IAM_HOME/kitty_sessions/$__KITTY_ID/pwd")"
-            [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim" ] && vim || true
-        fi
-    fi
-
     if _has tmux; then
-        [ -z "$__TMUX_FUNCTIONS_AVAILABLE" ] \
-            || SSH_PUB_KEY="$SSH_PUB_KEY" _GIT_USER_EMAIL="$_GIT_USER_EMAIL" _GIT_USER_NAME="$_GIT_USER_NAME" ,tmux restore
         if command tmux list-sessions -F '#{session_attached}' 2>/dev/null | grep --silent --fixed-strings '0'; then
             cprintf "~K~[~c~TMUX~K~] ~d~Current environment has the following unattached tmux sessions: \"%s\"" \
                 "$(tmux list-sessions -F '#{session_attached} #{session_name}' | grep '^0' | sed -E 's/^[[:digit:]][[:space:]]+//' | sed ':a;N;$!ba; s/\n/", "/g')"
             cprintf "~K~[~c~TMUX~K~] ~d~Type to attach: tmux attach-session -t <session name>"
         fi
+    fi
+
+    # Restore PWD for session, but not in tmux
+    if [ -n "$_TERM_SESSION_DIR" ]; then
+        if [ -r "$_TERM_SESSION_DIR/pwd" ]; then
+            # Remove a session older than 259200 seconds ( 60*60*24*3 ) or 3 days
+            if [ "$(expr $(date +"%s") - $(date -r "$_TERM_SESSION_DIR/pwd" +"%s"))" -gt 259200 ]; then
+                rm -rf "$_TERM_SESSION_DIR/*"
+            else
+                NEW_PWD="$(< "$_TERM_SESSION_DIR/pwd")"
+                if [ -d "$NEW_PWD" ]; then
+                    cd "$NEW_PWD"
+                else
+                    _warn "previous PWD '%s' is not reachable" "$NEW_PWD"
+                fi
+                unset NEW_PWD
+            fi
+        fi
+        [ ! -r "$_TERM_SESSION_DIR/vim" ] || vim
     fi
 
 fi

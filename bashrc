@@ -471,7 +471,7 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=3B41E677
+LOCAL_TOOLS_FILE_HASH=438FE69D
 declare -A -r __CPRINTF_COLORS=(
 [fw]=$'\e[37m' [fW]=$'\e[97m'
 [fk]=$'\e[30m' [fK]=$'\e[90m'
@@ -587,6 +587,7 @@ fi
 _warn() { cprintf "~y~WARNING~K~:~d~ $1" "${@:2}"; }
 _err() { cprintf "~r~ERROR~K~:~d~ $1" "${@:2}"; }
 _info() { cprintf "~g~Info~K~:~d~ $1" "${@:2}"; }
+_dbg() { cprintf "~K~Debug:~d~ $1" "${@:2}"; }
 _trim() {
 local __TRIM_VAR __TRIM_WHAT='[:space:]' __TRIM_L=1 __TRIM_R=1
 [ "$1" != "-r" ] || { unset __TRIM_L; shift; }
@@ -941,9 +942,9 @@ unset "$TMPVAR"
 printf -v "$TMPVAR" '%s' "$TMPVAL"
 done
 }
+mkdir -p "$IAM_HOME/tools/bin"
 _addpath -start "$IAM_HOME/tools/bin"
 _addpath "/usr/local/bin"
-[ -d "$IAM_HOME/tools/bin" ] || mkdir -p "$IAM_HOME/tools/bin"
 if _is aix; then
 _addpath -start "/opt/freeware/bin"
 elif _is sunos; then
@@ -963,40 +964,6 @@ elif _is wsl; then
 if [ -d /usr/bin/windows/System32 ]; then
 _addpath -start "/usr/bin/windows" "/usr/bin/windows/System32"
 fi
-fi
-if _isnot tmux; then
-unset WARN
-if _is wsl; then
-for fn in gsudo gsudo.exe; do
-REAL_CMD="$(command -v "$fn" 2>/dev/null)"
-if [ -n "$REAL_CMD" ] && [ ! -x "$REAL_CMD" ]; then
-if ! chmod +x "$REAL_CMD" >/dev/null 2>&1; then
-[ -n "$WARN" ] || echo
-_warn "could not chmod +x '%s': Permission denied. Run it using gsudo or run WSL under elevated powershell." "$REAL_CMD"
-WARN=1
-fi
-fi
-done
-for fn in vagrant VBoxManage net sc notepad explorer reg; do
-REAL_CMD="$(command -v "${fn}.exe" 2>/dev/null)"
-if [ -n "$REAL_CMD" ]; then
-ln -sf "$REAL_CMD" "$IAM_HOME/tools/bin/$fn"
-if [ ! -x "$REAL_CMD" ]; then
-if ! chmod +x "$REAL_CMD" >/dev/null 2>&1; then
-[ -n "$WARN" ] || echo
-_warn "could not chmod +x '%s': Permission denied. Run it using gsudo." "$REAL_CMD"
-WARN=1
-fi
-fi
-fi
-done
-fi
-[ -z "$WARN" ] || echo
-unset fn REAL_CMD WARN
-fi
-if [ "$LANG" != "en_US.UTF-8" ] && _has locale && [ "$(LANG=en_US.UTF-8 locale charmap 2>/dev/null)" = "UTF-8" ]; then
-LANG="en_US.UTF-8"
-export LANG
 fi
 if [ -f ~/gcloud/google-cloud-sdk/path.bash.inc ]; then
 . ~/gcloud/google-cloud-sdk/path.bash.inc
@@ -1027,6 +994,31 @@ if
 [ -x /usr/bin/vim.basic ]
 then
 ln -sf /usr/bin/vim.basic "$IAM_HOME/tools/bin/vim"
+fi
+if [ "$LANG" != "en_US.UTF-8" ] && _has locale && [ "$(LANG=en_US.UTF-8 locale charmap 2>/dev/null)" = "UTF-8" ]; then
+LANG="en_US.UTF-8"
+export LANG
+fi
+[ -e "$IAM_HOME/tmux_sessions/sessions-backup-ids" ] \
+&& TMUX_TMPDIR="$IAM_HOME/tmux_sessions" tmux kill-server >/dev/null 2>&1 || true
+[ -z "$IAM_HOME" ] || {
+rm -rf \
+"$IAM_HOME/kitty_sessions" \
+"$IAM_HOME/shell_sessions" \
+"$IAM_HOME/tmux_sessions"
+rm -f \
+"$IAM_HOME/tools/bash_completion"/ecconfigure.completion.bash \
+"$IAM_HOME/tools/bash_completion"/ectool.completion.bash \
+"$IAM_HOME/tools/bash_completion"/electricflow.completion.bash
+}
+if [ -n "$__KITTY_ID" ]; then
+_TERM_SESSION_ID="$__KITTY_ID"
+unset __KITTY_ID
+fi
+if [ -n "$_TERM_SESSION_ID" ]; then
+_unexport _TERM_SESSION_ID
+_TERM_SESSION_DIR="$IAM_HOME/session/term/id-$_TERM_SESSION_ID"
+mkdir -p "$_TERM_SESSION_DIR"
 fi
 tools() {
 local CMD="$1"
@@ -1253,29 +1245,123 @@ for SCRIPT in "$IAM_HOME"/shell.rc/*; do
 done
 unset SCRIPT
 if _has tmux; then
-[ -n "$__TMUX_FUNCTIONS_AVAILABLE" ] && _tmux_generate_conf || :
-TMUX_TMPDIR="$IAM_HOME/tmux_sessions"
+[ ! -n "$__TMUX_FUNCTIONS_AVAILABLE" ] || _tmux_generate_conf
+TMUX_TMPDIR="$IAM_HOME/session/tmux"
 export TMUX_TMPDIR
 [ -e "$TMUX_TMPDIR" ] || mkdir -p "$TMUX_TMPDIR"
-if _isnot tmux; then
-if [ -n "$__KITTY_ID" ] && [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID/tmux" ]; then
-SID="$(sed -E 's/,([^,]+),([^,]+)$/\1$\2/' "$IAM_HOME/kitty_sessions/$__KITTY_ID/tmux")"
-if SID="$(tmux list-sessions -F"#{socket_path}#{pid}#{session_id}@@@@@#{session_name}" | grep --fixed-string "$SID" | sed -E 's/^.+@@@@@//')" ; then
-exec tmux attach-session -t "$SID"
-fi
-fi
-tmux() {
-if [ -z "$1" ]; then
-export SSH_PUB_KEY _GIT_USER_EMAIL _GIT_USER_NAME
-exec tmux -f "$IAM_HOME/tmux.conf" new
+if _is tmux; then
+if [ -n "$_TMUX_SESSION_ID" ]; then
+_unexport _TMUX_SESSION_ID
 else
-command tmux -f "$IAM_HOME/tmux.conf" "$@"
+_random -v _TMUX_SESSION_ID
+command tmux set-env _TMUX_SESSION_ID "$_TMUX_SESSION_ID"
 fi
+_TMUX_SESSION_DIR="$TMUX_TMPDIR/id-$_TMUX_SESSION_ID"
+mkdir -p "$_TMUX_SESSION_DIR"
+[ -e "$_TMUX_SESSION_DIR/sid" ] || command tmux display-message -p '#{session_id}' > "$_TMUX_SESSION_DIR/sid"
+if _TMUX_WINDOW_ID="$(tmux show -w -t "$TMUX_PANE" -v '@persistent-id' 2>/dev/null)"; then
+: no-op
+elif [ -e "$_TMUX_SESSION_DIR/mode-restore" ]; then
+while ! _TMUX_WINDOW_ID="$(tmux show -w -t "$TMUX_PANE" -v '@persistent-id' 2>/dev/null)"; do
+sleep 1
+done
+else
+_random -v _TMUX_WINDOW_ID
+command tmux set -w -t "$TMUX_PANE" '@persistent-id' "$_TMUX_WINDOW_ID"
+fi
+_TMUX_WINDOW_DIR="$_TMUX_SESSION_DIR/wid-$_TMUX_WINDOW_ID"
+mkdir -p "$_TMUX_WINDOW_DIR"
+fi
+if _isnot tmux; then
+tmux() {
+local _TMUX_SESSION_ID
+local TMUX_CONFIG="$IAM_HOME/tmux.conf"
+if [ -z "$1" ]; then
+local _TMUX_SESSION_ID TMUX_SESSION
+if ! TMUX_SESSION="$(
+export SSH_PUB_KEY _GIT_USER_EMAIL _GIT_USER_NAME
+command tmux -f "$TMUX_CONFIG" new-session -d -P -F '#{session_id}'
+)"
+then
+_err 'failed to create a new tmux session: %s' "$TMUX_SESSION"
+return 1
+fi
+local COUNT=1 MAX_COUNT=10
+while ! _TMUX_SESSION_ID="$(command tmux show-env -t "$TMUX_SESSION" _TMUX_SESSION_ID 2>/dev/null)"; do
+echo "[$COUNT/$MAX_COUNT] wait for the new tmux session to set its _TMUX_SESSION_ID"
+sleep 1
+done
+_TMUX_SESSION_ID="${_TMUX_SESSION_ID#*=}"
+set -- attach-session -t "$TMUX_SESSION"
+fi
+if [ "$1" = "attach-session" ] || [ "$1" = "attach" ]; then
+if [ -n "$_TERM_SESSION_DIR" ]; then
+if [ -z "$_TMUX_SESSION_ID" ]; then
+local ARG PREV_ARG
+for ARG; do
+if [ "$PREV_ARG" != "-t" ]; then
+PREV_ARG="$ARG"
+continue
+fi
+if ! _TMUX_SESSION_ID="$(command tmux show-env -t "$ARG" _TMUX_SESSION_ID 2>/dev/null)"; then
+unset _TMUX_SESSION_ID
+else
+_TMUX_SESSION_ID="${_TMUX_SESSION_ID#*=}"
+fi
+break
+done
+fi
+if [ -n "$_TMUX_SESSION_ID" ]; then
+echo "$_TMUX_SESSION_ID" > "$_TERM_SESSION_DIR/tmux_session_id"
+fi
+fi
+exec tmux -f "$TMUX_CONFIG" "$@"
+fi
+command tmux -f "$TMUX_CONFIG" "$@"
 }
+[ -z "$__TMUX_FUNCTIONS_AVAILABLE" ] || ,tmux restore
+if [ -n "$_TERM_SESSION_DIR" ] && [ -e "$_TERM_SESSION_DIR/tmux_session_id" ]; then
+_TMUX_SESSION_ID="$(< "$_TERM_SESSION_DIR/tmux_session_id")"
+_TMUX_SESSION_DIR="$TMUX_TMPDIR/id-$_TMUX_SESSION_ID"
+if [ ! -e "$_TMUX_SESSION_DIR/sid" ]; then
+_warn "this terminal session is associated with tmux session '%s', but its sid file does not exist: %s" \
+"$_TMUX_SESSION_ID" "$_TMUX_SESSION_DIR/sid"
+else
+TMUX_SESSION="$(< "$_TMUX_SESSION_DIR/sid")"
+if ! command tmux has-session -t "$TMUX_SESSION" 2>/dev/null; then
+_warn "this terminal session is associated with tmux session '%s' (%s), but currently tmux doesn't have such a session" \
+"$_TMUX_SESSION_ID" "$TMUX_SESSION"
+else
+exec tmux attach-session -t "$TMUX_SESSION"
+fi
+unset TMUX_SESSION
+fi
+unset _TMUX_SESSION_ID _TMUX_SESSION_DIR
+fi
 else
 alias tmux="tmux -f \"$IAM_HOME/tmux.conf\""
 fi
 fi; # tmux
+if [ -z "$_SHELL_SESSION_ID" ]; then
+if [ -n "$_TMUX_WINDOW_DIR" ] && [ -r "$_TMUX_WINDOW_DIR/shell_session_id" ]; then
+_SHELL_SESSION_ID="$(< "$_TMUX_WINDOW_DIR/shell_session_id")"
+elif [ -n "$_TERM_SESSION_DIR" ] && [ -r "$_TERM_SESSION_DIR/shell_session_id" ]; then
+_SHELL_SESSION_ID="$(< "$_TERM_SESSION_DIR/shell_session_id")"
+else
+_random -v _SHELL_SESSION_ID
+fi
+else
+_unexport _SHELL_SESSION_ID
+fi
+_SHELL_SESSION_DIR="$IAM_HOME/session/shell/id-$_SHELL_SESSION_ID"
+mkdir -p "$_SHELL_SESSION_DIR"
+if [ -n "$_TMUX_WINDOW_DIR" ]; then
+echo "$_SHELL_SESSION_ID" > "$_TMUX_WINDOW_DIR/shell_session_id"
+elif [ -n "$_TERM_SESSION_DIR" ]; then
+echo "$_SHELL_SESSION_ID" > "$_TERM_SESSION_DIR/shell_session_id"
+fi
+_SHELL_SESSION_STAMP="$_SHELL_SESSION_DIR/stamp"
+echo > "$_SHELL_SESSION_STAMP"
 _isnot "aws" || _aws_metadata() {
 local METADATA_URL="http://169.254.169.254/latest"
 if [ -z "$_AWS_METADATA_ACCESS_TYPE" ]; then
@@ -1628,6 +1714,8 @@ _showinfo "Mount" "$b" "$d" "$f"
 done < <(df -m -P | tail -n +2 | grep -v -E ' +- +- +0 +-')
 elif _is windows; then
 while IFS=$' ,\t\r\n' read a b c d; do
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 [ -z "$c" ] && continue
 b=$(( b / 1024 / 1024 ))
 c=$(( c / 1024 / 1024 ))
@@ -1672,8 +1760,6 @@ elif [ -f /usr/local/etc/bash_completion ]; then
 . /usr/local/etc/bash_completion
 fi
 mkdir -p "$IAM_HOME/tools/bash_completion"
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 if _has_function _init_completion; then
 if _has kubectl && [ ! -f "$IAM_HOME/tools/bash_completion/kubectl.completion.bash" ]; then
 _info "Generating bash completions for kubectl..."
@@ -1720,10 +1806,6 @@ if _has upkg && [ ! -f "$IAM_HOME/tools/bash_completion/upkg.bash" ] && upkg sup
 _info "Generating bash completions for upkg..."
 upkg generate bash-completion >"$IAM_HOME/tools/bash_completion/upkg.bash" 2>/dev/null
 fi
-rm -f \
-"$IAM_HOME/tools/bash_completion"/ecconfigure.completion.bash \
-"$IAM_HOME/tools/bash_completion"/ectool.completion.bash \
-"$IAM_HOME/tools/bash_completion"/electricflow.completion.bash
 for i in "$IAM_HOME/tools/bash_completion"/*.bash; do
 source "$i"
 done
@@ -1850,22 +1932,19 @@ export EDITOR
 alias vi=vim
 vim() {
 _maybe_local "vim"
-if _isnot tmux; then
-if [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID" ]; then
-if [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim" ]; then
-set -- $(cat "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim")
+local VIM_SESSION_FILE="$_TERM_SESSION_DIR/vim"
+[ -z "$_TERM_SESSION_DIR" ] || {
+if [ -e "$VIM_SESSION_FILE" ]; then
+set -- $(< "$VIM_SESSION_FILE")
 else
-echo "$@" > "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim"
-fi
-fi
-fi
-command vim -u "$IAM_HOME/vimrc" -i "$IAM_HOME/viminfo" "$@"
-if _isnot tmux && [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID" ]; then
-rm -f "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim"
+printf '%q ' "$@" > "$VIM_SESSION_FILE"
 fi
 }
-[ -d "$IAM_HOME/vim_swap" ] || mkdir -p "$IAM_HOME/vim_swap"
-[ -d "$IAM_HOME/vim_runtime" ] || mkdir -p "$IAM_HOME/vim_runtime"
+command vim -u "$IAM_HOME/vimrc" -i "$IAM_HOME/viminfo" "$@"
+[ -z "$_TERM_SESSION_DIR" ] || rm -f "$VIM_SESSION_FILE"
+}
+mkdir -p "$IAM_HOME/vim_swap"
+mkdir -p "$IAM_HOME/vim_runtime"
 _has apt-get && apt-get() {
 if [ "$(id -u)" -ne 0 ]; then
 cprintf "~r~The 'sudo' prefix was added automatically for the 'apt-get' comman" >&2
@@ -1972,7 +2051,7 @@ for wid in $(command tmux list-windows -F '#{window_id}'); do
 command tmux send-keys -t $wid 'reload current' C-m
 done
 fi
-export _SHELL_SESSION_ID
+export _SHELL_SESSION_ID _TERM_SESSION_ID _TMUX_SESSION_ID
 export SSH_PUB_KEY _GIT_USER_EMAIL _GIT_USER_NAME
 exec bash --rcfile "$IAM_HOME/bashrc" -i
 }
@@ -2088,32 +2167,13 @@ HISTCONTROL=ignoreboth
 HISTTIMEFORMAT='%F %T '
 HISTIGNORE="&:[bf]g:exit:history:history *:reset:clear"
 HISTIGNORE="$HISTIGNORE:reload:reload current:mkcdtmp"
-if [ -z "$_SHELL_SESSION_ID" ]; then
-_random -v _SHELL_SESSION_ID
-else
-_unexport _SHELL_SESSION_ID
-fi
-_SHELL_SESSION_DIR="$IAM_HOME/shell_sessions/plain-$_SHELL_SESSION_ID"
 if _is in-container; then
 HISTFILE="$IAM_HOME/bash_history"
 else
 HISTFILE_GLOBAL="$IAM_HOME/bash_history"
-if _is tmux; then
-if _TMUX_SESSION_ID="$(command tmux show-env _TMUX_SESSION_ID 2>/dev/null)"; then
-_TMUX_SESSION_ID="${_TMUX_SESSION_ID#*=}"
-elif [ "$__TMUX_FUNCTIONS_AVAILABLE" != "1" ] || ! _TMUX_SESSION_ID="$(,tmux _get-id-from-backup)"; then
-_random -v _TMUX_SESSION_ID
-command tmux set-env _TMUX_SESSION_ID "$_TMUX_SESSION_ID"
-fi
-_TMUX_SESSION_DIR="$IAM_HOME/shell_sessions/tmux-$_TMUX_SESSION_ID"
-_SHELL_SESSION_DIR="$_TMUX_SESSION_DIR/$_SHELL_SESSION_ID"
-fi
 HISTFILE="$_SHELL_SESSION_DIR/bash_history"
 history -cr "$HISTFILE_GLOBAL"
 fi
-mkdir -p "$_SHELL_SESSION_DIR"
-_SHELL_SESSION_STAMP="$_SHELL_SESSION_DIR/stamp"
-echo > "$_SHELL_SESSION_STAMP"
 _homify() {
 local __HOMIFY_VAR __HOMIFY_DIR __HOMIFY_WIDTH=20 __HOMIFY_TRUNC='...'
 [ "$1" != "-v" ] || { __HOMIFY_VAR="$2"; shift 2; }
@@ -2439,16 +2499,8 @@ elif _check stat -c '%i' . && [ ! -L "$PWD" ] && [ "$(stat -c '%i' . 2>&1)" != "
 cprintf '~y~Current directory is a zombie. Fixing it.'
 cd ../"${PWD##*/}"
 fi
-if [ -n "$__KITTY_ID" ]; then
-[ -d "$IAM_HOME/kitty_sessions/$__KITTY_ID" ] || mkdir -p "$IAM_HOME/kitty_sessions/$__KITTY_ID"
-if _is tmux; then
-echo "$TMUX" > "$IAM_HOME/kitty_sessions/$__KITTY_ID/tmux"
-else
-echo "$PWD" > "$IAM_HOME/kitty_sessions/$__KITTY_ID/pwd"
-fi
-if [ ! -e "$IAM_HOME/kitty_sessions/$__KITTY_ID/shell_session_id" ] && [ -n "$_SHELL_SESSION_ID" ]; then
-echo "$_SHELL_SESSION_ID" > "$IAM_HOME/kitty_sessions/$__KITTY_ID/shell_session_id"
-fi
+if [ -n "$_TERM_SESSION_DIR" ]; then
+echo "$PWD" > "$_TERM_SESSION_DIR/pwd"
 fi
 echo "$PWD" > "$IAM_HOME/jumplist_last_pwd"
 if [ -z "$HISTFILE_GLOBAL" ]; then
@@ -2621,6 +2673,36 @@ done
 unset fn __var __val
 fi
 fi
+if _isnot tmux; then
+unset WARN
+if _is wsl; then
+for fn in gsudo gsudo.exe; do
+REAL_CMD="$(command -v "$fn" 2>/dev/null)"
+if [ -n "$REAL_CMD" ] && [ ! -x "$REAL_CMD" ]; then
+if ! chmod +x "$REAL_CMD" >/dev/null 2>&1; then
+[ -n "$WARN" ] || echo
+_warn "could not chmod +x '%s': Permission denied. Run it using gsudo or run WSL under elevated powershell." "$REAL_CMD"
+WARN=1
+fi
+fi
+done
+for fn in vagrant VBoxManage net sc notepad explorer reg; do
+REAL_CMD="$(command -v "${fn}.exe" 2>/dev/null)"
+if [ -n "$REAL_CMD" ]; then
+ln -sf "$REAL_CMD" "$IAM_HOME/tools/bin/$fn"
+if [ ! -x "$REAL_CMD" ]; then
+if ! chmod +x "$REAL_CMD" >/dev/null 2>&1; then
+[ -n "$WARN" ] || echo
+_warn "could not chmod +x '%s': Permission denied. Run it using gsudo." "$REAL_CMD"
+WARN=1
+fi
+fi
+fi
+done
+fi
+[ -z "$WARN" ] || echo
+unset fn REAL_CMD WARN
+fi
 if [ -f ~/.${IAM}_customrc ]; then
 . ~/.${IAM}_customrc
 fi
@@ -2750,22 +2832,28 @@ fi
 unset V
 tools check quick update
 [ -z "$__JUMPLIST_FUNCTIONS_AVAILABLE" ] || j -prompt
-if [ -n "$__KITTY_ID" ] && [ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID/pwd" ]; then
-if [ "$(expr $(date +"%s") - $(date -r "$IAM_HOME/kitty_sessions/$__KITTY_ID/pwd" +"%s"))" -gt 259200 ]; then
-rm -rf "$IAM_HOME/kitty_sessions/$__KITTY_ID"
-else
-cd "$(cat "$IAM_HOME/kitty_sessions/$__KITTY_ID/pwd")"
-[ -e "$IAM_HOME/kitty_sessions/$__KITTY_ID/vim" ] && vim || true
-fi
-fi
 if _has tmux; then
-[ -z "$__TMUX_FUNCTIONS_AVAILABLE" ] \
-|| SSH_PUB_KEY="$SSH_PUB_KEY" _GIT_USER_EMAIL="$_GIT_USER_EMAIL" _GIT_USER_NAME="$_GIT_USER_NAME" ,tmux restore
 if command tmux list-sessions -F '#{session_attached}' 2>/dev/null | grep --silent --fixed-strings '0'; then
 cprintf "~K~[~c~TMUX~K~] ~d~Current environment has the following unattached tmux sessions: \"%s\"" \
 "$(tmux list-sessions -F '#{session_attached} #{session_name}' | grep '^0' | sed -E 's/^[[:digit:]][[:space:]]+//' | sed ':a;N;$!ba; s/\n/", "/g')"
 cprintf "~K~[~c~TMUX~K~] ~d~Type to attach: tmux attach-session -t <session name>"
 fi
+fi
+if [ -n "$_TERM_SESSION_DIR" ]; then
+if [ -r "$_TERM_SESSION_DIR/pwd" ]; then
+if [ "$(expr $(date +"%s") - $(date -r "$_TERM_SESSION_DIR/pwd" +"%s"))" -gt 259200 ]; then
+rm -rf "$_TERM_SESSION_DIR/*"
+else
+NEW_PWD="$(< "$_TERM_SESSION_DIR/pwd")"
+if [ -d "$NEW_PWD" ]; then
+cd "$NEW_PWD"
+else
+_warn "previous PWD '%s' is not reachable" "$NEW_PWD"
+fi
+unset NEW_PWD
+fi
+fi
+[ ! -r "$_TERM_SESSION_DIR/vim" ] || vim
 fi
 fi
 EOF
@@ -2807,7 +2895,7 @@ EOF
 chmod +x "$IAM_HOME/shellrc"
 
 # Magic: try to restore current directory. Only for SSH.
-if [ -n "$SSH_CLIENT" ]; then
+if [ -n "$SSH_CLIENT" ] || [ -n "$WSL_HOST_IP" ]; then
     # get win title
     printf "\033]0;__ti\007"
     read __WIN_TITLE_1

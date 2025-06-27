@@ -40,7 +40,7 @@ EOF
 chmod +x "$IAM_HOME/shellrc"
 
 # Magic: try to restore current directory. Only for SSH.
-if [ -n "$SSH_CLIENT" ]; then
+if [ -n "$SSH_CLIENT" ] || [ -n "$WSL_HOST_IP" ]; then
     # get win title
     printf "\033]0;__ti\007"
     read __WIN_TITLE_1
