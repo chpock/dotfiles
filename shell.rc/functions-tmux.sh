@@ -48,7 +48,7 @@ _has tmux || return
             local tmp_session_id tmp_session_persistent_id
             local known_sessions="$(command tmux list-sessions -F "#{session_id}${SEP}#{_TMUX_SESSION_ID}" 2>/dev/null || true)"
             local known_windows
-            local restore_full_session
+            local restore_full_session session_sid_file
             local cols lines
             cols="$(tput cols 2>/dev/null)" || cols="-"
             lines="$(tput lines 2>/dev/null)" || lines="-"
@@ -64,7 +64,8 @@ _has tmux || return
                 done <<< "$known_sessions"
                 if [ -z "$session_id" ]; then
                     restore_full_session=1
-                    rm -f "$session_dir/sid"
+                    session_sid_file="$session_dir/sid"
+                    rm -f "$session_sid_file"
                     echo "[TMUX] restore session: $session_name"
                     # We can use "tmux new-session -e _TMUX_SESSION_ID=XYZ ..." to set the environment
                     # variable in the session being restored. However, this feature is only available
@@ -113,6 +114,15 @@ _has tmux || return
                 fi
                 if [ -n "$restore_full_session" ]; then
                     command tmux kill-window -t "${session_id}:__dummy__"
+                    local counter=0
+                    while [ ! -e "$session_sid_file" ]; do
+                        [ "$counter" -eq 0 ] || printf '\r'
+                        printf "[TMUX] waiting for sid file: %s (%s)" "$session_sid_file" "$counter"
+                        sleep 0.05
+                        counter=$(( counter + 1 ))
+                    done
+                    # clear current line
+                    [ "$counter" -eq 0 ] || printf '\r\033[K'
                 fi
             done < "$SESSION_BACKUP_FILE"
             #while IFS="$SEP" read session_name window_name current_path; do
