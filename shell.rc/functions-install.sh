@@ -6,7 +6,7 @@ __INSTALL_VERSION="
   kubectl       1.32.3
   dive          0.13.1
   jq            1.8.0
-  k9s           0.50.7
+  k9s           0.50.9
   kdash         0.6.2
   kl            0.6.0
   ktop          0.3.7
