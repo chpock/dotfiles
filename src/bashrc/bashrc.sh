@@ -1112,6 +1112,18 @@ if _has tmux; then
                 unset TMUX_SESSION
             fi
             unset _TMUX_SESSION_ID _TMUX_SESSION_DIR
+        else
+            # If current shell session has no attached tmux session, then check
+            # if machine has unattached tmux session 'default'. Attach it now if
+            # it exists.
+            if command tmux list-sessions -F '#{session_attached} #{session_name}' | grep --silent '^0 default$'; then
+                # If we have shell session, then attach it to the 'default' tmux session.
+                if [ -n "$_TERM_SESSION_DIR" ] && _TMUX_SESSION_ID="$(command tmux show-env -t "default" _TMUX_SESSION_ID 2>/dev/null)"; then
+                    echo "$_TMUX_SESSION_ID" > "$_TERM_SESSION_DIR/tmux_session_id"
+                fi
+                # Join to the session 'default'
+                exec tmux attach-session -t "default"
+            fi
         fi
 
     else
@@ -3270,7 +3282,7 @@ if _isnot tmux; then
     if _has tmux; then
         if command tmux list-sessions -F '#{session_attached}' 2>/dev/null | grep --silent --fixed-strings '0'; then
             cprintf "~K~[~c~TMUX~K~] ~d~Current environment has the following unattached tmux sessions: \"%s\"" \
-                "$(tmux list-sessions -F '#{session_attached} #{session_name}' | grep '^0' | sed -E 's/^[[:digit:]][[:space:]]+//' | sed ':a;N;$!ba; s/\n/", "/g')"
+                "$(command tmux list-sessions -F '#{session_attached} #{session_name}' | grep '^0' | sed -E 's/^[[:digit:]][[:space:]]+//' | sed ':a;N;$!ba; s/\n/", "/g')"
             cprintf "~K~[~c~TMUX~K~] ~d~Type to attach: tmux attach-session -t <session name>"
         fi
     fi

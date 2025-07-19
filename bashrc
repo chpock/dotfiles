@@ -1337,6 +1337,13 @@ fi
 unset TMUX_SESSION
 fi
 unset _TMUX_SESSION_ID _TMUX_SESSION_DIR
+else
+if command tmux list-sessions -F '#{session_attached} #{session_name}' | grep --silent '^0 default$'; then
+if [ -n "$_TERM_SESSION_DIR" ] && _TMUX_SESSION_ID="$(command tmux show-env -t "default" _TMUX_SESSION_ID 2>/dev/null)"; then
+echo "$_TMUX_SESSION_ID" > "$_TERM_SESSION_DIR/tmux_session_id"
+fi
+exec tmux attach-session -t "default"
+fi
 fi
 else
 alias tmux="tmux -f \"$IAM_HOME/tmux.conf\""
@@ -1710,12 +1717,12 @@ _showinfo "Mount" "$b" "$d" "$f"
 done < <(df -P -k | tail -n +2)
 elif _is aix; then
 while IFS=$' \t\r\n' read a b c d e f; do
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 _showinfo "Mount" "$b" "$d" "$f"
 done < <(df -m -P | tail -n +2 | grep -v -E ' +- +- +0 +-')
 elif _is windows; then
 while IFS=$' ,\t\r\n' read a b c d; do
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 [ -z "$c" ] && continue
 b=$(( b / 1024 / 1024 ))
 c=$(( c / 1024 / 1024 ))
@@ -2835,7 +2842,7 @@ tools check quick update
 if _has tmux; then
 if command tmux list-sessions -F '#{session_attached}' 2>/dev/null | grep --silent --fixed-strings '0'; then
 cprintf "~K~[~c~TMUX~K~] ~d~Current environment has the following unattached tmux sessions: \"%s\"" \
-"$(tmux list-sessions -F '#{session_attached} #{session_name}' | grep '^0' | sed -E 's/^[[:digit:]][[:space:]]+//' | sed ':a;N;$!ba; s/\n/", "/g')"
+"$(command tmux list-sessions -F '#{session_attached} #{session_name}' | grep '^0' | sed -E 's/^[[:digit:]][[:space:]]+//' | sed ':a;N;$!ba; s/\n/", "/g')"
 cprintf "~K~[~c~TMUX~K~] ~d~Type to attach: tmux attach-session -t <session name>"
 fi
 fi
