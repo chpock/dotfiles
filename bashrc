@@ -1340,6 +1340,7 @@ unset _TMUX_SESSION_ID _TMUX_SESSION_DIR
 else
 if command tmux list-sessions -F '#{session_attached} #{session_name}' | grep --silent '^0 default$'; then
 if [ -n "$_TERM_SESSION_DIR" ] && _TMUX_SESSION_ID="$(command tmux show-env -t "default" _TMUX_SESSION_ID 2>/dev/null)"; then
+_TMUX_SESSION_ID="${_TMUX_SESSION_ID#*=}"
 echo "$_TMUX_SESSION_ID" > "$_TERM_SESSION_DIR/tmux_session_id"
 fi
 exec tmux attach-session -t "default"
