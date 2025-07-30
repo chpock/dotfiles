@@ -79,6 +79,20 @@ git-config() {
     if [ -z "$GIT_AUTHOR" ]; then
         GIT_AUTHOR="$_GIT_USER_EMAIL"
     fi
+    # always enable: git commit -v
+    (set -x; "$GIT_BIN" config "$@" commit.verbose true)
+    # sort branches by commit date
+    (set -x; "$GIT_BIN" config "$@" branch.sort -committerdate)
+    # sort tags by version (the most recent tags are listed first)
+    (set -x; "$GIT_BIN" config "$@" tag.sort -version:refname)
+    # use better diff algorithm by default
+    (set -x; "$GIT_BIN" config "$@" diff.algorithm histogram)
+    #  no more 'git push origin HEAD', 'git push' will work everywhere!
+    (set -x; "$GIT_BIN" config "$@" push.autoSetupRemote true)
+    # enable automatic repository maintenance in background
+    (set -x; "$GIT_BIN" config "$@" maintenance.auto true)
+    (set -x; "$GIT_BIN" config "$@" maintenance.strategy incremental)
+    # set author
     (set -x; "$GIT_BIN" config "$@" user.name "$_GIT_USER_NAME")
     (set -x; "$GIT_BIN" config "$@" user.email "$GIT_AUTHOR")
     if ! SIGN_KEY="$(set +e; LC_ALL=C gpg --with-colons --list-secret-keys "$GIT_AUTHOR" 2>/dev/null | cut -d: -f5 | head -n 1)"; then
