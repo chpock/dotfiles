@@ -1935,6 +1935,13 @@ _hasnot ps || psaf() {
     env ps "$@"
 }
 
+_hasnot ps || psgrep() {
+    local OUTPUT
+    if OUTPUT="$(psaf)"; then
+        echo "$OUTPUT" | grep "$@"
+    fi
+}
+
 _hasnot grep || grep() {
     ! _check command grep --color=auto --version || set -- --color=auto "$@"
     env grep "$@"

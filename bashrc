@@ -1716,11 +1716,11 @@ b=$(( b / 1024 ))
 d=$(( d / 1024 ))
 _showinfo "Mount" "$b" "$d" "$f"
 done < <(df -P -k | tail -n +2)
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 elif _is aix; then
 while IFS=$' \t\r\n' read a b c d e f; do
 _showinfo "Mount" "$b" "$d" "$f"
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 done < <(df -m -P | tail -n +2 | grep -v -E ' +- +- +0 +-')
 elif _is windows; then
 while IFS=$' ,\t\r\n' read a b c d; do
@@ -1888,6 +1888,12 @@ env ps "$@"
 _hasnot ps || psaf() {
 _check command ps --version && set -- auxf "$@" || set -- -e -f "$@"
 env ps "$@"
+}
+_hasnot ps || psgrep() {
+local OUTPUT
+if OUTPUT="$(psaf)"; then
+echo "$OUTPUT" | grep "$@"
+fi
 }
 _hasnot grep || grep() {
 ! _check command grep --color=auto --version || set -- --color=auto "$@"
