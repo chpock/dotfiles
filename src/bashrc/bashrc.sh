@@ -2087,6 +2087,21 @@ man() {
     done
 }
 
+,forget() {
+    [ -n "$1" ] || { echo "Usage: $0 <grep parameters>"; return 1; }
+    grep "$@" "$HISTFILE" || { echo "Nothing found."; return 1; }
+    echo
+    local ASK
+    read -p "Do you wish to delete these lines from history file '$HISTFILE' [y/N]? " ASK
+    _glob_match '[Yy]*' "$ASK" || { echo "Do nothing."; return 0; }
+    local TMP_FILE="$(mktemp)"
+    grep -v "$@" "$HISTFILE" > "$TMP_FILE"
+    # Cleanup unused timestamps
+    awk '/^#[0-9]+$/ { last=$0; have_in=1; next } !/^#[0-9]+$/ { if (have_in) { print last; have_in=0 } print }' "$TMP_FILE" > "$HISTFILE"
+    rm -f "$TMP_FILE"
+    echo "Done."
+}
+
 _comp_,retry() {
     # Here we first try to use _comp_command_offset if it exists. This is a new
     # function that is intended to replace _command_offset. However, it only
@@ -2307,7 +2322,7 @@ HISTCONTROL=ignoreboth
 # add the full date and time to lines
 HISTTIMEFORMAT='%F %T '
 # Ignore standard commands
-HISTIGNORE="&:[bf]g:exit:history:history *:reset:clear"
+HISTIGNORE="&:[bf]g:exit:history:history *:reset:clear:export AWS_*"
 # Ignore our custom commands. They are useless for history.
 # reload - is my function to reload current shell
 HISTIGNORE="$HISTIGNORE:reload:reload current:mkcdtmp"
@@ -2802,27 +2817,15 @@ function promptcmd () {
         echo "$PWD" > "$_TERM_SESSION_DIR/pwd"
     fi
 
-    #if [ -n "$__KITTY_ID" ]; then
-    #    [ -d "$IAM_HOME/kitty_sessions/$__KITTY_ID" ] || mkdir -p "$IAM_HOME/kitty_sessions/$__KITTY_ID"
-    #    if _is tmux; then
-    #        echo "$TMUX" > "$IAM_HOME/kitty_sessions/$__KITTY_ID/tmux"
-    #    else
-    #        echo "$PWD" > "$IAM_HOME/kitty_sessions/$__KITTY_ID/pwd"
-    #    fi
-    #    if [ ! -e "$IAM_HOME/kitty_sessions/$__KITTY_ID/shell_session_id" ] && [ -n "$_SHELL_SESSION_ID" ]; then
-    #        echo "$_SHELL_SESSION_ID" > "$IAM_HOME/kitty_sessions/$__KITTY_ID/shell_session_id"
-    #    fi
-    #fi
-
     echo "$PWD" > "$IAM_HOME/jumplist_last_pwd"
 
-    # update history file
-    if [ -z "$HISTFILE_GLOBAL" ]; then
-        history -a
-    else
-        # Update both global and session history files
-        history -a /dev/stdout | tee -a "$HISTFILE_GLOBAL" >> "$HISTFILE"
+    # Update global history. To avoid clearing the list of unsaved history
+    # lines, do it in a subshell.
+    if [ -n "$HISTFILE_GLOBAL" ]; then
+        (builtin history -a "$HISTFILE_GLOBAL")
     fi
+    # Update session history file
+    builtin history -a
 
     local SCRIPT
     for SCRIPT in "$IAM_HOME"/shell.rc/*; do

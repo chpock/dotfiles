@@ -2010,6 +2010,19 @@ echo "Exit code: $R; Retry in 5 seconds ..."
 sleep 5
 done
 }
+,forget() {
+[ -n "$1" ] || { echo "Usage: $0 <grep parameters>"; return 1; }
+grep "$@" "$HISTFILE" || { echo "Nothing found."; return 1; }
+echo
+local ASK
+read -p "Do you wish to delete these lines from history file '$HISTFILE' [y/N]? " ASK
+_glob_match '[Yy]*' "$ASK" || { echo "Do nothing."; return 0; }
+local TMP_FILE="$(mktemp)"
+grep -v "$@" "$HISTFILE" > "$TMP_FILE"
+awk '/^#[0-9]+$/ { last=$0; have_in=1; next } !/^#[0-9]+$/ { if (have_in) { print last; have_in=0 } print }' "$TMP_FILE" > "$HISTFILE"
+rm -f "$TMP_FILE"
+echo "Done."
+}
 _comp_,retry() {
 if _has_function _comp_command_offset; then
 _comp_command_offset 1
@@ -2179,7 +2192,7 @@ unset HISTFILESIZE
 HISTSIZE=1000000
 HISTCONTROL=ignoreboth
 HISTTIMEFORMAT='%F %T '
-HISTIGNORE="&:[bf]g:exit:history:history *:reset:clear"
+HISTIGNORE="&:[bf]g:exit:history:history *:reset:clear:export AWS_*"
 HISTIGNORE="$HISTIGNORE:reload:reload current:mkcdtmp"
 if _is in-container; then
 HISTFILE="$IAM_HOME/bash_history"
@@ -2517,11 +2530,10 @@ if [ -n "$_TERM_SESSION_DIR" ]; then
 echo "$PWD" > "$_TERM_SESSION_DIR/pwd"
 fi
 echo "$PWD" > "$IAM_HOME/jumplist_last_pwd"
-if [ -z "$HISTFILE_GLOBAL" ]; then
-history -a
-else
-history -a /dev/stdout | tee -a "$HISTFILE_GLOBAL" >> "$HISTFILE"
+if [ -n "$HISTFILE_GLOBAL" ]; then
+(builtin history -a "$HISTFILE_GLOBAL")
 fi
+builtin history -a
 local SCRIPT
 for SCRIPT in "$IAM_HOME"/shell.rc/*; do
 [ -e "$SCRIPT" ] || continue
