@@ -472,7 +472,7 @@ EOF
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
 LOCAL_TOOLS_FILE_HASH=7DF2E6C6
-BASHRC_FILE_HASH=93938110
+BASHRC_FILE_HASH=AC7A80CE
 declare -A -r __CPRINTF_COLORS=(
 [fw]=$'\e[37m' [fW]=$'\e[97m'
 [fk]=$'\e[30m' [fK]=$'\e[90m'
@@ -1193,9 +1193,9 @@ fi
 fi
 if [ "quick" != "$PARAM" ]; then
 if [ -n "$I_SIZE" ]; then
-cprintf "$LINE ~K~[~d~!Size current: %8s ~K~/~d~ expected: %8s~K~]~d~ %s" "$SIZE" "$I_SIZE" "${I_FILE/$HOME/\~}"
+cprintf "$LINE ~K~[~d~Size current: %8s ~K~/~d~ expected: %8s~K~]~d~ %s" "$SIZE" "$I_SIZE" "${I_FILE/$HOME/\~}"
 else
-cprintf "$LINE ~K~[~d~!Hash current: %8s ~K~/~d~ expected: %8s~K~]~d~ %s" "$HASH" "$I_HASH" "${I_FILE/$HOME/\~}"
+cprintf "$LINE ~K~[~d~Hash current: %8s ~K~/~d~ expected: %8s~K~]~d~ %s" "$HASH" "$I_HASH" "${I_FILE/$HOME/\~}"
 fi
 fi
 elif [ "update" = "$CMD" ]; then
