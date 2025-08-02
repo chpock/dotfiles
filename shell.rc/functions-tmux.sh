@@ -84,7 +84,7 @@ _has tmux || return
                 fi
                 if [ -e "$session_dir/backup" ]; then
                     while read window_id; do
-                        if window_persistent_id="$(tmux show -w -t "$window_id" -v '@persistent-id' 2>/dev/null)"; then
+                        if window_persistent_id="$(command tmux show -w -t "$window_id" -v '@persistent-id' 2>/dev/null)" && [ -n "$window_persistent_id" ]; then
                             known_windows+="${SEP}${window_persistent_id}"
                         fi
                     done < <(command tmux list-windows -t "$session_id" -F '#{window_id}')

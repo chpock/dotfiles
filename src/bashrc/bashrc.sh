@@ -1018,12 +1018,15 @@ if _has tmux; then
         mkdir -p "$_TMUX_SESSION_DIR"
         [ -e "$_TMUX_SESSION_DIR/sid" ] || command tmux display-message -p '#{session_id}' > "$_TMUX_SESSION_DIR/sid"
 
-        if _TMUX_WINDOW_ID="$(tmux show -w -t "$TMUX_PANE" -v '@persistent-id' 2>/dev/null)"; then
+        # tmux 3.4 returns error 'invalid option:' if the option doesn't exist.
+        # However, tmux 3.2a returns empty string in this case. So, we have to
+        # check both error code + empty result.
+        if _TMUX_WINDOW_ID="$(command tmux show -w -t "$TMUX_PANE" -v '@persistent-id' 2>/dev/null)" && [ -n "$_TMUX_WINDOW_ID" ]; then
             #_dbg "_TMUX_WINDOW_ID=%s (from tmux options)" "$_TMUX_WINDOW_ID"
             : no-op
         elif [ -e "$_TMUX_SESSION_DIR/mode-restore" ]; then
             #_dbg "this tmux session is in restore mode. Getting _TMUX_WINDOW_ID from tmux options ..."
-            while ! _TMUX_WINDOW_ID="$(tmux show -w -t "$TMUX_PANE" -v '@persistent-id' 2>/dev/null)"; do
+            while ! _TMUX_WINDOW_ID="$(command tmux show -w -t "$TMUX_PANE" -v '@persistent-id' 2>/dev/null)" || [ -z "$_TMUX_WINDOW_ID" ]; do
                 #_dbg "_TMUX_WINDOW_ID is not yet defined"
                 sleep 1
             done
@@ -1054,7 +1057,7 @@ if _has tmux; then
                 fi
                 # Wait for the new tmux session to set its _TMUX_SESSION_ID
                 local COUNT=1 MAX_COUNT=10
-                while ! _TMUX_SESSION_ID="$(command tmux show-env -t "$TMUX_SESSION" _TMUX_SESSION_ID 2>/dev/null)"; do
+                while ! _TMUX_SESSION_ID="$(command tmux show-env -t "$TMUX_SESSION" _TMUX_SESSION_ID 2>/dev/null)" || [ -z "$_TMUX_SESSION_ID" ]; do
                     echo "[$COUNT/$MAX_COUNT] wait for the new tmux session to set its _TMUX_SESSION_ID"
                     sleep 1
                 done
@@ -1118,7 +1121,7 @@ if _has tmux; then
             # it exists.
             if command tmux list-sessions -F '#{session_attached} #{session_name}' | grep --silent '^0 default$'; then
                 # If we have shell session, then attach it to the 'default' tmux session.
-                if [ -n "$_TERM_SESSION_DIR" ] && _TMUX_SESSION_ID="$(command tmux show-env -t "default" _TMUX_SESSION_ID 2>/dev/null)"; then
+                if [ -n "$_TERM_SESSION_DIR" ] && _TMUX_SESSION_ID="$(command tmux show-env -t "default" _TMUX_SESSION_ID 2>/dev/null)" && [ -n "$_TMUX_SESSION_ID" ]; then
                     # Strip variable name
                     _TMUX_SESSION_ID="${_TMUX_SESSION_ID#*=}"
                     echo "$_TMUX_SESSION_ID" > "$_TERM_SESSION_DIR/tmux_session_id"

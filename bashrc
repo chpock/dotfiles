@@ -471,7 +471,7 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=1200E6C0
+LOCAL_TOOLS_FILE_HASH=7DF2E6C6
 declare -A -r __CPRINTF_COLORS=(
 [fw]=$'\e[37m' [fW]=$'\e[97m'
 [fk]=$'\e[30m' [fK]=$'\e[90m'
@@ -1259,10 +1259,10 @@ fi
 _TMUX_SESSION_DIR="$TMUX_TMPDIR/id-$_TMUX_SESSION_ID"
 mkdir -p "$_TMUX_SESSION_DIR"
 [ -e "$_TMUX_SESSION_DIR/sid" ] || command tmux display-message -p '#{session_id}' > "$_TMUX_SESSION_DIR/sid"
-if _TMUX_WINDOW_ID="$(tmux show -w -t "$TMUX_PANE" -v '@persistent-id' 2>/dev/null)"; then
+if _TMUX_WINDOW_ID="$(command tmux show -w -t "$TMUX_PANE" -v '@persistent-id' 2>/dev/null)" && [ -n "$_TMUX_WINDOW_ID" ]; then
 : no-op
 elif [ -e "$_TMUX_SESSION_DIR/mode-restore" ]; then
-while ! _TMUX_WINDOW_ID="$(tmux show -w -t "$TMUX_PANE" -v '@persistent-id' 2>/dev/null)"; do
+while ! _TMUX_WINDOW_ID="$(command tmux show -w -t "$TMUX_PANE" -v '@persistent-id' 2>/dev/null)" || [ -z "$_TMUX_WINDOW_ID" ]; do
 sleep 1
 done
 else
@@ -1287,7 +1287,7 @@ _err 'failed to create a new tmux session: %s' "$TMUX_SESSION"
 return 1
 fi
 local COUNT=1 MAX_COUNT=10
-while ! _TMUX_SESSION_ID="$(command tmux show-env -t "$TMUX_SESSION" _TMUX_SESSION_ID 2>/dev/null)"; do
+while ! _TMUX_SESSION_ID="$(command tmux show-env -t "$TMUX_SESSION" _TMUX_SESSION_ID 2>/dev/null)" || [ -z "$_TMUX_SESSION_ID" ]; do
 echo "[$COUNT/$MAX_COUNT] wait for the new tmux session to set its _TMUX_SESSION_ID"
 sleep 1
 done
@@ -1339,7 +1339,7 @@ fi
 unset _TMUX_SESSION_ID _TMUX_SESSION_DIR
 else
 if command tmux list-sessions -F '#{session_attached} #{session_name}' | grep --silent '^0 default$'; then
-if [ -n "$_TERM_SESSION_DIR" ] && _TMUX_SESSION_ID="$(command tmux show-env -t "default" _TMUX_SESSION_ID 2>/dev/null)"; then
+if [ -n "$_TERM_SESSION_DIR" ] && _TMUX_SESSION_ID="$(command tmux show-env -t "default" _TMUX_SESSION_ID 2>/dev/null)" && [ -n "$_TMUX_SESSION_ID" ]; then
 _TMUX_SESSION_ID="${_TMUX_SESSION_ID#*=}"
 echo "$_TMUX_SESSION_ID" > "$_TERM_SESSION_DIR/tmux_session_id"
 fi
@@ -1716,10 +1716,10 @@ b=$(( b / 1024 ))
 d=$(( d / 1024 ))
 _showinfo "Mount" "$b" "$d" "$f"
 done < <(df -P -k | tail -n +2)
-elif _is aix; then
-while IFS=$' \t\r\n' read a b c d e f; do
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
+elif _is aix; then
+while IFS=$' \t\r\n' read a b c d e f; do
 _showinfo "Mount" "$b" "$d" "$f"
 done < <(df -m -P | tail -n +2 | grep -v -E ' +- +- +0 +-')
 elif _is windows; then
