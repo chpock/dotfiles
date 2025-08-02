@@ -215,6 +215,10 @@ _once() {
     return 0
 }
 
+_create_flag() {
+    printf '' >> "$1"
+}
+
 _glob_match() {
     # case doesn't allow pipe '|' in variable as a pattern, that is why 'eval' is used here
     # https://unix.stackexchange.com/a/574088
@@ -673,6 +677,16 @@ if [ "$LANG" != "en_US.UTF-8" ] && _has locale && [ "$(LANG=en_US.UTF-8 locale c
     export LANG
 fi
 
+mkdir -p "$IAM_HOME/state"
+
+if [ -n "$BASHRC_FILE_HASH" ]; then
+    _BASHRC_STAMP_FILE="$IAM_HOME/state/bashrc.${BASHRC_FILE_HASH}.stamp"
+    if [ ! -e "$_BASHRC_STAMP_FILE" ]; then
+        rm -f "$IAM_HOME/state/bashrc."*.stamp
+        _create_flag "$_BASHRC_STAMP_FILE"
+    fi
+fi
+
 #if _hasnot curl && [ ! -e "$IAM_HOME/tools/bin/curl-portable" ] && _has sha256sum && _is linux-x64; then
 #    printf 'Download curl-portable ...'
 #    HASH="354bbcb8cd73f1deafff9f82743e9396b27a8aece2893e8477156e23cca5ca30"
@@ -763,7 +777,7 @@ tools() {
     local UPDATE_IMPORTANT_BANNEX="                           "
 
     if [ "lock" = "$CMD" ]; then
-        touch "$IAM_HOME/local_tools.locked"
+        _create_flag "$IAM_HOME/local_tools.locked"
         echo "Tools are locked now."
         return
     fi
@@ -1798,8 +1812,6 @@ elif [ -f /usr/lib/google-cloud-sdk/completion.bash.inc ]; then
     . /usr/lib/google-cloud-sdk/completion.bash.inc
 fi
 
-mkdir -p "$IAM_HOME/state"
-
 KUBECONFIG="$IAM_HOME/kubeconfig"
 export KUBECONFIG
 
@@ -2100,6 +2112,22 @@ man() {
     awk '/^#[0-9]+$/ { last=$0; have_in=1; next } !/^#[0-9]+$/ { if (have_in) { print last; have_in=0 } print }' "$TMP_FILE" > "$HISTFILE"
     rm -f "$TMP_FILE"
     echo "Done."
+}
+
+,dedup_history() {
+    local ASK
+    read -p "Do you wish to dedup lines in history file '$HISTFILE' [y/N]? " ASK
+    _glob_match '[Yy]*' "$ASK" || { echo "Do nothing."; return 0; }
+    local LINES_START="$(wc -l < "$HISTFILE")"
+    local TMP_FILE="$(mktemp)"
+    tac "$HISTFILE" \
+        | awk '/^#[0-9]+$/ || !seen[$0]++ { print }' \
+        | tac > "$TMP_FILE"
+    # Cleanup unused timestamps
+    awk '/^#[0-9]+$/ { last=$0; have_in=1; next } !/^#[0-9]+$/ { if (have_in) { print last; have_in=0 } print }' "$TMP_FILE" > "$HISTFILE"
+    rm -f "$TMP_FILE"
+    local LINES_END="$(wc -l < "$HISTFILE")"
+    echo "Done. Removed lines: $(( LINES_START - LINES_END ))"
 }
 
 _comp_,retry() {
@@ -2976,6 +3004,10 @@ function promptcmd () {
     #elif [ ${STPJBS} -gt 0 ]; then
     #    PS1="${PS1}\[${COLOR_YELLOW}\][stp:${STPJBS}]\[${COLOR_DEFAULT}\]"
     #fi
+
+    if [ -n "$_BASHRC_STAMP_FILE" ] && [ ! -e "$_BASHRC_STAMP_FILE" ]; then
+        cprintf -a PS1 "~K~[~r~bashrc is obsolete~K~]"
+    fi
 
     [ "$UID" -eq 0 ] \
         && cprintf -a PS1 '~r~# ~d~' \

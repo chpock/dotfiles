@@ -28,6 +28,7 @@ EOF
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
 @setHash LOCAL_TOOLS_FILE_HASH REPO_ROOT/tools.list
+@setHash BASHRC_FILE_HASH REPO_ROOT/src/bashrc/bashrc.sh
 @include part 0 bashrc.sh
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"

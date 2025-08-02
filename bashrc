@@ -472,6 +472,7 @@ EOF
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
 LOCAL_TOOLS_FILE_HASH=7DF2E6C6
+BASHRC_FILE_HASH=93938110
 declare -A -r __CPRINTF_COLORS=(
 [fw]=$'\e[37m' [fW]=$'\e[97m'
 [fk]=$'\e[30m' [fK]=$'\e[90m'
@@ -651,6 +652,9 @@ local V="__CACHE_ONCE_$_HASH"
 [ -z "${!V}" ] || return 1
 printf -v "$V" 0
 return 0
+}
+_create_flag() {
+printf '' >> "$1"
 }
 _glob_match() {
 eval "case \"\$2\" in ${1// /\\ }) return 0;; *) return 1;; esac"
@@ -999,6 +1003,14 @@ if [ "$LANG" != "en_US.UTF-8" ] && _has locale && [ "$(LANG=en_US.UTF-8 locale c
 LANG="en_US.UTF-8"
 export LANG
 fi
+mkdir -p "$IAM_HOME/state"
+if [ -n "$BASHRC_FILE_HASH" ]; then
+_BASHRC_STAMP_FILE="$IAM_HOME/state/bashrc.${BASHRC_FILE_HASH}.stamp"
+if [ ! -e "$_BASHRC_STAMP_FILE" ]; then
+rm -f "$IAM_HOME/state/bashrc."*.stamp
+_create_flag "$_BASHRC_STAMP_FILE"
+fi
+fi
 [ -e "$IAM_HOME/tmux_sessions/sessions-backup-ids" ] \
 && TMUX_TMPDIR="$IAM_HOME/tmux_sessions" tmux kill-server >/dev/null 2>&1 || true
 [ -z "$IAM_HOME" ] || {
@@ -1035,7 +1047,7 @@ local TOOLS_URL="https://raw.githubusercontent.com/chpock/dotfiles/master/tools.
 local UPDATE_IMPORTANT_BANNER="Updating important tools..."
 local UPDATE_IMPORTANT_BANNEX="                           "
 if [ "lock" = "$CMD" ]; then
-touch "$IAM_HOME/local_tools.locked"
+_create_flag "$IAM_HOME/local_tools.locked"
 echo "Tools are locked now."
 return
 fi
@@ -1719,10 +1731,10 @@ done < <(df -P -k | tail -n +2)
 elif _is aix; then
 while IFS=$' \t\r\n' read a b c d e f; do
 _showinfo "Mount" "$b" "$d" "$f"
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 done < <(df -m -P | tail -n +2 | grep -v -E ' +- +- +0 +-')
 elif _is windows; then
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 while IFS=$' ,\t\r\n' read a b c d; do
 [ -z "$c" ] && continue
 b=$(( b / 1024 / 1024 ))
@@ -1823,7 +1835,6 @@ if [ -f ~/gcloud/google-cloud-sdk/completion.bash.inc ]; then
 elif [ -f /usr/lib/google-cloud-sdk/completion.bash.inc ]; then
 . /usr/lib/google-cloud-sdk/completion.bash.inc
 fi
-mkdir -p "$IAM_HOME/state"
 KUBECONFIG="$IAM_HOME/kubeconfig"
 export KUBECONFIG
 unset MAILCHECK
@@ -2022,6 +2033,20 @@ grep -v "$@" "$HISTFILE" > "$TMP_FILE"
 awk '/^#[0-9]+$/ { last=$0; have_in=1; next } !/^#[0-9]+$/ { if (have_in) { print last; have_in=0 } print }' "$TMP_FILE" > "$HISTFILE"
 rm -f "$TMP_FILE"
 echo "Done."
+}
+,dedup_history() {
+local ASK
+read -p "Do you wish to dedup lines in history file '$HISTFILE' [y/N]? " ASK
+_glob_match '[Yy]*' "$ASK" || { echo "Do nothing."; return 0; }
+local LINES_START="$(wc -l < "$HISTFILE")"
+local TMP_FILE="$(mktemp)"
+tac "$HISTFILE" \
+| awk '/^#[0-9]+$/ || !seen[$0]++ { print }' \
+| tac > "$TMP_FILE"
+awk '/^#[0-9]+$/ { last=$0; have_in=1; next } !/^#[0-9]+$/ { if (have_in) { print last; have_in=0 } print }' "$TMP_FILE" > "$HISTFILE"
+rm -f "$TMP_FILE"
+local LINES_END="$(wc -l < "$HISTFILE")"
+echo "Done. Removed lines: $(( LINES_START - LINES_END ))"
 }
 _comp_,retry() {
 if _has_function _comp_command_offset; then
@@ -2620,6 +2645,9 @@ _homify -v PWD_MSG "$PWD"
 && PWD_COLOR="~g~" \
 || PWD_COLOR="~r~"
 cprintf -a PS1 "~K~:${PWD_COLOR}%s~K~]" "$PWD_MSG"
+if [ -n "$_BASHRC_STAMP_FILE" ] && [ ! -e "$_BASHRC_STAMP_FILE" ]; then
+cprintf -a PS1 "~K~[~r~bashrc is obsolete~K~]"
+fi
 [ "$UID" -eq 0 ] \
 && cprintf -a PS1 '~r~# ~d~' \
 || cprintf -a PS1 '~136~$ ~d~'
