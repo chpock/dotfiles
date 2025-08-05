@@ -28,6 +28,7 @@ __INSTALL_VERSION="
   kubectl-apidocs                       1.0.14
   kubeseal                              0.30.0
   eks-node-viewer                       0.7.4
+  robusta-krr:krr                       1.25.1
   7z            24.09
   moar          1.31.8 auto
   tar-portable  1.35
@@ -658,6 +659,29 @@ __install_awscli() {
     ./aws/install --bin-dir "$BASE_EXE_DIRECTORY" --install-dir "$BASE_EXE_DIRECTORY/aws-cli-install" --update >/dev/null || return $?
 }
 
+__install_robusta_krr() {
+    local VERSION="$1" EXECUTABLE="$2"
+
+    if [ "$VERSION" = "-check" ]; then
+        __install_check_version "$EXECUTABLE" version \
+            | tr -d 'v'
+        return 0
+    elif [ "$VERSION" = "-latest" ]; then
+        __install_get_latest_github "robusta-dev/krr"
+        return 0
+    fi
+
+    local FORMAT URL="https://github.com/robusta-dev/krr/releases/download/v${VERSION}/krr-"
+    __install_make_url "
+        linux-x64 ubuntu-latest-v${VERSION}.zip
+    " && __install_download && __install_unpack || return $?
+
+    local BASE_INSTALL_DIRECTORY="${EXECUTABLE%/*}"
+    local INSTALL_DIRECTORY="$BASE_INSTALL_DIRECTORY/robusta-krr"
+    rm -rf "$INSTALL_DIRECTORY"
+    mv "krr" "$INSTALL_DIRECTORY"
+    (cd "$BASE_INSTALL_DIRECTORY" && ln -s ./robusta-krr/krr ./krr) || return $?
+}
 
 __install_dive() {
     local VERSION="$1" EXECUTABLE="$2"
