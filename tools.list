@@ -52,7 +52,7 @@ tool: bash completion
 https://raw.githubusercontent.com/docker/cli/master/contrib/completion/bash/docker
 $IAM_HOME/tools/bash_completion/docker.completion.bash
 has: docker
-114527
+114495
 tool: bash completion
 https://raw.githubusercontent.com/docker/machine/master/contrib/completion/bash/docker-machine.bash
 $IAM_HOME/tools/bash_completion/docker-machine.completion.bash
