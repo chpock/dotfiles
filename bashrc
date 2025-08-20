@@ -471,8 +471,8 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=A300E6C9
-BASHRC_FILE_HASH=AC7A80CE
+LOCAL_TOOLS_FILE_HASH=0C0BE6CE
+BASHRC_FILE_HASH=BFBCDA5F
 declare -A -r __CPRINTF_COLORS=(
 [fw]=$'\e[37m' [fW]=$'\e[97m'
 [fk]=$'\e[30m' [fK]=$'\e[90m'
@@ -1733,10 +1733,10 @@ while IFS=$' \t\r\n' read a b c d e f; do
 _showinfo "Mount" "$b" "$d" "$f"
 done < <(df -m -P | tail -n +2 | grep -v -E ' +- +- +0 +-')
 elif _is windows; then
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 while IFS=$' ,\t\r\n' read a b c d; do
 [ -z "$c" ] && continue
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 b=$(( b / 1024 / 1024 ))
 c=$(( c / 1024 / 1024 ))
 _showinfo "Mount" "$c" "$b" "$a"
@@ -1796,6 +1796,10 @@ fi
 if _has oc && [ ! -f "$IAM_HOME/tools/bash_completion/oc.completion.bash" ]; then
 _info "Generating bash completions for OpenShift..."
 oc completion bash >"$IAM_HOME/tools/bash_completion/oc.completion.bash" 2>/dev/null
+fi
+if _has istioctl && [ ! -f "$IAM_HOME/tools/bash_completion/istioctl.completion.bash" ]; then
+_info "Generating bash completions for istioctl..."
+istioctl completion bash >"$IAM_HOME/tools/bash_completion/istioctl.completion.bash" 2>/dev/null
 fi
 else
 _warn 'The original bash completion package is not installed on this machine. Some of the completions may not be available.\n'

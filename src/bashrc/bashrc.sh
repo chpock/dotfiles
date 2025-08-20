@@ -1764,6 +1764,11 @@ if _has_function _init_completion; then
         oc completion bash >"$IAM_HOME/tools/bash_completion/oc.completion.bash" 2>/dev/null
     fi
 
+    if _has istioctl && [ ! -f "$IAM_HOME/tools/bash_completion/istioctl.completion.bash" ]; then
+        _info "Generating bash completions for istioctl..."
+        istioctl completion bash >"$IAM_HOME/tools/bash_completion/istioctl.completion.bash" 2>/dev/null
+    fi
+
 else
     _warn 'The original bash completion package is not installed on this machine. Some of the completions may not be available.\n'
 fi

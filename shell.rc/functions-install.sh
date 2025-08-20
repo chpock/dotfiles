@@ -27,6 +27,7 @@ __INSTALL_VERSION="
   kubectl-node-shell:kubectl-node_shell 1.11.0
   kubectl-apidocs                       1.0.14
   kubeseal                              0.30.0
+  istioctl                              1.27.0
   eks-node-viewer                       0.7.4
   robusta-krr:krr                       1.25.1
   7z            24.09
@@ -38,6 +39,24 @@ __INSTALL_VERSION="
   cidr          2.2.0
   lnav          0.12.4
 "
+
+__install_istioctl() {
+    local VERSION="$1" EXECUTABLE="$2"
+
+    if [ "$VERSION" = "-check" ]; then
+        __install_check_version "$EXECUTABLE" version --remote=false \
+            | awk '{print $NF}'
+        return 0
+    elif [ "$VERSION" = "-latest" ]; then
+        __install_get_latest_github "istio/istio"
+        return 0
+    fi
+
+    local FORMAT URL="https://github.com/istio/istio/releases/download/${VERSION}/istio-${VERSION}-"
+    __install_make_url "
+        linux-x64   linux-amd64.tar.gz
+    " && __install_download && __install_unpack &&  __install_bin "$(echo */bin/${EXECUTABLE##*/})" || return $?
+}
 
 __install_kubeseal() {
     local VERSION="$1" EXECUTABLE="$2"
