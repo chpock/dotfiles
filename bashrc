@@ -472,7 +472,7 @@ EOF
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
 LOCAL_TOOLS_FILE_HASH=0C0BE6CE
-BASHRC_FILE_HASH=BFBCDA5F
+BASHRC_FILE_HASH=2F6ADE47
 declare -A -r __CPRINTF_COLORS=(
 [fw]=$'\e[37m' [fW]=$'\e[97m'
 [fk]=$'\e[30m' [fK]=$'\e[90m'
@@ -1350,7 +1350,7 @@ unset TMUX_SESSION
 fi
 unset _TMUX_SESSION_ID _TMUX_SESSION_DIR
 else
-if command tmux list-sessions -F '#{session_attached} #{session_name}' | grep --silent '^0 default$'; then
+if command tmux list-sessions -F '#{session_attached} #{session_name}' 2>/dev/null | grep --silent '^0 default$'; then
 if [ -n "$_TERM_SESSION_DIR" ] && _TMUX_SESSION_ID="$(command tmux show-env -t "default" _TMUX_SESSION_ID 2>/dev/null)" && [ -n "$_TMUX_SESSION_ID" ]; then
 _TMUX_SESSION_ID="${_TMUX_SESSION_ID#*=}"
 echo "$_TMUX_SESSION_ID" > "$_TERM_SESSION_DIR/tmux_session_id"

@@ -1133,7 +1133,7 @@ if _has tmux; then
             # If current shell session has no attached tmux session, then check
             # if machine has unattached tmux session 'default'. Attach it now if
             # it exists.
-            if command tmux list-sessions -F '#{session_attached} #{session_name}' | grep --silent '^0 default$'; then
+            if command tmux list-sessions -F '#{session_attached} #{session_name}' 2>/dev/null | grep --silent '^0 default$'; then
                 # If we have shell session, then attach it to the 'default' tmux session.
                 if [ -n "$_TERM_SESSION_DIR" ] && _TMUX_SESSION_ID="$(command tmux show-env -t "default" _TMUX_SESSION_ID 2>/dev/null)" && [ -n "$_TMUX_SESSION_ID" ]; then
                     # Strip variable name
