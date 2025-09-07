@@ -4,6 +4,7 @@ __INSTALL_VERSION="
   shellcheck    0.10.0
   awscli:aws    2.24.26
   kubectl       1.32.3
+  helm          3.18.6
   dive          0.13.1
   jq            1.8.0
   k9s           0.50.9
@@ -40,6 +41,24 @@ __INSTALL_VERSION="
   lnav          0.12.4
 "
 
+__install_helm() {
+    local VERSION="$1" EXECUTABLE="$2"
+
+    if [ "$VERSION" = "-check" ]; then
+        __install_check_version "$EXECUTABLE" version --template='{{.Version}}' \
+            | tr -d 'v'
+        return 0
+    elif [ "$VERSION" = "-latest" ]; then
+        __install_get_latest_github "helm/helm"
+        return 0
+    fi
+
+    local FORMAT URL="https://get.helm.sh/helm-v${VERSION}-"
+    __install_make_url "
+        linux-x64   linux-amd64.tar.gz
+    " && __install_download && __install_unpack &&  __install_bin || return $?
+}
+
 __install_istioctl() {
     local VERSION="$1" EXECUTABLE="$2"
 
@@ -55,7 +74,7 @@ __install_istioctl() {
     local FORMAT URL="https://github.com/istio/istio/releases/download/${VERSION}/istio-${VERSION}-"
     __install_make_url "
         linux-x64   linux-amd64.tar.gz
-    " && __install_download && __install_unpack &&  __install_bin "$(echo */bin/${EXECUTABLE##*/})" || return $?
+    " && __install_download && __install_unpack &&  __install_bin "$(echo */"bin/${EXECUTABLE##*/}")" || return $?
 }
 
 __install_kubeseal() {
