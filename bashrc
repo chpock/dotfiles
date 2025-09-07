@@ -471,8 +471,8 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=0C0BE6CE
-BASHRC_FILE_HASH=2F6ADE47
+LOCAL_TOOLS_FILE_HASH=5030E6D4
+BASHRC_FILE_HASH=350FDEAF
 declare -A -r __CPRINTF_COLORS=(
 [fw]=$'\e[37m' [fW]=$'\e[97m'
 [fk]=$'\e[30m' [fK]=$'\e[90m'
@@ -616,7 +616,7 @@ local __BASENAME_VAR
 local __BASENAME_OUT
 if [ -n "$1" ]; then
 _trim -r -v __BASENAME_OUT "$1" "/"
-[ -z "__BASENAME_OUT" ] && __BASENAME_OUT="/" || __BASENAME_OUT="${__BASENAME_OUT##*/}"
+[ -z "$__BASENAME_OUT" ] && __BASENAME_OUT="/" || __BASENAME_OUT="${__BASENAME_OUT##*/}"
 fi
 [ -z "$__BASENAME_VAR" ] && echo "$__BASENAME_OUT" || printf -v "$__BASENAME_VAR" '%s' "$__BASENAME_OUT"
 }
@@ -2200,7 +2200,7 @@ printf '\033];__ws:%s\007' "$PWD" | _send_raw_term
 clip() {
 {
 printf '\033[5i'
-cat $@
+cat "$@"
 printf '\033[4i'
 } | _send_raw_term
 echo "Copied to Windows clipboard" 1>&2

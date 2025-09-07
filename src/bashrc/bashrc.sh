@@ -161,7 +161,7 @@ _basename() {
     if [ -n "$1" ]; then
         # Trim possible trailing slashes
         _trim -r -v __BASENAME_OUT "$1" "/"
-        [ -z "__BASENAME_OUT" ] && __BASENAME_OUT="/" || __BASENAME_OUT="${__BASENAME_OUT##*/}"
+        [ -z "$__BASENAME_OUT" ] && __BASENAME_OUT="/" || __BASENAME_OUT="${__BASENAME_OUT##*/}"
     fi
     [ -z "$__BASENAME_VAR" ] && echo "$__BASENAME_OUT" || printf -v "$__BASENAME_VAR" '%s' "$__BASENAME_OUT"
 }
@@ -2313,7 +2313,7 @@ winscp() {
 clip() {
     {
         printf '\033[5i'
-        cat $@
+        cat "$@"
         printf '\033[4i'
     } | _send_raw_term
     echo "Copied to Windows clipboard" 1>&2
