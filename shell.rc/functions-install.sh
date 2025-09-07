@@ -999,7 +999,8 @@ _is_install_available() {
         if [ "$CHECK_VERSION" != "$VERSION" ]; then
 
             # don't use '--directory' parameter here as it is not suppurted by busybox
-            local TEMP_DIR="$(mktemp -d)"
+            local TEMP_DIR
+            TEMP_DIR="$(mktemp -d)"
             (cd "$TEMP_DIR"; "$TOOL_FUNC" "$VERSION" "$EXECUTABLE") || R=$?
             rm -rf "$TEMP_DIR"
 
@@ -1015,7 +1016,7 @@ _is_install_available() {
 __install_complete() {
     COMPREPLY=()
 
-    if [ $COMP_CWORD -lt 2 ]; then
+    if [ "$COMP_CWORD" -lt 2 ]; then
         COMPREPLY=($(compgen -W "-check $__INSTALL_AVAILABLE_TOOLS" -- "${COMP_WORDS[COMP_CWORD]}"))
     else
         COMPREPLY=($(compgen -W "$__INSTALL_AVAILABLE_TOOLS" -- "${COMP_WORDS[COMP_CWORD]}"))
@@ -1040,7 +1041,7 @@ while read -r TOOL VERSION OPTIONS; do
     TOOL_FUNC="__install_${TOOL//-/_}"
     "$TOOL_FUNC" -available "$EXECUTABLE" && R=1 || R=$?
     # If "$TOOL_FUNC -available" returns 251, then the tool is available
-    if [ $R -eq 251 ]; then
+    if [ "$R" -eq 251 ]; then
         if [ -n "$__INSTALL_AVAILABLE_TOOLS" ]; then
             __INSTALL_AVAILABLE_TOOLS="$__INSTALL_AVAILABLE_TOOLS $TOOL"
             __INSTALL_AVAILABLE_EXECUTABLES="$__INSTALL_AVAILABLE_EXECUTABLES $EXECUTABLE"
@@ -1066,7 +1067,7 @@ unset __INSTALL_VERSION
 
 if [ -n "$__INSTALL_AUTO" ]; then
     # Install update auto-install tools
-    ,install $__INSTALL_AUTO >/dev/null 2>&1 &
+    ,install "$__INSTALL_AUTO" >/dev/null 2>&1 &
     disown $!
     unset __INSTALL_AUTO
 fi
@@ -1075,10 +1076,11 @@ fi
 
 ! _has_function "yazi" || yazi() {
     _maybe_local "yazi"
-    local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+    local tmp cwd
+    tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
     env YAZI_CONFIG_HOME="$IAM_HOME/yazi-config" yazi "$@" --cwd-file="$tmp"
     if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
-        builtin cd -- "$cwd"
+        builtin cd -- "$cwd" || true
     fi
     rm -f -- "$tmp"
 }
