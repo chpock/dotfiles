@@ -1769,6 +1769,13 @@ if _has_function _init_completion; then
         istioctl completion bash >"$IAM_HOME/tools/bash_completion/istioctl.completion.bash" 2>/dev/null
     fi
 
+    # This only available for bazel 8.4.0+
+    # https://github.com/bazelbuild/bazel/pull/26501
+    if _has bazel && [ ! -f "$IAM_HOME/tools/bash_completion/bazel.completion.bash" ]; then
+        _info "Generating bash completions for bazel..."
+        bazel help completion bash >"$IAM_HOME/tools/bash_completion/bazel.completion.bash" 2>/dev/null
+    fi
+
 else
     _warn 'The original bash completion package is not installed on this machine. Some of the completions may not be available.\n'
 fi
