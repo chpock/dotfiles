@@ -4,7 +4,7 @@ set -e
 
 echo "Uninstall previous docker packages..."
 for i in docker docker-engine docker.io containerd runc; do
-    sudo apt remove >/dev/null 2>&1 || true
+    sudo apt remove "$i" >/dev/null 2>&1 || true
 done
 
 (set -x; sudo apt-get update)
