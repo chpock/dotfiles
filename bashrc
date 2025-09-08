@@ -472,7 +472,7 @@ EOF
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
 LOCAL_TOOLS_FILE_HASH=73D0E6D3
-BASHRC_FILE_HASH=67FD5152
+BASHRC_FILE_HASH=C6AB5E78
 declare -A -r __CPRINTF_COLORS=(
 [fw]=$'\e[37m' [fW]=$'\e[97m'
 [fk]=$'\e[30m' [fK]=$'\e[90m'
@@ -1443,7 +1443,7 @@ echo "$BAR"
 if _is linux; then
 if [ -f /etc/redhat-release ]; then
 UNAME_RELEASE="$(cat /etc/redhat-release)"
-elif [ -f /etc/alpine-release ]; then
+elif [ -f /etc/alpine-release ] || [ -f /etc/arch-release ]; then
 UNAME_RELEASE="$(grep 'PRETTY_NAME=' /etc/os-release | cut -d= -f2 | tr -d '"')"
 elif [ -f /etc/SuSE-release ]; then
 UNAME_RELEASE="SUSE Linux Enterprise Server $(grep VERSION /etc/SuSE-release | cut -d= -f2 | awk '{print $1}') SP$(grep PATCHLEVEL /etc/SuSE-release | cut -d= -f2 | awk '{print $1}')"

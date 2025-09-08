@@ -1289,8 +1289,8 @@ hostinfo() {
         if [ -f /etc/redhat-release ]; then
             # RedHat
             UNAME_RELEASE="$(cat /etc/redhat-release)"
-        elif [ -f /etc/alpine-release ]; then
-            # Alpine
+        elif [ -f /etc/alpine-release ] || [ -f /etc/arch-release ]; then
+            # Alpine / ArchLinux
             UNAME_RELEASE="$(grep 'PRETTY_NAME=' /etc/os-release | cut -d= -f2 | tr -d '"')"
         elif [ -f /etc/SuSE-release ]; then
             # SUSE
