@@ -14,11 +14,17 @@ if _has curl && _isnot aws; then
 fi
 
 aws() {
+    local AWS_BROWSER_BIN="$IAM_HOME/tools/bin/aws_browser"
     # Execute in subshell to suppress trace messages in this function, but leave
     # the default trace status in the original shell instance.
+    # Also, this allows to define temporary environment variable BROWSER. 
     (
         { set +x; } 2>/dev/null
         _maybe_local "aws"
+        if [ -e "$AWS_BROWSER_BIN" ]; then
+            BROWSER="$AWS_BROWSER_BIN"
+            export BROWSER
+        fi
         if [ -e "$IAM_HOME/state/on_aws_localstack" ]; then
             AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_DEFAULT_REGION=${DEFAULT_REGION:-${AWS_DEFAULT_REGION:-eu-west-1}} \
                 command aws --endpoint-url=http://${LOCALSTACK_HOST:-localhost}:4566 "$@"
@@ -193,6 +199,26 @@ aws() {
         export AWS_PROFILE="$AWS_PROFILE_INACTIVE"
         unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_PROFILE_INACTIVE
         ;;
+    set-browser)
+        local AWS_BROWSER_BIN="$IAM_HOME/tools/bin/aws_browser"
+        if [ "$2" = "-" ]; then
+            rm -f "$AWS_BROWSER_BIN"
+        elif [ -n "$2" ]; then
+            shift
+            printf '%s\nexec %s"$@"' '#!/bin/sh' "$(printf '%q ' "$@")" > "$AWS_BROWSER_BIN"
+        fi
+        if [ -e "$AWS_BROWSER_BIN" ]; then
+            local AWS_BROWSER_STR
+            AWS_BROWSER_STR="$(tail -n 1 "$AWS_BROWSER_BIN")"
+            # strip: exec
+            AWS_BROWSER_STR="${AWS_BROWSER_STR#* }"
+            # strip: "$@"
+            AWS_BROWSER_STR="${AWS_BROWSER_STR% *}"
+            echo "Browser for AWS SSO login: $AWS_BROWSER_STR"
+        else
+            echo "No custom browser defined for AWS SSO login."
+        fi
+        ;;
     *)
         echo "Unknown command: '$1'"
         return 1
@@ -216,7 +242,7 @@ __,aws() {
     COMPREPLY=()
 
     if [ $COMP_CWORD -eq 1 ]; then
-        COMPREPLY=($(compgen -W "on off local remote role region eks-update-kubeconfig ecr-auth-docker ecr-auth-helm unset-environment-variables profile update-profile eks-tunnel" -- "$CUR"))
+        COMPREPLY=($(compgen -W "on off local remote role region eks-update-kubeconfig ecr-auth-docker ecr-auth-helm unset-environment-variables profile update-profile eks-tunnel set-browser" -- "$CUR"))
         return
     fi
 
