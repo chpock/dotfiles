@@ -472,7 +472,7 @@ EOF
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
 LOCAL_TOOLS_FILE_HASH=33F6E6DD
-BASHRC_FILE_HASH=C6AB5E78
+BASHRC_FILE_HASH=7D749280
 declare -A -r __CPRINTF_COLORS=(
 [fw]=$'\e[37m' [fW]=$'\e[97m'
 [fk]=$'\e[30m' [fK]=$'\e[90m'
@@ -1737,9 +1737,9 @@ while IFS=$' ,\t\r\n' read a b c d; do
 [ -z "$c" ] && continue
 b=$(( b / 1024 / 1024 ))
 c=$(( c / 1024 / 1024 ))
+_showinfo "Mount" "$c" "$b" "$a"
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
-_showinfo "Mount" "$c" "$b" "$a"
 done < <(wmic logicaldisk get Caption,FreeSpace,Size | tail -n +2)
 fi
 unset a b c d e f g h i
@@ -2118,7 +2118,13 @@ exec bash --rcfile "$IAM_HOME/bashrc" -i
 ,ssh() {
 local ARG
 for ARG in "$@"; do :; done
-_glob_match "*@*" "$ARG" || _warn "the remote user is not provided. Current user '%s' will be used on the remove machine." "$USER"
+if ! _glob_match "*@*" "$ARG"; then
+local SSH_USER
+SSH_USER="$(ssh -G "$ARG" 2>/dev/null | grep -i '^user ' | awk '{print $2}')"
+if [ -z "$SSH_USER" ] || [ "$SSH_USER" = "$USER" ]; then
+_warn "the remote user is not provided. Current user '%s' will be used on the remove machine." "$USER"
+fi
+fi
 ssh -t "$@" "$(__magic_ssh)"
 }
 gssh() {

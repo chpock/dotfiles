@@ -2218,7 +2218,13 @@ reload() {
 ,ssh() {
     local ARG
     for ARG in "$@"; do :; done
-    _glob_match "*@*" "$ARG" || _warn "the remote user is not provided. Current user '%s' will be used on the remove machine." "$USER"
+    if ! _glob_match "*@*" "$ARG"; then
+        local SSH_USER
+        SSH_USER="$(ssh -G "$ARG" 2>/dev/null | grep -i '^user ' | awk '{print $2}')"
+        if [ -z "$SSH_USER" ] || [ "$SSH_USER" = "$USER" ]; then
+            _warn "the remote user is not provided. Current user '%s' will be used on the remove machine." "$USER"
+        fi
+    fi
     ssh -t "$@" "$(__magic_ssh)"
 }
 gssh() {
