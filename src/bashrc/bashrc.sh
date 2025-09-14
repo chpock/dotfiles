@@ -1151,6 +1151,56 @@ if _has tmux; then
 
 fi; # tmux
 
+# __magic_ssh and ,ssh should be here and before other initializetion/shell sessions
+# as we want to handle _MACIG_SSH environment variable.
+
+__magic_ssh() {
+    # disable messages during -x
+    {
+        printf '%s\n' \
+            "IAM=\"$IAM\" && export IAM" \
+            "[ -n \"\$HOME\" ] || { HOME=\"/tmp\"; export HOME; }" \
+            "IAM_HOME=\"\$HOME/.${IAM}_home\" && export IAM_HOME" \
+            "SSH_PUB_KEY=\"$SSH_PUB_KEY\" && export SSH_PUB_KEY" \
+            "_GIT_USER_NAME=\"$_GIT_USER_NAME\" && export _GIT_USER_NAME" \
+            "_GIT_USER_EMAIL=\"$_GIT_USER_EMAIL\" && export _GIT_USER_EMAIL" \
+            "[ -d \"\$IAM_HOME/terminfo\" ] || mkdir -p \"\$IAM_HOME/terminfo\"" \
+            "cat >\"\$IAM_HOME/terminfo/.terminfo\" <<'EOF'" "$(cat "$IAM_HOME/terminfo/.terminfo")" "EOF" \
+            "if [ \"\$TERM\" = 'xterm' ]; then TERM='xterm-256color'; export TERM; fi" \
+            "if [ \"\$TERM\" = 'xterm-256color' -o \"\$TERM\" = 'tmux-256color' ] && command -v tic >/dev/null 2>&1; then" \
+            "TERMINFO=\"\$IAM_HOME/terminfo\"" \
+            "export TERMINFO" \
+            "tic \"\$IAM_HOME/terminfo/.terminfo\" >/dev/null 2>&1 || true" \
+            "fi" \
+            "cat >\"\$IAM_HOME/vimrc\" <<'EOF'" "$(cat "$IAM_HOME/vimrc")" "EOF" \
+            "cat >\"\$IAM_HOME/bashrc\" <<'EOF'" "$(cat "$IAM_HOME/bashrc")" "EOF" \
+            "cat >\"\$IAM_HOME/shellrc\" <<'EOF'" "$(cat "$IAM_HOME/shellrc")" "EOF" \
+            "cat >\"\$IAM_HOME/local_tools\" <<'EOF'" "$(cat "$IAM_HOME/local_tools" 2>/dev/null || :)" "EOF" \
+            "cat >\"\$HOME/.tclshrc\" <<'EOF'" "$(cat "$HOME/.tclshrc")" "EOF" \
+            "chmod +x \"\$IAM_HOME/shellrc\"" \
+            "exec \"\$IAM_HOME/shellrc\""
+    } 2>/dev/null
+}
+
+,ssh() {
+    local ARG
+    for ARG in "$@"; do :; done
+    if ! _glob_match "*@*" "$ARG"; then
+        local SSH_USER
+        SSH_USER="$(ssh -G "$ARG" 2>/dev/null | grep -i '^user ' | awk '{print $2}')"
+        if [ -z "$SSH_USER" ] || [ "$SSH_USER" = "$USER" ]; then
+            _warn "the remote user is not provided. Current user '%s' will be used on the remove machine." "$USER"
+        fi
+    fi
+    set -- ssh -t "$@" "$(__magic_ssh)"
+    [ -z "$_MAGIC_SSH" ] || set -- exec "$@"
+    "$@"
+}
+
+if [ -n "$_MAGIC_SSH" ]; then
+    ,ssh "$_MAGIC_SSH"
+fi
+
 if [ -z "$_SHELL_SESSION_ID" ]; then
     if [ -n "$_TMUX_WINDOW_DIR" ] && [ -r "$_TMUX_WINDOW_DIR/shell_session_id" ]; then
         _SHELL_SESSION_ID="$(< "$_TMUX_WINDOW_DIR/shell_session_id")"
@@ -2162,34 +2212,6 @@ complete -F _comp_,retry ,retry
 
 #magic
 
-__magic_ssh() {
-    # disable messages during -x
-    {
-        printf '%s\n' \
-            "IAM=\"$IAM\" && export IAM" \
-            "[ -n \"\$HOME\" ] || { HOME=\"/tmp\"; export HOME; }" \
-            "IAM_HOME=\"\$HOME/.${IAM}_home\" && export IAM_HOME" \
-            "SSH_PUB_KEY=\"$SSH_PUB_KEY\" && export SSH_PUB_KEY" \
-            "_GIT_USER_NAME=\"$_GIT_USER_NAME\" && export _GIT_USER_NAME" \
-            "_GIT_USER_EMAIL=\"$_GIT_USER_EMAIL\" && export _GIT_USER_EMAIL" \
-            "[ -d \"\$IAM_HOME/terminfo\" ] || mkdir -p \"\$IAM_HOME/terminfo\"" \
-            "cat >\"\$IAM_HOME/terminfo/.terminfo\" <<'EOF'" "$(cat "$IAM_HOME/terminfo/.terminfo")" "EOF" \
-            "if [ \"\$TERM\" = 'xterm' ]; then TERM='xterm-256color'; export TERM; fi" \
-            "if [ \"\$TERM\" = 'xterm-256color' -o \"\$TERM\" = 'tmux-256color' ] && command -v tic >/dev/null 2>&1; then" \
-            "TERMINFO=\"\$IAM_HOME/terminfo\"" \
-            "export TERMINFO" \
-            "tic \"\$IAM_HOME/terminfo/.terminfo\" >/dev/null 2>&1 || true" \
-            "fi" \
-            "cat >\"\$IAM_HOME/vimrc\" <<'EOF'" "$(cat "$IAM_HOME/vimrc")" "EOF" \
-            "cat >\"\$IAM_HOME/bashrc\" <<'EOF'" "$(cat "$IAM_HOME/bashrc")" "EOF" \
-            "cat >\"\$IAM_HOME/shellrc\" <<'EOF'" "$(cat "$IAM_HOME/shellrc")" "EOF" \
-            "cat >\"\$IAM_HOME/local_tools\" <<'EOF'" "$(cat "$IAM_HOME/local_tools" 2>/dev/null || :)" "EOF" \
-            "cat >\"\$HOME/.tclshrc\" <<'EOF'" "$(cat "$HOME/.tclshrc")" "EOF" \
-            "chmod +x \"\$IAM_HOME/shellrc\"" \
-            "exec \"\$IAM_HOME/shellrc\""
-    } 2>/dev/null
-}
-
 reload() {
     if _is tmux && [ "$1" != "current" ]; then
         local current_wid wid cmd
@@ -2214,18 +2236,6 @@ reload() {
     export _SHELL_SESSION_ID _TERM_SESSION_ID _TMUX_SESSION_ID
     export SSH_PUB_KEY _GIT_USER_EMAIL _GIT_USER_NAME
     exec bash --rcfile "$IAM_HOME/bashrc" -i
-}
-,ssh() {
-    local ARG
-    for ARG in "$@"; do :; done
-    if ! _glob_match "*@*" "$ARG"; then
-        local SSH_USER
-        SSH_USER="$(ssh -G "$ARG" 2>/dev/null | grep -i '^user ' | awk '{print $2}')"
-        if [ -z "$SSH_USER" ] || [ "$SSH_USER" = "$USER" ]; then
-            _warn "the remote user is not provided. Current user '%s' will be used on the remove machine." "$USER"
-        fi
-    fi
-    ssh -t "$@" "$(__magic_ssh)"
 }
 gssh() {
     host="$1"
