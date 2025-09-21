@@ -1,0 +1,86 @@
+[general]
+live_config_reload = true
+
+[window]
+dynamic_title = true
+
+[scrolling]
+history = 10000
+multiplier = 3
+
+[env]
+TERM = "xterm-256color"
+
+[terminal]
+#shell = { program = "/bin/zsh", args = ["-l"] }
+osc52 = "OnlyCopy"
+
+[selection]
+save_to_clipboard = true
+
+[font]
+size = 12
+builtin_box_drawing = true
+
+[mouse]
+hide_when_typing = true
+bindings = [
+    { mouse = "Right", mods = "Shift", action = "Paste" },
+    { mouse = "Right", action = "Paste" },
+]
+
+[keyboard]
+bindings = [
+    { key = "Insert", mods = "Shift", action = "Paste" },
+]
+
+[colors]
+draw_bold_text_with_bright_colors = false
+
+[colors.primary]
+foreground = "#b2b2b2"
+background = "#000000"
+
+[colors.selection]
+# Default:
+# text = "CellBackground"
+# background = "CellForeground"
+text = "#000000"
+background = "#7f6699"
+
+[colors.cursor]
+# Default:
+# text = "CellBackground"
+# cursor = "CellForeground"
+text = "#ffffff"
+cursor = "#52ad70"
+
+[colors.normal]
+black = "#000000"
+red = "#bb0000"
+green = "#00bb00"
+yellow = "#bbbb00"
+blue = "#366ebb"
+magenta = "#bb00bb"
+cyan = "#00bbbb"
+white = "#bbbbbb"
+
+[colors.bright]
+black = "#555555"
+red = "#ff5555"
+green = "#55ff55"
+yellow = "#ffff55"
+blue = "#5555ff"
+magenta = "#ff55ff"
+cyan = "#55ffff"
+white = "#ffffff"
+
+[cursor]
+# shape = "Block" | "Underline" | "Beam"
+# blinking = "Never" | "Off" | "On" | "Always"
+# Default: Block / Off
+style = { shape = "Block", blinking = "Off" }
+unfocused_hollow = true
+thickness = 0.15
+
+
