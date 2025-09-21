@@ -1,0 +1,3 @@
+[submodule ".config/quickshell/dms"]
+	path = .config/quickshell/dms
+	url = https://github.com/AvengeMedia/DankMaterialShell.git

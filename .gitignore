@@ -1,0 +1,18 @@
+/*
+!/.config/
+!/.local/
+!/.gitignore
+!/.gitmodules
+
+# Ignore files/dirs in .config
+/.config/vesktop/
+/.config/teams-for-linux/
+/.config/chromium/
+/.config/spotify/
+/.config/go/
+/.config/freerdp/server/*.pem
+/.config/helm/registry/config.json
+
+
+/.local/state/
+/.local/share/
