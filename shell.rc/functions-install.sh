@@ -40,7 +40,31 @@ __INSTALL_VERSION="
   pdu           0.11.0
   cidr          2.2.0
   lnav          0.12.4
+  cht.sh        0.0.4
 "
+
+__install_cht_sh() {
+    local VERSION="$1" EXECUTABLE="$2"
+
+    local URL="https://raw.githubusercontent.com/chubin/cheat.sh/refs/heads/master/share/cht.sh.txt"
+
+    if [ "$VERSION" = "-check" ]; then
+        grep '^__CHTSH_VERSION' < "$EXECUTABLE" \
+            | cut -d= -f2
+        return 0
+    elif [ "$VERSION" = "-latest" ]; then
+        curl -sL "$URL" | grep '^__CHTSH_VERSION' \
+            | cut -d= -f2
+        return 0
+    fi
+
+    # This tool is a shell script and it is available for any platform
+    [ "$VERSION" != "-available" ] || return 251
+
+    __install_download && __install_bin "archive" || return $?
+
+    __install_completions -custom curl -sLf "${URL%/*}/bash_completion.txt" || return $?
+}
 
 __install_helm() {
     local VERSION="$1" EXECUTABLE="$2"
@@ -855,6 +879,20 @@ __install_download() {
     fi
 }
 
+__install_completions() {
+    local COMPLETION_FILE="$IAM_HOME/tools/bash_completion/${TOOL}.completion.bash"
+    echo "Install completions for $TOOL ..." >&2
+    if [ "$1" = "-custom" ]; then
+        shift
+    else
+        set -- "$EXECUTABLE" "$@"
+    fi
+    "$@" > "$COMPLETION_FILE" || return $?
+    echo "Load completions ..." >&2
+    # shellcheck disable=SC1090
+    . "$COMPLETION_FILE" || return $?
+}
+
 __install_make_url() {
     local CONDITION SUFFIX NO_FORMAT
     if [ "$1" = "-noformat" ]; then
@@ -908,7 +946,7 @@ __install_check_new_versions() {
     local DISABLED TOOL VERSION EXECUTABLE
     while read -r DISABLED TOOL EXECUTABLE VERSION; do
         [ -n "$TOOL" ] || continue
-        local TOOL_FUNC="__install_${TOOL//-/_}"
+        local TOOL_FUNC="__install_${TOOL//[-.]/_}"
         cprintf -n '~c~%s ~b~v~B~%s ~d~...' "$TOOL" "$VERSION"
         VERSION_LATEST="$("$TOOL_FUNC" -latest "$EXECUTABLE" || :)"
         cprintf -n '\b\b\b\b~K~:   \r\t\t\t\t\t'
@@ -961,7 +999,7 @@ _is_install_available() {
         return
     fi
 
-    local V="__CACHE_INSTALL_${1//-/_}"
+    local V="__CACHE_INSTALL_${1//[-.]/_}"
     # for debug
     #[ -z "${!V}" ] || return "${!V}"
 
@@ -994,7 +1032,7 @@ _is_install_available() {
         [ -z "$DISABLED" ] || echo "Error: tool '$1' is unknown" >&2
     else
 
-        local TOOL_FUNC="__install_${TOOL//-/_}"
+        local TOOL_FUNC="__install_${TOOL//[-.]/_}"
 
         [ -n "$EXECUTABLE" ] || EXECUTABLE="$TOOL"
         EXECUTABLE="$IAM_HOME/tools/bin/$EXECUTABLE"
@@ -1019,9 +1057,10 @@ _is_install_available() {
         if [ "$CHECK_VERSION" != "$VERSION" ]; then
 
             # don't use '--directory' parameter here as it is not suppurted by busybox
-            local TEMP_DIR
+            local TEMP_DIR SAVE_PWD="$PWD"
             TEMP_DIR="$(mktemp -d)"
-            (cd "$TEMP_DIR"; "$TOOL_FUNC" "$VERSION" "$EXECUTABLE") || R=$?
+            cd "$TEMP_DIR" && "$TOOL_FUNC" "$VERSION" "$EXECUTABLE" && R=0 || R=$?
+            cd "$SAVE_PWD" || :
             rm -rf "$TEMP_DIR"
 
         fi
@@ -1037,8 +1076,10 @@ __install_complete() {
     COMPREPLY=()
 
     if [ "$COMP_CWORD" -lt 2 ]; then
+        # shellcheck disable=SC2207
         COMPREPLY=($(compgen -W "-check $__INSTALL_AVAILABLE_TOOLS" -- "${COMP_WORDS[COMP_CWORD]}"))
     else
+        # shellcheck disable=SC2207
         COMPREPLY=($(compgen -W "$__INSTALL_AVAILABLE_TOOLS" -- "${COMP_WORDS[COMP_CWORD]}"))
     fi
 }
@@ -1058,7 +1099,7 @@ while read -r TOOL VERSION OPTIONS; do
     # is no colon in the tool name. Otherwise, refine the tool name by
     # cutting off all characters after the colon.
     [ "$EXECUTABLE" = "$TOOL" ] || TOOL="${TOOL%%:*}"
-    TOOL_FUNC="__install_${TOOL//-/_}"
+    TOOL_FUNC="__install_${TOOL//[-.]/_}"
     "$TOOL_FUNC" -available "$EXECUTABLE" && R=1 || R=$?
     # If "$TOOL_FUNC -available" returns 251, then the tool is available
     if [ "$R" -eq 251 ]; then
