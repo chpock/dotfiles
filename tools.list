@@ -34,6 +34,10 @@ tool: jumplist functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-jumplist.sh
 $IAM_HOME/shell.rc/functions-jumplist.sh
 5953
+tool: misc functions
+https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-misc.sh
+$IAM_HOME/shell.rc/functions-misc.sh
+828
 tool: ,share function
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-share.sh
 $IAM_HOME/shell.rc/functions-share.sh

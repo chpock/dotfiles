@@ -3204,7 +3204,7 @@ if [ ! -z "$FOUND" ]; then
     unset FOUND
 fi
 
-if _has ssh && _isnot in-container; then
+if _has ssh && _isnot in-container && _isnot tmux; then
     if ! RESULT="$(ssh -G 127.0.0.1 2>&1)"; then
         _warn 'unknown error while checking SSH ServerAliveInterval\n'
     else
@@ -3256,7 +3256,7 @@ if [ "$TERM" != "xterm-256color" ] && [ "$TERM" != "tmux-256color" ]; then
     # unset custom TERMINFO since we don't have definitions for this terminal
     unset TERMINFO
     _warn 'Unexpected TERM type: "%s"\n' "$TERM"
-elif [ ! -e "$IAM_HOME/terminfo"/*/xterm-256color ]; then
+elif [ ! -e "$(echo "$IAM_HOME/terminfo"/*/xterm-256color)" ]; then
     _warn 'Terminfo file "%s" not found. Perhaps the "tic" command does not exist in the environment.\n' "$IAM_HOME/terminfo/*/xterm-256color"
     unset TERMINFO
 fi
@@ -3266,7 +3266,7 @@ if _has git && _vercomp 1.7.9 '>' "$__GIT_VERSION"; then
 fi
 
 if ! _is in-container; then
-    SSH_PUB_KEY_ONLY="`echo $SSH_PUB_KEY | awk '{print $2}'`"
+    SSH_PUB_KEY_ONLY="$(echo "$SSH_PUB_KEY" | awk '{print $2}')"
     if [ -z "$SSH_PUB_KEY_ONLY" ]; then
         _warn 'SSH key is not defined\n'
     else
@@ -3295,6 +3295,10 @@ if [ ! -x "$IAM_HOME/tools/bin/geturl" ]; then
         echo '_get_url "$@"'
     } > "$IAM_HOME/tools/bin/geturl"
     chmod +x "$IAM_HOME/tools/bin/geturl"
+fi
+
+if _isnot tmux && _isnot in-container; then
+    ! _has_function __gpgconf_validate || __gpgconf_validate
 fi
 
 if _isnot tmux; then

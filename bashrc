@@ -471,8 +471,8 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=A70BE6EE
-BASHRC_FILE_HASH=232AE1CA
+LOCAL_TOOLS_FILE_HASH=C3571C47
+BASHRC_FILE_HASH=2D210FC8
 declare -A -r __CPRINTF_COLORS=(
 [fw]=$'\e[37m' [fW]=$'\e[97m'
 [fk]=$'\e[30m' [fK]=$'\e[90m'
@@ -1749,9 +1749,9 @@ unset a
 else
 a="(nfs: $a)"
 fi
+_showinfo "Mount" "$b" "$d" "$f" "$a"
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
-_showinfo "Mount" "$b" "$d" "$f" "$a"
 done < <(df -m -P 2>/dev/null | tail -n +2 | grep -v '^/dev/loop')
 elif _is macos; then
 while IFS=$' \t\r\n' read a b c d e f g h i; do
@@ -2789,7 +2789,7 @@ if [ ! -z "$FOUND" ]; then
 echo ""
 unset FOUND
 fi
-if _has ssh && _isnot in-container; then
+if _has ssh && _isnot in-container && _isnot tmux; then
 if ! RESULT="$(ssh -G 127.0.0.1 2>&1)"; then
 _warn 'unknown error while checking SSH ServerAliveInterval\n'
 else
@@ -2835,7 +2835,7 @@ fi
 if [ "$TERM" != "xterm-256color" ] && [ "$TERM" != "tmux-256color" ]; then
 unset TERMINFO
 _warn 'Unexpected TERM type: "%s"\n' "$TERM"
-elif [ ! -e "$IAM_HOME/terminfo"/*/xterm-256color ]; then
+elif [ ! -e "$(echo "$IAM_HOME/terminfo"/*/xterm-256color)" ]; then
 _warn 'Terminfo file "%s" not found. Perhaps the "tic" command does not exist in the environment.\n' "$IAM_HOME/terminfo/*/xterm-256color"
 unset TERMINFO
 fi
@@ -2843,7 +2843,7 @@ if _has git && _vercomp 1.7.9 '>' "$__GIT_VERSION"; then
 _warn 'git v%s is too old and does not support signatures, v1.7.9 or higher is required.\n' "$__GIT_VERSION"
 fi
 if ! _is in-container; then
-SSH_PUB_KEY_ONLY="`echo $SSH_PUB_KEY | awk '{print $2}'`"
+SSH_PUB_KEY_ONLY="$(echo "$SSH_PUB_KEY" | awk '{print $2}')"
 if [ -z "$SSH_PUB_KEY_ONLY" ]; then
 _warn 'SSH key is not defined\n'
 else
@@ -2870,6 +2870,9 @@ declare -f _is _isnot _hash _hash_in _check _has _catch _get_url
 echo '_get_url "$@"'
 } > "$IAM_HOME/tools/bin/geturl"
 chmod +x "$IAM_HOME/tools/bin/geturl"
+fi
+if _isnot tmux && _isnot in-container; then
+! _has_function __gpgconf_validate || __gpgconf_validate
 fi
 if _isnot tmux; then
 if _is wsl; then
