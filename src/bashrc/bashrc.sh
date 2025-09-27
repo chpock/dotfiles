@@ -104,6 +104,8 @@ cprintf() {
         fi
         if [[ "$__CPRINTF_VAR_NAME" ]]; then
             if [[ "$__CPRINTF_APPEND" ]] && [[ "${!__CPRINTF_VAR_NAME}" ]]; then
+                # Disable: Don't use variables in the printf format string. Use printf '..%s..' "$foo".
+                # shellcheck disable=SC2059
                 printf -v __CPRINTF_RESULT "$__CPRINTF_RESULT" "$@" 2>&3
                 if [ "$__CPRINTF_APPEND" -eq 1 ]; then
                     printf -v "$__CPRINTF_VAR_NAME" '%s%s' "${!__CPRINTF_VAR_NAME}" "$__CPRINTF_RESULT"
@@ -111,12 +113,16 @@ cprintf() {
                     printf -v "$__CPRINTF_VAR_NAME" '%s %s' "${!__CPRINTF_VAR_NAME}" "$__CPRINTF_RESULT"
                 fi
             else
+                # Disable: Don't use variables in the printf format string. Use printf '..%s..' "$foo".
+                # shellcheck disable=SC2059
                 printf -v "$__CPRINTF_VAR_NAME" "$__CPRINTF_RESULT" "$@" 2>&3
             fi
         else
             if [[ "$__CPRINTF_NEW_LINE" ]]; then
                 __CPRINTF_RESULT+='\n'
             fi
+            # Disable: Don't use variables in the printf format string. Use printf '..%s..' "$foo".
+            # shellcheck disable=SC2059
             printf "$__CPRINTF_RESULT" "$@" 2>&3
         fi
     } 3>&2 2>/dev/null
@@ -136,11 +142,18 @@ _trim() {
     # Set C locale to avoid processing strings as Unicode. This will
     # improve performance. Set it only if we are trimming default
     # characters (spaces).
+    #
+    # Disable: Note that A && B || C is not if-then-else. C may run when A is true. [SC2015]
+    # shellcheck disable=SC2015
     [ -n "$2" ] && __TRIM_WHAT="$2" || local LC_ALL=C LC_TYPE=C
     local __TRIM_OUT="$1"
     # remove leading characters
+    # Disable: Expansions inside ${..} need to be quoted separately, otherwise they match as patterns. [SC2295]
+    # shellcheck disable=SC2295
     [ -z "$__TRIM_L" ] || __TRIM_OUT=${__TRIM_OUT#"${__TRIM_OUT%%[!${__TRIM_WHAT}]*}"}
     # remove trailing characters
+    # Disable: Expansions inside ${..} need to be quoted separately, otherwise they match as patterns. [SC2295]
+    # shellcheck disable=SC2295
     [ -z "$__TRIM_R" ] || __TRIM_OUT=${__TRIM_OUT%"${__TRIM_OUT##*[!${__TRIM_WHAT}]}"}
     [ -z "$__TRIM_VAR" ] && echo "$__TRIM_OUT" || printf -v "$__TRIM_VAR" '%s' "$__TRIM_OUT"
 }
@@ -268,7 +281,10 @@ _get_url() {
         isnot need_proxy || set -- -e "use_proxy=on" -e "https_proxy=http://127.0.0.1:52011" "$@"
         wget "$@"
     elif [ -x /usr/lib/apt/apt-helper ]; then
-        local R OUT ERR TMP="$(mktemp)"
+        # Disable: OUT appears unused. Verify use (or export if used externally). [SC2034]
+        # shellcheck disable=SC2034
+        local R OUT ERR TMP
+        TMP="$(mktemp)"
         _catch OUT ERR /usr/lib/apt/apt-helper -oAcquire::https::Verify-Peer=false download-file "$URL" "$TMP" && R=0 || R=$?
         if [ $R -eq 0 ]; then
             cat "$TMP"
@@ -290,7 +306,7 @@ _get_url() {
                 if [ -z "$R" ]; then
                     R="${line#* }"
                     S="${R%% *}"
-                    if [ "$S" != "200" -a "$S" != "301" -a "$S" != "302" ]; then
+                    if [ "$S" != "200" ] && [ "$S" != "301" ] && [ "$S" != "302" ]; then
                         echo "Error: $R" >&2
                         return 1
                     fi
@@ -304,7 +320,7 @@ _get_url() {
                     # if line contains only '\r'
                     cat
                 fi
-            done < <(printf '%s\r\n' "GET $UPATH HTTP/1.1" "Host: $HOST" "Connection: Close" "" | openssl s_client -quiet -connect "$HOST:443" 2>/dev/null)
+            done < <(printf '%s\r\n' "GET $UPATH HTTP/1.1" "Host: $HOST" "Connection: Close" "" | openssl s_client -quiet -connect "$HOST:$PORT" 2>/dev/null)
         done
     else
         return 1
@@ -344,7 +360,7 @@ _hash() {
             # Set C locale to avoid processing strings as Unicode. This will
             # improve performance.
             local LC_ALL=C LC_TYPE=C
-            local A=1 B=0 C i M="$@"
+            local A=1 B=0 C i M="$*"
             local L=${#M}
             for (( i = 0; i < L; i++ )); do
                 printf -v C '%d' "'${M:i:1}"
@@ -355,7 +371,7 @@ _hash() {
         fi
     } 2>/dev/null
     # For debugging only
-    : _HASH = $_HASH
+    : _HASH = "$_HASH"
 }
 
 if _has perl; then
@@ -373,6 +389,8 @@ else
         {
             # Set C locale to avoid processing strings as Unicode. This will
             # improve performance.
+            # Disable: LC_TYPE appears unused. Verify use (or export if used externally). [SC2034]
+            # shellcheck disable=SC2034
             local LC_ALL=C LC_TYPE=C
             local A=1 B=0 C
             while IFS= read -d '' -r -n1 C; do
@@ -387,12 +405,14 @@ fi
 
 __vercomp() {
     local i IFS=.
+    # Disable: Quote to prevent word splitting/globbing, or split robustly with mapfile or read -a. [SC2206]
+    # shellcheck disable=SC2206
     local v1=($1) v2=($2)
     for (( i = 0; i < ${#v1[@]} || i < ${#v2[@]}; i++ )); do
         [ "${v1[i]:-0}" -le "${v2[i]:-0}" ] || return 1
         [ "${v1[i]:-0}" -ge "${v2[i]:-0}" ] || return 0
     done
-    return $3
+    return "$3"
 }
 
 _vercomp() {
@@ -435,7 +455,7 @@ _random() {
         result="$result${chars:$(( RANDOM % ${#chars} )):1}"
         count=$(( count - 1 ))
     done
-    [ -n "$V" ] && printf -v "$V" "$result" || echo "$result"
+    [ -n "$V" ] && printf -v "$V" '%s' "$result" || echo "$result"
 }
 
 _catch() {
@@ -444,16 +464,26 @@ _catch() {
     [ "${-/v}" != "$-" ] && set +v && USE_V="-v" || USE_V="+v"
     # check "xtrace" option, turn if off if enabled, and save restore status USE_X
     [ "${-/x}" != "$-" ] && set +x && USE_X="-x" || USE_X="+x"
+    # Disable: Modification of R is local (to subshell caused by $(..) expansion). [SC2030]
+    # Disable: Modification of STDOUT is local (to subshell caused by $(..) expansion). [SC2030]
+    # Disable: Modification of STDERR is local (to subshell caused by $(..) expansion). [SC2030]
+    # shellcheck disable=SC2030
     eval "$({
         STDERR="$({ STDOUT="$("${@:3}")"; } 2>&1 && R=0 || R=$?; declare -p STDOUT >&2; exit $R)" && R=0 || R=$?
         declare -p STDERR
         declare -p R
     } 2>&1)"
+    # Disable: STDOUT was modified in a subshell. That change might be lost. [SC2031]
+    # shellcheck disable=SC2031
     printf -v "$1" '%s' "$STDOUT"
+    # Disable: STDERR was modified in a subshell. That change might be lost. [SC2031]
+    # shellcheck disable=SC2031
     printf -v "$2" '%s' "$STDERR"
     set $USE_X
     set $USE_V
-    return $R
+    # Disable: R was modified in a subshell. That change might be lost. [SC2031]
+    # shellcheck disable=SC2031
+    return "$R"
 }
 
 __uname_machine() { uname --machine 2>/dev/null || uname -m 2>/dev/null || uname -p 2>/dev/null || echo "Unknown"; }
@@ -491,15 +521,17 @@ _is() {
                 sunos)  [ "$_CACHE" = "SunOS" ]  || R=1 ;;
                 macos)  [ "$_CACHE" = "Darwin" ] || R=1 ;;
                 linux)  [ "$_CACHE" = "Linux" ]  || R=1 ;;
-                cygwin) [ "$_CACHE" = ${_CACHE#CYGWIN_NT*} ] && R=1 || : ;;
-                msys)   [ "$_CACHE" = ${_CACHE#MSYS_NT*} ]   && R=1 || : ;;
-                mingw)  [ "$_CACHE" = ${_CACHE#MINGW*} ]     && R=1 || : ;;
+                cygwin) [ "$_CACHE" = "${_CACHE#CYGWIN_NT*}" ] && R=1 || : ;;
+                msys)   [ "$_CACHE" = "${_CACHE#MSYS_NT*}" ]   && R=1 || : ;;
+                mingw)  [ "$_CACHE" = "${_CACHE#MINGW*}" ]     && R=1 || : ;;
             esac
             ;;
         wsl)
+            # Disable: Note that A && B || C is not if-then-else. C may run when A is true. [SC2015]
+            # shellcheck disable=SC2015
             _is in-container && R=1 || {
                 _cache __uname_kernel_release
-                [ -z ${_CACHE%%*-WSL2} ] || R=1
+                [ -z "${_CACHE%%*-WSL2}" ] || R=1
             }
             ;;
         windows)     ! _is cygwin && ! _is mingw && ! _is msys && R=1 || : ;;
@@ -632,6 +664,7 @@ fi
 
 # GCP
 if [ -f ~/gcloud/google-cloud-sdk/path.bash.inc ]; then
+    # shellcheck source=/dev/null
     . ~/gcloud/google-cloud-sdk/path.bash.inc
 fi
 
@@ -759,7 +792,7 @@ tools() {
     local PARAM="$2"
     local PARAM_EX="$3"
     local LINE
-    local I_DESC I_URL I_FILE I_SIZE I_FILTER I_ON_UPDATE
+    local I_DESC I_URL I_FILE I_SIZE I_FILTER_IS I_FILTER_HAS I_ON_UPDATE
     local SIZE HASH
     local CHECK_STATE
     local IS_ERROR
@@ -818,7 +851,8 @@ tools() {
     fi
 
     if [ -z "$TOOLS_EXISTS" ]; then
-        local TMP="$(mktemp)"
+        local TMP
+        TMP="$(mktemp)"
         if [ "$PARAM" = "important" ]; then
             printf '%s' "$UPDATE_IMPORTANT_BANNER"
             unset UPDATE_IMPORTANT_BANNER
@@ -890,7 +924,7 @@ tools() {
             else
                 recs+=("$I_DESC" "$I_URL" "$I_FILE" "$I_ON_UPDATE" "$I_SIZE" "$I_HASH" 0 0)
             fi
-            unset I_DESC I_URL I_FILE I_SIZE I_HASH I_FILTER I_ON_UPDATE
+            unset I_DESC I_URL I_FILE I_SIZE I_HASH I_FILTER_IS I_FILTER_HAS I_ON_UPDATE
         done < "$TOOLS_FILE"
     fi
 
@@ -950,7 +984,8 @@ tools() {
             fi
             IS_ERROR=0
             mkdir -p "${I_FILE%/*}"
-            local TMP="$(mktemp)"
+            local TMP
+            TMP="$(mktemp)"
             if [ "$PARAM" = "important" ]; then
                 if [ -n "$UPDATE_IMPORTANT_BANNER" ]; then
                     printf '%s' "$UPDATE_IMPORTANT_BANNER"
@@ -1005,6 +1040,8 @@ tools update important
 # Load shell.rc scripts now as other scripts may depend on functions defined there
 for SCRIPT in "$IAM_HOME"/shell.rc/*; do
     [ -e "$SCRIPT" ] || continue
+    # Disable: ShellCheck can't follow non-constant source. Use a directive to specify location. [SC1090]
+    # shellcheck disable=SC1090
     ! _once "PS1 -> source $SCRIPT" || source "$SCRIPT"
 done
 unset SCRIPT
@@ -1146,7 +1183,7 @@ if _has tmux; then
         fi
 
     else
-        alias tmux="tmux -f \"$IAM_HOME/tmux.conf\""
+        alias tmux="tmux -f \"\$IAM_HOME/tmux.conf\""
     fi
 
 fi; # tmux
@@ -1253,7 +1290,8 @@ _isnot "aws" || _aws_metadata() {
     # Check AWS metadata access type
 
     if [ -z "$_AWS_METADATA_ACCESS_TYPE" ]; then
-        local STATUS_CODE="$(command curl -s -f --connect-timeout 0.1 -o /dev/null -I -w "%{http_code}" "$METADATA_URL/meta-data/instance-id")"
+        local STATUS_CODE
+        STATUS_CODE="$(command curl -s -f --connect-timeout 0.1 -o /dev/null -I -w "%{http_code}" "$METADATA_URL/meta-data/instance-id")"
         if [ "$STATUS_CODE" = "200" ]; then
             _AWS_METADATA_ACCESS_TYPE="plain"
         elif [ "$STATUS_CODE" = "401" ]; then
@@ -1272,7 +1310,8 @@ _isnot "aws" || _aws_metadata() {
         # returns 'error' if the previous attempt to return the metadata token
         # failed with an error
         [ "$_AWS_METADATA_TOKEN" != "error" ] || return 1
-        local CURRENT_TIMESTAMP="$(date +%s)" DURATION_HOURS_LEFT=0
+        local CURRENT_TIMESTAMP DURATION_HOURS_LEFT=0
+        CURRENT_TIMESTAMP="$(date +%s)"
         # If _AWS_METADATA_TOKEN_TIMESTAMP exists, then compute current session
         # duration as "6 hours + <old timestamp> - <current timestamp>".
         # If _AWS_METADATA_TOKEN_TIMESTAMP does not exist, DURATION_HOURS_LEFT
@@ -1309,11 +1348,21 @@ hostinfo() {
     local MSHELL="unknown"
 
     ! _glob_match "*.*" "$BASH_VERSION" || MSHELL="bash $BASH_VERSION"
+    # Disable: Possible misspelling: ZSH_VERSION may not be assigned. Did you mean BASH_VERSION? [SC2153]
+    # shellcheck disable=SC2153
     ! _glob_match "*.*" "$ZSH_VERSION" || MSHELL="zsh $ZSH_VERSION"
     ! _glob_match "*zsh*" "$VERSION" || MSHELL="$VERSION"
+    # Disable: Possible misspelling: SH_VERSION may not be assigned. Did you mean BASH_VERSION? [SC2153]
+    # shellcheck disable=SC2153
     ! _glob_match "*PD*" "$SH_VERSION" || MSHELL="$SH_VERSION"
+    # Disable: Possible misspelling: KSH_VERSION may not be assigned. Did you mean BASH_VERSION? [SC2153]
+    # shellcheck disable=SC2153
     ! _glob_match "*MIRBSD*" "$KSH_VERSION" || MSHELL="$KSH_VERSION"
+    # Disable: Possible misspelling: POSH_VERSION may not be assigned. Did you mean BASH_VERSION? [SC2153]
+    # shellcheck disable=SC2153
     ! _glob_match "*.*|*POSH*" "$POSH_VERSION" || MSHELL="posh $POSH_VERSION"
+    # Disable: Possible misspelling: YASH_VERSION may not be assigned. Did you mean BASH_VERSION? [SC2153]
+    # shellcheck disable=SC2153
     ! _glob_match "*.*" "$YASH_VERSION" || MSHELL="yash $YASH_VERSION"
 
     _cache __uname_machine
@@ -1440,44 +1489,45 @@ hostinfo() {
                     printf "%d.%d.%d.%d" $(($1>>24)) $(($1>>16&255)) $(($1>>8&255)) $(($1&255))
                 }
                 ip2int() {
+                    # Disable: Quote to prevent word splitting/globbing, or split robustly with mapfile or read -a. [SC2206]
+                    # shellcheck disable=SC2206
                     _a=(${1//./ })
-                    printf "%u" $(( _a<<24 | ${_a[1]} << 16 | ${_a[2]} << 8 | ${_a[3]} ))
+                    printf "%u" $(( _a<<24 | _a[1] << 16 | _a[2] << 8 | _a[3] ))
                 }
 
                 runOnMac=0
-                while IFS=$' :\t\r\n' read a b c d; do
+                while IFS=$' :\t\r\n' read -r a b c d; do
                     [ "$a" = "usage" ] && [ "$b" = "route" ] && runOnMac=1
-                    if [ "x$runOnMac" = "x1" ]; then
+                    if [ "$runOnMac" = "1" ]; then
                         case $a in
-                            gateway )    gWay=$b  ;;
-                            interface )  iFace=$b ;;
+                            gateway )    gWay="$b"  ;;
                         esac
                     else
-                        [ "$a" = "0.0.0.0" ] && [ "$c" = "$a" ] && iFace=${d##* } gWay=$b
+                        [ "$a" = "0.0.0.0" ] && [ "$c" = "$a" ] && gWay="$b"
                     fi
                 done < <(/sbin/route -n 2>&1 || /sbin/route -n get 0.0.0.0/0 2>&1 || true)
 
-                [ -z "$gWay" ] && gw=0 || gw=$(ip2int $gWay)
+                [ -z "$gWay" ] && gw=0 || gw=$(ip2int "$gWay")
 
-                while read lhs rhs; do
+                while read -r lhs rhs; do
                     [ "$lhs" ] && {
-                        [ "x$lhs" != "xinet" ] && [ "x$lhs" != "xinet6" ] && iface="$lhs"
+                        [ "$lhs" != "inet" ] && [ "$lhs" != "inet6" ] && iface="$lhs"
                         [ -z "${lhs#*:}" ] && iface=${lhs%:}
-                        [ "x$lhs" = "xinet" ] && {
+                        [ "$lhs" = "inet" ] && {
                             mask=${rhs#*netmask }
                             mask=${mask#*Mask:}
                             mask=${mask%% *}
                             case "$mask" in
-                                0x*) mask="$(printf %u $mask)"; ;;
-                                f*)  mask="$(printf %u 0x$mask)"; ;;
-                                *)   mask="$(ip2int $mask)"; ;;
+                                0x*) mask="$(printf '%u' "$mask")"; ;;
+                                f*)  mask="$(printf '%u' "0x$mask")"; ;;
+                                *)   mask="$(ip2int "$mask")"; ;;
                             esac
                             myIp=${rhs%% *}
                             myIp=${myIp#*addr:}
-                            ip=$(ip2int $myIp)
-                            netMask=$(int2ip $mask)
+                            ip=$(ip2int "$myIp")
+                            netMask=$(int2ip "$mask")
                             (( ( ip & mask ) == ( gw & mask ) )) && myGway=", gw: $gWay" || myGway=
-                            [ "x$myIp" != "x127.0.0.1" ] && \
+                            [ "$myIp" != "127.0.0.1" ] && \
                                 printf -- "Interface : %s (name: '%s', mask: %s%s)\n" "$myIp" "$iface" "$netMask" "$myGway"
                         }
                     }
@@ -1605,7 +1655,7 @@ hostinfo() {
 
             local _buffers=0 _cached=0 _memTotal _memFree _swapTotal _swapFree
 
-            while IFS=$' :\t\r\n' read a b c; do
+            while IFS=$' :\t\r\n' read -r a b c; do
                 case "$a" in
                     MemTotal)  _memTotal="$b";;
                     MemFree)   _memFree="$b";;
@@ -1623,7 +1673,7 @@ hostinfo() {
 
         elif _has vm_stat; then
 
-            read SWAP_TOTAL SWAP_FREE <<< $(sysctl vm.swapusage | awk '{ print $4 "\n" $10 }')
+            read -r SWAP_TOTAL SWAP_FREE <<< "$(sysctl vm.swapusage | awk '{ print $4 "\n" $10 }')"
             SWAP_TOTAL="${SWAP_TOTAL%%.*}"
             SWAP_FREE="${SWAP_FREE%%.*}"
 
@@ -1631,11 +1681,11 @@ hostinfo() {
             MEM_TOTAL=$(( MEM_TOTAL / 1024 / 1024 ))
 
             MEM_FREE=0
-            while IFS=$':\r\n' read a b; do
+            while IFS=$':\r\n' read -r a b; do
                 if [ "$a" = "Pages free" ] || [ "$a" = "Pages inactive" ] || [ "$a" = "Pages speculative" ]; then
                     b="${b// /}"
                     b="${b//./}"
-                    MEM_FREE=$(( MEM_FREE + $b ))
+                    MEM_FREE=$(( MEM_FREE + b ))
                 fi
             done < <(vm_stat)
             MEM_FREE=$(( MEM_FREE * 4096 / 1024 / 1024 ))
@@ -1644,7 +1694,7 @@ hostinfo() {
 
         if [ -n "$MEM_TOTAL" ]; then
             _showinfo "RAM" "$MEM_TOTAL" "$MEM_FREE"
-            if [ $SWAP_TOTAL -eq 0 ]; then
+            if [ "$SWAP_TOTAL" -eq 0 ]; then
                 cprintf -- "Swap      : ~y~%s" "Not installed"
             else
                 _showinfo "Swap" "$SWAP_TOTAL" "$SWAP_FREE"
@@ -1662,7 +1712,7 @@ hostinfo() {
         #   Filesystem     1M-blocks  Used Available Capacity iused      ifree %iused  Mounted on
         #   /dev/disk1s5s1    476802  9486    383863     3%  356050 3930762280    0%   /
         if _is linux; then
-            while IFS=$' \t\r\n' read a b c d e f; do
+            while IFS=$' \t\r\n' read -r a b c d _ f; do
 
                 [ "$f" = "/dev/shm" ] && continue
                 [ "$f" = "/dev" ]     && continue
@@ -1694,13 +1744,13 @@ hostinfo() {
 
             done < <(df -m -P 2>/dev/null | tail -n +2 | grep -v '^/dev/loop')
         elif _is macos; then
-            while IFS=$' \t\r\n' read a b c d e f g h i; do
+            while IFS=$' \t\r\n' read -r a b c d _ f _ _ i; do
                 # if BSD df
                 _check df --version || f="$i"
                 _showinfo "Mount" "$b" "$d" "$f"
             done < <(df -m 2>/dev/null | tail -n +2 | grep -v -E ' +0 +0 +0 +100%')
         elif _is sunos; then
-            while IFS=$' \t\r\n' read a b c d e f; do
+            while IFS=$' \t\r\n' read -r a b c d _ f; do
 
                 [ "$f" = "/var/run" ] && continue
                 [ "$f" = "/etc/svc/volatile" ] && continue
@@ -1712,7 +1762,7 @@ hostinfo() {
 
             done < <(df -k -t | tail -n +2 | grep -v -E ' +0 +0 +0 +0%')
         elif _is hpux; then
-            while IFS=$' \t\r\n' read a b c d e f; do
+            while IFS=$' \t\r\n' read -r a b c d _ f; do
 
                 b=$(( b / 1024 ))
                 d=$(( d / 1024 ))
@@ -1720,13 +1770,13 @@ hostinfo() {
 
             done < <(df -P -k | tail -n +2)
         elif _is aix; then
-            while IFS=$' \t\r\n' read a b c d e f; do
+            while IFS=$' \t\r\n' read -r a b c d _ f; do
 
                 _showinfo "Mount" "$b" "$d" "$f"
 
             done < <(df -m -P | tail -n +2 | grep -v -E ' +- +- +0 +-')
         elif _is windows; then
-            while IFS=$' ,\t\r\n' read a b c d; do
+            while IFS=$' ,\t\r\n' read -r a b c d; do
 
                 [ -z "$c" ] && continue
 
@@ -1780,12 +1830,16 @@ hostinfo() {
 _is tmux || hostinfo
 
 if [ -f /etc/bash_completion ]; then
+    # shellcheck source=/dev/null
     . /etc/bash_completion
 elif [ -f /etc/profile.d/bash_completion.sh ]; then
+    # shellcheck source=/dev/null
     . /etc/profile.d/bash_completion.sh
 elif [ -f /usr/share/bash-completion/bash_completion ]; then
+    # shellcheck source=/dev/null
     . /usr/share/bash-completion/bash_completion
 elif [ -f /usr/local/etc/bash_completion ]; then
+    # shellcheck source=/dev/null
     . /usr/local/etc/bash_completion
 fi
 # files from /etc/bash_completion.d/* will be loaded automatically by the above
@@ -1833,6 +1887,8 @@ fi
 if _has kpexec && [ ! -f "$IAM_HOME/tools/bash_completion/kpexec.completion.bash" ];  then
     _info "Generating bash completions for kpexec..."
     if kpexec --completion bash >"$IAM_HOME/tools/bash_completion/kpexec.completion.bash" 2>/dev/null; then
+        # Disable: Expressions don't expand in single quotes, use double quotes for that. [SC2016]
+        # shellcheck disable=SC2016
         echo '
             if [ $(type -t compopt) = "builtin" ]; then
                 complete -o default -F __start_kpexec ,kpexec
@@ -1864,13 +1920,16 @@ if _has upkg && [ ! -f "$IAM_HOME/tools/bash_completion/upkg.bash" ] && upkg sup
 fi
 
 for i in "$IAM_HOME/tools/bash_completion"/*.bash; do
+    # shellcheck source=/dev/null
     source "$i"
 done
 unset i
 
 if [ -f ~/gcloud/google-cloud-sdk/completion.bash.inc ]; then
+    # shellcheck source=/dev/null
     . ~/gcloud/google-cloud-sdk/completion.bash.inc
 elif [ -f /usr/lib/google-cloud-sdk/completion.bash.inc ]; then
+    # shellcheck source=/dev/null
     . /usr/lib/google-cloud-sdk/completion.bash.inc
 fi
 
@@ -1893,7 +1952,7 @@ if _has gpg; then
     export GNUPGHOME
     mkdir -p "$GNUPGHOME"
     # avoid:
-    #  gpg: WARNING: unsafe permissions on homedir
+    #  gpg: WARNING unsafe permissions on homedir
     chmod 0700 "$GNUPGHOME"
 
     # required for GPG
@@ -1903,6 +1962,8 @@ if _has gpg; then
 fi
 
 if ! _is in-container && _is aws_metadata_available; then
+    # Disable: Note that A && B || C is not if-then-else. C may run when A is true. [SC2015]
+    # shellcheck disable=SC2015
     AWS_DEFAULT_REGION="$(_aws_metadata placement/region)" && export AWS_DEFAULT_REGION || unset AWS_DEFAULT_REGION
 fi
 
@@ -2000,11 +2061,15 @@ ls() {
 }
 
 _hasnot ps || psa() {
+    # Disable: Note that A && B || C is not if-then-else. C may run when A is true. [SC2015]
+    # shellcheck disable=SC2015
     _check command ps --version && set -- aux "$@" || set -- -e -f "$@"
     env ps "$@"
 }
 
 _hasnot ps || psaf() {
+    # Disable: Note that A && B || C is not if-then-else. C may run when A is true. [SC2015]
+    # shellcheck disable=SC2015
     _check command ps --version && set -- auxf "$@" || set -- -e -f "$@"
     env ps "$@"
 }
@@ -2023,15 +2088,16 @@ _hasnot grep || grep() {
 
 _hasnot grep || grepzip() {
     local ret i start_fn
-    for (( i = 1; $i <= $#; i++ )); do
+    for (( i = 1; i <= $#; i++ )); do
         _glob_match "*.zip" "${!i}" || continue
         start_fn=$i
         break
     done
     [ -n "$start_fn" ] || { echo "Error: zip files in command line were not found." >&2; return 1; }
-    for (( i = $start_fn; $i <= $#; i++ )); do
+    for (( i = start_fn; i <= $#; i++ )); do
         # don't use '--directory' parameter here as it is not suppurted by busybox
-        local TEMP_DIR="$(mktemp -d)"
+        local TEMP_DIR
+        TEMP_DIR="$(mktemp -d)"
         if unzip -q "${!i}" -d "$TEMP_DIR"; then
             grep "${@:1:$(( start_fn - 1 ))}" -r "$TEMP_DIR" || true
         else
@@ -2062,7 +2128,11 @@ _hasnot diff || diff() {
 alias mv='mv -i'
 
 alias mkdir='mkdir -p'
+# Disable: Aliases can't use positional parameters. Use a function. [SC2142]
+# shellcheck disable=SC2142
 alias mkcd='_(){ mkdir -p $1; cd $1; }; _'
+# Disable: Aliases can't use positional parameters. Use a function. [SC2142]
+# shellcheck disable=SC2142
 alias mkcdtmp='_(){ cd "$(test -z "$1" && mktemp -d || mktemp -d -t "${1}.XXXXXXX")"; }; _'
 
 alias ..='cd ..'
@@ -2074,7 +2144,7 @@ alias ff='find . -name'
 if _has vim; then
     EDITOR="vim -u $IAM_HOME/vimrc -i $IAM_HOME/viminfo"
 elif _has vi; then
-    EDITOR=vi
+    EDITOR="vi"
 else
     _warn 'vi/vim not found\n'
 fi
@@ -2086,6 +2156,8 @@ vim() {
     local VIM_SESSION_FILE="$_TERM_SESSION_DIR/vim"
     [ -z "$_TERM_SESSION_DIR" ] || {
         if [ -e "$VIM_SESSION_FILE" ]; then
+            # Disable: Quote this to prevent word splitting. [SC2046]
+            # shellcheck disable=SC2046
             set -- $(< "$VIM_SESSION_FILE")
         else
             printf '%q ' "$@" > "$VIM_SESSION_FILE"
@@ -2098,20 +2170,29 @@ vim() {
 mkdir -p "$IAM_HOME/vim_swap"
 mkdir -p "$IAM_HOME/vim_runtime"
 
+# Disable: This function can't be invoked via sudo on line 2178. [SC2032]
+# shellcheck disable=SC2032
 _has apt-get && apt-get() {
     if [ "$(id -u)" -ne 0 ]; then
         cprintf "~r~The 'sudo' prefix was added automatically for the 'apt-get' comman" >&2
+        # Disable: This function can't be invoked via sudo on line 2175. [SC2032]
+        # Disable: Shell functions can't be passed to external commands. Use separate script or sh -c. [SC2033]
+        # shellcheck disable=SC2032,SC2033
         sudo apt-get "$@"
     else
         command apt-get "$@"
     fi
 }
 
+# Disable: This function can't be invoked via sudo on line 2178. [SC2032]
+# shellcheck disable=SC2032
 _has apt && apt() {
     if [ "$(id -u)" -ne 0 ]; then
         case "$1" in
             install|remove|purge|autoremove|update|upgrade|full-upgrade|edit-sources)
                 cprintf "~r~The 'sudo' prefix was added automatically for the 'apt' command" >&2
+                # Disable: Shell functions can't be passed to external commands. Use separate script or sh -c. [SC2033]
+                # shellcheck disable=SC2033
                 sudo apt "$@"
             ;;
             *) command apt "$@"
@@ -2165,10 +2246,10 @@ man() {
     [ -n "$1" ] || { echo "Usage: $0 <grep parameters>"; return 1; }
     grep "$@" "$HISTFILE" || { echo "Nothing found."; return 1; }
     echo
-    local ASK
-    read -p "Do you wish to delete these lines from history file '$HISTFILE' [y/N]? " ASK
+    local ASK TMP_FILE
+    read -r -p "Do you wish to delete these lines from history file '$HISTFILE' [y/N]? " ASK
     _glob_match '[Yy]*' "$ASK" || { echo "Do nothing."; return 0; }
-    local TMP_FILE="$(mktemp)"
+    TMP_FILE="$(mktemp)"
     grep -v "$@" "$HISTFILE" > "$TMP_FILE"
     # Cleanup unused timestamps
     awk '/^#[0-9]+$/ { last=$0; have_in=1; next } !/^#[0-9]+$/ { if (have_in) { print last; have_in=0 } print }' "$TMP_FILE" > "$HISTFILE"
@@ -2177,18 +2258,18 @@ man() {
 }
 
 ,dedup_history() {
-    local ASK
-    read -p "Do you wish to dedup lines in history file '$HISTFILE' [y/N]? " ASK
+    local ASK TMP_FILE LINES_START LINES_END
+    read -r -p "Do you wish to dedup lines in history file '$HISTFILE' [y/N]? " ASK
     _glob_match '[Yy]*' "$ASK" || { echo "Do nothing."; return 0; }
-    local LINES_START="$(wc -l < "$HISTFILE")"
-    local TMP_FILE="$(mktemp)"
+    LINES_START="$(wc -l < "$HISTFILE")"
+    TMP_FILE="$(mktemp)"
     tac "$HISTFILE" \
         | awk '/^#[0-9]+$/ || !seen[$0]++ { print }' \
         | tac > "$TMP_FILE"
     # Cleanup unused timestamps
     awk '/^#[0-9]+$/ { last=$0; have_in=1; next } !/^#[0-9]+$/ { if (have_in) { print last; have_in=0 } print }' "$TMP_FILE" > "$HISTFILE"
     rm -f "$TMP_FILE"
-    local LINES_END="$(wc -l < "$HISTFILE")"
+    LINES_END="$(wc -l < "$HISTFILE")"
     echo "Done. Removed lines: $(( LINES_START - LINES_END ))"
 }
 
@@ -2202,6 +2283,8 @@ _comp_,retry() {
     elif _has_function _command_offset; then
         # The _command_offset function expects a list of words in the 'words'
         # variable. This we initialize this variable in local scope.
+        # Disable: XXX appears unused. Verify use (or export if used externally). [SC2034]
+        # shellcheck disable=SC2034
         local cur prev words cword split
         _init_completion -s || return
         _command_offset 1
@@ -2215,7 +2298,7 @@ complete -F _comp_,retry ,retry
 reload() {
     if _is tmux && [ "$1" != "current" ]; then
         local current_wid wid cmd
-        current_wid="$(command tmux display-message -p -t $TMUX_PANE '#{window_id}')"
+        current_wid="$(command tmux display-message -p -t "$TMUX_PANE" '#{window_id}')"
         for wid in $(command tmux list-windows -F '#{window_id}'); do
             [ "$wid" != "$current_wid" ] || continue
             cmd="$(command tmux display-message -p -t "$wid" '#{pane_current_command}')"
@@ -2228,7 +2311,7 @@ reload() {
         command tmux source-file "$IAM_HOME/tmux.conf"
         for wid in $(command tmux list-windows -F '#{window_id}'); do
             [ "$wid" != "$current_wid" ] || continue
-            command tmux send-keys -t $wid 'reload current' C-m
+            command tmux send-keys -t "$wid" 'reload current' C-m
         done
     fi
     # Reloaded shell should be with the same _SHELL_SESSION_ID.
@@ -2275,14 +2358,14 @@ wsl() {
               _GIT_USER_NAME=\"$_GIT_USER_NAME\" && export _GIT_USER_NAME && \
               _GIT_USER_EMAIL=\"$_GIT_USER_EMAIL\" && export _GIT_USER_EMAIL && \
               if [ ! -d \"\$IAM_HOME/terminfo\" ]; then mkdir \"\$IAM_HOME/terminfo\"; fi && \
-              echo \"$(cat ${IAM_HOME}/terminfo/.terminfo | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/terminfo/.terminfo\" &&
+              echo \"$(cat "${IAM_HOME}"/terminfo/.terminfo | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/terminfo/.terminfo\" &&
               TERMINFO=\"\$IAM_HOME/terminfo\" && \
               export TERMINFO && \
               tic \"\$IAM_HOME/terminfo/.terminfo\" && \
-              echo \"$(cat ${IAM_HOME}/vimrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/vimrc\" && \
-              echo \"$(cat ${IAM_HOME}/local_tools | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/local_tools\" && \
-              echo \"$(cat ${HOME}/.tclshrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$HOME/.tclshrc\" && \
-              echo \"$(cat ${IAM_HOME}/bashrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/bashrc\"" \
+              echo \"$(cat "${IAM_HOME}"/vimrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/vimrc\" && \
+              echo \"$(cat "${IAM_HOME}"/local_tools | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/local_tools\" && \
+              echo \"$(cat "${HOME}"/.tclshrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$HOME/.tclshrc\" && \
+              echo \"$(cat "${IAM_HOME}"/bashrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/bashrc\"" \
         | wsl -d Ubuntu
 
         wsl -d Ubuntu /bin/bash -ci "IAM=\"$IAM\" && export IAM && \
@@ -2291,7 +2374,7 @@ wsl() {
               _GIT_USER_NAME=\"$_GIT_USER_NAME\" && export _GIT_USER_NAME && \
               _GIT_USER_EMAIL=\"$_GIT_USER_EMAIL\" && export _GIT_USER_EMAIL && \
               if [ ! -d \"\\\$IAM_HOME/terminfo\" ]; then mkdir \"\\\$IAM_HOME/terminfo\"; fi && \
-              echo \"$(cat $IAM_HOME/terminfo/.terminfo | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\\\$IAM_HOME/terminfo/.terminfo\" &&
+              echo \"$(cat "$IAM_HOME"/terminfo/.terminfo | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\\\$IAM_HOME/terminfo/.terminfo\" &&
               TERMINFO=\"\\\$IAM_HOME/terminfo\" && \
               export TERMINFO && \
               tic \"\\\$IAM_HOME/terminfo/.terminfo\" && \
@@ -2305,6 +2388,8 @@ _send_raw_term() {
         printf '\033Ptmux;'
         # all \033 must be doubled: https://github.com/tmux/tmux/wiki/FAQ#what-is-the-passthrough-escape-sequence-and-how-do-i-use-it
         sed -E 's/\x1B/&&/g'
+        # Disable: Want to escape a single quote? echo 'This is how it'\''s done'. [SC1003]
+        # shellcheck disable=SC1003
         printf '\033\\'
     else
         cat
@@ -2342,7 +2427,7 @@ clip() {
     echo "Copied to Windows clipboard" 1>&2
 }
 ,fix-x-permission() {
-    local fn T
+    local fn
     for fn; do
         cat "$fn" > "${fn}.fix-permissions"
         mv -f "${fn}.fix-permissions" "$fn"
@@ -2403,7 +2488,7 @@ _homify() {
     [ -z "$COLUMNS" ] || __HOMIFY_WIDTH=$(( COLUMNS / 4 ))
     [ -n "$1" ] && __HOMIFY_DIR="$1" || __HOMIFY_DIR="$PWD"
     if [ "$__HOMIFY_DIR" = "$HOME" ] || _glob_match "$HOME/*" "$__HOMIFY_DIR"; then
-        __HOMIFY_DIR="~${__HOMIFY_DIR#$HOME}"
+        __HOMIFY_DIR="~${__HOMIFY_DIR#"$HOME"}"
     fi
     if [ ${#__HOMIFY_DIR} -gt $__HOMIFY_WIDTH ]; then
         __HOMIFY_DIR="$__HOMIFY_TRUNC${__HOMIFY_DIR:$(( ${#__HOMIFY_DIR} - __HOMIFY_WIDTH + ${#__HOMIFY_TRUNC} ))}"
@@ -2443,6 +2528,8 @@ __kubectl_status() {
             #   error: current-context is not set
             # to:
             #   current-context is not set
+            # Disable: STDERR was modified in a subshell. That change might be lost. [SC2031]
+            # shellcheck disable=SC2031
             STDERR="${STDERR#* }"
             cprintf -A MSG '~R~%s' "$STDERR"
         elif [ -n "$STDERR" ]; then
@@ -2552,6 +2639,8 @@ __aws_status() {
         REGION="$AWS_DEFAULT_REGION"
     fi
 
+    # Disable: Note that A && B || C is not if-then-else. C may run when A is true. [SC2015]
+    # shellcheck disable=SC2015
     [ -n "$REGION" ] \
         && cprintf -A MSG '~c~%s' "$REGION" \
         || cprintf -A MSG '~r~%s' "N"
@@ -2604,7 +2693,8 @@ __git_status() {
 
     local MSG TMP_VAL
 
-    local GIT_REPO_ROOT="$(command git rev-parse --git-dir 2>/dev/null)"
+    local GIT_REPO_ROOT
+    GIT_REPO_ROOT="$(command git rev-parse --git-dir 2>/dev/null)"
 
     if [ "$GIT_REPO_ROOT" = ".git" ]; then
         GIT_REPO_ROOT="$PWD"
@@ -2682,7 +2772,7 @@ __git_status() {
     fi
 
     local GIT_TAG
-    if GIT_TAG="$(command git describe --exact-match --tags $(command git rev-parse HEAD) 2>/dev/null)"; then
+    if GIT_TAG="$(command git describe --exact-match --tags "$(command git rev-parse HEAD)" 2>/dev/null)"; then
         cprintf -a MSG '~K~; ~d~tag~K~: ~m~%s' "$GIT_TAG"
     fi
 
@@ -2824,11 +2914,12 @@ function promptcmd () {
     local exitcode="$1" i
 
     # fix cursor position when it is not on new line
-    local CURPOS SAVE_STTY="$(stty -g)"
+    local CURPOS SAVE_STTY
+    SAVE_STTY="$(stty -g)"
     stty raw -echo min 0
-    echo -en "\033[6n" && read -sdR CURPOS
+    echo -en "\033[6n" && read -rsdR CURPOS
     stty "$SAVE_STTY"
-    [ ${CURPOS##*;} -eq 1 ] || cprintf '~Wr~%%'
+    [ "${CURPOS##*;}" -eq 1 ] || cprintf '~Wr~%%'
 
     # A non-zero exit code is displayed here. It's not such a trivial task.
     # Bash doesn't cleanup the latest exit code when executing an empty command.
@@ -2866,7 +2957,7 @@ function promptcmd () {
     elif _check stat -c '%i' . && [ ! -L "$PWD" ] && [ "$(stat -c '%i' . 2>&1)" != "$(stat -c '%i' "$PWD")" ]; then
         # if inside of zombie directory
         cprintf '~y~Current directory is a zombie. Fixing it.'
-        cd ../"${PWD##*/}"
+        cd ../"${PWD##*/}" || :
     fi
 
     if [ -n "$_TERM_SESSION_DIR" ]; then
@@ -2886,6 +2977,7 @@ function promptcmd () {
     local SCRIPT
     for SCRIPT in "$IAM_HOME"/shell.rc/*; do
         [ -e "$SCRIPT" ] || continue
+        # shellcheck source=/dev/null
         ! _once "PS1 -> source $SCRIPT" && [ "$_SHELL_SESSION_STAMP" -nt "$SCRIPT" ] || source "$SCRIPT"
     done
 
@@ -2896,8 +2988,10 @@ function promptcmd () {
         if [ -f "$PWD/.venv/bin/activate" ]; then
             # At the moment, we are silently ignoring possible errors during
             # activation.
+            # shellcheck source=/dev/null
             source "$PWD/.venv/bin/activate" || true
         elif _is windows && [ -f "$PWD/.venv/Scripts/activate" ]; then
+            # shellcheck source=/dev/null
             source "$PWD/.venv/Scripts/activate" || true
         fi
     else
@@ -3037,6 +3131,8 @@ function promptcmd () {
         cprintf -a PS1 "~K~[~r~bashrc is obsolete~K~]"
     fi
 
+    # Disable: Note that A && B || C is not if-then-else. C may run when A is true. [SC2015]
+    # shellcheck disable=SC2015
     [ "$UID" -eq 0 ] \
         && cprintf -a PS1 '~r~# ~d~' \
         || cprintf -a PS1 '~136~$ ~d~'
@@ -3054,9 +3150,9 @@ function promptcmd () {
 }
 
 __debug_trap() {
-    : $BASH_COMMAND
-    [ "$1" != "on"  ] || { unset __BASH_DEBUG_TRAP_IGNORE; return ${2-0}; }
-    [ "$1" != "off" ] || { __BASH_DEBUG_TRAP_IGNORE=1; return ${2-0}; }
+    : "$BASH_COMMAND"
+    [ "$1" != "on"  ] || { unset __BASH_DEBUG_TRAP_IGNORE; return "${2-0}"; }
+    [ "$1" != "off" ] || { __BASH_DEBUG_TRAP_IGNORE=1; return "${2-0}"; }
     # ignore itself
     [ "${BASH_COMMAND%% *}" != "__debug_trap" ] || return
     # ignore when ignore
@@ -3150,7 +3246,7 @@ elif _is windows; then
             if [ "${__val/\%/}" != "$__val" ]; then
                 echo "Warning! Percent in environment variable '${__var}': '${__val}'"
             fi
-            export $__var="$__val" >/dev/null 2>&1
+            export "$__var"="$__val" >/dev/null 2>&1
         done
         unset fn __var __val
     fi
@@ -3188,8 +3284,9 @@ if _isnot tmux; then
     unset fn REAL_CMD WARN
 fi
 
-if [ -f ~/.${IAM}_customrc ]; then
-    . ~/.${IAM}_customrc
+if [ -f ~/."${IAM}"_customrc ]; then
+    # shellcheck source=/dev/null
+    . ~/."${IAM}"_customrc
 fi
 
 for VAR in LD_LIBRARY_PATH LIBPATH SHLIB_PATH DYLD_LIBRARY_PATH LD_PRELOAD LD_RUN_PATH; do
@@ -3318,6 +3415,8 @@ if _isnot tmux; then
             _warn "/usr/bin/windows/System32 is unavailable. Windows standard exes will not work. Do the following:"
             echo "\$ sudo mkdir -p /usr/bin/windows"
             echo "\$ sudo vi /etc/fstab"
+            # Disable: echo may not expand escape sequences. Use printf. [SC2028]
+            # shellcheck disable=SC2028
             echo 'c:\\Windows /usr/bin/windows drvfs ro,noatime,metadata 0 0'
             echo "\$ sudo vi /etc/wsl.conf"
             echo "Make sure that 'mountFsTab = true' exists under the section '[automount]'"
@@ -3370,12 +3469,14 @@ if _isnot tmux; then
     if [ -n "$_TERM_SESSION_DIR" ]; then
         if [ -r "$_TERM_SESSION_DIR/pwd" ]; then
             # Remove a session older than 259200 seconds ( 60*60*24*3 ) or 3 days
-            if [ "$(expr $(date +"%s") - $(date -r "$_TERM_SESSION_DIR/pwd" +"%s"))" -gt 259200 ]; then
-                rm -rf "$_TERM_SESSION_DIR/*"
+            if [ $(( "$(date +"%s")" - "$(date -r "$_TERM_SESSION_DIR/pwd" +"%s")" )) -gt 259200 ]; then
+                # Disable: Use "${var:?}" to ensure this never expands to /* . [SC2115]
+                # shellcheck disable=SC2115
+                rm -rf "$_TERM_SESSION_DIR"/*
             else
                 NEW_PWD="$(< "$_TERM_SESSION_DIR/pwd")"
                 if [ -d "$NEW_PWD" ]; then
-                    cd "$NEW_PWD"
+                    cd "$NEW_PWD" || :
                 else
                     _warn "previous PWD '%s' is not reachable" "$NEW_PWD"
                 fi

@@ -471,8 +471,8 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=C3571C47
-BASHRC_FILE_HASH=2D210FC8
+LOCAL_TOOLS_FILE_HASH=BB7C1C47
+BASHRC_FILE_HASH=6E84303C
 declare -A -r __CPRINTF_COLORS=(
 [fw]=$'\e[37m' [fW]=$'\e[97m'
 [fk]=$'\e[30m' [fK]=$'\e[90m'
@@ -696,7 +696,8 @@ set -- -q -O - "$URL"
 isnot need_proxy || set -- -e "use_proxy=on" -e "https_proxy=http://127.0.0.1:52011" "$@"
 wget "$@"
 elif [ -x /usr/lib/apt/apt-helper ]; then
-local R OUT ERR TMP="$(mktemp)"
+local R OUT ERR TMP
+TMP="$(mktemp)"
 _catch OUT ERR /usr/lib/apt/apt-helper -oAcquire::https::Verify-Peer=false download-file "$URL" "$TMP" && R=0 || R=$?
 if [ $R -eq 0 ]; then
 cat "$TMP"
@@ -718,7 +719,7 @@ while IFS= read -r line; do
 if [ -z "$R" ]; then
 R="${line#* }"
 S="${R%% *}"
-if [ "$S" != "200" -a "$S" != "301" -a "$S" != "302" ]; then
+if [ "$S" != "200" ] && [ "$S" != "301" ] && [ "$S" != "302" ]; then
 echo "Error: $R" >&2
 return 1
 fi
@@ -731,7 +732,7 @@ break
 elif [ "${#line}" -eq 1 ]; then
 cat
 fi
-done < <(printf '%s\r\n' "GET $UPATH HTTP/1.1" "Host: $HOST" "Connection: Close" "" | openssl s_client -quiet -connect "$HOST:443" 2>/dev/null)
+done < <(printf '%s\r\n' "GET $UPATH HTTP/1.1" "Host: $HOST" "Connection: Close" "" | openssl s_client -quiet -connect "$HOST:$PORT" 2>/dev/null)
 done
 else
 return 1
@@ -765,7 +766,7 @@ if [ $# -eq 0 ]; then
 _hash_in
 else
 local LC_ALL=C LC_TYPE=C
-local A=1 B=0 C i M="$@"
+local A=1 B=0 C i M="$*"
 local L=${#M}
 for (( i = 0; i < L; i++ )); do
 printf -v C '%d' "'${M:i:1}"
@@ -775,7 +776,7 @@ done
 printf -v _HASH '%08X' $(( A + ( B << 16 ) ))
 fi
 } 2>/dev/null
-: _HASH = $_HASH
+: _HASH = "$_HASH"
 }
 if _has perl; then
 _hash_in() {
@@ -806,7 +807,7 @@ for (( i = 0; i < ${#v1[@]} || i < ${#v2[@]}; i++ )); do
 [ "${v1[i]:-0}" -le "${v2[i]:-0}" ] || return 1
 [ "${v1[i]:-0}" -ge "${v2[i]:-0}" ] || return 0
 done
-return $3
+return "$3"
 }
 _vercomp() {
 case "$2" in
@@ -845,7 +846,7 @@ while [ "$count" -ne 0 ]; do
 result="$result${chars:$(( RANDOM % ${#chars} )):1}"
 count=$(( count - 1 ))
 done
-[ -n "$V" ] && printf -v "$V" "$result" || echo "$result"
+[ -n "$V" ] && printf -v "$V" '%s' "$result" || echo "$result"
 }
 _catch() {
 local USE_V USE_X R STDOUT STDERR
@@ -860,7 +861,7 @@ printf -v "$1" '%s' "$STDOUT"
 printf -v "$2" '%s' "$STDERR"
 set $USE_X
 set $USE_V
-return $R
+return "$R"
 }
 __uname_machine() { uname --machine 2>/dev/null || uname -m 2>/dev/null || uname -p 2>/dev/null || echo "Unknown"; }
 __uname_kernel_name() { uname --kernel-name 2>/dev/null || uname -s 2>/dev/null || echo "Unknown"; }
@@ -886,15 +887,15 @@ aix)    [ "$_CACHE" = "AIX" ]    || R=1 ;;
 sunos)  [ "$_CACHE" = "SunOS" ]  || R=1 ;;
 macos)  [ "$_CACHE" = "Darwin" ] || R=1 ;;
 linux)  [ "$_CACHE" = "Linux" ]  || R=1 ;;
-cygwin) [ "$_CACHE" = ${_CACHE#CYGWIN_NT*} ] && R=1 || : ;;
-msys)   [ "$_CACHE" = ${_CACHE#MSYS_NT*} ]   && R=1 || : ;;
-mingw)  [ "$_CACHE" = ${_CACHE#MINGW*} ]     && R=1 || : ;;
+cygwin) [ "$_CACHE" = "${_CACHE#CYGWIN_NT*}" ] && R=1 || : ;;
+msys)   [ "$_CACHE" = "${_CACHE#MSYS_NT*}" ]   && R=1 || : ;;
+mingw)  [ "$_CACHE" = "${_CACHE#MINGW*}" ]     && R=1 || : ;;
 esac
 ;;
 wsl)
 _is in-container && R=1 || {
 _cache __uname_kernel_release
-[ -z ${_CACHE%%*-WSL2} ] || R=1
+[ -z "${_CACHE%%*-WSL2}" ] || R=1
 }
 ;;
 windows)     ! _is cygwin && ! _is mingw && ! _is msys && R=1 || : ;;
@@ -1037,7 +1038,7 @@ local CMD="$1"
 local PARAM="$2"
 local PARAM_EX="$3"
 local LINE
-local I_DESC I_URL I_FILE I_SIZE I_FILTER I_ON_UPDATE
+local I_DESC I_URL I_FILE I_SIZE I_FILTER_IS I_FILTER_HAS I_ON_UPDATE
 local SIZE HASH
 local CHECK_STATE
 local IS_ERROR
@@ -1082,7 +1083,8 @@ _hash_file "$TOOLS_FILE"
 [ "$_HASH" != "$LOCAL_TOOLS_FILE_HASH" ] || TOOLS_EXISTS=1
 fi
 if [ -z "$TOOLS_EXISTS" ]; then
-local TMP="$(mktemp)"
+local TMP
+TMP="$(mktemp)"
 if [ "$PARAM" = "important" ]; then
 printf '%s' "$UPDATE_IMPORTANT_BANNER"
 unset UPDATE_IMPORTANT_BANNER
@@ -1149,7 +1151,7 @@ fi
 else
 recs+=("$I_DESC" "$I_URL" "$I_FILE" "$I_ON_UPDATE" "$I_SIZE" "$I_HASH" 0 0)
 fi
-unset I_DESC I_URL I_FILE I_SIZE I_HASH I_FILTER I_ON_UPDATE
+unset I_DESC I_URL I_FILE I_SIZE I_HASH I_FILTER_IS I_FILTER_HAS I_ON_UPDATE
 done < "$TOOLS_FILE"
 fi
 if [ "${#files_by_size[@]}" -gt 0 ]; then
@@ -1205,7 +1207,8 @@ if [ "$PARAM" != "force" ]; then
 fi
 IS_ERROR=0
 mkdir -p "${I_FILE%/*}"
-local TMP="$(mktemp)"
+local TMP
+TMP="$(mktemp)"
 if [ "$PARAM" = "important" ]; then
 if [ -n "$UPDATE_IMPORTANT_BANNER" ]; then
 printf '%s' "$UPDATE_IMPORTANT_BANNER"
@@ -1359,7 +1362,7 @@ exec tmux attach-session -t "default"
 fi
 fi
 else
-alias tmux="tmux -f \"$IAM_HOME/tmux.conf\""
+alias tmux="tmux -f \"\$IAM_HOME/tmux.conf\""
 fi
 fi; # tmux
 __magic_ssh() {
@@ -1428,7 +1431,8 @@ echo > "$_SHELL_SESSION_STAMP"
 _isnot "aws" || _aws_metadata() {
 local METADATA_URL="http://169.254.169.254/latest"
 if [ -z "$_AWS_METADATA_ACCESS_TYPE" ]; then
-local STATUS_CODE="$(command curl -s -f --connect-timeout 0.1 -o /dev/null -I -w "%{http_code}" "$METADATA_URL/meta-data/instance-id")"
+local STATUS_CODE
+STATUS_CODE="$(command curl -s -f --connect-timeout 0.1 -o /dev/null -I -w "%{http_code}" "$METADATA_URL/meta-data/instance-id")"
 if [ "$STATUS_CODE" = "200" ]; then
 _AWS_METADATA_ACCESS_TYPE="plain"
 elif [ "$STATUS_CODE" = "401" ]; then
@@ -1441,7 +1445,8 @@ fi
 set -- command curl -s -f --connect-timeout 1 "$METADATA_URL/meta-data/$1"
 if [ "$_AWS_METADATA_ACCESS_TYPE" = "token" ]; then
 [ "$_AWS_METADATA_TOKEN" != "error" ] || return 1
-local CURRENT_TIMESTAMP="$(date +%s)" DURATION_HOURS_LEFT=0
+local CURRENT_TIMESTAMP DURATION_HOURS_LEFT=0
+CURRENT_TIMESTAMP="$(date +%s)"
 [ -z "$_AWS_METADATA_TOKEN_TIMESTAMP" ] || DURATION_HOURS_LEFT=$(( ( 21600 + _AWS_METADATA_TOKEN_TIMESTAMP - CURRENT_TIMESTAMP ) / 3600 ))
 if [ "$DURATION_HOURS_LEFT" -le 0 ]; then
 if ! _AWS_METADATA_TOKEN="$(command curl -s -f --connect-timeout 1 -X PUT \
@@ -1562,40 +1567,39 @@ printf "%d.%d.%d.%d" $(($1>>24)) $(($1>>16&255)) $(($1>>8&255)) $(($1&255))
 }
 ip2int() {
 _a=(${1//./ })
-printf "%u" $(( _a<<24 | ${_a[1]} << 16 | ${_a[2]} << 8 | ${_a[3]} ))
+printf "%u" $(( _a<<24 | _a[1] << 16 | _a[2] << 8 | _a[3] ))
 }
 runOnMac=0
-while IFS=$' :\t\r\n' read a b c d; do
+while IFS=$' :\t\r\n' read -r a b c d; do
 [ "$a" = "usage" ] && [ "$b" = "route" ] && runOnMac=1
-if [ "x$runOnMac" = "x1" ]; then
+if [ "$runOnMac" = "1" ]; then
 case $a in
-gateway )    gWay=$b  ;;
-interface )  iFace=$b ;;
+gateway )    gWay="$b"  ;;
 esac
 else
-[ "$a" = "0.0.0.0" ] && [ "$c" = "$a" ] && iFace=${d##* } gWay=$b
+[ "$a" = "0.0.0.0" ] && [ "$c" = "$a" ] && gWay="$b"
 fi
 done < <(/sbin/route -n 2>&1 || /sbin/route -n get 0.0.0.0/0 2>&1 || true)
-[ -z "$gWay" ] && gw=0 || gw=$(ip2int $gWay)
-while read lhs rhs; do
+[ -z "$gWay" ] && gw=0 || gw=$(ip2int "$gWay")
+while read -r lhs rhs; do
 [ "$lhs" ] && {
-[ "x$lhs" != "xinet" ] && [ "x$lhs" != "xinet6" ] && iface="$lhs"
+[ "$lhs" != "inet" ] && [ "$lhs" != "inet6" ] && iface="$lhs"
 [ -z "${lhs#*:}" ] && iface=${lhs%:}
-[ "x$lhs" = "xinet" ] && {
+[ "$lhs" = "inet" ] && {
 mask=${rhs#*netmask }
 mask=${mask#*Mask:}
 mask=${mask%% *}
 case "$mask" in
-0x*) mask="$(printf %u $mask)"; ;;
-f*)  mask="$(printf %u 0x$mask)"; ;;
-*)   mask="$(ip2int $mask)"; ;;
+0x*) mask="$(printf '%u' "$mask")"; ;;
+f*)  mask="$(printf '%u' "0x$mask")"; ;;
+*)   mask="$(ip2int "$mask")"; ;;
 esac
 myIp=${rhs%% *}
 myIp=${myIp#*addr:}
-ip=$(ip2int $myIp)
-netMask=$(int2ip $mask)
+ip=$(ip2int "$myIp")
+netMask=$(int2ip "$mask")
 (( ( ip & mask ) == ( gw & mask ) )) && myGway=", gw: $gWay" || myGway=
-[ "x$myIp" != "x127.0.0.1" ] && \
+[ "$myIp" != "127.0.0.1" ] && \
 printf -- "Interface : %s (name: '%s', mask: %s%s)\n" "$myIp" "$iface" "$netMask" "$myGway"
 }
 }
@@ -1684,7 +1688,7 @@ if ! _is in-container && ! _is sudo; then
 local MEM_TOTAL="" MEM_FREE SWAP_TOTAL SWAP_FREE
 if [ -f /proc/meminfo ]; then
 local _buffers=0 _cached=0 _memTotal _memFree _swapTotal _swapFree
-while IFS=$' :\t\r\n' read a b c; do
+while IFS=$' :\t\r\n' read -r a b c; do
 case "$a" in
 MemTotal)  _memTotal="$b";;
 MemFree)   _memFree="$b";;
@@ -1699,24 +1703,24 @@ MEM_FREE=$(( (_memFree + _buffers + _cached) / 1024 ))
 SWAP_TOTAL=$(( _swapTotal / 1024 ))
 SWAP_FREE=$(( _swapFree / 1024 ))
 elif _has vm_stat; then
-read SWAP_TOTAL SWAP_FREE <<< $(sysctl vm.swapusage | awk '{ print $4 "\n" $10 }')
+read -r SWAP_TOTAL SWAP_FREE <<< "$(sysctl vm.swapusage | awk '{ print $4 "\n" $10 }')"
 SWAP_TOTAL="${SWAP_TOTAL%%.*}"
 SWAP_FREE="${SWAP_FREE%%.*}"
 MEM_TOTAL=$(sysctl hw.memsize | awk '{ print $NF }')
 MEM_TOTAL=$(( MEM_TOTAL / 1024 / 1024 ))
 MEM_FREE=0
-while IFS=$':\r\n' read a b; do
+while IFS=$':\r\n' read -r a b; do
 if [ "$a" = "Pages free" ] || [ "$a" = "Pages inactive" ] || [ "$a" = "Pages speculative" ]; then
 b="${b// /}"
 b="${b//./}"
-MEM_FREE=$(( MEM_FREE + $b ))
+MEM_FREE=$(( MEM_FREE + b ))
 fi
 done < <(vm_stat)
 MEM_FREE=$(( MEM_FREE * 4096 / 1024 / 1024 ))
 fi
 if [ -n "$MEM_TOTAL" ]; then
 _showinfo "RAM" "$MEM_TOTAL" "$MEM_FREE"
-if [ $SWAP_TOTAL -eq 0 ]; then
+if [ "$SWAP_TOTAL" -eq 0 ]; then
 cprintf -- "Swap      : ~y~%s" "Not installed"
 else
 _showinfo "Swap" "$SWAP_TOTAL" "$SWAP_FREE"
@@ -1726,7 +1730,7 @@ fi
 fi
 if ! _is in-container && ! _is sudo; then
 if _is linux; then
-while IFS=$' \t\r\n' read a b c d e f; do
+while IFS=$' \t\r\n' read -r a b c d _ f; do
 [ "$f" = "/dev/shm" ] && continue
 [ "$f" = "/dev" ]     && continue
 [ "$f" = "/run" ]     && continue
@@ -1750,16 +1754,16 @@ else
 a="(nfs: $a)"
 fi
 _showinfo "Mount" "$b" "$d" "$f" "$a"
+done < <(df -m -P 2>/dev/null | tail -n +2 | grep -v '^/dev/loop')
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
-done < <(df -m -P 2>/dev/null | tail -n +2 | grep -v '^/dev/loop')
 elif _is macos; then
-while IFS=$' \t\r\n' read a b c d e f g h i; do
+while IFS=$' \t\r\n' read -r a b c d _ f _ _ i; do
 _check df --version || f="$i"
 _showinfo "Mount" "$b" "$d" "$f"
 done < <(df -m 2>/dev/null | tail -n +2 | grep -v -E ' +0 +0 +0 +100%')
 elif _is sunos; then
-while IFS=$' \t\r\n' read a b c d e f; do
+while IFS=$' \t\r\n' read -r a b c d _ f; do
 [ "$f" = "/var/run" ] && continue
 [ "$f" = "/etc/svc/volatile" ] && continue
 [ "$f" = "/lib/libc.so.1" ]  && continue
@@ -1768,17 +1772,17 @@ d=$(( d / 1024 ))
 _showinfo "Mount" "$b" "$d" "$f"
 done < <(df -k -t | tail -n +2 | grep -v -E ' +0 +0 +0 +0%')
 elif _is hpux; then
-while IFS=$' \t\r\n' read a b c d e f; do
+while IFS=$' \t\r\n' read -r a b c d _ f; do
 b=$(( b / 1024 ))
 d=$(( d / 1024 ))
 _showinfo "Mount" "$b" "$d" "$f"
 done < <(df -P -k | tail -n +2)
 elif _is aix; then
-while IFS=$' \t\r\n' read a b c d e f; do
+while IFS=$' \t\r\n' read -r a b c d _ f; do
 _showinfo "Mount" "$b" "$d" "$f"
 done < <(df -m -P | tail -n +2 | grep -v -E ' +- +- +0 +-')
 elif _is windows; then
-while IFS=$' ,\t\r\n' read a b c d; do
+while IFS=$' ,\t\r\n' read -r a b c d; do
 [ -z "$c" ] && continue
 b=$(( b / 1024 / 1024 ))
 c=$(( c / 1024 / 1024 ))
@@ -1963,14 +1967,15 @@ env grep "$@"
 }
 _hasnot grep || grepzip() {
 local ret i start_fn
-for (( i = 1; $i <= $#; i++ )); do
+for (( i = 1; i <= $#; i++ )); do
 _glob_match "*.zip" "${!i}" || continue
 start_fn=$i
 break
 done
 [ -n "$start_fn" ] || { echo "Error: zip files in command line were not found." >&2; return 1; }
-for (( i = $start_fn; $i <= $#; i++ )); do
-local TEMP_DIR="$(mktemp -d)"
+for (( i = start_fn; i <= $#; i++ )); do
+local TEMP_DIR
+TEMP_DIR="$(mktemp -d)"
 if unzip -q "${!i}" -d "$TEMP_DIR"; then
 grep "${@:1:$(( start_fn - 1 ))}" -r "$TEMP_DIR" || true
 else
@@ -2000,7 +2005,7 @@ alias ff='find . -name'
 if _has vim; then
 EDITOR="vim -u $IAM_HOME/vimrc -i $IAM_HOME/viminfo"
 elif _has vi; then
-EDITOR=vi
+EDITOR="vi"
 else
 _warn 'vi/vim not found\n'
 fi
@@ -2076,27 +2081,27 @@ done
 [ -n "$1" ] || { echo "Usage: $0 <grep parameters>"; return 1; }
 grep "$@" "$HISTFILE" || { echo "Nothing found."; return 1; }
 echo
-local ASK
-read -p "Do you wish to delete these lines from history file '$HISTFILE' [y/N]? " ASK
+local ASK TMP_FILE
+read -r -p "Do you wish to delete these lines from history file '$HISTFILE' [y/N]? " ASK
 _glob_match '[Yy]*' "$ASK" || { echo "Do nothing."; return 0; }
-local TMP_FILE="$(mktemp)"
+TMP_FILE="$(mktemp)"
 grep -v "$@" "$HISTFILE" > "$TMP_FILE"
 awk '/^#[0-9]+$/ { last=$0; have_in=1; next } !/^#[0-9]+$/ { if (have_in) { print last; have_in=0 } print }' "$TMP_FILE" > "$HISTFILE"
 rm -f "$TMP_FILE"
 echo "Done."
 }
 ,dedup_history() {
-local ASK
-read -p "Do you wish to dedup lines in history file '$HISTFILE' [y/N]? " ASK
+local ASK TMP_FILE LINES_START LINES_END
+read -r -p "Do you wish to dedup lines in history file '$HISTFILE' [y/N]? " ASK
 _glob_match '[Yy]*' "$ASK" || { echo "Do nothing."; return 0; }
-local LINES_START="$(wc -l < "$HISTFILE")"
-local TMP_FILE="$(mktemp)"
+LINES_START="$(wc -l < "$HISTFILE")"
+TMP_FILE="$(mktemp)"
 tac "$HISTFILE" \
 | awk '/^#[0-9]+$/ || !seen[$0]++ { print }' \
 | tac > "$TMP_FILE"
 awk '/^#[0-9]+$/ { last=$0; have_in=1; next } !/^#[0-9]+$/ { if (have_in) { print last; have_in=0 } print }' "$TMP_FILE" > "$HISTFILE"
 rm -f "$TMP_FILE"
-local LINES_END="$(wc -l < "$HISTFILE")"
+LINES_END="$(wc -l < "$HISTFILE")"
 echo "Done. Removed lines: $(( LINES_START - LINES_END ))"
 }
 _comp_,retry() {
@@ -2112,7 +2117,7 @@ complete -F _comp_,retry ,retry
 reload() {
 if _is tmux && [ "$1" != "current" ]; then
 local current_wid wid cmd
-current_wid="$(command tmux display-message -p -t $TMUX_PANE '#{window_id}')"
+current_wid="$(command tmux display-message -p -t "$TMUX_PANE" '#{window_id}')"
 for wid in $(command tmux list-windows -F '#{window_id}'); do
 [ "$wid" != "$current_wid" ] || continue
 cmd="$(command tmux display-message -p -t "$wid" '#{pane_current_command}')"
@@ -2125,7 +2130,7 @@ done
 command tmux source-file "$IAM_HOME/tmux.conf"
 for wid in $(command tmux list-windows -F '#{window_id}'); do
 [ "$wid" != "$current_wid" ] || continue
-command tmux send-keys -t $wid 'reload current' C-m
+command tmux send-keys -t "$wid" 'reload current' C-m
 done
 fi
 export _SHELL_SESSION_ID _TERM_SESSION_ID _TMUX_SESSION_ID
@@ -2160,14 +2165,14 @@ IAM_HOME=\"\$HOME/.${IAM}_home\" && export IAM_HOME && \
 _GIT_USER_NAME=\"$_GIT_USER_NAME\" && export _GIT_USER_NAME && \
 _GIT_USER_EMAIL=\"$_GIT_USER_EMAIL\" && export _GIT_USER_EMAIL && \
 if [ ! -d \"\$IAM_HOME/terminfo\" ]; then mkdir \"\$IAM_HOME/terminfo\"; fi && \
-echo \"$(cat ${IAM_HOME}/terminfo/.terminfo | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/terminfo/.terminfo\" &&
+echo \"$(cat "${IAM_HOME}"/terminfo/.terminfo | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/terminfo/.terminfo\" &&
 TERMINFO=\"\$IAM_HOME/terminfo\" && \
 export TERMINFO && \
 tic \"\$IAM_HOME/terminfo/.terminfo\" && \
-echo \"$(cat ${IAM_HOME}/vimrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/vimrc\" && \
-echo \"$(cat ${IAM_HOME}/local_tools | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/local_tools\" && \
-echo \"$(cat ${HOME}/.tclshrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$HOME/.tclshrc\" && \
-echo \"$(cat ${IAM_HOME}/bashrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/bashrc\"" \
+echo \"$(cat "${IAM_HOME}"/vimrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/vimrc\" && \
+echo \"$(cat "${IAM_HOME}"/local_tools | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/local_tools\" && \
+echo \"$(cat "${HOME}"/.tclshrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$HOME/.tclshrc\" && \
+echo \"$(cat "${IAM_HOME}"/bashrc | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\$IAM_HOME/bashrc\"" \
 | wsl -d Ubuntu
 wsl -d Ubuntu /bin/bash -ci "IAM=\"$IAM\" && export IAM && \
 SSH_PUB_KEY=\"$SSH_PUB_KEY\" && export SSH_PUB_KEY && \
@@ -2175,7 +2180,7 @@ IAM_HOME=\"\$HOME/.${IAM}_home\" && export IAM_HOME && \
 _GIT_USER_NAME=\"$_GIT_USER_NAME\" && export _GIT_USER_NAME && \
 _GIT_USER_EMAIL=\"$_GIT_USER_EMAIL\" && export _GIT_USER_EMAIL && \
 if [ ! -d \"\\\$IAM_HOME/terminfo\" ]; then mkdir \"\\\$IAM_HOME/terminfo\"; fi && \
-echo \"$(cat $IAM_HOME/terminfo/.terminfo | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\\\$IAM_HOME/terminfo/.terminfo\" &&
+echo \"$(cat "$IAM_HOME"/terminfo/.terminfo | sed 's/\([$"\`\\]\)/\\\1/g')\">\"\\\$IAM_HOME/terminfo/.terminfo\" &&
 TERMINFO=\"\\\$IAM_HOME/terminfo\" && \
 export TERMINFO && \
 tic \"\\\$IAM_HOME/terminfo/.terminfo\" && \
@@ -2221,7 +2226,7 @@ printf '\033[4i'
 echo "Copied to Windows clipboard" 1>&2
 }
 ,fix-x-permission() {
-local fn T
+local fn
 for fn; do
 cat "$fn" > "${fn}.fix-permissions"
 mv -f "${fn}.fix-permissions" "$fn"
@@ -2251,7 +2256,7 @@ local __HOMIFY_VAR __HOMIFY_DIR __HOMIFY_WIDTH=20 __HOMIFY_TRUNC='...'
 [ -z "$COLUMNS" ] || __HOMIFY_WIDTH=$(( COLUMNS / 4 ))
 [ -n "$1" ] && __HOMIFY_DIR="$1" || __HOMIFY_DIR="$PWD"
 if [ "$__HOMIFY_DIR" = "$HOME" ] || _glob_match "$HOME/*" "$__HOMIFY_DIR"; then
-__HOMIFY_DIR="~${__HOMIFY_DIR#$HOME}"
+__HOMIFY_DIR="~${__HOMIFY_DIR#"$HOME"}"
 fi
 if [ ${#__HOMIFY_DIR} -gt $__HOMIFY_WIDTH ]; then
 __HOMIFY_DIR="$__HOMIFY_TRUNC${__HOMIFY_DIR:$(( ${#__HOMIFY_DIR} - __HOMIFY_WIDTH + ${#__HOMIFY_TRUNC} ))}"
@@ -2380,7 +2385,8 @@ command git config core.autocrlf false
 fi
 fi
 local MSG TMP_VAL
-local GIT_REPO_ROOT="$(command git rev-parse --git-dir 2>/dev/null)"
+local GIT_REPO_ROOT
+GIT_REPO_ROOT="$(command git rev-parse --git-dir 2>/dev/null)"
 if [ "$GIT_REPO_ROOT" = ".git" ]; then
 GIT_REPO_ROOT="$PWD"
 else
@@ -2443,7 +2449,7 @@ cprintf -A MSG '~K~(~y~%s commits ahead remote~K~)' "$TMP_VAL"
 fi
 fi
 local GIT_TAG
-if GIT_TAG="$(command git describe --exact-match --tags $(command git rev-parse HEAD) 2>/dev/null)"; then
+if GIT_TAG="$(command git describe --exact-match --tags "$(command git rev-parse HEAD)" 2>/dev/null)"; then
 cprintf -a MSG '~K~; ~d~tag~K~: ~m~%s' "$GIT_TAG"
 fi
 [ "$GIT_NUM_CONFLICT" -eq 0 ] \
@@ -2543,11 +2549,12 @@ printf "\n\033[?7l%s\033[?7h" "$1" | command tmux display-message -t "$_PS1_TMUX
 }
 function promptcmd () {
 local exitcode="$1" i
-local CURPOS SAVE_STTY="$(stty -g)"
+local CURPOS SAVE_STTY
+SAVE_STTY="$(stty -g)"
 stty raw -echo min 0
-echo -en "\033[6n" && read -sdR CURPOS
+echo -en "\033[6n" && read -rsdR CURPOS
 stty "$SAVE_STTY"
-[ ${CURPOS##*;} -eq 1 ] || cprintf '~Wr~%%'
+[ "${CURPOS##*;}" -eq 1 ] || cprintf '~Wr~%%'
 if [ "$exitcode" -ne 0 ] && [ -n "$PS1_COMMAND" ]; then
 local SIG
 if [ "$exitcode" -eq 130 ]; then
@@ -2568,7 +2575,7 @@ if [ ! -d "$PWD" ]; then
 _warn "Warning: Current directory doesn't exist"
 elif _check stat -c '%i' . && [ ! -L "$PWD" ] && [ "$(stat -c '%i' . 2>&1)" != "$(stat -c '%i' "$PWD")" ]; then
 cprintf '~y~Current directory is a zombie. Fixing it.'
-cd ../"${PWD##*/}"
+cd ../"${PWD##*/}" || :
 fi
 if [ -n "$_TERM_SESSION_DIR" ]; then
 echo "$PWD" > "$_TERM_SESSION_DIR/pwd"
@@ -2677,9 +2684,9 @@ fi
 echo > "$_SHELL_SESSION_STAMP"
 }
 __debug_trap() {
-: $BASH_COMMAND
-[ "$1" != "on"  ] || { unset __BASH_DEBUG_TRAP_IGNORE; return ${2-0}; }
-[ "$1" != "off" ] || { __BASH_DEBUG_TRAP_IGNORE=1; return ${2-0}; }
+: "$BASH_COMMAND"
+[ "$1" != "on"  ] || { unset __BASH_DEBUG_TRAP_IGNORE; return "${2-0}"; }
+[ "$1" != "off" ] || { __BASH_DEBUG_TRAP_IGNORE=1; return "${2-0}"; }
 [ "${BASH_COMMAND%% *}" != "__debug_trap" ] || return
 [ -z "$__BASH_DEBUG_TRAP_IGNORE" ] || return
 : echo "PRE> PS1_COMMAND = '$BASH_COMMAND'"
@@ -2741,7 +2748,7 @@ echo "Added environment variable: $__var"
 if [ "${__val/\%/}" != "$__val" ]; then
 echo "Warning! Percent in environment variable '${__var}': '${__val}'"
 fi
-export $__var="$__val" >/dev/null 2>&1
+export "$__var"="$__val" >/dev/null 2>&1
 done
 unset fn __var __val
 fi
@@ -2776,8 +2783,8 @@ fi
 [ -z "$WARN" ] || echo
 unset fn REAL_CMD WARN
 fi
-if [ -f ~/.${IAM}_customrc ]; then
-. ~/.${IAM}_customrc
+if [ -f ~/."${IAM}"_customrc ]; then
+. ~/."${IAM}"_customrc
 fi
 for VAR in LD_LIBRARY_PATH LIBPATH SHLIB_PATH DYLD_LIBRARY_PATH LD_PRELOAD LD_RUN_PATH; do
 if [ ! -z "${!VAR}" ]; then
@@ -2917,12 +2924,12 @@ fi
 fi
 if [ -n "$_TERM_SESSION_DIR" ]; then
 if [ -r "$_TERM_SESSION_DIR/pwd" ]; then
-if [ "$(expr $(date +"%s") - $(date -r "$_TERM_SESSION_DIR/pwd" +"%s"))" -gt 259200 ]; then
-rm -rf "$_TERM_SESSION_DIR/*"
+if [ $(( "$(date +"%s")" - "$(date -r "$_TERM_SESSION_DIR/pwd" +"%s")" )) -gt 259200 ]; then
+rm -rf "$_TERM_SESSION_DIR"/*
 else
 NEW_PWD="$(< "$_TERM_SESSION_DIR/pwd")"
 if [ -d "$NEW_PWD" ]; then
-cd "$NEW_PWD"
+cd "$NEW_PWD" || :
 else
 _warn "previous PWD '%s' is not reachable" "$NEW_PWD"
 fi
@@ -2944,7 +2951,7 @@ BASH_BIN="$IAM_HOME/tools/bin/bash"
 elif ! BASH_BIN="$(command -v bash 2>/dev/null)"; then
 unset BASH_BIN
 OS="$(uname -o):$(uname -m)"
-if [ "$OS" = "GNU/Linux:x86_64" -o "$OS" = "Linux:x86_64" ]; then
+if [ "$OS" = "GNU/Linux:x86_64" ] || [ "$OS" = "Linux:x86_64" ]; then
 [ -d "$IAM_HOME/tools/bin" ] || mkdir -p "$IAM_HOME/tools/bin"
 BASH_BIN="$IAM_HOME/tools/bin/bash"
 URL="https://github.com/chpock/dotfiles/releases/download/v0.0.0/bash-portable.5.2.21.linux.x86_64"

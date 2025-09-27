@@ -13,6 +13,8 @@ docker() {
             local MASK="$2"
             shift
             shift
+            # Disable: Quote expansions in case patterns to match literally rather than as a glob. [SC2254]
+            # shellcheck disable=SC2254
             while IFS= read -r LINE; do
                 case "$LINE" in
                     *\<none\>*) continue ;;
@@ -68,7 +70,9 @@ __,docker() {
     local CUR="${COMP_WORDS[COMP_CWORD]}"
     COMPREPLY=()
 
-    if [ $COMP_CWORD -eq 1 ]; then
+    if [ "$COMP_CWORD" -eq 1 ]; then
+        # Disable: Prefer mapfile or read -a to split command output (or quote to avoid splitting). [SC2207]
+        # shellcheck disable=SC2207
         COMPREPLY=($(compgen -W "exec run" -- "$CUR"))
         return
     fi
@@ -82,12 +86,16 @@ __,docker() {
         # COMP_CWORD - 3
         # COMP_WORDS - xdocker-run zookeeper : 3.8.
         if [ "${COMP_WORDS[COMP_CWORD-1]}" = ":" ]; then
+            # Disable: Prefer mapfile or read -a to split command output (or quote to avoid splitting). [SC2207]
+            # shellcheck disable=SC2207
             COMPREPLY=($(compgen -W "$(docker image ls --filter "dangling=false" --filter "reference=${COMP_WORDS[COMP_CWORD-2]}" --format '{{.Tag}}')" -- "$CUR"))
         else
+            # Disable: Prefer mapfile or read -a to split command output (or quote to avoid splitting). [SC2207]
+            # shellcheck disable=SC2207
             COMPREPLY=($(compgen -W "$(docker image ls --filter "dangling=false" --format '{{.Repository}}:{{.Tag}}')" -- "$CUR"))
         fi
     elif [ "$CMD" = "exec" ]; then
-        if [ $COMP_CWORD -eq 2 ] && [ -z "$CUR" ]; then
+        if [ "$COMP_CWORD" -eq 2 ] && [ -z "$CUR" ]; then
             if VAR="$(docker ps --format '{{.Names}}' 2>&1)" && [ "$(echo "$VAR" | wc -l)" -eq 1 ]; then
                 if [ -z "$VAR" ]; then
                     printf '\n%s' "There are no containers running"
@@ -101,7 +109,7 @@ __,docker() {
             fi
             return
         fi
-        if [ $COMP_CWORD -gt 2 ]; then
+        if [ "$COMP_CWORD" -gt 2 ]; then
             compopt -o default
             return
         fi
@@ -109,6 +117,8 @@ __,docker() {
             cprintf -n '\n~r~ERROR~K~: ~d~%s' "$VAR"
             COMPREPLY=('~=~=~=~=~=~' '=~=~=~=~=~=')
         else
+            # Disable: Prefer mapfile or read -a to split command output (or quote to avoid splitting). [SC2207]
+            # shellcheck disable=SC2207
             COMPREPLY=($(compgen -W "$VAR" -- "$CUR"))
         fi
     fi

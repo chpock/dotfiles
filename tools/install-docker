@@ -27,6 +27,6 @@ fi
 
 if ! id -nG | tr ' ' '\n' | grep -q '^docker$'; then
     echo "Add current user '$USER' to the docker group..."
-    (set -x; sudo usermod -aG docker $USER)
+    (set -x; sudo usermod -aG docker "$USER")
     echo "WARNING: you need to re-login to apply the group change"
 fi

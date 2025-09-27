@@ -38,6 +38,7 @@ _hasnot pip3 || pip() {
                 for FN in requirements.txt requirements-dev.txt dev-requirements.txt; do
                     if [ -f "$PWD/$FN" ]; then
                         echo "Installing requirements: $FN ..."
+                        # shellcheck source=/dev/null
                         (source "$PWD"/.venv/bin/activate && pip install -r "$PWD/$FN") && RC=0 || RC=$?
                     fi
                     [ $RC -eq 0 ] || break

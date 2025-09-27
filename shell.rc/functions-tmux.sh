@@ -14,8 +14,9 @@ _has tmux || return
     case "$CMD" in
         _get-id-from-backup)
             if [ -e "$BACKUP_FILE_IDS" ]; then
-                local current_session_name="$(tmux display-message -p '#S')"
-                while IFS="$SEP" read session_name session_id; do
+                local current_session_name
+                current_session_name="$(tmux display-message -p '#S')"
+                while IFS="$SEP" read -r session_name session_id; do
                     if [ "$session_name" = "$current_session_name" ]; then
                         echo "$session_id"
                         return 0
@@ -25,12 +26,12 @@ _has tmux || return
             return 1
             ;;
         save)
-            while IFS="$SEP" read session_name session_id session_persistent_id; do
+            while IFS="$SEP" read -r session_name session_id session_persistent_id; do
                 echo "${session_name}${SEP}${session_persistent_id}"
                 session_dir="$TMUX_TMPDIR/id-$session_persistent_id"
                 active_window_id="$(command tmux display-message -t "$session_id" -p -F '#{window_id}' 2>/dev/null)"
                 rm -f "$session_dir/backup_active"
-                while IFS="$SEP" read window_name window_id current_path; do
+                while IFS="$SEP" read -r window_name window_id current_path; do
                     window_persistent_id="$(command tmux show -w -t "$window_id" -v '@persistent-id')"
                     echo "${window_name}${SEP}${window_persistent_id}${SEP}${current_path}"
                     if [ "$window_id" = "$active_window_id" ]; then
@@ -46,17 +47,18 @@ _has tmux || return
         restore)
             [ -e "$SESSION_BACKUP_FILE" ] || return 0
             local tmp_session_id tmp_session_persistent_id
-            local known_sessions="$(command tmux list-sessions -F "#{session_id}${SEP}#{_TMUX_SESSION_ID}" 2>/dev/null || true)"
+            local known_sessions
             local known_windows
             local restore_full_session session_sid_file
             local cols lines
+            known_sessions="$(command tmux list-sessions -F "#{session_id}${SEP}#{_TMUX_SESSION_ID}" 2>/dev/null || true)"
             cols="$(tput cols 2>/dev/null)" || cols="-"
             lines="$(tput lines 2>/dev/null)" || lines="-"
-            while IFS="$SEP" read session_name session_persistent_id; do
+            while IFS="$SEP" read -r session_name session_persistent_id; do
                 # We don't use filter feature to find existing session as it is only available in tmux v3.3+.
                 unset session_id restore_full_session known_windows
                 session_dir="$TMUX_TMPDIR/id-$session_persistent_id"
-                while IFS="$SEP" read tmp_session_id tmp_session_persistent_id; do
+                while IFS="$SEP" read -r tmp_session_id tmp_session_persistent_id; do
                     if [ "$tmp_session_persistent_id" = "$session_persistent_id" ]; then
                         session_id="$tmp_session_id"
                         break
@@ -83,22 +85,24 @@ _has tmux || return
                     command tmux set-env -t "$session_id" _TMUX_SESSION_ID "$session_persistent_id"
                 fi
                 if [ -e "$session_dir/backup" ]; then
-                    while read window_id; do
+                    while read -r window_id; do
                         if window_persistent_id="$(command tmux show -w -t "$window_id" -v '@persistent-id' 2>/dev/null)" && [ -n "$window_persistent_id" ]; then
                             known_windows+="${SEP}${window_persistent_id}"
                         fi
                     done < <(command tmux list-windows -t "$session_id" -F '#{window_id}')
                     known_windows+="${SEP}"
                     unset active_window_id
+                    # Disable: Note that A && B || C is not if-then-else. C may run when A is true. [SC2015]
+                    # shellcheck disable=SC2015
                     [ -e "$session_dir/backup_active" ] \
                         && active_window_persistent_id="$(< "$session_dir/backup_active")" \
                         || unset active_window_persistent_id
                     # It's a simple "touch", but using the built-in "echo" and without calling
                     # an external "touch" utility.
                     echo > "$session_dir/mode-restore"
-                    while IFS="$SEP" read window_name window_persistent_id current_path; do
+                    while IFS="$SEP" read -r window_name window_persistent_id current_path; do
                         # Check if the current window is in the list of existing windows
-                        [ "$known_windows" = "${known_windows#*${SEP}$window_persistent_id${SEP}}" ] || continue
+                        [ "$known_windows" = "${known_windows#*"${SEP}$window_persistent_id${SEP}"}" ] || continue
                         if [ -z "$restore_full_session" ]; then
                             echo "[TMUX] restore window '$window_name' with path '$current_path' (session: $session_name)"
                         fi
@@ -148,11 +152,12 @@ _has tmux || return
             fi
             ;;
         memory)
+            local MAX_LEN_SIZE MAX_LEN_SESSION
             # Find the longest number of bytes
-            local MAX_LEN_SIZE="$(tmux list-panes -a -F '#{history_bytes}' \
+            MAX_LEN_SIZE="$(tmux list-panes -a -F '#{history_bytes}' \
                 | awk 'length > maxlen { maxlen = length } END { print maxlen }')"
             # Fin the longest session name
-            local MAX_LEN_SESSION="$(tmux list-sessions -F '#S' \
+            MAX_LEN_SESSION="$(tmux list-sessions -F '#S' \
                 | awk 'length > maxlen { maxlen = length } END { print maxlen }')"
             tmux list-panes -a -F \
                 "#{p$(( MAX_LEN_SIZE + 1)):history_bytes} [#{p$(( MAX_LEN_SESSION + 1)):session_name}] Win: ###{window_index} (lines: #{history_size}/#{history_limit})" \
@@ -182,7 +187,8 @@ _tmux_generate_conf() {
     [ -e "$TMUX_CONF" ] && [ "$TMUX_CONF" -nt "$TMUX_CONF_TEMPLATE" ] && return 0 || :
 
     # strip beta prefix for versions like '3.0a', '3.1c', etc.
-    local ver="$(command tmux -V | sed -E -e 's/^.*[[:space:]][^[:digit:]]*//' -e 's/[^[:digit:]]*$//')"
+    local ver
+    ver="$(command tmux -V | sed -E -e 's/^.*[[:space:]][^[:digit:]]*//' -e 's/[^[:digit:]]*$//')"
 
     local min_ver max_ver line blank
     unset blank
@@ -200,6 +206,8 @@ _tmux_generate_conf() {
         esac
         [ -z "$min_ver" ] || { _vercomp "$min_ver" '<=' "$ver" || continue; }
         [ -z "$max_ver" ] || { _vercomp "$max_ver" '>=' "$ver" || continue; }
+        # Disable: Note that A && B || C is not if-then-else. C may run when A is true. [SC2015]
+        # shellcheck disable=SC2015
         [ -z "$line" ] && blank=1 || unset blank
         echo "$line"
     done < "$TMUX_CONF_TEMPLATE" > "$TMUX_CONF"

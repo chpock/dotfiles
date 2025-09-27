@@ -58,6 +58,8 @@ _comp,share() {
 
     if [ "$COMP_CWORD" -ge 2 ]; then
         if [ "${COMP_WORDS[COMP_CWORD-1]}" == "-expires" ]; then
+            # Disable: Prefer mapfile or read -a to split command output (or quote to avoid splitting). [SC2207]
+            # shellcheck disable=SC2207
             COMPREPLY=( $(compgen -W "0 1 6 24 168 720 -" -- "$cur") )
             return
         fi
@@ -65,10 +67,14 @@ _comp,share() {
 
     case "$cur" in
         -*)
+            # Disable: Prefer mapfile or read -a to split command output (or quote to avoid splitting). [SC2207]
+            # shellcheck disable=SC2207
             COMPREPLY=($(compgen -W "-expires" -- "$cur"))
             ;;
         *)
             # complete file paths by default
+            # Disable: Prefer mapfile or read -a to split command output (or quote to avoid splitting). [SC2207]
+            # shellcheck disable=SC2207
             COMPREPLY=( $(compgen -f -- "$cur") )
             ;;
     esac

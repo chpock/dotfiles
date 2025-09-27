@@ -7,33 +7,33 @@ tool: git functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-git.sh
 $IAM_HOME/shell.rc/functions-git.sh
 has: git
-5819
+5846
 tool: docker functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-docker.sh
 $IAM_HOME/shell.rc/functions-docker.sh
 has: docker
-3713
+4471
 tool: AWS CLI functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-awscli.sh
 $IAM_HOME/shell.rc/functions-awscli.sh
-13159
+13906
 tool: kubetcl function
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-kubectl.sh
 $IAM_HOME/shell.rc/functions-kubectl.sh
-4841
+5457
 tool: tmux function
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-tmux.sh
 $IAM_HOME/shell.rc/functions-tmux.sh
 has: tmux
-10958
+11378
 tool: python functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-python.sh
 $IAM_HOME/shell.rc/functions-python.sh
-1865
+1919
 tool: jumplist functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-jumplist.sh
 $IAM_HOME/shell.rc/functions-jumplist.sh
-5953
+6517
 tool: misc functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-misc.sh
 $IAM_HOME/shell.rc/functions-misc.sh
@@ -42,11 +42,11 @@ tool: ,share function
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-share.sh
 $IAM_HOME/shell.rc/functions-share.sh
 has: curl
-2097
+2556
 tool: edit bashrc
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/bashrc.rc.sh
 $IAM_HOME/shell.rc/bashrc.rc.sh
-358
+509
 tool: tmux.conf
 https://raw.githubusercontent.com/chpock/dotfiles/master/tmux.conf.template
 $IAM_HOME/tmux.conf.template
@@ -111,7 +111,7 @@ has: tmux
 tool: install-docker
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/install-docker
 $IAM_HOME/tools/bin/install-docker
-1230
+1232
 tool: tracer/debugger for perl
 https://raw.githubusercontent.com/chpock/dotfiles/master/tools/trace-perl
 $IAM_HOME/tools/bin/trace-perl

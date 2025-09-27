@@ -13,6 +13,8 @@ j() {
         if [ "$COMP_CWORD" -eq 1 ]; then
             case "$CURRENT" in
                 -*)
+                    # Disable: Prefer mapfile or read -a to split command output (or quote to avoid splitting). [SC2207]
+                    # shellcheck disable=SC2207
                     COMPREPLY=($(compgen -W "-add -del -list -help -rename -last" -- "$CURRENT"))
                     return
                     ;;
@@ -43,25 +45,27 @@ j() {
             return
         fi
         # don't provide completions for 2nd argument for -rename
-        if [ "${COMP_WORDS[1]}" = "-rename" ] && [ $COMP_CWORD -gt 2 ]; then
+        if [ "${COMP_WORDS[1]}" = "-rename" ] && [ "$COMP_CWORD" -gt 2 ]; then
             return
         fi
-        COMPREPLY=($(COMP_CWORD= j -complete "$CURRENT"))
+        # Disable: Prefer mapfile or read -a to split command output (or quote to avoid splitting). [SC2207]
+        # shellcheck disable=SC2207
+        COMPREPLY=($(COMP_CWORD='' j -complete "$CURRENT"))
         return
     fi
 
     rm -f "$JUMP_FILE_TEMP"
 
-    if [ "X$1" = "X-last" ]; then
+    if [ "$1" = "-last" ]; then
         if [ -e "$IAM_HOME/jumplist_last_pwd" ]; then
-            cd "$(cat "$IAM_HOME/jumplist_last_pwd")"
+            cd "$(cat "$IAM_HOME/jumplist_last_pwd")" || :
         else
             echo "JumpList: last directory is unknown"
         fi
         return
     fi
 
-    if [ "X$1" = "X-add" ]; then
+    if [ "$1" = "-add" ]; then
         DIR="$(pwd)"
         NAME="$2"
         [ -z "$NAME" ] && NAME="$(basename "$DIR")" || true
@@ -70,7 +74,7 @@ j() {
         return
     fi
 
-    if [ "X$1" = "X-del" ]; then
+    if [ "$1" = "-del" ]; then
         if [ -z "$2" ]; then
             echo "JumpList: ERROR: The name is not specified."
             echo "Usage: j -del <name>"
@@ -79,7 +83,7 @@ j() {
         local FOUND
         if [ -e "$JUMP_FILE" ]; then
             while IFS=$'\t' read -r NAME DIR; do
-                if [ "X$NAME" != "X$2" ]; then
+                if [ "$NAME" != "$2" ]; then
                     printf '%s\t%s\n' "$NAME" "$DIR" >>"$JUMP_FILE_TEMP"
                 else
                     FOUND=1
@@ -92,11 +96,13 @@ j() {
             return 1
         fi
         echo "JumpList: the name '$2' was removed."
+        # Disable: Note that A && B || C is not if-then-else. C may run when A is true. [SC2015]
+        # shellcheck disable=SC2015
         [ -e "$JUMP_FILE_TEMP" ] && mv -f "$JUMP_FILE_TEMP" "$JUMP_FILE" || rm -f "$JUMP_FILE"
         return
     fi
 
-    if [ "X$1" = "X-rename" ]; then
+    if [ "$1" = "-rename" ]; then
         if [ -z "$2" ] || [ -z "$3" ]; then
             if [ -z "$2" ]; then
                 echo "JumpList: ERROR: The original name is not specified."
@@ -109,7 +115,7 @@ j() {
         local FOUND
         if [ -e "$JUMP_FILE" ]; then
             while IFS=$'\t' read -r NAME DIR; do
-                if [ "X$NAME" != "X$2" ]; then
+                if [ "$NAME" != "$2" ]; then
                     printf '%s\t%s\n' "$NAME" "$DIR" >>"$JUMP_FILE_TEMP"
                 else
                     printf '%s\t%s\n' "$3" "$DIR" >>"$JUMP_FILE_TEMP"
@@ -123,16 +129,18 @@ j() {
             return 1
         fi
         echo "JumpList: renamed '$2' -> '$3'"
+        # Disable: Note that A && B || C is not if-then-else. C may run when A is true. [SC2015]
+        # shellcheck disable=SC2015
         [ -e "$JUMP_FILE_TEMP" ] && mv -f "$JUMP_FILE_TEMP" "$JUMP_FILE" || rm -f "$JUMP_FILE"
         return
     fi
 
-    if [ "X$1" = "X-list" ] || [ "X$1" = "X" ]; then
+    if [ "$1" = "-list" ] || [ -z "$1" ]; then
         if [ -e "$JUMP_FILE" ]; then
             local COUNTER=1
             while IFS=$'\t' read -r NAME DIR; do
                 printf "[%2i] %-20s %s\n" "$COUNTER" "$NAME" "$DIR"
-                COUNTER="$(expr 1 + "$COUNTER")"
+                COUNTER="$(( 1 + COUNTER ))"
             done < "$JUMP_FILE"
         else
             echo "JumpList: no directories"
@@ -140,7 +148,7 @@ j() {
         return
     fi
 
-    if [ "X$1" = "X-complete" ]; then
+    if [ "$1" = "-complete" ]; then
         if [ -e "$JUMP_FILE" ]; then
             while IFS=$'\t' read -r NAME DIR; do
                 case "$NAME" in $2*) echo "$NAME" ;; esac
@@ -149,7 +157,7 @@ j() {
         return
     fi
 
-    if [ "X$1" = "X-prompt" ]; then
+    if [ "$1" = "-prompt" ]; then
         if [ -e "$JUMP_FILE" ]; then
             local NAME_LIST
             while IFS=$'\t' read -r NAME DIR; do
@@ -164,7 +172,7 @@ j() {
         return
     fi
 
-    if [ "X$1" = "X-help" ]; then
+    if [ "$1" = "-help" ]; then
         echo "JumpList: Usage:"
         echo "  j -add [<name>]"
         echo "  j -del <name>"
@@ -178,7 +186,7 @@ j() {
 
     if [ -e "$JUMP_FILE" ]; then
         while IFS=$'\t' read -r NAME DIR; do
-            if [ "X$NAME" = "X$1" ]; then
+            if [ "$NAME" = "$1" ]; then
                 JUMP="$DIR"
             fi
         done < "$JUMP_FILE"
@@ -189,7 +197,7 @@ j() {
         return 1
     fi
 
-    cd "$JUMP/$2"
+    cd "$JUMP/$2" || :
 
 }
 

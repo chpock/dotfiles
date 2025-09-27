@@ -7,6 +7,8 @@ SELF_HOME="$(cd "$(dirname "$SELF_FILE")"; pwd)"
 SELF_FILE="$SELF_HOME/$(basename "$SELF_FILE")"
 BASHRC_SRC="$SELF_HOME/../src/bashrc"
 
+# Disable: This function is never invoked. Check usage (or ignored if invoked indirectly). [SC2329]
+# shellcheck disable=SC2329
 __bashrc_completion() {
     local BASHRC_SRC='!BASHRC_SRC!'
     if [ "$1" = "--install" ]; then
@@ -16,11 +18,15 @@ __bashrc_completion() {
     COMPREPLY=()
     local CUR="${COMP_WORDS[COMP_CWORD]}"
     if [ "${COMP_CWORD}" -eq 1 ]; then
+        # Disable: Prefer mapfile or read -a to split command output (or quote to avoid splitting). [SC2207]
+        # shellcheck disable=SC2207
         COMPREPLY=($(compgen -W "$(cd "$BASHRC_SRC"; echo *)" -- "${CUR}"))
         return 0
     fi
     local CMD="${COMP_WORDS[1]}"
     if [ "$CMD" = "-generate" ]; then
+        # Disable: Prefer mapfile or read -a to split command output (or quote to avoid splitting). [SC2207]
+        # shellcheck disable=SC2207
         COMPREPLY=($(compgen -W "bash-completion bash-rc" -- "${CUR}"))
     fi
     return 0
@@ -70,4 +76,4 @@ kill $watchdog
 
 "$SELF_FILE" -build silent
 
-exit $R
+exit "$R"

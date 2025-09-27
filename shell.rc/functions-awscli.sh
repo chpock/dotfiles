@@ -27,7 +27,7 @@ aws() {
         fi
         if [ -e "$IAM_HOME/state/on_aws_localstack" ]; then
             AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_DEFAULT_REGION=${DEFAULT_REGION:-${AWS_DEFAULT_REGION:-eu-west-1}} \
-                command aws --endpoint-url=http://${LOCALSTACK_HOST:-localhost}:4566 "$@"
+                command aws --endpoint-url=http://"${LOCALSTACK_HOST:-localhost}":4566 "$@"
         else
             command aws "$@"
         fi
@@ -55,6 +55,8 @@ aws() {
             unset AWS_ACCESS_KEY_ID
             unset AWS_SECRET_ACCESS_KEY
         fi
+        # Disable: Quote this to prevent word splitting. [SC2046]
+        # shellcheck disable=SC2046
         set -- $(set -x; aws sts assume-role --role-arn "$2" --role-session-name "$(hostname -s)" \
             --output text --query '[Credentials.AccessKeyId,Credentials.SecretAccessKey,Credentials.SessionToken]')
         export AWS_ACCESS_KEY_ID="$1"
@@ -115,14 +117,15 @@ aws() {
             echo "Usage: $0 $1 <user>@<bastion host>"
             return 1
         fi
-        local EKS_NAME="$(kubectl config view --minify -o jsonpath='{.clusters[].name}')"
+        local EKS_NAME EKS_HOST
+        EKS_NAME="$(kubectl config view --minify -o jsonpath='{.clusters[].name}')"
         if [ -n "$EKS_NAME" ]; then
             echo "EKS name: $EKS_NAME"
         else
             echo "Error: could not get EKS name"
             return
         fi
-        local EKS_HOST="$(kubectl config view --minify -o jsonpath='{.clusters[].cluster.server}')"
+        EKS_HOST="$(kubectl config view --minify -o jsonpath='{.clusters[].cluster.server}')"
         # strip https://
         EKS_HOST="${EKS_HOST##*/}"
         if [ -n "$EKS_HOST" ]; then
@@ -141,9 +144,10 @@ aws() {
         _info "Deny /usr/bin/ssh to bind system ports ..."
         sudo setcap -r /usr/bin/ssh
         _info "Unpatch /etc/hosts ..."
-        local TMP_FILE="$(mktemp)"
+        local TMP_FILE
+        TMP_FILE="$(mktemp)"
         grep -vF "$EKS_HOST" /etc/hosts > "$TMP_FILE"
-        sudo tee /etc/hosts < "$TMP_FILE" > /dev/null
+        cat "$TMP_FILE" | sudo tee /etc/hosts > /dev/null
         rm -f "$TMP_FILE"
         ;;
     ecr-auth-docker|ecr-auth-helm)
@@ -241,23 +245,26 @@ __,aws() {
     local CUR="${COMP_WORDS[COMP_CWORD]}"
     COMPREPLY=()
 
-    if [ $COMP_CWORD -eq 1 ]; then
+    if [ "$COMP_CWORD" -eq 1 ]; then
+        # Disable: Prefer mapfile or read -a to split command output (or quote to avoid splitting). [SC2207]
+        # shellcheck disable=SC2207
         COMPREPLY=($(compgen -W "on off local remote role region eks-update-kubeconfig ecr-auth-docker ecr-auth-helm unset-environment-variables profile update-profile eks-tunnel set-browser" -- "$CUR"))
         return
     fi
 
     local CMD="${COMP_WORDS[1]}"
-    local VAR
 
     case "$CMD" in
     region)
-        if [ $COMP_CWORD -eq 2 ]; then
+        if [ "$COMP_CWORD" -eq 2 ]; then
+            # Disable: Prefer mapfile or read -a to split command output (or quote to avoid splitting). [SC2207]
+            # shellcheck disable=SC2207
             COMPREPLY=($(compgen -W "$AWS_AVAILABLE_REGIONS" -- "$CUR"))
             return
         fi
         ;;
     eks-update-kubeconfig)
-        if [ $COMP_CWORD -eq 2 ]; then
+        if [ "$COMP_CWORD" -eq 2 ]; then
             if ! RESULT="$(aws eks list-clusters --query 'clusters' --output text 2>&1)"; then
                 # Trim possible leading spaces
                 RESULT=${RESULT#"${RESULT%%[![:space:]]*}"}
@@ -270,26 +277,30 @@ __,aws() {
                 COMPREPLY=('~=~=~=~=~=~' '=~=~=~=~=~=')
                 return
             fi
+            # Disable: Prefer mapfile or read -a to split command output (or quote to avoid splitting). [SC2207]
+            # shellcheck disable=SC2207
             COMPREPLY=($(compgen -W "$RESULT" -- "$CUR"))
             return
         fi
         ;;
     eks-tunnel)
-        if [ $COMP_CWORD -eq 2 ]; then
+        if [ "$COMP_CWORD" -eq 2 ]; then
             printf '\nEnter the bastion connection information in the format <user>@<bastion host>'
             COMPREPLY=('~=~=~=~=~=~' '=~=~=~=~=~=')
             return
         fi
         ;;
     ecr-auth-docker)
-        if [ $COMP_CWORD -eq 2 ]; then
+        if [ "$COMP_CWORD" -eq 2 ]; then
             printf '\nEnter the ECR host name here or leave it blank for automatic detection.'
             COMPREPLY=('~=~=~=~=~=~' '=~=~=~=~=~=')
             return
         fi
         ;;
     profile)
-        if [ $COMP_CWORD -eq 2 ]; then
+        if [ "$COMP_CWORD" -eq 2 ]; then
+            # Disable: Prefer mapfile or read -a to split command output (or quote to avoid splitting). [SC2207]
+            # shellcheck disable=SC2207
             COMPREPLY=($(compgen -W "$(aws configure list-profiles)" -- "$CUR"))
             return
         fi

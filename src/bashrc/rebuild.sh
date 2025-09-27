@@ -28,6 +28,8 @@ _has() {
     command -v "$1" >/dev/null 2>&1 && return 0 || return 1
 }
 
+# Disable: _hash references arguments, but none are ever passed. [SC2120]
+# shellcheck disable=SC2120
 _hash() {
     # here is Adler-32
     # disable messages during -x
@@ -38,7 +40,7 @@ _hash() {
             # Set C locale to avoid processing strings as Unicode. This will
             # improve performance.
             local LC_ALL=C LC_TYPE=C
-            local A=1 B=0 C i M="$@"
+            local A=1 B=0 C i M="$*"
             local L=${#M}
             for (( i = 0; i < L; i++ )); do
                 printf -v C '%d' "'${M:i:1}"
@@ -49,7 +51,7 @@ _hash() {
         fi
     } 2>/dev/null
     # For debugging only
-    : _HASH = $_HASH
+    : _HASH = "$_HASH"
 }
 
 if _has perl; then
@@ -67,6 +69,8 @@ else
         {
             # Set C locale to avoid processing strings as Unicode. This will
             # improve performance.
+            # Disable: LC_TYPE appears unused. Verify use (or export if used externally). [SC2034]
+            # shellcheck disable=SC2034
             local LC_ALL=C LC_TYPE=C
             local A=1 B=0 C
             while IFS= read -d '' -r -n1 C; do

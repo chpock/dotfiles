@@ -9,7 +9,7 @@ elif [ -x "$IAM_HOME/tools/bin/bash" ]; then
 elif ! BASH_BIN="$(command -v bash 2>/dev/null)"; then
     unset BASH_BIN
     OS="$(uname -o):$(uname -m)"
-    if [ "$OS" = "GNU/Linux:x86_64" -o "$OS" = "Linux:x86_64" ]; then
+    if [ "$OS" = "GNU/Linux:x86_64" ] || [ "$OS" = "Linux:x86_64" ]; then
         [ -d "$IAM_HOME/tools/bin" ] || mkdir -p "$IAM_HOME/tools/bin"
         BASH_BIN="$IAM_HOME/tools/bin/bash"
         URL="https://github.com/chpock/dotfiles/releases/download/v0.0.0/bash-portable.5.2.21.linux.x86_64"

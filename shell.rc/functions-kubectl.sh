@@ -73,7 +73,7 @@ k() {
                 echo "Usage: kube ns <namespace>"
                 return 1
             fi
-            kubectl config set-context $(kubectl config current-context) --namespace "$2"
+            kubectl config set-context "$(kubectl config current-context)" --namespace "$2"
         ;;
         context)
             if [ -z "$2" ]; then
@@ -110,7 +110,9 @@ __kube_complete() {
 
     COMPREPLY=()
 
-    if [ $COMP_CWORD -lt 2 ]; then
+    if [ "$COMP_CWORD" -lt 2 ]; then
+        # Disable: Prefer mapfile or read -a to split command output (or quote to avoid splitting). [SC2207]
+        # shellcheck disable=SC2207
         COMPREPLY=($(compgen -W "on off context conf ns events" -- "${COMP_WORDS[1]}"))
         return
     fi
@@ -125,6 +127,8 @@ __kube_complete() {
                 cprintf -n '~r~ERROR~K~: ~d~%s' "$__VAR"
                 COMPREPLY=('~=~=~=~=~=~' '=~=~=~=~=~=')
             else
+                # Disable: Prefer mapfile or read -a to split command output (or quote to avoid splitting). [SC2207]
+                # shellcheck disable=SC2207
                 COMPREPLY=($(compgen -W "$__VAR" -- "${COMP_WORDS[2]}"))
             fi
         ;;
@@ -134,6 +138,8 @@ __kube_complete() {
                 cprintf -n '~r~ERROR~K~: ~d~%s' "$__VAR"
                 COMPREPLY=('~=~=~=~=~=~' '=~=~=~=~=~=')
             else
+                # Disable: Prefer mapfile or read -a to split command output (or quote to avoid splitting). [SC2207]
+                # shellcheck disable=SC2207
                 COMPREPLY=($(compgen -W "$__VAR" -- "${COMP_WORDS[2]}"))
             fi
         ;;
@@ -153,6 +159,8 @@ __wrapper_start_kubectl() {
         __start_kubectl
     else
         # fallback: file completion as default behavior
+        # Disable: Prefer mapfile or read -a to split command output (or quote to avoid splitting). [SC2207]
+        # shellcheck disable=SC2207
         COMPREPLY=( $(compgen -f -- "${COMP_WORDS[COMP_CWORD]}") )
     fi
 }
