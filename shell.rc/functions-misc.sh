@@ -2,7 +2,8 @@
 
 __gpgconf_validate() {
     _has gpgconf || return
-    __background_gpgconf_validate &
+    # Run in subshell with disabled job control to avoid garbage in terminal
+    (set +m; __background_gpgconf_validate &)
 }
 
 __background_gpgconf_validate() {
