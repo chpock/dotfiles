@@ -6,6 +6,8 @@ SELF_DIR="$(dirname "$0")"
 OUT_DIR="$SELF_DIR/../../../far-manager/ui"
 CONF="$SELF_DIR/ui-colors.ini"
 OUT="$OUT_DIR/ui-colors.farconfig"
+IN_FAR2L="$SELF_DIR/farcolors.ini.in"
+OUT_FAR2L="$OUT_DIR/farcolors.ini"
 
 declare -A RAW_DATA
 
@@ -20,6 +22,22 @@ normalize() {
     fg="${fg:4:2}${fg:2:2}${fg:0:2}"
     bg="${bg:4:2}${bg:2:2}${bg:0:2}"
     echo "$bg $fg"
+}
+
+normalizeReverse() {
+    local fg="${1% *}"
+    local bg="${1#* }"
+    fg="${fg:0:2}${fg:2:2}${fg:4:2}"
+    bg="${bg:0:2}${bg:2:2}${bg:4:2}"
+    echo "$bg $fg"
+}
+
+normalizeRGB() {
+    local fg="${1% *}"
+    local bg="${1#* }"
+    fg="fore_rgb($((0x${fg:0:2})), $((0x${fg:2:2})), $((0x${fg:4:2})))"
+    bg="back_rgb($((0x${bg:0:2})), $((0x${bg:2:2})), $((0x${bg:4:2})))"
+    echo "$bg | $fg"
 }
 
 get_colors() {
@@ -89,7 +107,12 @@ fi
 <farconfig>
     <colors>
 EOF
+    # Disable: To read lines rather than words, pipe/redirect to a 'while read' loop. [SC2013]
+    # shellcheck disable=SC2013
     for i in $(grep -oP '^[A-Z][^=]+' "$CONF" | sort); do
+        # Disable: Quote this to prevent word splitting. [SC2046]
+        # Disable: This format string has 5 variables, but is passed 4 arguments. [SC2183]
+        # shellcheck disable=SC2046,SC2183
         printf '        <object name="%s" background="FF%s" foreground="FF%s"/>\n' "$i" $(normalize "$(get_colors "$i")")
     done
     cat <<EOF
@@ -101,5 +124,34 @@ EOF
 </farconfig>
 EOF
 } >"$OUT"
+
+
+{
+
+    cat <<EOF
+; Far manager configuration: UI colors
+; Maintained by: Konstantin Kushnir <chpock@gmail.com> (https://github.com/chpock/dotfiles)
+; Generated at: $(date --iso-8601=ns)
+
+EOF
+
+    while read -r LINE; do
+        case "$LINE" in
+            CommandLine*|Not.Used=*) :;;
+            *=background:*)
+                LINE="${LINE%;*}"
+                ID="${LINE%=*}"
+                # Workaround for the bug: https://github.com/elfmz/far2l/issues/2920
+                [ "$ID" != "Panel.Info.Tota" ] || ID="Panel.Info.Total"
+                # Disable: Quote this to prevent word splitting. [SC2046]
+                # Disable: This format string has 5 variables, but is passed 4 arguments. [SC2183]
+                # shellcheck disable=SC2046,SC2183
+                printf -v LINE '%s=background:#%s foreground:#%s, %s; %s' "${LINE%%=*}" $(normalizeReverse "$(get_colors "$ID")") "${LINE#*, }" "$(normalizeRGB "$(get_colors "$ID")")"
+                ;;
+        esac
+        echo "$LINE"
+    done < "$IN_FAR2L"
+
+} >"$OUT_FAR2L"
 
 "$SELF_DIR/../gen-all.sh"
