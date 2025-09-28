@@ -1,0 +1,4 @@
+git:
+  # Don't allow to force push from lazygit UI.
+  # This is exceptional case and should be allowed only for manual git commands.
+  disableForcePushing: true
