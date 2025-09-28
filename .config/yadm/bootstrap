@@ -1,0 +1,14 @@
+#!/bin/sh
+
+cd "$HOME"
+yadm submodule update --recursive --init
+
+# permissions
+chmod 700 ~/.cache ~/.config
+
+yadm gitconfig status.showUntrackedFiles normal
+
+# sparse checkout
+yadm gitconfig core.sparseCheckout true
+#yadm sparse-checkout set '/*' '!README.md' '!UNLICENSE'
+yadm sparse-checkout set .config .local .gitignore .gitmodules

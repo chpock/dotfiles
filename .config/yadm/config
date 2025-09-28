@@ -1,0 +1,18 @@
+[commit]
+	verbose = true
+	gpgsign = true
+[branch]
+	sort = -committerdate
+[tag]
+	sort = -version:refname
+[diff]
+	algorithm = histogram
+[push]
+	autoSetupRemote = true
+[maintenance]
+	auto = true
+	strategy = incremental
+[user]
+	name = Konstantin Kushnir
+	email = chpock@gmail.com
+	signingkey = 2583DAA108F4BE69
