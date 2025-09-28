@@ -39,7 +39,7 @@ __INSTALL_VERSION="
   xz-portable   5.6.4
   pdu           0.11.0
   cidr          2.2.0
-  lnav          0.12.4
+  lnav          0.13.2
   cht.sh        0.0.4
 "
 
