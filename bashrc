@@ -472,7 +472,7 @@ EOF
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
 LOCAL_TOOLS_FILE_HASH=82D71C63
-BASHRC_FILE_HASH=13006D48
+BASHRC_FILE_HASH=4C7BBADC
 declare -A -r __CPRINTF_COLORS=(
 [fw]=$'\e[37m' [fW]=$'\e[97m'
 [fk]=$'\e[30m' [fK]=$'\e[90m'
@@ -1679,11 +1679,11 @@ cprintf -v msg "%-9s : Free ${color}%9s~d~ of %9s ~K~[~b~%-25s~K~] ${color}%3s%%
 if [ -n "$add" ]; then
 cprintf -A msg '~W~%s' "$add"
 fi
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 if [ -n "$add2" ]; then
 cprintf -A msg '~K~%s' "$add2"
 fi
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 echo "$msg"
 }
 if ! _is in-container && ! _is sudo; then
@@ -2390,12 +2390,18 @@ printf "\n\033[?7l%s\033[?7h" "$1" | command tmux display-message -t "$_PS1_TMUX
 }
 function promptcmd () {
 local exitcode="$1" i
+if [ -z "$__PROMPTCMD_NO_CURPOS" ] && [ -z "$FARPID" ]; then
 local CURPOS SAVE_STTY
 SAVE_STTY="$(stty -g)"
 stty raw -echo min 0
-echo -en "\033[6n" && read -rsdR CURPOS
+echo -en "\033[6n"
+if ! read -r -s -t 0.2 -dR CURPOS; then
+CURPOS=1
+__PROMPTCMD_NO_CURPOS=1
+fi
 stty "$SAVE_STTY"
 [ "${CURPOS##*;}" -eq 1 ] || cprintf '~Wr~%%'
+fi
 if [ "$exitcode" -ne 0 ] && [ -n "$PS1_COMMAND" ]; then
 local SIG
 if [ "$exitcode" -eq 130 ]; then

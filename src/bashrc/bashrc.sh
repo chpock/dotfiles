@@ -2704,13 +2704,21 @@ function promptcmd () {
     # Exit status of the last command run.
     local exitcode="$1" i
 
-    # fix cursor position when it is not on new line
-    local CURPOS SAVE_STTY
-    SAVE_STTY="$(stty -g)"
-    stty raw -echo min 0
-    echo -en "\033[6n" && read -rsdR CURPOS
-    stty "$SAVE_STTY"
-    [ "${CURPOS##*;}" -eq 1 ] || cprintf '~Wr~%%'
+    # Fix cursor position when it is not on new line.
+    # Don't run this code for a shell inside FAR2L. Due to unknown reason,
+    # read hangs there even with -t 0.2.
+    if [ -z "$__PROMPTCMD_NO_CURPOS" ] && [ -z "$FARPID" ]; then
+        local CURPOS SAVE_STTY
+        SAVE_STTY="$(stty -g)"
+        stty raw -echo min 0
+        echo -en "\033[6n"
+        if ! read -r -s -t 0.2 -dR CURPOS; then
+            CURPOS=1
+            __PROMPTCMD_NO_CURPOS=1
+        fi
+        stty "$SAVE_STTY"
+        [ "${CURPOS##*;}" -eq 1 ] || cprintf '~Wr~%%'
+    fi
 
     # A non-zero exit code is displayed here. It's not such a trivial task.
     # Bash doesn't cleanup the latest exit code when executing an empty command.
@@ -2965,6 +2973,7 @@ __cleanup_trap() {
     rm -rf "$_SHELL_SESSION_DIR"
     exit $RC
 }
+
 
 #PROMPT_COMMAND="promptcmd \$?"
 #PROMPT_COMMAND="__debug_trap off \$? && __EC=0 || __EC=\$?; promptcmd \$__EC; unset __EC; __debug_trap on"
