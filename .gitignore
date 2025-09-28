@@ -25,7 +25,29 @@
 /.config/go/
 /.config/freerdp/server/*.pem
 /.config/helm/registry/config.json
+/.config/appimagelauncher.cfg
+/.config/electron-builder.json
+/.config/pulse/cookie
+/.config/gpgui/openssl.cnf
+/.config/com.yuezk.gpgui/*.bin
+/.config/qalculate/qalc.history
+/.config/rslsync/
+/.config/systemd/user/default.target.wants/appimagelauncherd.service
+/.config/systemd/user/default.target.wants/rslsync.service
+/.config/systemd/user/graphical-session.target.wants/hypridle.service
+/.config/systemd/user/pipewire.service.wants/
+/.config/systemd/user/pipewire-session-manager.service
+/.config/menus/applications-merged/user-chrome-apps.menu
+/.config/menus/applications-merged/xdg-desktop-menu-dummy.menu
+/.config/remmina/
+/.config/dconf/user
+/.config/far2l/history/
+/.config/far2l/REG/
+/.config/far2l/settings/bookmarks.ini
+/.config/far2l/settings/panel.ini
+/.config/far2l/winstate
 
-
+# Ignore files/dirs in .local
+/.local/bin/chrome-profile-*
 /.local/state/
 /.local/share/
