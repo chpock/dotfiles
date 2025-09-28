@@ -11,7 +11,7 @@
 
 -->
 
-<hrd xmlns="http://colorer.sf.net/2003/hrd">
+<hrd xmlns="http://colorer.sf.net/2003/hrd" class="rgb" name="gruvbox_dark_hard" description="Gruvbox (dark-hard)">
 
   <assign name="def:Text" fore="#ebdbb2" back="#1d2021"/>
   <assign name="def:HorzCross" fore="#1d2021" back="#bdae93"/>
