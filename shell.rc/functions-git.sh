@@ -84,81 +84,127 @@ git() {
     command git "$@"
 }
 
-git-config() {
-    local GIT_BIN GIT_AUTHOR SIGN_KEY
-    GIT_BIN="$(which git)"
-    if [ "$1" = "-local" ]; then
-        GIT_AUTHOR="$2"
-        set -- --local
-    else
-        GIT_AUTHOR="$1"
-        set --
-    fi
-    if [ -z "$GIT_AUTHOR" ]; then
-        GIT_AUTHOR="$_GIT_USER_EMAIL"
-    fi
-    # always enable: git commit -v
-    (set -x; "$GIT_BIN" config "$@" commit.verbose true)
-    # sort branches by commit date
-    (set -x; "$GIT_BIN" config "$@" branch.sort -committerdate)
-    # sort tags by version (the most recent tags are listed first)
-    (set -x; "$GIT_BIN" config "$@" tag.sort -version:refname)
-    # use better diff algorithm by default
-    (set -x; "$GIT_BIN" config "$@" diff.algorithm histogram)
-    #  no more 'git push origin HEAD', 'git push' will work everywhere!
-    (set -x; "$GIT_BIN" config "$@" push.autoSetupRemote true)
-    # enable automatic repository maintenance in background
-    (set -x; "$GIT_BIN" config "$@" maintenance.auto true)
-    (set -x; "$GIT_BIN" config "$@" maintenance.strategy incremental)
-    # set author
-    (set -x; "$GIT_BIN" config "$@" user.name "$_GIT_USER_NAME")
-    (set -x; "$GIT_BIN" config "$@" user.email "$GIT_AUTHOR")
-    if ! SIGN_KEY="$(set +e; LC_ALL=C gpg --with-colons --list-secret-keys "$GIT_AUTHOR" 2>/dev/null | cut -d: -f5 | head -n 1)"; then
-        echo "WARNING: gpg error: $SIGN_KEY"
-        (set -x; "$GIT_BIN" config "$@" commit.gpgsign false)
-    elif [ -z "$SIGN_KEY" ]; then
-        echo "WARNING: gpg key for '$GIT_AUTHOR' not found!"
-        (set -x; "$GIT_BIN" config "$@" commit.gpgsign false)
-    else
-        (set -x; "$GIT_BIN" config "$@" user.signingkey "$SIGN_KEY")
-        (set -x; "$GIT_BIN" config "$@" commit.gpgsign true)
-    fi
-}
+,git() {
+    case "$1" in
+        config)
+            local GIT_BIN GIT_AUTHOR SIGN_KEY
+            GIT_BIN="$(which git)"
+            if [ "$2" = "-global" ]; then
+                GIT_AUTHOR="$3"
+                set -- "$GIT_BIN" config
+            else
+                GIT_AUTHOR="$2"
+                if _is_yadm; then
+                    set -- yadm config
+                else
+                    set -- "$GIT_BIN" config --local
+                fi
+            fi
+            if [ -z "$GIT_AUTHOR" ]; then
+                GIT_AUTHOR="$_GIT_USER_EMAIL"
+            fi
+            # always enable: git commit -v
+            (set -x; "$@" commit.verbose true)
+            # sort branches by commit date
+            (set -x; "$@" branch.sort -committerdate)
+            # sort tags by version (the most recent tags are listed first)
+            (set -x; "$@" tag.sort -version:refname)
+            # use better diff algorithm by default
+            (set -x; "$@" diff.algorithm histogram)
+            #  no more 'git push origin HEAD', 'git push' will work everywhere!
+            (set -x; "$@" push.autoSetupRemote true)
+            # enable automatic repository maintenance in background
+            (set -x; "$@" maintenance.auto true)
+            (set -x; "$@" maintenance.strategy incremental)
+            # set author
+            (set -x; "$@" user.name "$_GIT_USER_NAME")
+            (set -x; "$@" user.email "$GIT_AUTHOR")
+            if ! SIGN_KEY="$(set +e; LC_ALL=C gpg --with-colons --list-secret-keys "$GIT_AUTHOR" 2>/dev/null | cut -d: -f5 | head -n 1)"; then
+                echo "WARNING: gpg error: $SIGN_KEY"
+                (set -x; "$@" commit.gpgsign false)
+            elif [ -z "$SIGN_KEY" ]; then
+                echo "WARNING: gpg key for '$GIT_AUTHOR' not found!"
+                (set -x; "$@" commit.gpgsign false)
+            else
+                (set -x; "$@" user.signingkey "$SIGN_KEY")
+                (set -x; "$@" commit.gpgsign true)
+            fi
+            ;;
+        cleanup)
+            local TO_REMOVE ASK BRANCH GIT_BIN
 
-git-cleanup() {
-    local TO_REMOVE
-    local ASK
+            _is_yadm && GIT_BIN="yadm" || GIT_BIN="$(which git)"
+            # Update remote and cleanup branches that don't exist in remote
+            echo "Fetching remote..."
+            "$GIT_BIN" fetch --all --prune
 
-    # Update remote and cleanup branches that don't exist in remote
-    echo "Fetching remote..."
-    git fetch --all --prune
+            echo "Checking branches..."
+            while read -r BRANCH; do
+                # skip branches: master, + (worktree), * (current)
+                if [ "$BRANCH" = 'master' ] || [ "$BRANCH" = '+' ] || [ "$BRANCH" = '*' ]; then
+                    continue
+                fi
+                if [ -n "$("$GIT_BIN" ls-remote --heads origin "$BRANCH")" ]; then
+                    echo "KEEP: $BRANCH"
+                else
+                    TO_REMOVE="$TO_REMOVE $BRANCH"
+                fi
+            done < <("$GIT_BIN" branch --list | awk '{print $1}')
 
-    echo "Checking branches..."
-    while read -r BRANCH; do
-        # skip branches: master, + (worktree), * (current)
-        if [ "$BRANCH" = 'master' ] || [ "$BRANCH" = '+' ] || [ "$BRANCH" = '*' ]; then
-            continue
-        fi
-        if [ -n "$(git ls-remote --heads origin "$BRANCH")" ]; then
-            echo "KEEP: $BRANCH"
-        else
-            TO_REMOVE="$TO_REMOVE $BRANCH"
-        fi
-    done < <(git branch --list | awk '{print $1}')
+            echo "Branches to delete:$TO_REMOVE"
 
-    echo "Branches to delete:$TO_REMOVE"
+            read -r -p "Do you wish to delete these branches [y/n]? " ASK
 
-    read -r -p "Do you wish to delete these branches [y/n]? " ASK
-
-    case $ASK in
-        [Yy]* )
-            for BRANCH in $TO_REMOVE; do
-                echo "git branch --delete --force '$BRANCH'"
-                git branch --delete --force "$BRANCH"
-            done
+            case $ASK in
+                [Yy]* )
+                    for BRANCH in $TO_REMOVE; do
+                        echo "$GIT_BIN branch --delete --force '$BRANCH'"
+                        "$GIT_BIN" branch --delete --force "$BRANCH"
+                    done
+                    ;;
+            esac
+            ;;
+        *)
+            echo "Unknown command: '$1'"
+            return 1
             ;;
     esac
 }
+
+__,git() {
+
+    if [ "$1" = "--install-completion" ]; then
+        complete -F __,git ,git
+        return
+    fi
+
+    local CUR="${COMP_WORDS[COMP_CWORD]}"
+    COMPREPLY=()
+
+    if [ "$COMP_CWORD" -eq 1 ]; then
+        # Disable: Prefer mapfile or read -a to split command output (or quote to avoid splitting). [SC2207]
+        # shellcheck disable=SC2207
+        COMPREPLY=($(compgen -W "config cleanup" -- "$CUR"))
+        return
+    fi
+
+    local CMD="${COMP_WORDS[1]}"
+
+    case "$CMD" in
+        config)
+            if [ "$COMP_CWORD" -eq 2 ]; then
+                # Disable: Prefer mapfile or read -a to split command output (or quote to avoid splitting). [SC2207]
+                # shellcheck disable=SC2207
+                COMPREPLY=($(compgen -W "-global" -- "$CUR"))
+            fi
+            ;;
+    esac
+
+    return
+
+}
+
+__,git --install-completion
 
 # based on: https://github.com/magicmonty/bash-git-prompt
 __git_status() {
