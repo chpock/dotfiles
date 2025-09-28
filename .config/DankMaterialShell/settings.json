@@ -35,12 +35,12 @@
   "controlCenterShowAudioIcon": true,
   "controlCenterWidgets": [
     {
-      "id": "volumeSlider",
+      "id": "brightnessSlider",
       "enabled": true,
       "width": 50
     },
     {
-      "id": "brightnessSlider",
+      "id": "volumeSlider",
       "enabled": true,
       "width": 50
     },
