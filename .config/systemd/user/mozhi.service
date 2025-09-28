@@ -1,0 +1,20 @@
+[Unit]
+Description=Mozhi translate
+
+[Service]
+TimeoutStartSec=3m
+Type=simple
+Restart=always
+RestartSec=10
+ExecStop=/usr/bin/docker stop mozhi-translate
+ExecStartPre=/usr/bin/docker pull codeberg.org/chpock/mozhi:latest
+ExecStartPre=-/usr/bin/docker kill mozhi-translate
+ExecStartPre=-/usr/bin/docker rm mozhi-translate
+ExecStart=/bin/sh -c "/usr/bin/docker run --rm \
+    --name mozhi-translate \
+    -e DEEPL_API_AUTH_KEY=\"$(cat /home/kot/.deepl-key)\" \
+    -p 3112:3000 \
+    codeberg.org/chpock/mozhi:latest"
+
+[Install]
+WantedBy=default.target
