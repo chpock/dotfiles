@@ -1,0 +1,120 @@
+return {
+  "https://gitlab.com/motaz-shokry/gruvbox.nvim",
+  name = "gruvbox",
+  opts = {
+    -- dark_variant = "hard",
+    variant = "hard",
+    palette = {
+      -- Override the builtin palette per variant
+      hard = {
+        bg_main = "#1D2021",
+        --     fg = "#D4C5A0",
+      },
+    },
+    -- Available colors:
+    -- bg_main = "#1b1b1b", bg_second = "#282828", bg_third = "#32302F",
+		-- bg1 = "#3C3836", bg2 = "#504945", bg3 = "#665C54", bg4 = "#7C6F64",
+		-- fg = "#FBF1C7", fg1 = "#EBDBB2", fg2 = "#D5C4A1", fg3 = "#BDAE93", fg4 = "#A89984",
+    -- gray = "#928374",
+    -- red_dark      = "#CC241D", red_lite    = "#FB4934",
+    -- green_dark    = "#98971A", green_lite  = "#B8BB26",
+    -- yellow_dark   = "#D79921", yellow_lite = "#FABD2F",
+    -- blue_dark     = "#458588", blue_lite   = "#83A598",
+    -- purple_dark   = "#B16286", purple_lite = "#D3869B",
+    -- aqua_dark     = "#689D6A", aqua_lite   = "#8EC07C",
+    -- orange_dark   = "#D65D0E", orange_lite = "#FE8019",
+		-- highlight_low = "#3C3836", highlight_med = "#504945", highlight_high = "#665C54",
+    highlight_groups = {
+      ["@variable.parameter"] = { fg = "fg1" },
+      HeirlineNormal = { bg = "green_lite", fg = "fg1" },
+      HeirlineInsert = { bg = "aqua_lite", fg = "fg1" },
+      HeirlineVisual = { bg = "bg1", fg = "fg1" },
+      HeirlineReplace = { bg = "red_lite", fg = "fg1" },
+      -- HeirlineInactive = { fg = "fg1" },
+      -- HeirlineCommand = { fg = "fg1" },
+      -- HeirlineTerminal = { fg = "fg1" },
+      -- -- StatusLine = { fg = "bg1", bg = "bg1", blend = 15 },
+      -- -- VertSplit = { fg = "bg4", bg = "bg4" },
+      -- -- Visual = { fg = "bg_second", bg = "fg1", inherit = false },
+
+      -- Treesitter
+      -- ["@none"] = { bg = palette.none, fg = palette.none },
+      -- ["@variable"] = { fg = palette.fg1 },
+      -- ["@variable.builtin"] = { fg = palette.orange_lite, bold = styles.bold },
+      -- ["@variable.parameter"] = { fg = palette.red_lite },
+      -- ["@variable.parameter.builtin"] = { fg = palette.blue_lite, italic = true, bold = styles.bold },
+      -- ["@variable.member"] = { fg = palette.blue_lite },
+      --
+      -- ["@constant"] = { fg = palette.purple_lite },
+      -- ["@constant.builtin"] = { fg = palette.orange_lite, bold = styles.bold },
+      -- ["@constant.macro"] = { fg = palette.aqua_lite },
+      --
+      -- ["@module"] = { fg = palette.fg1 },
+      -- ["@module.builtin"] = { fg = palette.fg1, bold = styles.bold },
+      -- ["@label"] = { link = "Label" },
+      --
+      -- ["@string"] = { fg = palette.green_lite },
+      -- ["@string.regexp"] = { fg = palette.aqua_dark },
+      -- ["@string.escape"] = { fg = palette.aqua_dark },
+      -- ["@string.special.url"] = { fg = palette.purple_lite },
+      --
+      -- ["@type"] = { fg = palette.yellow_lite },
+      -- ["@type.builtin"] = { fg = palette.yellow_lite, bold = styles.bold },
+      -- ["@type.definition"] = { fg = palette.yellow_lite, bold = styles.bold },
+      -- ["@type.qualifier"] = { fg = palette.yellow_lite },
+      --
+      -- ["@attribute"] = { fg = palette.aqua_lite },
+      -- ["@attribute.builtin"] = { fg = palette.aqua_lite, bold = styles.bold },
+      -- ["@property"] = { fg = palette.blue_lite },
+      --
+      -- ["@function"] = { fg = palette.green_dark },
+      -- ["@function.call"] = { link = "@function" },
+      -- ["@function.builtin"] = { fg = palette.orange_lite },
+      -- ["@function.method"] = { link = "@function" },
+      -- ["@function.method.call"] = { link = "@function.method" },
+      -- ["@function.macro"] = { fg = palette.purple_lite },
+      --
+      -- ["@constructor"] = { fg = palette.orange_dark },
+      --
+      -- ["@keyword"] = { fg = palette.red_lite },
+      -- ["@keyword.operator"] = { fg = palette.red_lite },
+      -- ["@keyword.function"] = { fg = palette.red_lite },
+      -- ["@keyword.import"] = { link = "Include" },
+      -- ["@keyword.storage"] = { link = "StrongCalss" },
+      -- ["@keyword.repeat"] = { fg = palette.red_lite },
+      -- ["@keyword.return"] = { fg = palette.red_lite },
+      -- ["@keyword.debug"] = { fg = palette.purple_dark },
+      -- ["@keyword.exception"] = { fg = palette.red_lite },
+      -- ["@keyword.conditional"] = { fg = palette.red_lite },
+      -- ["@keyword.conditional.ternary"] = { fg = palette.red_dark },
+      -- ["@keyword.directive"] = { fg = palette.aqua_lite },
+      -- ["@keyword.directive.define"] = { fg = palette.aqua_lite, bold = styles.bold },
+      --
+      -- ["@punctuation.delimiter"] = { fg = palette.orange_lite },
+      -- ["@punctuation.bracket"] = { fg = palette.orange_lite },
+      -- ["@punctuation.special"] = { fg = palette.orange_lite },
+      --
+      -- ["@comment"] = { fg = palette.gray },
+      -- ["@comment.error"] = { fg = palette.red_lite },
+      -- ["@comment.warning"] = { fg = palette.yellow_lite },
+      -- ["@comment.todo"] = { fg = palette.yellow_lite, bg = palette.bg_second, bold = styles.bold },
+      -- ["@comment.hint"] = { fg = palette.green_lite, bg = palette.bg_second },
+      -- ["@comment.info"] = { fg = palette.blue_lite, bg = palette.bg_second },
+      -- ["@comment.note"] = { fg = palette.aqua_lite, bg = palette.bg_second },
+      --
+      -- ["@markup.heading"] = { fg = palette.green_lite, bold = styles.bold },
+      -- ["@markup.link"] = { fg = palette.blue_lite },
+      -- ["@markup.link.url"] = { fg = palette.purple_lite, underline = true },
+      -- ["@markup.list"] = { fg = palette.orange_dark },
+      -- ["@markup.raw.delimiter.markdown"] = { fg = palette.gray },
+      --
+      -- ["@diff.plus"] = { fg = palette.green_lite, bg = palette.bg_main },
+      -- ["@diff.minus"] = { fg = palette.red_lite, bg = palette.bg_main },
+      -- ["@diff.delta"] = { bg = palette.yellow_lite, blend = 20 },
+      --
+      -- ["@tag.attribute"] = { fg = palette.blue_lite },
+      -- ["@tag.delimiter"] = { fg = palette.orange_lite },
+      -- ["@conceal.markdown"] = { fg = palette.blue_lite },
+    },
+  },
+}
