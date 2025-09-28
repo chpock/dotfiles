@@ -24,12 +24,13 @@ return {
   { import = "astrocommunity.recipes.neovide" },
   { import = "astrocommunity.editing-support.todo-comments-nvim" },
   { import = "astrocommunity.editing-support.bigfile-nvim" }, -- LunarVim/bigfile.nvim Make editing big files faster
-  -- { import = "astrocommunity.project.project-nvim" },
-  { import = "astrocommunity.fuzzy-finder.telescope-nvim" },
+  -- { import = "astrocommunity.fuzzy-finder.telescope-nvim" },
   { import = "astrocommunity.recipes.heirline-mode-text-statusline" },
   { import = "astrocommunity.recipes.diagnostic-virtual-lines-current-line" },
   { import = "astrocommunity.bars-and-lines.bufferline-nvim" },
-  { import = "astrocommunity.search.nvim-hlslens" },
+  -- { import = "astrocommunity.search.nvim-hlslens" },
+  -- { import = "astrocommunity.pack.harper" },
+  -- { import = "astrocommunity.utility.noice-nvim" },
   -- {
   --   "gruvbox.nvim",
   --   opts = {

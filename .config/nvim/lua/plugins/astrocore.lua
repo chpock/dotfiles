@@ -165,7 +165,7 @@ return {
         opt = { -- vim.opt.<key>
           relativenumber = false, -- sets vim.opt.relativenumber
           number = true, -- sets vim.opt.number
-          spell = true, -- sets vim.opt.spell
+          spell = false, -- sets vim.opt.spell
           signcolumn = "yes", -- sets vim.opt.signcolumn to yes
           wrap = false, -- sets vim.opt.wrap
           guifont = "monospace,Noto_Color_Emoji:h12",
@@ -184,6 +184,10 @@ return {
           -- This can be found in the `lua/lazy_setup.lua` file
         },
       },
+      -- Don't turn off hlsearch during cursor movement
+      on_keys = {
+        auto_hlsearch = false,
+      },
       -- Mappings can be configured through AstroCore as well.
       -- NOTE: keycodes follow the casing in the vimdocs. For example, `<Leader>` must be capitalized
       mappings = {
@@ -199,6 +203,7 @@ return {
           ["<C-C>"] = { '"+y', desc = "Copy selection to system clipboard" },
         },
         i = {
+          ["<C-L>"] = { "<Cmd>nohlsearch<CR>", desc = "Turn off search highlight" },
           ["<C-/>"] = { "<C-O>gcc", remap = true, desc = "Toggle comment line" },
           -- Ctrl-P in insert mote - paste from system clipboard
           -- ["<C-P>"] = { '<C-r>+', desc = "Paste from system clipboard" },
@@ -209,12 +214,12 @@ return {
               if vim.bo.filetype == "neo-tree" then
                 vim.cmd.wincmd "p"
               else
+                vim.cmd.stopinsert()
                 vim.cmd.Neotree "focus"
               end
             end, desc = "Toggle Explorer focus",
           },
           -- ["<C-Q>"] = { "<Cmd>qa!<CR>", desc = "Force quit" },
-          ["<C-L>"] = { "<Cmd>nohlsearch<CR>", desc = "Turn off search highlight" },
         },
         n = {
           ["<C-L>"] = { "<Cmd>nohlsearch<CR>", desc = "Turn off search highlight" },
