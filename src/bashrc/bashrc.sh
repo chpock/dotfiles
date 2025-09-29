@@ -1473,7 +1473,7 @@ hostinfo() {
     cprintf -- "Release   : ~c~%s" "$UNAME_RELEASE"
 
     if _is need_proxy; then
-        cprintf -- "Proxy     : ~g~%s" "Enabled"
+        cprintf -- "Proxy     : ~R~%s" "Enabled"
     fi
 
     sep "OS"

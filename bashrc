@@ -472,7 +472,7 @@ EOF
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
 LOCAL_TOOLS_FILE_HASH=6D601C62
-BASHRC_FILE_HASH=4C7BBADC
+BASHRC_FILE_HASH=03D0BAC7
 declare -A -r __CPRINTF_COLORS=(
 [fw]=$'\e[37m' [fW]=$'\e[97m'
 [fk]=$'\e[30m' [fK]=$'\e[90m'
@@ -1556,7 +1556,7 @@ printf -- "Kernel    : %s\n" "$UNAME_ALL"
 printf -- "Machine   : %s\n" "$UNAME_MACHINE"
 cprintf -- "Release   : ~c~%s" "$UNAME_RELEASE"
 if _is need_proxy; then
-cprintf -- "Proxy     : ~g~%s" "Enabled"
+cprintf -- "Proxy     : ~R~%s" "Enabled"
 fi
 sep "OS"
 if ! _is in-container && ! _is sudo; then
