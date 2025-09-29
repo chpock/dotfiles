@@ -2242,6 +2242,50 @@ man() {
     done
 }
 
+_comp_,retry() {
+    # Here we first try to use _comp_command_offset if it exists. This is a new
+    # function that is intended to replace _command_offset. However, it only
+    # exists in bash-completion v2.12. Also, the _command_offset function
+    # is marked as deprecated in this version of the package.
+    if _has_function _comp_command_offset; then
+        _comp_command_offset 1
+    elif _has_function _command_offset; then
+        # The _command_offset function expects a list of words in the 'words'
+        # variable. This we initialize this variable in local scope.
+        # Disable: XXX appears unused. Verify use (or export if used externally). [SC2034]
+        # shellcheck disable=SC2034
+        local cur prev words cword split
+        _init_completion -s || return
+        _command_offset 1
+    fi
+}
+
+complete -F _comp_,retry ,retry
+
+if _is need_proxy; then
+    ,proxy() {
+        env \
+            https_proxy=http://127.0.0.1:52011 \
+            http_proxy=http://127.0.0.1:52011 \
+            HTTPS_PROXY=http://127.0.0.1:52011 \
+            HTTP_PROXY=http://127.0.0.1:52011 \
+            "$@"
+    }
+    # See comments for _comp_,retry function about this implementation.
+    _comp_,proxy() {
+        if _has_function _comp_command_offset; then
+            _comp_command_offset 1
+        elif _has_function _command_offset; then
+            # Disable: XXX appears unused. Verify use (or export if used externally). [SC2034]
+            # shellcheck disable=SC2034
+            local cur prev words cword split
+            _init_completion -s || return
+            _command_offset 1
+        fi
+    }
+    complete -F _comp_,proxy ,proxy
+fi
+
 ,forget() {
     [ -n "$1" ] || { echo "Usage: $0 <grep parameters>"; return 1; }
     grep "$@" "$HISTFILE" || { echo "Nothing found."; return 1; }
@@ -2273,25 +2317,6 @@ man() {
     echo "Done. Removed lines: $(( LINES_START - LINES_END ))"
 }
 
-_comp_,retry() {
-    # Here we first try to use _comp_command_offset if it exists. This is a new
-    # function that is intended to replace _command_offset. However, it only
-    # exists in bash-completion v2.12. Also, the _command_offset function
-    # is marked as deprecated in this version of the package.
-    if _has_function _comp_command_offset; then
-        _comp_command_offset 1
-    elif _has_function _command_offset; then
-        # The _command_offset function expects a list of words in the 'words'
-        # variable. This we initialize this variable in local scope.
-        # Disable: XXX appears unused. Verify use (or export if used externally). [SC2034]
-        # shellcheck disable=SC2034
-        local cur prev words cword split
-        _init_completion -s || return
-        _command_offset 1
-    fi
-}
-
-complete -F _comp_,retry ,retry
 
 #magic
 

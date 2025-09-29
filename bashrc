@@ -472,7 +472,7 @@ EOF
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
 LOCAL_TOOLS_FILE_HASH=6D601C62
-BASHRC_FILE_HASH=03D0BAC7
+BASHRC_FILE_HASH=D505A1C7
 declare -A -r __CPRINTF_COLORS=(
 [fw]=$'\e[37m' [fW]=$'\e[97m'
 [fk]=$'\e[30m' [fK]=$'\e[90m'
@@ -1682,14 +1682,14 @@ fi
 if [ -n "$add2" ]; then
 cprintf -A msg '~K~%s' "$add2"
 fi
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 echo "$msg"
 }
 if ! _is in-container && ! _is sudo; then
 local MEM_TOTAL="" MEM_FREE SWAP_TOTAL SWAP_FREE
 if [ -f /proc/meminfo ]; then
 local _buffers=0 _cached=0 _memTotal _memFree _swapTotal _swapFree
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 while IFS=$' :\t\r\n' read -r a b c; do
 case "$a" in
 MemTotal)  _memTotal="$b";;
@@ -2077,6 +2077,36 @@ echo "Exit code: $R; Retry in 5 seconds ..."
 sleep 5
 done
 }
+_comp_,retry() {
+if _has_function _comp_command_offset; then
+_comp_command_offset 1
+elif _has_function _command_offset; then
+local cur prev words cword split
+_init_completion -s || return
+_command_offset 1
+fi
+}
+complete -F _comp_,retry ,retry
+if _is need_proxy; then
+,proxy() {
+env \
+https_proxy=http://127.0.0.1:52011 \
+http_proxy=http://127.0.0.1:52011 \
+HTTPS_PROXY=http://127.0.0.1:52011 \
+HTTP_PROXY=http://127.0.0.1:52011 \
+"$@"
+}
+_comp_,proxy() {
+if _has_function _comp_command_offset; then
+_comp_command_offset 1
+elif _has_function _command_offset; then
+local cur prev words cword split
+_init_completion -s || return
+_command_offset 1
+fi
+}
+complete -F _comp_,proxy ,proxy
+fi
 ,forget() {
 [ -n "$1" ] || { echo "Usage: $0 <grep parameters>"; return 1; }
 grep "$@" "$HISTFILE" || { echo "Nothing found."; return 1; }
@@ -2104,16 +2134,6 @@ rm -f "$TMP_FILE"
 LINES_END="$(wc -l < "$HISTFILE")"
 echo "Done. Removed lines: $(( LINES_START - LINES_END ))"
 }
-_comp_,retry() {
-if _has_function _comp_command_offset; then
-_comp_command_offset 1
-elif _has_function _command_offset; then
-local cur prev words cword split
-_init_completion -s || return
-_command_offset 1
-fi
-}
-complete -F _comp_,retry ,retry
 reload() {
 if _is tmux && [ "$1" != "current" ]; then
 local current_wid wid cmd
