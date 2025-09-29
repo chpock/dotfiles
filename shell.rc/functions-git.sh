@@ -214,12 +214,12 @@ __git_status() {
     local GIT_STATUS IS_YADM=''
     # Check if current directory is a git repository
     if _check _vercomp 1.8.0 '<' "$__GIT_VERSION"; then
-        GIT_STATUS="$(LC_ALL=C "$@" status --porcelain 2>/dev/null)" || GIT_STATUS=""
+        GIT_STATUS="$(LC_ALL=C "$@" status --porcelain 2>/dev/null)" || GIT_STATUS="!ERROR!"
     else
-        GIT_STATUS="$(LC_ALL=C "$@" status --porcelain --branch 2>/dev/null)" || GIT_STATUS=""
+        GIT_STATUS="$(LC_ALL=C "$@" status --porcelain --branch 2>/dev/null)" || GIT_STATUS="!ERROR!"
     fi
 
-    if [ -z "$GIT_STATUS" ]; then
+    if [ "$GIT_STATUS" = "!ERROR!" ]; then
         _is_yadm || return 0
         set -- "$@" --git-dir="$HOME"/.local/share/yadm/repo.git --work-tree="$HOME"
         # Return if yadm returns an error

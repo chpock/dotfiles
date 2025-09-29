@@ -3002,6 +3002,7 @@ __cleanup_trap() {
 
 #PROMPT_COMMAND="promptcmd \$?"
 #PROMPT_COMMAND="__debug_trap off \$? && __EC=0 || __EC=\$?; promptcmd \$__EC; unset __EC; __debug_trap on"
+#PROMPT_COMMAND="__EC=\$?; set -x; promptcmd \$__EC; set +x; unset _EC"
 PROMPT_COMMAND="{ __debug_trap off \$? && __EC=0 || __EC=\$?; promptcmd \$__EC; unset __EC; __debug_trap on; } 2>/dev/null"
 
 #trap __debug_trap DEBUG

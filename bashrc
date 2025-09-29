@@ -471,8 +471,8 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=6D601C62
-BASHRC_FILE_HASH=D505A1C7
+LOCAL_TOOLS_FILE_HASH=19471C5E
+BASHRC_FILE_HASH=56E1B775
 declare -A -r __CPRINTF_COLORS=(
 [fw]=$'\e[37m' [fW]=$'\e[97m'
 [fk]=$'\e[30m' [fK]=$'\e[90m'
@@ -1688,9 +1688,9 @@ if ! _is in-container && ! _is sudo; then
 local MEM_TOTAL="" MEM_FREE SWAP_TOTAL SWAP_FREE
 if [ -f /proc/meminfo ]; then
 local _buffers=0 _cached=0 _memTotal _memFree _swapTotal _swapFree
+while IFS=$' :\t\r\n' read -r a b c; do
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
-while IFS=$' :\t\r\n' read -r a b c; do
 case "$a" in
 MemTotal)  _memTotal="$b";;
 MemFree)   _memFree="$b";;
