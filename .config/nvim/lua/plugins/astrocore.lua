@@ -11,9 +11,13 @@ return {
         k8s = {
           apiVersion = false,
           kind = false,
-        }
+        },
+        helm = false,
       }
       for _, line in ipairs(lines) do
+        if line:match '%{%{%-? ' then
+          has.helm = true
+        end
         if line:match '^AWSTemplateFormatVersion' or line:match '^ *Resources:' then
           has.cfn = true
         elseif line:match '^Transform: .*::Serverless.*' then
@@ -28,6 +32,8 @@ return {
         return "yaml.sam"
       elseif has.cfn then
         return "yaml.cfn"
+      elseif has.helm then
+        return "helm"
       elseif has.k8s.apiVersion and has.k8s.kind then
         return "yaml.k8s"
       end
