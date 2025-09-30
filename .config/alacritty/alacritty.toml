@@ -3,6 +3,8 @@ live_config_reload = true
 
 [window]
 dynamic_title = true
+padding = { x = 4, y = 2 }
+dynamic_padding = true
 
 [scrolling]
 history = 10000
