@@ -59,7 +59,7 @@ __install_bazelisk() {
     local URL="https://github.com/bazelbuild/bazelisk/releases/download/v${VERSION}/bazelisk-"
     __install_make_url -noformat "
         linux-x64   linux-amd64
-    " && __install_download &&  __install_bin "archive" || return $?
+    " && __install_download &&  __install_bin "archive" && ln -sf "$TOOL" "${EXECUTABLE%/*}/bazel" || return $?
 }
 
 __install_cht_sh() {
