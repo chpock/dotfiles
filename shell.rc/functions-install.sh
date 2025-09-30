@@ -41,7 +41,26 @@ __INSTALL_VERSION="
   cidr          2.2.0
   lnav          0.13.2
   cht.sh        0.0.4
+  bazelisk      1.27.0
 "
+
+__install_bazelisk() {
+    local VERSION="$1" EXECUTABLE="$2"
+
+    if [ "$VERSION" = "-check" ]; then
+        # bazelisk has no ability to show its version without launching
+        # bazel binary. Thus, we will only check for its presence.
+        return 1
+    elif [ "$VERSION" = "-latest" ]; then
+        __install_get_latest_github "bazelbuild/bazelisk"
+        return 0
+    fi
+
+    local URL="https://github.com/bazelbuild/bazelisk/releases/download/v${VERSION}/bazelisk-"
+    __install_make_url -noformat "
+        linux-x64   linux-amd64
+    " && __install_download &&  __install_bin "archive" || return $?
+}
 
 __install_cht_sh() {
     local VERSION="$1" EXECUTABLE="$2"
