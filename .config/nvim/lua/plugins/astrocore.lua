@@ -173,7 +173,8 @@ return {
           clipboard = {},
           -- don't jump to the first char when paging
           startofline = false,
-          hlsearch = true, -- highlight search terms
+          -- Don't set hlsearch option here. Its state will come from specific session.
+          -- hlsearch = true, -- highlight search terms
           incsearch = true, -- show search matches as you type
           ignorecase = true, -- ignore case when searching
           smartcase = true, -- ignore case if search pattern is all lowercase, case-sensitive otherwise
