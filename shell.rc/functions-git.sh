@@ -33,6 +33,10 @@ _is_yadm() {
         "$HOME"/.local|"$HOME"/.local/*) :;;
         *) return 1;;
     esac
+    # If we are here, then current directory is under yadm. However, we might be
+    # in some submodule of dotfiles repo. Let's return FALSE if git is able to
+    # find a repository.
+    [ "$(command git rev-parse --is-inside-work-tree 2>/dev/null || true)" != "true" ] || return 1
     return 0
 }
 
