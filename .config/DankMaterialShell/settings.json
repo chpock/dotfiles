@@ -285,6 +285,9 @@
   "dockAutoHide": true,
   "dockGroupByApp": false,
   "dockOpenOnOverview": false,
+  "dockPosition": 1,
+  "dockSpacing": 4,
+  "dockBottomGap": 0,
   "cornerRadius": 6,
   "notificationOverlayEnabled": false,
   "dankBarAutoHide": false,
@@ -296,7 +299,7 @@
   "dankBarSquareCorners": true,
   "dankBarNoBackground": true,
   "dankBarGothCornersEnabled": false,
-  "dankBarAtBottom": false,
+  "dankBarPosition": 0,
   "lockScreenShowPowerActions": true,
   "hideBrightnessSlider": false,
   "widgetBackgroundColor": "sch",
@@ -304,6 +307,7 @@
   "notificationTimeoutLow": 5000,
   "notificationTimeoutNormal": 5000,
   "notificationTimeoutCritical": 0,
+  "notificationPopupPosition": 0,
   "screenPreferences": {
     "topBar": [
       "all"
@@ -311,5 +315,6 @@
     "dock": [
       "all"
     ]
-  }
+  },
+  "animationSpeed": 2
 }
