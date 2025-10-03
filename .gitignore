@@ -47,6 +47,7 @@
 /.config/far2l/settings/panel.ini
 /.config/far2l/winstate
 /.config/QtProject.conf
+/.config/far2l/plugins/state.ini
 
 # Ignore files/dirs in .local
 /.local/bin/chrome-profile-*
