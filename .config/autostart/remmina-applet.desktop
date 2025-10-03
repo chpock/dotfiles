@@ -1,0 +1,3 @@
+# disable remmina autostart by this file. This utility always creates this
+# autostart file if tray icon is enabled. But I want to enable tray icon and
+# disable autostart by this file.
