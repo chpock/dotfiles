@@ -312,9 +312,10 @@ return {
           {
             event = "User",
             pattern = "SessionLoadPost",
-            desc = "Show file tree on session load",
+            desc = "Show file tree on session load and turn off insert mode",
             callback = function()
               require("neo-tree.command").execute({ action = "show" })
+              vim.cmd.stopinsert()
             end,
           }
         }
