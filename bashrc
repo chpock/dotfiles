@@ -472,7 +472,7 @@ EOF
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
 LOCAL_TOOLS_FILE_HASH=10661C3A
-BASHRC_FILE_HASH=56E1B775
+BASHRC_FILE_HASH=AE3AE135
 declare -A -r __CPRINTF_COLORS=(
 [fw]=$'\e[37m' [fW]=$'\e[97m'
 [fk]=$'\e[30m' [fK]=$'\e[90m'
@@ -1401,7 +1401,13 @@ if [ -z "$SSH_USER" ] || [ "$SSH_USER" = "$USER" ]; then
 _warn "the remote user is not provided. Current user '%s' will be used on the remove machine." "$USER"
 fi
 fi
-set -- ssh -t "$@" "$(__magic_ssh)"
+set -- -t "$@" "$(__magic_ssh)"
+if _has autossh; then
+set -- autossh -M0 "$@"
+else
+_warn "autossh is not available, using plain ssh"
+set -- ssh "$@"
+fi
 [ -z "$_MAGIC_SSH" ] || set -- exec "$@"
 "$@"
 }
@@ -1687,10 +1693,10 @@ echo "$msg"
 if ! _is in-container && ! _is sudo; then
 local MEM_TOTAL="" MEM_FREE SWAP_TOTAL SWAP_FREE
 if [ -f /proc/meminfo ]; then
-local _buffers=0 _cached=0 _memTotal _memFree _swapTotal _swapFree
-while IFS=$' :\t\r\n' read -r a b c; do
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
+local _buffers=0 _cached=0 _memTotal _memFree _swapTotal _swapFree
+while IFS=$' :\t\r\n' read -r a b c; do
 case "$a" in
 MemTotal)  _memTotal="$b";;
 MemFree)   _memFree="$b";;

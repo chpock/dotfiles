@@ -1229,7 +1229,13 @@ __magic_ssh() {
             _warn "the remote user is not provided. Current user '%s' will be used on the remove machine." "$USER"
         fi
     fi
-    set -- ssh -t "$@" "$(__magic_ssh)"
+    set -- -t "$@" "$(__magic_ssh)"
+    if _has autossh; then
+        set -- autossh -M0 "$@"
+    else
+        _warn "autossh is not available, using plain ssh"
+        set -- ssh "$@"
+    fi
     [ -z "$_MAGIC_SSH" ] || set -- exec "$@"
     "$@"
 }
