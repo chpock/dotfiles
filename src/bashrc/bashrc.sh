@@ -178,6 +178,24 @@ _basename() {
     fi
     [ -z "$__BASENAME_VAR" ] && echo "$__BASENAME_OUT" || printf -v "$__BASENAME_VAR" '%s' "$__BASENAME_OUT"
 }
+_absname() {
+    local __ABSNAME_VAR
+    [ "$1" != "-v" ] || { __ABSNAME_VAR="$2"; shift 2; }
+    [ "$1" != "--" ] || { shift; }
+    local __ABSNAME_OUT
+    case "$1" in
+        # 1st case: the specified path is already absolute
+        /*) __ABSNAME_OUT="$1";;
+        # 2nd case: the specified path is empty or a dot, return PWD
+        ""|".") __ABSNAME_OUT="$PWD";;
+        # 3rd case: the specified path is relative to PWD
+        ./*) __ABSNAME_OUT="$PWD/${1:2}";;
+        # otherwise: we have relative path
+        *) __ABSNAME_OUT="$PWD/$1";;
+    esac
+    [ -z "$__ABSNAME_VAR" ] && echo "$__ABSNAME_OUT" || printf -v "$__ABSNAME_VAR" '%s' "$__ABSNAME_OUT"
+}
+
 
 _hash_file() {
     local SOURCE_FILE="$1" SOURCE_BASENAME="${1##*/}" SOURCE_PATH="${1%/*}"
@@ -278,7 +296,7 @@ _get_url() {
         curl "$@"
     elif _has wget; then
         set -- -q -O - "$URL"
-        isnot need_proxy || set -- -e "use_proxy=on" -e "https_proxy=http://127.0.0.1:52011" "$@"
+        _isnot need_proxy || set -- -e "use_proxy=on" -e "https_proxy=http://127.0.0.1:52011" "$@"
         wget "$@"
     elif [ -x /usr/lib/apt/apt-helper ]; then
         # Disable: OUT appears unused. Verify use (or export if used externally). [SC2034]

@@ -472,7 +472,7 @@ EOF
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
 LOCAL_TOOLS_FILE_HASH=10661C3A
-BASHRC_FILE_HASH=AE3AE135
+BASHRC_FILE_HASH=53DA94E9
 declare -A -r __CPRINTF_COLORS=(
 [fw]=$'\e[37m' [fW]=$'\e[97m'
 [fk]=$'\e[30m' [fK]=$'\e[90m'
@@ -620,6 +620,19 @@ _trim -r -v __BASENAME_OUT "$1" "/"
 fi
 [ -z "$__BASENAME_VAR" ] && echo "$__BASENAME_OUT" || printf -v "$__BASENAME_VAR" '%s' "$__BASENAME_OUT"
 }
+_absname() {
+local __ABSNAME_VAR
+[ "$1" != "-v" ] || { __ABSNAME_VAR="$2"; shift 2; }
+[ "$1" != "--" ] || { shift; }
+local __ABSNAME_OUT
+case "$1" in
+/*) __ABSNAME_OUT="$1";;
+""|".") __ABSNAME_OUT="$PWD";;
+./*) __ABSNAME_OUT="$PWD/${1:2}";;
+*) __ABSNAME_OUT="$PWD/$1";;
+esac
+[ -z "$__ABSNAME_VAR" ] && echo "$__ABSNAME_OUT" || printf -v "$__ABSNAME_VAR" '%s' "$__ABSNAME_OUT"
+}
 _hash_file() {
 local SOURCE_FILE="$1" SOURCE_BASENAME="${1##*/}" SOURCE_PATH="${1%/*}"
 [ "$SOURCE_BASENAME" != "$SOURCE_PATH" ] || SOURCE_PATH="$PWD"
@@ -693,7 +706,7 @@ _isnot need_proxy || set -- --proxy "http://127.0.0.1:52011" "$@"
 curl "$@"
 elif _has wget; then
 set -- -q -O - "$URL"
-isnot need_proxy || set -- -e "use_proxy=on" -e "https_proxy=http://127.0.0.1:52011" "$@"
+_isnot need_proxy || set -- -e "use_proxy=on" -e "https_proxy=http://127.0.0.1:52011" "$@"
 wget "$@"
 elif [ -x /usr/lib/apt/apt-helper ]; then
 local R OUT ERR TMP
@@ -1689,12 +1702,12 @@ if [ -n "$add2" ]; then
 cprintf -A msg '~K~%s' "$add2"
 fi
 echo "$msg"
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 }
 if ! _is in-container && ! _is sudo; then
 local MEM_TOTAL="" MEM_FREE SWAP_TOTAL SWAP_FREE
 if [ -f /proc/meminfo ]; then
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 local _buffers=0 _cached=0 _memTotal _memFree _swapTotal _swapFree
 while IFS=$' :\t\r\n' read -r a b c; do
 case "$a" in
