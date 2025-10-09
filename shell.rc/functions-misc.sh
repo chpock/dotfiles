@@ -25,3 +25,17 @@ __background_gpgconf_validate() {
         gpgconf --kill gpg-agent
     fi
 }
+
+_ensure_config() {
+    local CONFIG_DIR="$1" BASE_FILE="$2"
+    [ -r "$BASE_FILE" ] || return 0
+    local FN FN_FULL
+    while read -r FN; do
+        FN_FULL="$CONFIG_DIR/$FN"
+        [ -e "$FN_FULL" ] && [ "$FN_FULL" -nt "$BASE_FILE" ] && continue || true
+        local FN_DIR
+        _dirname -v FN_DIR -- "$FN_FULL"
+        local FN_ESCAPED="${FN//[][*^\\\/.$]/\\&}"
+        mkdir -p "$FN_DIR" && sed -n "/^---- $FN_ESCAPED/,/^----/{//!p}" "$BASE_FILE" > "$FN_FULL"
+    done < <(awk '/^---- [^[:space:]]/{ print $2 }' "$BASE_FILE")
+}

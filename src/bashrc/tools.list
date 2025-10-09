@@ -57,6 +57,12 @@ $IAM_HOME/shell.rc/functions-share.sh
 has: curl
 @getSize REPO_ROOT/shell.rc/functions-share.sh
 
+tool: k9s function
+https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-k9s.sh
+$IAM_HOME/shell.rc/functions-k9s.sh
+has: k9s
+@getSize REPO_ROOT/shell.rc/functions-k9s.sh
+
 tool: edit bashrc
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/bashrc.rc.sh
 $IAM_HOME/shell.rc/bashrc.rc.sh

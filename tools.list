@@ -37,12 +37,17 @@ $IAM_HOME/shell.rc/functions-jumplist.sh
 tool: misc functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-misc.sh
 $IAM_HOME/shell.rc/functions-misc.sh
-915
+1453
 tool: ,share function
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-share.sh
 $IAM_HOME/shell.rc/functions-share.sh
 has: curl
 2556
+tool: k9s function
+https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-k9s.sh
+$IAM_HOME/shell.rc/functions-k9s.sh
+has: k9s
+2345
 tool: edit bashrc
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/bashrc.rc.sh
 $IAM_HOME/shell.rc/bashrc.rc.sh
