@@ -472,7 +472,7 @@ EOF
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
 LOCAL_TOOLS_FILE_HASH=EACA5262
-BASHRC_FILE_HASH=53DA94E9
+BASHRC_FILE_HASH=8726BB31
 declare -A -r __CPRINTF_COLORS=(
 [fw]=$'\e[37m' [fW]=$'\e[97m'
 [fk]=$'\e[30m' [fK]=$'\e[90m'
@@ -1702,9 +1702,9 @@ if [ -n "$add2" ]; then
 cprintf -A msg '~K~%s' "$add2"
 fi
 echo "$msg"
+}
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
-}
 if ! _is in-container && ! _is sudo; then
 local MEM_TOTAL="" MEM_FREE SWAP_TOTAL SWAP_FREE
 if [ -f /proc/meminfo ]; then
@@ -2081,6 +2081,12 @@ LESS_TERMCAP_so=$'\E[01;44;33m' \
 LESS_TERMCAP_ue=$'\E[0m' \
 LESS_TERMCAP_us=$'\E[01;32m' \
 man "$@"
+}
+sha256sum() {
+case "$1" in
+http://*|https://*) _get_url "$1" | command sha256sum;;
+*) command sha256sum "$@";;
+esac
 }
 ,myip() { _get_url "https://checkip.amazonaws.com"; }
 ,hostname() {

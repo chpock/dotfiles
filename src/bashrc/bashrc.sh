@@ -2249,6 +2249,13 @@ man() {
         man "$@"
 }
 
+sha256sum() {
+    case "$1" in
+        http://*|https://*) _get_url "$1" | command sha256sum;;
+        *) command sha256sum "$@";;
+    esac
+}
+
 ,myip() { _get_url "https://checkip.amazonaws.com"; }
 
 ,hostname() {
