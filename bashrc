@@ -472,7 +472,7 @@ EOF
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
 LOCAL_TOOLS_FILE_HASH=139B5264
-BASHRC_FILE_HASH=8726BB31
+BASHRC_FILE_HASH=B54AEA6D
 declare -A -r __CPRINTF_COLORS=(
 [fw]=$'\e[37m' [fW]=$'\e[97m'
 [fk]=$'\e[30m' [fK]=$'\e[90m'
@@ -1366,12 +1366,15 @@ unset TMUX_SESSION
 fi
 unset _TMUX_SESSION_ID _TMUX_SESSION_DIR
 else
-if command tmux list-sessions -F '#{session_attached} #{session_name}' 2>/dev/null | grep --silent '^0 default$'; then
-if [ -n "$_TERM_SESSION_DIR" ] && _TMUX_SESSION_ID="$(command tmux show-env -t "default" _TMUX_SESSION_ID 2>/dev/null)" && [ -n "$_TMUX_SESSION_ID" ]; then
+if [ -z "$_MAGIC_TMUX" ] && command tmux list-sessions -F '#{session_attached} #{session_name}' 2>/dev/null | grep --silent '^0 default$'; then
+_MAGIC_TMUX="default"
+fi
+if [ -n "$_MAGIC_TMUX" ]; then
+if [ -n "$_TERM_SESSION_DIR" ] && _TMUX_SESSION_ID="$(command tmux show-env -t "$_MAGIC_TMUX" _TMUX_SESSION_ID 2>/dev/null)" && [ -n "$_TMUX_SESSION_ID" ]; then
 _TMUX_SESSION_ID="${_TMUX_SESSION_ID#*=}"
 echo "$_TMUX_SESSION_ID" > "$_TERM_SESSION_DIR/tmux_session_id"
 fi
-exec tmux attach-session -t "default"
+exec tmux attach-session -t "$_MAGIC_TMUX"
 fi
 fi
 else
@@ -1702,9 +1705,9 @@ if [ -n "$add2" ]; then
 cprintf -A msg '~K~%s' "$add2"
 fi
 echo "$msg"
-}
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
+}
 if ! _is in-container && ! _is sudo; then
 local MEM_TOTAL="" MEM_FREE SWAP_TOTAL SWAP_FREE
 if [ -f /proc/meminfo ]; then

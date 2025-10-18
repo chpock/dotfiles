@@ -1188,15 +1188,19 @@ if _has tmux; then
             # If current shell session has no attached tmux session, then check
             # if machine has unattached tmux session 'default'. Attach it now if
             # it exists.
-            if command tmux list-sessions -F '#{session_attached} #{session_name}' 2>/dev/null | grep --silent '^0 default$'; then
-                # If we have shell session, then attach it to the 'default' tmux session.
-                if [ -n "$_TERM_SESSION_DIR" ] && _TMUX_SESSION_ID="$(command tmux show-env -t "default" _TMUX_SESSION_ID 2>/dev/null)" && [ -n "$_TMUX_SESSION_ID" ]; then
+            if [ -z "$_MAGIC_TMUX" ] && command tmux list-sessions -F '#{session_attached} #{session_name}' 2>/dev/null | grep --silent '^0 default$'; then
+                _MAGIC_TMUX="default"
+            fi
+            # Check if we want to join to existing session
+            if [ -n "$_MAGIC_TMUX" ]; then
+                # If we have shell session, then attach it to the tmux session we are about to join
+                if [ -n "$_TERM_SESSION_DIR" ] && _TMUX_SESSION_ID="$(command tmux show-env -t "$_MAGIC_TMUX" _TMUX_SESSION_ID 2>/dev/null)" && [ -n "$_TMUX_SESSION_ID" ]; then
                     # Strip variable name
                     _TMUX_SESSION_ID="${_TMUX_SESSION_ID#*=}"
                     echo "$_TMUX_SESSION_ID" > "$_TERM_SESSION_DIR/tmux_session_id"
                 fi
-                # Join to the session 'default'
-                exec tmux attach-session -t "default"
+                # Join to the session
+                exec tmux attach-session -t "$_MAGIC_TMUX"
             fi
         fi
 
