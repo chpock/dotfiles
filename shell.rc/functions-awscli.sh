@@ -139,7 +139,7 @@ aws() {
         _info "Allow /usr/bin/ssh to bind system ports ..."
         sudo setcap 'CAP_NET_BIND_SERVICE=+ep' /usr/bin/ssh
         _info "Start tunnel ..."
-        (set -x; ssh -N -L "443:${EKS_HOST}:443" "$2")
+        (set -x; ssh -o ControlMaster=no -N -L "443:${EKS_HOST}:443" "$2")
         echo
         _info "Deny /usr/bin/ssh to bind system ports ..."
         sudo setcap -r /usr/bin/ssh
