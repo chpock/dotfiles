@@ -6,7 +6,7 @@ return {
   -- Don't highlight whitespace on dashboard.
   -- See https://github.com/ntpeters/vim-better-whitespace/issues/172#issuecomment-3099581990
   event = "BufRead",
-  config = function()
+  init = function()
     local g = vim.g
     g.better_whitespace_enabled = 1
     g.strip_whitespace_on_save = 1
@@ -19,5 +19,6 @@ return {
     g.strip_whitelines_at_eof = 1
     g.better_whitespace_skip_empty_lines = 1
     g.better_whitespace_verbosity = 1
+    g.better_whitespace_operator = ""
   end,
 }
