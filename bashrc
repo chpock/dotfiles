@@ -472,7 +472,7 @@ EOF
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
 LOCAL_TOOLS_FILE_HASH=C0A1526C
-BASHRC_FILE_HASH=03F59304
+BASHRC_FILE_HASH=5D0602E2
 declare -A -r __CPRINTF_COLORS=(
 [fw]=$'\e[37m' [fW]=$'\e[97m'
 [fk]=$'\e[30m' [fK]=$'\e[90m'
@@ -1720,12 +1720,12 @@ while IFS=$' :\t\r\n' read -r a b c; do
 case "$a" in
 MemTotal)  _memTotal="$b";;
 MemFree)   _memFree="$b";;
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 Buffers)   _buffers="$b";;
 Cached)    _cached="$b";;
 SwapTotal) _swapTotal="$b";;
 SwapFree)  _swapFree="$b";;
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 esac
 done < /proc/meminfo
 MEM_TOTAL=$(( _memTotal / 1024 ))
@@ -2054,16 +2054,11 @@ command vim -u "$IAM_HOME/vimrc" -i "$IAM_HOME/viminfo" "$@"
 }
 mkdir -p "$IAM_HOME/vim_swap"
 mkdir -p "$IAM_HOME/vim_runtime"
-_has apt-get && apt-get() {
-if [ "$(id -u)" -ne 0 ]; then
+_has apt-get && _isnot root && apt-get() {
 cprintf "~r~The 'sudo' prefix was added automatically for the 'apt-get' comman" >&2
 sudo apt-get "$@"
-else
-command apt-get "$@"
-fi
 }
-_has apt && apt() {
-if [ "$(id -u)" -ne 0 ]; then
+_has apt && _isnot root && apt() {
 case "$1" in
 install|remove|purge|autoremove|update|upgrade|full-upgrade|edit-sources)
 cprintf "~r~The 'sudo' prefix was added automatically for the 'apt' command" >&2
@@ -2072,9 +2067,16 @@ sudo apt "$@"
 *) command apt "$@"
 ;;
 esac
-else
-command apt "$@"
-fi
+}
+_has pacman && _isnot root && pacman() {
+case "$1" in
+-S*|-R*|-U*|-D*)
+cprintf "~r~The 'sudo' prefix was added automatically for the 'pacman' command" >&2
+sudo pacman "$@"
+;;
+*) command pacman "$@"
+;;
+esac
 }
 clear() {
 [ "$TERM" != "tmux-256color" ] || set -- -T tmux "$@"

@@ -2207,37 +2207,44 @@ vim() {
 mkdir -p "$IAM_HOME/vim_swap"
 mkdir -p "$IAM_HOME/vim_runtime"
 
-# Disable: This function can't be invoked via sudo on line 2178. [SC2032]
+# Disable: This function can't be invoked via sudo on line XXX
 # shellcheck disable=SC2032
-_has apt-get && apt-get() {
-    if [ "$(id -u)" -ne 0 ]; then
-        cprintf "~r~The 'sudo' prefix was added automatically for the 'apt-get' comman" >&2
-        # Disable: This function can't be invoked via sudo on line 2175. [SC2032]
-        # Disable: Shell functions can't be passed to external commands. Use separate script or sh -c. [SC2033]
-        # shellcheck disable=SC2032,SC2033
-        sudo apt-get "$@"
-    else
-        command apt-get "$@"
-    fi
+_has apt-get && _isnot root && apt-get() {
+    cprintf "~r~The 'sudo' prefix was added automatically for the 'apt-get' comman" >&2
+    # Disable: This function can't be invoked via sudo on line 2175. [SC2032]
+    # Disable: Shell functions can't be passed to external commands. Use separate script or sh -c. [SC2033]
+    # shellcheck disable=SC2032,SC2033
+    sudo apt-get "$@"
 }
 
-# Disable: This function can't be invoked via sudo on line 2178. [SC2032]
+# Disable: This function can't be invoked via sudo on line XXX
 # shellcheck disable=SC2032
-_has apt && apt() {
-    if [ "$(id -u)" -ne 0 ]; then
-        case "$1" in
-            install|remove|purge|autoremove|update|upgrade|full-upgrade|edit-sources)
-                cprintf "~r~The 'sudo' prefix was added automatically for the 'apt' command" >&2
-                # Disable: Shell functions can't be passed to external commands. Use separate script or sh -c. [SC2033]
-                # shellcheck disable=SC2033
-                sudo apt "$@"
-            ;;
-            *) command apt "$@"
-            ;;
-        esac
-    else
-        command apt "$@"
-    fi
+_has apt && _isnot root && apt() {
+    case "$1" in
+        install|remove|purge|autoremove|update|upgrade|full-upgrade|edit-sources)
+            cprintf "~r~The 'sudo' prefix was added automatically for the 'apt' command" >&2
+            # Disable: Shell functions can't be passed to external commands. Use separate script or sh -c. [SC2033]
+            # shellcheck disable=SC2033
+            sudo apt "$@"
+        ;;
+        *) command apt "$@"
+        ;;
+    esac
+}
+
+# Disable: This function can't be invoked via sudo on line XXX
+# shellcheck disable=SC2032
+_has pacman && _isnot root && pacman() {
+    case "$1" in
+        -S*|-R*|-U*|-D*)
+            cprintf "~r~The 'sudo' prefix was added automatically for the 'pacman' command" >&2
+            # Disable: Shell functions can't be passed to external commands. Use separate script or sh -c. [SC2033]
+            # shellcheck disable=SC2033
+            sudo pacman "$@"
+        ;;
+        *) command pacman "$@"
+        ;;
+    esac
 }
 
 clear() {
