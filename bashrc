@@ -472,7 +472,7 @@ EOF
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
 LOCAL_TOOLS_FILE_HASH=C0A1526C
-BASHRC_FILE_HASH=F983930F
+BASHRC_FILE_HASH=03F59304
 declare -A -r __CPRINTF_COLORS=(
 [fw]=$'\e[37m' [fW]=$'\e[97m'
 [fk]=$'\e[30m' [fK]=$'\e[90m'
@@ -1234,7 +1234,7 @@ _get_url "$I_URL" >"$TMP" || IS_ERROR=$?
 if [ "$IS_ERROR" -ne 0 ]; then
 cprintf " ~R~ERROR"
 else
-cprintf " ~r~OK"
+cprintf " ~g~OK"
 fi
 fi
 if [ "$IS_ERROR" -ne 0 ]; then

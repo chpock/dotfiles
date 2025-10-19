@@ -1016,7 +1016,7 @@ tools() {
                 if [ "$IS_ERROR" -ne 0 ]; then
                     cprintf " ~R~ERROR"
                 else
-                    cprintf " ~r~OK"
+                    cprintf " ~g~OK"
                 fi
             fi
             if [ "$IS_ERROR" -ne 0 ]; then
