@@ -471,8 +471,8 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=139B5264
-BASHRC_FILE_HASH=21B1E730
+LOCAL_TOOLS_FILE_HASH=C0A1526C
+BASHRC_FILE_HASH=F983930F
 declare -A -r __CPRINTF_COLORS=(
 [fw]=$'\e[37m' [fW]=$'\e[97m'
 [fk]=$'\e[30m' [fK]=$'\e[90m'
@@ -1711,8 +1711,6 @@ if [ -n "$add2" ]; then
 cprintf -A msg '~K~%s' "$add2"
 fi
 echo "$msg"
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 }
 if ! _is in-container && ! _is sudo; then
 local MEM_TOTAL="" MEM_FREE SWAP_TOTAL SWAP_FREE
@@ -1722,6 +1720,8 @@ while IFS=$' :\t\r\n' read -r a b c; do
 case "$a" in
 MemTotal)  _memTotal="$b";;
 MemFree)   _memFree="$b";;
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 Buffers)   _buffers="$b";;
 Cached)    _cached="$b";;
 SwapTotal) _swapTotal="$b";;
@@ -2321,6 +2321,7 @@ __kubectl_status() {
 if ! _has kubectl || [ ! -e "$IAM_HOME/state/on_kube" ]; then
 return 0
 fi
+[ "$1" != "-check" ] || return 1
 local CONFIG CONFIG_MSG MSG STDERR
 if [ -z "$KUBECONFIG" ]; then
 CONFIG="$HOME/.kube/config"
@@ -2371,6 +2372,7 @@ if [ -n "$AWS_ACCESS_KEY_ID$AWS_SECRET_ACCESS_KEY$AWS_SESSION_TOKEN" ] && [ -n "
 AWS_PROFILE_INACTIVE="$AWS_PROFILE"
 unset AWS_PROFILE
 fi
+[ "$1" != "-check" ] || return 1
 local MSG
 cprintf -v MSG '~K~[~W~AWS~K~:'
 if [ -e "$IAM_HOME/state/on_aws_localstack" ]; then
@@ -2438,9 +2440,13 @@ command tmux set -p -t "$TMUX_PANE" pane-active-border-style 'bg=default,fg=colo
 command tmux set -p -t "$_PS1_TMUX_CURRENT_STATUS" pane-border-style 'bg=default,fg=colour238'
 command tmux set -p -t "$_PS1_TMUX_CURRENT_STATUS" pane-active-border-style 'bg=default,fg=colour238'
 fi
-[ -z "$_PS1_STATUS_LINE" ] && _PS1_STATUS_LINE=1 || _PS1_STATUS_LINE=$(( _PS1_STATUS_LINE + 1 ))
-command tmux resize-pane -y "$_PS1_STATUS_LINE" -t "$_PS1_TMUX_CURRENT_STATUS"
-printf "\n\033[?7l%s\033[?7h" "$1" | command tmux display-message -t "$_PS1_TMUX_CURRENT_STATUS" -I
+if [ "$1" = "-reserve" ]; then
+command tmux resize-pane -y "$2" -t "$_PS1_TMUX_CURRENT_STATUS"
+else
+local PRE_FORMAT='\033[H'
+[ -n "$_PS1_STATUS_DEFER" ] && PRE_FORMAT='\n' || _PS1_STATUS_DEFER=1
+printf "${PRE_FORMAT}\033[2K\033[?7l%s\033[?7h" "$1" | command tmux display-message -t "$_PS1_TMUX_CURRENT_STATUS" -I
+fi
 }
 function promptcmd () {
 local exitcode="$1" i
@@ -2494,7 +2500,6 @@ for SCRIPT in "$IAM_HOME"/shell.rc/*; do
 [ -e "$SCRIPT" ] || continue
 ! _once "PS1 -> source $SCRIPT" && [ "$_SHELL_SESSION_STAMP" -nt "$SCRIPT" ] || source "$SCRIPT"
 done
-unset _PS1_STATUS_LINE
 if [ -z "$VIRTUAL_ENV" ]; then
 if [ -f "$PWD/.venv/bin/activate" ]; then
 source "$PWD/.venv/bin/activate" || true
@@ -2520,13 +2525,31 @@ deactivate || unset VIRTUAL_ENV
 unset __VENV_DEACTIVATE
 fi
 fi
+if _isnot tmux; then
 __aws_status
 __kubectl_status
 ! _has_function __git_status || __git_status
-if [ -z "$_PS1_STATUS_LINE" ] && [ -n "$_PS1_TMUX_CURRENT_STATUS" ]; then
+else
+local _PS1_STATUS_AWS=0 _PS1_STATUS_K8S=0 _PS1_STATUS_GIT=0
+__aws_status -check || _PS1_STATUS_AWS=1
+__kubectl_status -check || _PS1_STATUS_K8S=1
+if _has_function __git_status; then
+__git_status -check || _PS1_STATUS_GIT=1
+fi
+local _PS1_STATUS_COUNT=$(( _PS1_STATUS_AWS + _PS1_STATUS_K8S + _PS1_STATUS_GIT ))
+if [ "$_PS1_STATUS_COUNT" != "0" ]; then
+_ps1_show_status -reserve "$_PS1_STATUS_COUNT"
+(
+[ "$_PS1_STATUS_AWS" = "0" ] || __aws_status
+[ "$_PS1_STATUS_K8S" = "0" ] || __kubectl_status
+[ "$_PS1_STATUS_GIT" = "0" ] || __git_status
+) &
+disown $!
+elif [ -n "$_PS1_TMUX_CURRENT_STATUS" ]; then
 command tmux kill-pane -t "$_PS1_TMUX_CURRENT_STATUS"
 command tmux set-hook -u -w -t "$TMUX_PANE" 'pane-exited[879]'
 unset _PS1_TMUX_CURRENT_STATUS
+fi
 fi
 if _is tmux && [ -n "$TMUX_PANE" ]; then
 command tmux set-hook -R -t "$TMUX_PANE" window-renamed >/dev/null 2>&1 &

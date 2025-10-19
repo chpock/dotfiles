@@ -2571,6 +2571,9 @@ __kubectl_status() {
         return 0
     fi
 
+    # If we just checking if AWS status is required, then return that flag now
+    [ "$1" != "-check" ] || return 1
+
     local CONFIG CONFIG_MSG MSG STDERR
 
     if [ -z "$KUBECONFIG" ]; then
@@ -2651,6 +2654,9 @@ __aws_status() {
         AWS_PROFILE_INACTIVE="$AWS_PROFILE"
         unset AWS_PROFILE
     fi
+
+    # If we just checking if AWS status is required, then return that flag now
+    [ "$1" != "-check" ] || return 1
 
     local MSG
 
@@ -2760,11 +2766,21 @@ _ps1_show_status() {
         command tmux set -p -t "$_PS1_TMUX_CURRENT_STATUS" pane-border-style 'bg=default,fg=colour238'
         command tmux set -p -t "$_PS1_TMUX_CURRENT_STATUS" pane-active-border-style 'bg=default,fg=colour238'
     fi
-    [ -z "$_PS1_STATUS_LINE" ] && _PS1_STATUS_LINE=1 || _PS1_STATUS_LINE=$(( _PS1_STATUS_LINE + 1 ))
-    command tmux resize-pane -y "$_PS1_STATUS_LINE" -t "$_PS1_TMUX_CURRENT_STATUS"
-    # "\033[?7l" / "\033[?7h" - disables/enables word wrap in tmux
-    # https://github.com/tmux/tmux/issues/969#issuecomment-307659989
-    printf "\n\033[?7l%s\033[?7h" "$1" | command tmux display-message -t "$_PS1_TMUX_CURRENT_STATUS" -I
+    if [ "$1" = "-reserve" ]; then
+        command tmux resize-pane -y "$2" -t "$_PS1_TMUX_CURRENT_STATUS"
+    else
+        # If current status line is the first one, when move cursor to the top
+        # of the status pane. Otherwise, move cursot to the next line by
+        # sending <NL>. We send output to status pane in new subshell each time.
+        # Thus, variable _PS1_STATUS_DEFER will be new and empty each time, and
+        # will be discarded when subshell for status update is done.
+        local PRE_FORMAT='\033[H'
+        [ -n "$_PS1_STATUS_DEFER" ] && PRE_FORMAT='\n' || _PS1_STATUS_DEFER=1
+        # "\033[2K" - clears current line
+        # "\033[?7l" / "\033[?7h" - disables/enables word wrap in tmux
+        # https://github.com/tmux/tmux/issues/969#issuecomment-307659989
+        printf "${PRE_FORMAT}\033[2K\033[?7l%s\033[?7h" "$1" | command tmux display-message -t "$_PS1_TMUX_CURRENT_STATUS" -I
+    fi
 }
 
 # Function to set prompt_command to.
@@ -2855,8 +2871,6 @@ function promptcmd () {
         ! _once "PS1 -> source $SCRIPT" && [ "$_SHELL_SESSION_STAMP" -nt "$SCRIPT" ] || source "$SCRIPT"
     done
 
-    unset _PS1_STATUS_LINE
-
     if [ -z "$VIRTUAL_ENV" ]; then
         # If venv is inactive and we have a venv in PWD, then activate it
         if [ -f "$PWD/.venv/bin/activate" ]; then
@@ -2897,14 +2911,32 @@ function promptcmd () {
         fi
     fi
 
-    __aws_status
-    __kubectl_status
-    ! _has_function __git_status || __git_status
-
-    if [ -z "$_PS1_STATUS_LINE" ] && [ -n "$_PS1_TMUX_CURRENT_STATUS" ]; then
-        command tmux kill-pane -t "$_PS1_TMUX_CURRENT_STATUS"
-        command tmux set-hook -u -w -t "$TMUX_PANE" 'pane-exited[879]'
-        unset _PS1_TMUX_CURRENT_STATUS
+    if _isnot tmux; then
+        __aws_status
+        __kubectl_status
+        ! _has_function __git_status || __git_status
+    else
+        local _PS1_STATUS_AWS=0 _PS1_STATUS_K8S=0 _PS1_STATUS_GIT=0
+        __aws_status -check || _PS1_STATUS_AWS=1
+        __kubectl_status -check || _PS1_STATUS_K8S=1
+        if _has_function __git_status; then
+            __git_status -check || _PS1_STATUS_GIT=1
+        fi
+        local _PS1_STATUS_COUNT=$(( _PS1_STATUS_AWS + _PS1_STATUS_K8S + _PS1_STATUS_GIT ))
+        if [ "$_PS1_STATUS_COUNT" != "0" ]; then
+            _ps1_show_status -reserve "$_PS1_STATUS_COUNT"
+            # Update status in background
+            (
+                [ "$_PS1_STATUS_AWS" = "0" ] || __aws_status
+                [ "$_PS1_STATUS_K8S" = "0" ] || __kubectl_status
+                [ "$_PS1_STATUS_GIT" = "0" ] || __git_status
+            ) &
+            disown $!
+        elif [ -n "$_PS1_TMUX_CURRENT_STATUS" ]; then
+            command tmux kill-pane -t "$_PS1_TMUX_CURRENT_STATUS"
+            command tmux set-hook -u -w -t "$TMUX_PANE" 'pane-exited[879]'
+            unset _PS1_TMUX_CURRENT_STATUS
+        fi
     fi
 
     if _is tmux && [ -n "$TMUX_PANE" ]; then
@@ -3048,7 +3080,6 @@ __cleanup_trap() {
     rm -rf "$_SHELL_SESSION_DIR"
     exit $RC
 }
-
 
 #PROMPT_COMMAND="promptcmd \$?"
 #PROMPT_COMMAND="__debug_trap off \$? && __EC=0 || __EC=\$?; promptcmd \$__EC; unset __EC; __debug_trap on"

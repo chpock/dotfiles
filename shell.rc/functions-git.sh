@@ -213,6 +213,8 @@ __,git --install-completion
 # based on: https://github.com/magicmonty/bash-git-prompt
 __git_status() {
 
+    local ARG_1="$1"
+
     set -- command git
 
     local GIT_STATUS IS_YADM=''
@@ -230,6 +232,9 @@ __git_status() {
         GIT_STATUS="$(LC_ALL=C "$@" status --porcelain --branch 2>/dev/null)" || return 0
         IS_YADM=1
     fi
+
+    # If we just checking if AWS status is required, then return that flag now
+    [ "$ARG_1" != "-check" ] || return 1
 
     # run only once per session
     _check _git-config-check
