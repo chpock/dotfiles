@@ -472,7 +472,7 @@ EOF
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
 LOCAL_TOOLS_FILE_HASH=139B5264
-BASHRC_FILE_HASH=B54AEA6D
+BASHRC_FILE_HASH=21B1E730
 declare -A -r __CPRINTF_COLORS=(
 [fw]=$'\e[37m' [fW]=$'\e[97m'
 [fk]=$'\e[30m' [fK]=$'\e[90m'
@@ -1299,6 +1299,12 @@ command tmux set -w -t "$TMUX_PANE" '@persistent-id' "$_TMUX_WINDOW_ID"
 fi
 _TMUX_WINDOW_DIR="$_TMUX_SESSION_DIR/wid-$_TMUX_WINDOW_ID"
 mkdir -p "$_TMUX_WINDOW_DIR"
+_TMUX_WINDOW_DUMP_FILE="$_TMUX_WINDOW_DIR/dump"
+if ! _TMUX_WINDOW_IS_NEW="$(command tmux show -w -t "$TMUX_PANE" -v '@is-new' 2>/dev/null)" || [ -z "$_TMUX_WINDOW_IS_NEW" ]; then
+[ ! -e "$_TMUX_WINDOW_DUMP_FILE" ] \
+|| awk 'NF{last=NR} {lines[NR]=$0} END{for(i=1;i<=last;i++)print lines[i]}' "$_TMUX_WINDOW_DUMP_FILE"
+command tmux set -w -t "$TMUX_PANE" '@is-new' "no"
+fi
 fi
 if _isnot tmux; then
 tmux() {
@@ -2432,7 +2438,7 @@ command tmux set -p -t "$TMUX_PANE" pane-active-border-style 'bg=default,fg=colo
 command tmux set -p -t "$_PS1_TMUX_CURRENT_STATUS" pane-border-style 'bg=default,fg=colour238'
 command tmux set -p -t "$_PS1_TMUX_CURRENT_STATUS" pane-active-border-style 'bg=default,fg=colour238'
 fi
-[ -z "${_PS1_STATUS_LINE}" ] && _PS1_STATUS_LINE=1 || _PS1_STATUS_LINE=$(( _PS1_STATUS_LINE + 1 ))
+[ -z "$_PS1_STATUS_LINE" ] && _PS1_STATUS_LINE=1 || _PS1_STATUS_LINE=$(( _PS1_STATUS_LINE + 1 ))
 command tmux resize-pane -y "$_PS1_STATUS_LINE" -t "$_PS1_TMUX_CURRENT_STATUS"
 printf "\n\033[?7l%s\033[?7h" "$1" | command tmux display-message -t "$_PS1_TMUX_CURRENT_STATUS" -I
 }
@@ -2465,6 +2471,9 @@ SIG="EX_${SIG##*:}"
 fi
 [ -z "$SIG" ] || SIG=" ~K~[~y~${SIG}~K~]"
 cprintf "~r~Exit code~K~: ~R~%i$SIG" "$exitcode"
+fi
+if [ -n "$_TMUX_WINDOW_DUMP_FILE" ]; then
+command tmux capture-pane -t "$TMUX_PANE" -e -p -S -1000 > "$_TMUX_WINDOW_DUMP_FILE" 2>/dev/null &
 fi
 if [ ! -d "$PWD" ]; then
 _warn "Warning: Current directory doesn't exist"

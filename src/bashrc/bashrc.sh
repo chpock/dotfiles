@@ -1107,6 +1107,15 @@ if _has tmux; then
         fi
         _TMUX_WINDOW_DIR="$_TMUX_SESSION_DIR/wid-$_TMUX_WINDOW_ID"
         mkdir -p "$_TMUX_WINDOW_DIR"
+        _TMUX_WINDOW_DUMP_FILE="$_TMUX_WINDOW_DIR/dump"
+        # Restore window content is it is a new window
+        if ! _TMUX_WINDOW_IS_NEW="$(command tmux show -w -t "$TMUX_PANE" -v '@is-new' 2>/dev/null)" || [ -z "$_TMUX_WINDOW_IS_NEW" ]; then
+            # We use awk here instead of cat to trim trailing empty lines from the pane dump
+            [ ! -e "$_TMUX_WINDOW_DUMP_FILE" ] \
+                || awk 'NF{last=NR} {lines[NR]=$0} END{for(i=1;i<=last;i++)print lines[i]}' "$_TMUX_WINDOW_DUMP_FILE"
+            # Mark current window is "NOT new"
+            command tmux set -w -t "$TMUX_PANE" '@is-new' "no"
+        fi
     fi
 
     if _isnot tmux; then
@@ -2751,7 +2760,7 @@ _ps1_show_status() {
         command tmux set -p -t "$_PS1_TMUX_CURRENT_STATUS" pane-border-style 'bg=default,fg=colour238'
         command tmux set -p -t "$_PS1_TMUX_CURRENT_STATUS" pane-active-border-style 'bg=default,fg=colour238'
     fi
-    [ -z "${_PS1_STATUS_LINE}" ] && _PS1_STATUS_LINE=1 || _PS1_STATUS_LINE=$(( _PS1_STATUS_LINE + 1 ))
+    [ -z "$_PS1_STATUS_LINE" ] && _PS1_STATUS_LINE=1 || _PS1_STATUS_LINE=$(( _PS1_STATUS_LINE + 1 ))
     command tmux resize-pane -y "$_PS1_STATUS_LINE" -t "$_PS1_TMUX_CURRENT_STATUS"
     # "\033[?7l" / "\033[?7h" - disables/enables word wrap in tmux
     # https://github.com/tmux/tmux/issues/969#issuecomment-307659989
@@ -2809,6 +2818,12 @@ function promptcmd () {
        fi
        [ -z "$SIG" ] || SIG=" ~K~[~y~${SIG}~K~]"
        cprintf "~r~Exit code~K~: ~R~%i$SIG" "$exitcode"
+    fi
+
+    # Save a snapshot of the tmux pane for further restore
+    if [ -n "$_TMUX_WINDOW_DUMP_FILE" ]; then
+        # Save 1000 last lines
+        command tmux capture-pane -t "$TMUX_PANE" -e -p -S -1000 > "$_TMUX_WINDOW_DUMP_FILE" 2>/dev/null &
     fi
 
     if [ ! -d "$PWD" ]; then
