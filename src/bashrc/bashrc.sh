@@ -2847,6 +2847,7 @@ function promptcmd () {
     if [ -n "$_TMUX_WINDOW_DUMP_FILE" ]; then
         # Save 1000 last lines
         command tmux capture-pane -t "$TMUX_PANE" -e -p -S -1000 > "$_TMUX_WINDOW_DUMP_FILE" 2>/dev/null &
+        disown $!
     fi
 
     if [ ! -d "$PWD" ]; then

@@ -472,7 +472,7 @@ EOF
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
 LOCAL_TOOLS_FILE_HASH=C0A1526C
-BASHRC_FILE_HASH=5D0602E2
+BASHRC_FILE_HASH=215206E5
 declare -A -r __CPRINTF_COLORS=(
 [fw]=$'\e[37m' [fW]=$'\e[97m'
 [fk]=$'\e[30m' [fK]=$'\e[90m'
@@ -2482,6 +2482,7 @@ cprintf "~r~Exit code~K~: ~R~%i$SIG" "$exitcode"
 fi
 if [ -n "$_TMUX_WINDOW_DUMP_FILE" ]; then
 command tmux capture-pane -t "$TMUX_PANE" -e -p -S -1000 > "$_TMUX_WINDOW_DUMP_FILE" 2>/dev/null &
+disown $!
 fi
 if [ ! -d "$PWD" ]; then
 _warn "Warning: Current directory doesn't exist"
