@@ -2114,6 +2114,7 @@ _hasnot ps || psaf() {
 _hasnot ps || psgrep() {
     local OUTPUT
     if OUTPUT="$(psaf)"; then
+        echo "$OUTPUT" | head -n 1
         echo "$OUTPUT" | grep "$@"
     fi
 }

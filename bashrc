@@ -472,7 +472,7 @@ EOF
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
 LOCAL_TOOLS_FILE_HASH=C0A1526C
-BASHRC_FILE_HASH=215206E5
+BASHRC_FILE_HASH=25150F61
 declare -A -r __CPRINTF_COLORS=(
 [fw]=$'\e[37m' [fW]=$'\e[97m'
 [fk]=$'\e[30m' [fK]=$'\e[90m'
@@ -1724,9 +1724,9 @@ Buffers)   _buffers="$b";;
 Cached)    _cached="$b";;
 SwapTotal) _swapTotal="$b";;
 SwapFree)  _swapFree="$b";;
+esac
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
-esac
 done < /proc/meminfo
 MEM_TOTAL=$(( _memTotal / 1024 ))
 MEM_FREE=$(( (_memFree + _buffers + _cached) / 1024 ))
@@ -1986,6 +1986,7 @@ env ps "$@"
 _hasnot ps || psgrep() {
 local OUTPUT
 if OUTPUT="$(psaf)"; then
+echo "$OUTPUT" | head -n 1
 echo "$OUTPUT" | grep "$@"
 fi
 }
