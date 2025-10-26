@@ -48,6 +48,8 @@
 /.config/far2l/winstate
 /.config/QtProject.conf
 /.config/far2l/plugins/state.ini
+/.config/VNote/VNote/*.log
+/.config/VNote/VNote/session.json
 
 # Ignore files/dirs in .local
 /.local/bin/chrome-profile-*
