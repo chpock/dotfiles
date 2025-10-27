@@ -173,7 +173,7 @@ aws() {
             ECR_HOST="$2"
             REGION="$(echo "$ECR_HOST" | cut -d. -f4)"
         fi
-        (set -x; aws ecr get-login-password --region "$REGION" | $LOGIN_TARGET login --username AWS --password-stdin "$ECR_HOST")
+        (set -x; aws ecr get-login-password --region "$REGION" | command "$LOGIN_TARGET" login --username AWS --password-stdin "$ECR_HOST")
         ;;
     unset-environment-variables)
         unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_DEFAULT_REGION AWS_PROFILE AWS_PROFILE_INACTIVE
