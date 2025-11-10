@@ -75,7 +75,7 @@ has: docker
 tool: bash completion
 https://raw.githubusercontent.com/Bash-it/bash-it/master/completion/available/virtualbox.completion.bash
 $IAM_HOME/tools/bash_completion/virtualbox.completion.bash
-4762
+4921
 tool: bash completion
 https://raw.githubusercontent.com/Bash-it/bash-it/master/completion/available/makefile.completion.bash
 $IAM_HOME/tools/bash_completion/makefile.completion.bash
@@ -134,11 +134,11 @@ $IAM_HOME/vim_runtime/plugin/ColorizerPlugin.vim
 tool: vim plugin Colorizer (autoload)
 https://raw.githubusercontent.com/chrisbra/Colorizer/master/autoload/Colorizer.vim
 $IAM_HOME/vim_runtime/autoload/Colorizer.vim
-83930
+83929
 tool: vim plugin endwise
 https://raw.githubusercontent.com/tpope/vim-endwise/master/plugin/endwise.vim
 $IAM_HOME/vim_runtime/plugin/endwise.vim
-11183
+11191
 tool: vim plugin commentary
 https://raw.githubusercontent.com/tpope/vim-commentary/master/plugin/commentary.vim
 $IAM_HOME/vim_runtime/plugin/commentary.vim
