@@ -471,8 +471,8 @@ EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=A30A526F
-BASHRC_FILE_HASH=25150F61
+LOCAL_TOOLS_FILE_HASH=296CC664
+BASHRC_FILE_HASH=33AC3CDB
 declare -A -r __CPRINTF_COLORS=(
 [fw]=$'\e[37m' [fW]=$'\e[97m'
 [fk]=$'\e[30m' [fK]=$'\e[90m'
@@ -1035,7 +1035,9 @@ rm -rf \
 rm -f \
 "$IAM_HOME/tools/bash_completion"/ecconfigure.completion.bash \
 "$IAM_HOME/tools/bash_completion"/ectool.completion.bash \
-"$IAM_HOME/tools/bash_completion"/electricflow.completion.bash
+"$IAM_HOME/tools/bash_completion"/electricflow.completion.bash \
+"$IAM_HOME/tools/bash_completion"/virtualbox.completion.bash \
+"$IAM_HOME/tools/bash_completion"/makefile.completion.bash
 }
 if [ -n "$__KITTY_ID" ]; then
 _TERM_SESSION_ID="$__KITTY_ID"
@@ -1724,9 +1726,9 @@ Buffers)   _buffers="$b";;
 Cached)    _cached="$b";;
 SwapTotal) _swapTotal="$b";;
 SwapFree)  _swapFree="$b";;
-esac
 EOF
 cat <<'EOF' >> "$IAM_HOME/bashrc"
+esac
 done < /proc/meminfo
 MEM_TOTAL=$(( _memTotal / 1024 ))
 MEM_FREE=$(( (_memFree + _buffers + _cached) / 1024 ))

@@ -784,7 +784,9 @@ fi
     rm -f \
     "$IAM_HOME/tools/bash_completion"/ecconfigure.completion.bash \
     "$IAM_HOME/tools/bash_completion"/ectool.completion.bash \
-    "$IAM_HOME/tools/bash_completion"/electricflow.completion.bash
+    "$IAM_HOME/tools/bash_completion"/electricflow.completion.bash \
+    "$IAM_HOME/tools/bash_completion"/virtualbox.completion.bash \
+    "$IAM_HOME/tools/bash_completion"/makefile.completion.bash
 }
 
 if [ -n "$__KITTY_ID" ]; then
