@@ -42,6 +42,7 @@ __INSTALL_VERSION="
   lnav          0.13.2
   cht.sh        0.0.4
   bazelisk      1.27.0
+  fx            39.2.0
 "
 
 __install_bazelisk() {
@@ -588,6 +589,23 @@ __install_jq() {
     local URL="https://github.com/jqlang/jq/releases/download/jq-${VERSION}/jq-"
     __install_make_url -noformat "
         linux-x64   linux-amd64
+    " && __install_download && __install_bin "archive" || return $?
+}
+
+__install_fx() {
+    local VERSION="$1" EXECUTABLE="$2"
+
+    if [ "$VERSION" = "-check" ]; then
+        __install_check_version "$EXECUTABLE" --version
+        return 0
+    elif [ "$VERSION" = "-latest" ]; then
+        __install_get_latest_github "antonmedv/fx"
+        return 0
+    fi
+
+    local URL="https://github.com/antonmedv/fx/releases/download/${VERSION}/fx_"
+    __install_make_url -noformat "
+        linux-x64   linux_amd64
     " && __install_download && __install_bin "archive" || return $?
 }
 
