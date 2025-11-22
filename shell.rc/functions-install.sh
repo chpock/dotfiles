@@ -7,7 +7,7 @@ __INSTALL_VERSION="
   helm          3.18.6
   dive          0.13.1
   jq            1.8.0
-  k9s           0.50.15
+  k9s           0.50.16
   kdash         0.6.2
   kl            0.6.0
   ktop          0.3.7
