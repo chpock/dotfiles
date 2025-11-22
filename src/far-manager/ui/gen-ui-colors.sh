@@ -141,8 +141,6 @@ EOF
             *=background:*)
                 LINE="${LINE%;*}"
                 ID="${LINE%=*}"
-                # Workaround for the bug: https://github.com/elfmz/far2l/issues/2920
-                [ "$ID" != "Panel.Info.Tota" ] || ID="Panel.Info.Total"
                 # Disable: Quote this to prevent word splitting. [SC2046]
                 # Disable: This format string has 5 variables, but is passed 4 arguments. [SC2183]
                 # shellcheck disable=SC2046,SC2183
