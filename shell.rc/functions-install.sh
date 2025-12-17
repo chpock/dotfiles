@@ -14,6 +14,7 @@ __INSTALL_VERSION="
   kube-capacity 0.8.0
   kpexec        0.4.1
   kubecolor     0.5.1
+  kor           0.6.6
   mcfly         0.9.3
   vim           9.0.2094
   yq            4.45.4
@@ -84,6 +85,24 @@ __install_cht_sh() {
     __install_download && __install_bin "archive" || return $?
 
     __install_completions -custom curl -sLf "${URL%/*}/bash_completion.txt" || return $?
+}
+
+__install_kor() {
+    local VERSION="$1" EXECUTABLE="$2"
+
+    if [ "$VERSION" = "-check" ]; then
+        __install_check_version "$EXECUTABLE" version \
+            | awk '{print $NF}' | tr -d 'v'
+        return 0
+    elif [ "$VERSION" = "-latest" ]; then
+        __install_get_latest_github "yonahd/kor"
+        return 0
+    fi
+
+    local FORMAT URL="https://github.com/yonahd/kor/releases/download/v${VERSION}/kor_"
+    __install_make_url "
+        linux-x64   Linux_x86_64.tar.gz
+    " && __install_download && __install_unpack &&  __install_bin || return $?
 }
 
 __install_helm() {
