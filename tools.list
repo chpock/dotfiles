@@ -2,7 +2,7 @@ tool: install functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-install.sh
 $IAM_HOME/shell.rc/functions-install.sh
 important: true
-#FC74DDDE
+#B607A865
 tool: git functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-git.sh
 $IAM_HOME/shell.rc/functions-git.sh
@@ -20,7 +20,7 @@ $IAM_HOME/shell.rc/functions-awscli.sh
 tool: kubetcl function
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-kubectl.sh
 $IAM_HOME/shell.rc/functions-kubectl.sh
-5457
+5508
 tool: tmux function
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-tmux.sh
 $IAM_HOME/shell.rc/functions-tmux.sh

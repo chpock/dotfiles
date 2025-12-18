@@ -13,6 +13,7 @@ k() {
     _maybe_local "kubectl-node_shell" >/dev/null 2>&1
     _maybe_local "kubectl-apidocs" >/dev/null 2>&1
     _maybe_local "kubectl-df_pv" >/dev/null 2>&1
+    _maybe_local "kubectl-get_all" >/dev/null 2>&1
 
     [ -z "$__KUBECTL_KUBECOLOR" ] \
         && [ -n "$__INSTALL_FUNCTIONS_AVAILABLE" ] \

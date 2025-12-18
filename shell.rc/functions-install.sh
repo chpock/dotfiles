@@ -29,6 +29,7 @@ __INSTALL_VERSION="
   kubectl-node-shell:kubectl-node_shell 1.11.0
   kubectl-apidocs                       1.0.14
   kubectl-df-pv:kubectl-df_pv           0.4.1
+  kubectl-get-all:kubectl-get_all       1.4.2
   kubeseal                              0.30.0
   istioctl                              1.27.0
   eks-node-viewer                       0.7.4
@@ -252,6 +253,23 @@ __install_kubectl_df_pv() {
     " && __install_download && __install_unpack &&  __install_bin "df-pv" || return $?
 }
 
+__install_kubectl_get_all() {
+    local VERSION="$1" EXECUTABLE="$2"
+
+    if [ "$VERSION" = "-check" ]; then
+        __install_check_version "$EXECUTABLE" version \
+            | tr -d 'v'
+        return 0
+    elif [ "$VERSION" = "-latest" ]; then
+        __install_get_latest_github "stackitcloud/kubectl-get-all"
+        return 0
+    fi
+
+    local FORMAT URL="https://github.com/stackitcloud/kubectl-get-all/releases/download/v${VERSION}/get-all_v${VERSION}_"
+    __install_make_url "
+        linux-x64   linux_amd64.tar.gz
+    " && __install_download && __install_unpack &&  __install_bin "get-all" || return $?
+}
 
 __install_kubectl_pod_lens() {
     local VERSION="$1" EXECUTABLE="$2"
