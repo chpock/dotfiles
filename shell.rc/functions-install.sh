@@ -5,6 +5,7 @@ __INSTALL_VERSION="
   awscli:aws    2.24.26
   kubectl       1.32.3
   helm          3.18.6
+  nelm          1.18.0
   dive          0.13.1
   jq            1.8.0
   k9s           0.50.16
@@ -122,6 +123,24 @@ __install_helm() {
     __install_make_url "
         linux-x64   linux-amd64.tar.gz
     " && __install_download && __install_unpack &&  __install_bin || return $?
+}
+
+__install_nelm() {
+    local VERSION="$1" EXECUTABLE="$2"
+
+    if [ "$VERSION" = "-check" ]; then
+        __install_check_version "$EXECUTABLE" version \
+            | grep '^full:' | awk '{print $NF}'
+        return 0
+    elif [ "$VERSION" = "-latest" ]; then
+        __install_get_latest_github "werf/nelm"
+        return 0
+    fi
+
+    local URL="https://tuf.nelm.sh/targets/releases/${VERSION}/"
+    __install_make_url -noformat "
+        linux-x64   linux-amd64/bin/nelm
+    " && __install_download && __install_bin "archive" || return $?
 }
 
 __install_istioctl() {
