@@ -31,6 +31,7 @@ __INSTALL_VERSION="
   kubectl-apidocs                       1.0.14
   kubectl-df-pv:kubectl-df_pv           0.4.1
   kubectl-get-all:kubectl-get_all       1.4.2
+  kubectl-glance                        0.1.18
   kubeseal                              0.30.0
   istioctl                              1.27.0
   eks-node-viewer                       0.7.4
@@ -340,6 +341,24 @@ __install_kubectl_whoami() {
     local FORMAT URL="https://github.com/rajatjindal/kubectl-whoami/releases/download/v${VERSION}/kubectl-whoami_v${VERSION}_"
     __install_make_url "
         linux-x64   linux_amd64.tar.gz
+    " && __install_download && __install_unpack &&  __install_bin || return $?
+}
+
+__install_kubectl_glance() {
+    local VERSION="$1" EXECUTABLE="$2"
+
+    if [ "$VERSION" = "-check" ]; then
+        __install_check_version "$EXECUTABLE" --version \
+            | awk '{print $NF}'
+        return 0
+    elif [ "$VERSION" = "-latest" ]; then
+        __install_get_latest_gitlab "davidxarnold/glance"
+        return 0
+    fi
+
+    local FORMAT URL="https://gitlab.com/api/v4/projects/9502011/packages/generic/kubectl-glance/${VERSION}/kubectl-glance-${VERSION}-"
+    __install_make_url "
+        linux-x64   linux-amd64.tar.gz
     " && __install_download && __install_unpack &&  __install_bin || return $?
 }
 
