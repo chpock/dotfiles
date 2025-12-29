@@ -16,6 +16,11 @@ send_paste() {
 case "$ROFI_RETV" in
     0) # Initial call of script
         printf "\0use-hot-keys\x1ftrue\n"
+        if [ -z "$ROFI_CLIPBOARD_PERSISTENT" ]; then
+            printf "\0message\x1f<span color='blue'>&lt;S-CR&gt;</span><span color='black'>:</span> <span color='green'>move to persistent</span><span color='black'>;</span> <span color='blue'>&lt;S-Del&gt;</span><span color='black'>:</span> <span color='green'>delete entry</span>\n"
+        else
+            printf "\0message\x1f<span color='blue'>&lt;S-Del&gt;</span><span color='black'>:</span> <span color='green'>delete entry</span>\n"
+        fi
         cliphist list | awk '{
             split($0, a, "\t")
             word=a[1]
