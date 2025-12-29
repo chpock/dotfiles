@@ -1,139 +1,152 @@
+local function duplicate_comment_selection()
+  local saved_reg = vim.fn.getreg('z')
+  local saved_reg_type = vim.fn.getregtype('z')
+  vim.cmd('normal! "zygv')   -- Yank
+  vim.cmd('normal gc')     -- Comment
+  vim.cmd('normal! `]')    -- Jump to bottom
+  vim.cmd('normal! "zp')     -- Paste
+  vim.fn.setreg('z', saved_reg, saved_reg_type)
+end
+
+local function yaml_ft(_, bufnr)
+  -- Read first 20 lines
+  local lines = vim.api.nvim_buf_get_lines(bufnr, 0, 20, false)
+  local has = {
+    cfn = false,
+    sam = false,
+    k8s = {
+      apiVersion = false,
+      kind = false,
+    },
+    helm = false,
+  }
+  for _, line in ipairs(lines) do
+    if line:match '%{%{%-? ' then
+      has.helm = true
+    end
+    if line:match '^AWSTemplateFormatVersion' or line:match '^ *Resources:' then
+      has.cfn = true
+    elseif line:match '^Transform: .*::Serverless.*' then
+      has.sam = true
+    elseif line:match '^apiVersion:' then
+      has.k8s.apiVersion = true
+    elseif line:match '^kind:' then
+      has.k8s.kind = true
+    end
+  end
+  if has.sam then
+    return "yaml.sam"
+  elseif has.cfn then
+    return "yaml.cfn"
+  elseif has.helm then
+    return "helm"
+  elseif has.k8s.apiVersion and has.k8s.kind then
+    return "yaml.k8s"
+  end
+  -- return yaml if nothing else
+  return "yaml"
+end
+
+local function yaml_lsp(event)
+  local client = vim.lsp.get_client_by_id(event.data.client_id)
+  if not client or client.name ~= 'yamlls' then
+    return
+  end
+  local filetype = vim.bo[event.buf].filetype
+  local is_cfn = filetype == 'yaml.cfn'
+  local is_sam = filetype == 'yaml.sam'
+  if not is_cfn and not is_sam then
+    return
+  end
+  local yamlls_config = client.config.settings.yaml
+  local filepath = vim.api.nvim_buf_get_name(event.buf)
+
+  if is_sam then
+    ---@diagnostic disable-next-line: inject-field
+    yamlls_config.schemas = {
+      ['https://raw.githubusercontent.com/aws/serverless-application-model/main/samtranslator/schema/schema.json'] = {
+        filepath,
+      },
+    }
+  else
+    -- Do not use any schema for CFN. The below schema is the only available and it
+    -- gives a lot of false positive alarms. It is better to disable schema for CFN
+    -- templates at all.
+    --
+    -- ---@diagnostic disable-next-line: inject-field
+    -- yamlls_config.schemas = {
+    --   ['https://raw.githubusercontent.com/awslabs/goformation/master/schema/cloudformation.schema.json'] = {
+    --     filepath,
+    --   },
+    -- }
+    ---@diagnostic disable-next-line: inject-field
+    yamlls_config.schemas = {}
+  end
+
+  ---@diagnostic disable-next-line: inject-field
+  yamlls_config.customTags = {
+    '!And scalar',
+    '!And mapping',
+    '!And sequence',
+    '!If scalar',
+    '!If mapping',
+    '!If sequence',
+    '!Not scalar',
+    '!Not mapping',
+    '!Not sequence',
+    '!Equals scalar',
+    '!Equals mapping',
+    '!Equals sequence',
+    '!Or scalar',
+    '!Or mapping',
+    '!Or sequence',
+    '!FindInMap scalar',
+    '!FindInMap mappping',
+    '!FindInMap sequence',
+    '!Base64 scalar',
+    '!Base64 mapping',
+    '!Base64 sequence',
+    '!Cidr scalar',
+    '!Cidr mapping',
+    '!Cidr sequence',
+    '!Ref scalar',
+    '!Ref mapping',
+    '!Ref sequence',
+    '!Sub scalar',
+    '!Sub mapping',
+    '!Sub sequence',
+    '!GetAtt scalar',
+    '!GetAtt mapping',
+    '!GetAtt sequence',
+    '!GetAZs scalar',
+    '!GetAZs mapping',
+    '!GetAZs sequence',
+    '!ImportValue scalar',
+    '!ImportValue mapping',
+    '!ImportValue sequence',
+    '!Select scalar',
+    '!Select mapping',
+    '!Select sequence',
+    '!Split scalar',
+    '!Split mapping',
+    '!Split sequence',
+    '!Join scalar',
+    '!Join mapping',
+    '!Join sequence',
+    '!Condition scalar',
+    '!Condition mapping',
+    '!Condition sequence',
+  }
+
+  ---@diagnostic disable-next-line: param-type-mismatch
+  client.notify('workspace/didChangeConfiguration', { settings = yamlls_config })
+end
+
 ---@type LazySpec
 return {
   "AstroNvim/astrocore",
   opts = function(_, opts)
-    local function yaml_ft(_, bufnr)
-      -- Read first 20 lines
-      local lines = vim.api.nvim_buf_get_lines(bufnr, 0, 20, false)
-      local has = {
-        cfn = false,
-        sam = false,
-        k8s = {
-          apiVersion = false,
-          kind = false,
-        },
-        helm = false,
-      }
-      for _, line in ipairs(lines) do
-        if line:match '%{%{%-? ' then
-          has.helm = true
-        end
-        if line:match '^AWSTemplateFormatVersion' or line:match '^ *Resources:' then
-          has.cfn = true
-        elseif line:match '^Transform: .*::Serverless.*' then
-          has.sam = true
-        elseif line:match '^apiVersion:' then
-          has.k8s.apiVersion = true
-        elseif line:match '^kind:' then
-          has.k8s.kind = true
-        end
-      end
-      if has.sam then
-        return "yaml.sam"
-      elseif has.cfn then
-        return "yaml.cfn"
-      elseif has.helm then
-        return "helm"
-      elseif has.k8s.apiVersion and has.k8s.kind then
-        return "yaml.k8s"
-      end
-      -- return yaml if nothing else
-      return "yaml"
-    end
-    local function yaml_lsp(event)
-      local client = vim.lsp.get_client_by_id(event.data.client_id)
-      if not client or client.name ~= 'yamlls' then
-        return
-      end
-      local filetype = vim.bo[event.buf].filetype
-      local is_cfn = filetype == 'yaml.cfn'
-      local is_sam = filetype == 'yaml.sam'
-      if not is_cfn and not is_sam then
-        return
-      end
-      local yamlls_config = client.config.settings.yaml
-      local filepath = vim.api.nvim_buf_get_name(event.buf)
 
-      if is_sam then
-        ---@diagnostic disable-next-line: inject-field
-        yamlls_config.schemas = {
-          ['https://raw.githubusercontent.com/aws/serverless-application-model/main/samtranslator/schema/schema.json'] = {
-            filepath,
-          },
-        }
-      else
-        -- Do not use any schema for CFN. The below schema is the only available and it
-        -- gives a lot of false positive alarms. It is better to disable schema for CFN
-        -- templates at all.
-        --
-        -- ---@diagnostic disable-next-line: inject-field
-        -- yamlls_config.schemas = {
-        --   ['https://raw.githubusercontent.com/awslabs/goformation/master/schema/cloudformation.schema.json'] = {
-        --     filepath,
-        --   },
-        -- }
-        ---@diagnostic disable-next-line: inject-field
-        yamlls_config.schemas = {}
-      end
-
-      ---@diagnostic disable-next-line: inject-field
-      yamlls_config.customTags = {
-        '!And scalar',
-        '!And mapping',
-        '!And sequence',
-        '!If scalar',
-        '!If mapping',
-        '!If sequence',
-        '!Not scalar',
-        '!Not mapping',
-        '!Not sequence',
-        '!Equals scalar',
-        '!Equals mapping',
-        '!Equals sequence',
-        '!Or scalar',
-        '!Or mapping',
-        '!Or sequence',
-        '!FindInMap scalar',
-        '!FindInMap mappping',
-        '!FindInMap sequence',
-        '!Base64 scalar',
-        '!Base64 mapping',
-        '!Base64 sequence',
-        '!Cidr scalar',
-        '!Cidr mapping',
-        '!Cidr sequence',
-        '!Ref scalar',
-        '!Ref mapping',
-        '!Ref sequence',
-        '!Sub scalar',
-        '!Sub mapping',
-        '!Sub sequence',
-        '!GetAtt scalar',
-        '!GetAtt mapping',
-        '!GetAtt sequence',
-        '!GetAZs scalar',
-        '!GetAZs mapping',
-        '!GetAZs sequence',
-        '!ImportValue scalar',
-        '!ImportValue mapping',
-        '!ImportValue sequence',
-        '!Select scalar',
-        '!Select mapping',
-        '!Select sequence',
-        '!Split scalar',
-        '!Split mapping',
-        '!Split sequence',
-        '!Join scalar',
-        '!Join mapping',
-        '!Join sequence',
-        '!Condition scalar',
-        '!Condition mapping',
-        '!Condition sequence',
-      }
-
-      ---@diagnostic disable-next-line: param-type-mismatch
-      client.notify('workspace/didChangeConfiguration', { settings = yamlls_config })
-    end
     opts = require("astrocore").extend_tbl(opts, {
       -- git_worktrees = {
       --   { toplevel = vim.env.HOME, gitdir = vim.env.HOME .. "/.local/share/yadm/repo.git" },
@@ -176,7 +189,9 @@ return {
           wrap = false, -- sets vim.opt.wrap
           guifont = "monospace,Noto_Color_Emoji:h12",
           -- don't use system clipboard by default for copy/depete/paste
-          clipboard = {},
+          -- clipboard = {},
+          -- use system clipboard by default for everything
+          clipboard = "unnamedplus",
           -- don't jump to the first char when paging
           startofline = false,
           -- Don't set hlsearch option here. Its state will come from specific session.
@@ -184,6 +199,13 @@ return {
           incsearch = true, -- show search matches as you type
           ignorecase = true, -- ignore case when searching
           smartcase = true, -- ignore case if search pattern is all lowercase, case-sensitive otherwise
+          tabstop = 4, -- use 4 spaces for indent by default
+          shiftwidth = 4, -- use 4 spaces for indent by default
+          autoindent = true, -- always set autoindenting on
+          copyindent = true, -- copy the previous indentation on autoindenting
+          list = true, -- show invisible characters
+          listchars = "tab:»⸱,trail:⸱,extends:>,precedes:<,nbsp:⸱", -- what invisible chars to show
+          virtualedit = "all", -- allow to move out of line edges
         },
         g = { -- vim.g.<key>
           -- configure global vim variables (vim.g)
@@ -201,6 +223,12 @@ return {
         -- first key is the mode
         v = {
           ["<C-/>"] = { "gc", remap = true, desc = "Toggle comment" },
+          ["<C-S-/>"] = {
+            function()
+              duplicate_comment_selection()
+            end,
+            desc = "Duplicate visual selection and comment original",
+          },
           -- Ctrl-C in visual mode - copy to system clipboard
           ["<C-C>"] = { '"+y', desc = "Copy selection to system clipboard" },
         },
@@ -212,6 +240,19 @@ return {
         i = {
           ["<C-L>"] = { "<Cmd>nohlsearch<CR>", desc = "Turn off search highlight" },
           ["<C-/>"] = { "<C-O>gcc", remap = true, desc = "Toggle comment line" },
+          ["<C-S-/>"] = {
+            function()
+              local current_col = vim.fn.col('.')
+              vim.cmd.stopinsert()
+              vim.schedule(function()
+                vim.cmd('normal! V') -- Enter Visual Line
+                duplicate_comment_selection()
+                vim.cmd.startinsert()
+                vim.fn.cursor(0, current_col)
+              end)
+            end,
+            desc = "Duplicate line and comment it"
+          },
           -- Ctrl-P in insert mote - paste from system clipboard
           -- ["<C-P>"] = { '<C-r>+', desc = "Paste from system clipboard" },
           ["<PageUp>"] = { "<C-O><C-U><C-O><C-U><C-O>zz", desc = "Scroll: Page up" },
@@ -224,13 +265,23 @@ return {
                 vim.cmd.stopinsert()
                 vim.cmd.Neotree "focus"
               end
-            end, desc = "Toggle Explorer focus",
+            end,
+            desc = "Toggle Explorer focus",
           },
-          -- ["<C-Q>"] = { "<Cmd>qa!<CR>", desc = "Force quit" },
+          ["<C-Q>"] = { "<Cmd>qa!<CR>", desc = "Force quit" },
         },
         n = {
           ["<C-L>"] = { "<Cmd>nohlsearch<CR>", desc = "Turn off search highlight" },
           ["<C-/>"] = { "gcc", remap = true, desc = "Toggle comment line" },
+          ["<C-S-/>"] = {
+            function()
+              local current_col = vim.fn.col('.')
+              vim.cmd('normal! V') -- Enter Visual Line
+              duplicate_comment_selection()
+              vim.fn.cursor(0, current_col)
+            end,
+            desc = "Duplicate line and comment original",
+          },
           ["<PageUp>"] = { "<C-U><C-U>zz", desc = "Scroll: Page up" },
           ["<PageDown>"] = { "<C-D><C-D>zz", desc = "Scroll: Page down" },
           ["<C-E>"] = {
@@ -243,22 +294,28 @@ return {
             end,
             desc = "Toggle Explorer focus",
           },
-          -- ["<C-Q>"] = { "<Cmd>qa!<CR>", desc = "Force quit" },
+          ["<C-Q>"] = { "<Cmd>qa<CR>", desc = "Quit all" },
+          ["q"] = {
+            function()
+              require("astrocore.buffer").close()
+            end,
+            desc = "Close buffer",
+          },
           -- navigate buffer tabs
           ["]b"] = { function() require("astrocore.buffer").nav(vim.v.count1) end, desc = "Next buffer" },
           ["[b"] = { function() require("astrocore.buffer").nav(-vim.v.count1) end, desc = "Previous buffer" },
 
           -- Open Dashboard Automatically When No More Buffers
-          ["<Leader>c"] = {
-            function()
-              local bufs = vim.fn.getbufinfo({ buflisted = 1 })
-              require("astrocore.buffer").close(0)
-              if not bufs[2] then
-                require("snacks").dashboard()
-              end
-            end,
-            desc = "Close buffer",
-          },
+          -- ["<Leader>c"] = {
+          --   function()
+          --     local bufs = vim.fn.getbufinfo({ buflisted = 1 })
+          --     require("astrocore.buffer").close(0)
+          --     if not bufs[2] then
+          --       require("snacks").dashboard()
+          --     end
+          --   end,
+          --   desc = "Close buffer",
+          -- },
 
           -- tables with just a `desc` key will be registered with which-key if it's installed
           -- this is useful for naming menus

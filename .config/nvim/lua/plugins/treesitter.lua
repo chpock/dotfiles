@@ -7,6 +7,7 @@ return {
       "vim",
       "jsonnet",
       "groovy",
+      "qmljs",
       -- add more arguments for adding more treesitter parsers
     },
   },

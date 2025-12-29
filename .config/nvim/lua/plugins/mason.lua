@@ -28,6 +28,9 @@ return {
         -- groovy
         "groovy-language-server",
         "npm-groovy-lint",
+
+        -- qml
+        "qmlls",
       },
     },
   },

@@ -29,5 +29,16 @@ return {
       { key = "s", action = "<Leader>Sl", icon = get_icon("Refresh", 0, true), desc = "Last Session  " },
     }
 
+    opts.picker.layout = {
+      -- Don't cycle when navigating through records, it's annoying
+      cycle = false,
+      layout = {
+        -- maximize picker window. I don't see any point in seeing
+        -- the underlying windows/layers. It only reduces the visible area.
+        width = 0,
+        height = 0,
+      },
+    }
+
   end,
 }

@@ -33,6 +33,7 @@ return {
     -- enable servers that you already have installed without mason
     servers = {
       -- "pyright"
+      "qmlls",
     },
     -- customize language server configuration options passed to `lspconfig`
     ---@diagnostic disable: missing-fields
@@ -50,6 +51,10 @@ return {
       yamlls = {
         -- default is: { 'yaml', 'yaml.docker-compose', 'yaml.gitlab', 'yaml.helm-values' }
         filetypes = { 'yaml', 'yaml.docker-compose', 'yaml.gitlab', 'yaml.helm-values', 'yaml.cfn', 'yaml.sam', 'yaml.k8s', },
+      },
+      qmlls = {
+        cmd = { "/usr/bin/qmlls6", "-E", },
+        filetypes = { 'qml', 'qtquick', },
       },
       -- Workaround for:
       -- https://github.com/LazyVim/LazyVim/discussions/5395

@@ -5,6 +5,7 @@ return {
       numbers = "ordinal",
       show_buffer_close_icons = false,
       show_close_icon = false,
+      tab_size = 0,
     },
   },
   dependencies = {
