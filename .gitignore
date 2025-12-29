@@ -17,11 +17,14 @@
 !/tools/
 !/wsl/
 
-# Ignore files/dirs in .config
+# Ignore files/dirs in .config for electron-based apps
 /.config/vesktop/
 /.config/teams-for-linux/
 /.config/chromium/
 /.config/spotify/
+/.config/ntfy-desktop/
+
+# Ignore files/dirs in .config
 /.config/go/
 /.config/freerdp/server/*.pem
 /.config/helm/registry/config.json
@@ -50,6 +53,11 @@
 /.config/far2l/plugins/state.ini
 /.config/VNote/VNote/*.log
 /.config/VNote/VNote/session.json
+/.config/Pinta/addins/
+/.config/geeqie/accels
+/.config/geeqie/history
+/.config/geeqie/marks
+/.config/lnav/
 
 # Ignore files/dirs in .local
 /.local/bin/chrome-profile-*
