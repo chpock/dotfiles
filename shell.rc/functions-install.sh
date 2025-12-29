@@ -1053,6 +1053,11 @@ __install_get_latest_github() {
         | sed -n '/\/releases\/expanded_assets\// s#.*/releases/expanded_assets/[^0-9]*\([^"]*\).*#\1#p'
 }
 
+__install_get_latest_gitlab() {
+    _get_url "https://gitlab.com/$1/-/releases.atom" 2>/dev/null \
+        | sed -n '/^\s*<id>.\+\/releases\/[^<]/{ s#.\+/releases/v\?##; s#<.*##; p; q; }'
+}
+
 __install_check_new_versions() {
     local VERSION_LATEST
     local DISABLED TOOL VERSION EXECUTABLE
