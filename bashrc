@@ -467,6 +467,9 @@ command ToggleStripTrailingWhitespace :call ToggleStripTrailingWhitespace()
 call ToggleStripTrailingWhitespace()
 let g:colorizer_auto_filetype = 'css,html'
 let g:colorizer_fgcontrast = 0
+if !empty($WAYLAND_DISPLAY)
+au TextYankPost * if (v:event.operator == 'y') | silent! execute 'call system("wl-copy", @")' | endif
+endif
 EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes

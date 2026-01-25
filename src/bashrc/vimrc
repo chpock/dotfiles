@@ -546,4 +546,7 @@ call ToggleStripTrailingWhitespace()
 let g:colorizer_auto_filetype = 'css,html'   " Automatically highlight filetypes
 let g:colorizer_fgcontrast = 0   " Adjust the contrast (-1, 0, 1, 2). When -1 - fg and bg are the same.
 
-
+" Under Wayland use wl-copy to copy in system clipboard
+if !empty($WAYLAND_DISPLAY)
+    au TextYankPost * if (v:event.operator == 'y') | silent! execute 'call system("wl-copy", @")' | endif
+endif
