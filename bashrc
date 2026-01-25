@@ -472,7 +472,7 @@ EOF
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
 LOCAL_TOOLS_FILE_HASH=0988C694
-BASHRC_FILE_HASH=33AC3CDB
+BASHRC_FILE_HASH=1EDA8ABB
 declare -A -r __CPRINTF_COLORS=(
 [fw]=$'\e[37m' [fW]=$'\e[97m'
 [fk]=$'\e[30m' [fK]=$'\e[90m'
@@ -1726,11 +1726,11 @@ Buffers)   _buffers="$b";;
 Cached)    _cached="$b";;
 SwapTotal) _swapTotal="$b";;
 SwapFree)  _swapFree="$b";;
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 esac
 done < /proc/meminfo
 MEM_TOTAL=$(( _memTotal / 1024 ))
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 MEM_FREE=$(( (_memFree + _buffers + _cached) / 1024 ))
 SWAP_TOTAL=$(( _swapTotal / 1024 ))
 SWAP_FREE=$(( _swapFree / 1024 ))
@@ -2080,6 +2080,13 @@ sudo pacman "$@"
 *) command pacman "$@"
 ;;
 esac
+}
+_has far2l && far2l() {
+[ $# -ne 0 ] || set -- --tty --cd "$PWD" --cd "$PWD"
+if [ -n "$WAYLAND_DISPLAY" ] && _has wl-copy && _has wl-paste && [ -x "$HOME/.local/bin/far2l-clip" ]; then
+set -- "$@" --clipboard="$HOME/.local/bin/far2l-clip"
+fi
+command far2l "$@"
 }
 clear() {
 [ "$TERM" != "tmux-256color" ] || set -- -T tmux "$@"
