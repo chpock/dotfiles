@@ -388,7 +388,7 @@ if has('syntax') && !exists('g:syntax_on')
 syntax enable
 endif
 if exists('+colorcolumn')
-set colorcolumn=80
+set colorcolumn=100
 endif
 nmap <leader>sp :call <SID>SynStack()<CR>
 function! <SID>SynStack()
