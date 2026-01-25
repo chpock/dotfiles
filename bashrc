@@ -92,6 +92,12 @@ command! Wqa :wqa
 noremap <C-s>  :update<CR>
 vnoremap <C-s> <C-C>:update<CR>
 inoremap <C-s> <Esc>:update<CR>gi
+nmap <C-/> gcc
+vmap <C-/> gcc
+imap <C-/> <C-O>gcc
+nmap <C-_> gcc
+vmap <C-_> gcc
+imap <C-_> <C-O>gcc
 func! PasteGuard()
 if !exists("g:paste_prev") | let g:paste_prev = &paste | endif
 if !exists("g:paste_guard") | let g:paste_guard = 0 | endif

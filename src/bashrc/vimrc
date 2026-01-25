@@ -89,6 +89,15 @@ noremap <C-s>  :update<CR>
 vnoremap <C-s> <C-C>:update<CR>
 inoremap <C-s> <Esc>:update<CR>gi
 
+" C-/ - comment/uncomment (commentary plugin)
+nmap <C-/> gcc
+vmap <C-/> gcc
+imap <C-/> <C-O>gcc
+" Many terminals send Ctrl+_ when you press Ctrl+/
+nmap <C-_> gcc
+vmap <C-_> gcc
+imap <C-_> <C-O>gcc
+
 " There is no way to detect the paste mode changes in vim. That is why I use
 " here a hack to call this procedure on statusline update. It will detect
 " the paste mode change.
