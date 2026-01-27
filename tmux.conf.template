@@ -48,6 +48,19 @@ bind - split-window -v -c "#{pane_current_path}"
 bind \\ split-window -h -c "#{pane_current_path}"
 bind c new-window -c "#{pane_current_path}"
 bind i set monitor-activity \; display-message "Monitor activity for windows #I is #{?monitor-activity,ON,OFF}"
+bind -n M-` run-shell " \
+    if [ \"$(tmux display-message -p '#{window_index}')\" -eq 0 ]; then \
+        tmux last-window; \
+    else \
+        if ! tmux select-window -t :0; then \
+            CPATH=\"$(tmux display-message -p '#{pane_current_path}')\"; \
+            set -- far2l --tty --cd \"$CPATH\" --cd \"$CPATH\"; \
+            CLIP=\"$HOME/.local/bin/far2l-clip\"; \
+            [ ! -x \"$CLIP\" ] || set -- \"$@\" --clipboard=\"$CLIP\"; \
+            tmux new-window -t :0 -n 'Far' \"$@\"; \
+        fi; \
+    fi \
+"
 bind -n M-1 select-window -t 1
 bind -n M-2 select-window -t 2
 bind -n M-3 select-window -t 3
