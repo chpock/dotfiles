@@ -25,7 +25,7 @@ tool: tmux function
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-tmux.sh
 $IAM_HOME/shell.rc/functions-tmux.sh
 has: tmux
-11378
+11482
 tool: python functions
 https://raw.githubusercontent.com/chpock/dotfiles/master/shell.rc/functions-python.sh
 $IAM_HOME/shell.rc/functions-python.sh
@@ -56,7 +56,7 @@ tool: tmux.conf
 https://raw.githubusercontent.com/chpock/dotfiles/master/tmux.conf.template
 $IAM_HOME/tmux.conf.template
 has: tmux
-4999
+5020
 tool: bash completion
 https://raw.githubusercontent.com/docker/cli/master/contrib/completion/bash/docker
 $IAM_HOME/tools/bash_completion/docker.completion.bash

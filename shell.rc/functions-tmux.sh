@@ -7,7 +7,7 @@ _has tmux || return
     local SEP=$'\t'
     local SESSION_BACKUP_FILE="$TMUX_TMPDIR/backup"
     local session_name session_id session_persistent_id session_dir
-    local window_name window_id window_persistent_id current_path
+    local window_index window_name window_id window_persistent_id current_path
     local active_window_id active_window_persistent_id
     shift
 
@@ -31,14 +31,15 @@ _has tmux || return
                 session_dir="$TMUX_TMPDIR/id-$session_persistent_id"
                 active_window_id="$(command tmux display-message -t "$session_id" -p -F '#{window_id}' 2>/dev/null)"
                 rm -f "$session_dir/backup_active"
-                while IFS="$SEP" read -r window_name window_id current_path; do
+                while IFS="$SEP" read -r window_index window_name window_id current_path; do
+                    [ "$window_index" != 0 ] || continue
                     window_persistent_id="$(command tmux show -w -t "$window_id" -v '@persistent-id')"
                     echo "${window_name}${SEP}${window_persistent_id}${SEP}${current_path}"
                     if [ "$window_id" = "$active_window_id" ]; then
                         echo "$window_persistent_id" > "$session_dir/backup_active"
                     fi
                 done \
-                    < <(command tmux list-windows -t "$session_id" -F "#{window_name}${SEP}#{window_id}${SEP}#{pane_current_path}") \
+                    < <(command tmux list-windows -t "$session_id" -F "${window_index}${SEP}#{window_name}${SEP}#{window_id}${SEP}#{pane_current_path}") \
                     > "$session_dir/backup"
             done \
                 < <(command tmux list-sessions -F "#{session_name}${SEP}#{session_id}${SEP}#{_TMUX_SESSION_ID}") \

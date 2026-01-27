@@ -55,9 +55,9 @@ bind -n M-` run-shell " \
         if ! tmux select-window -t :0; then \
             CPATH=\"$(tmux display-message -p '#{pane_current_path}')\"; \
             set -- far2l --tty --cd \"$CPATH\" --cd \"$CPATH\"; \
-            CLIP=\"$HOME/.local/bin/far2l-clip\"; \
-            [ ! -x \"$CLIP\" ] || set -- \"$@\" --clipboard=\"$CLIP\"; \
-            tmux new-window -t :0 -n 'Far' \"$@\"; \
+            CLIP_SCRIPT=\"$HOME/.local/bin/far2l-clip\"; \
+            [ ! -x \"$CLIP_SCRIPT\" ] || set -- \"$@\" --clipboard=\"$CLIP_SCRIPT\"; \
+            tmux new-window -t :0 -n 'FAR' \"$@\"; \
         fi; \
     fi \
 "
