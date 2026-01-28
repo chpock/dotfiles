@@ -56,7 +56,7 @@ tool: tmux.conf
 https://raw.githubusercontent.com/chpock/dotfiles/master/tmux.conf.template
 $IAM_HOME/tmux.conf.template
 has: tmux
-5020
+5029
 tool: bash completion
 https://raw.githubusercontent.com/docker/cli/master/contrib/completion/bash/docker
 $IAM_HOME/tools/bash_completion/docker.completion.bash
