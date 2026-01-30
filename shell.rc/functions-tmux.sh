@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 _has tmux || return
 
 ,tmux() {
@@ -39,7 +40,7 @@ _has tmux || return
                         echo "$window_persistent_id" > "$session_dir/backup_active"
                     fi
                 done \
-                    < <(command tmux list-windows -t "$session_id" -F "${window_index}${SEP}#{window_name}${SEP}#{window_id}${SEP}#{pane_current_path}") \
+                    < <(command tmux list-windows -t "$session_id" -F "#{window_index}${SEP}#{window_name}${SEP}#{window_id}${SEP}#{pane_current_path}") \
                     > "$session_dir/backup"
             done \
                 < <(command tmux list-sessions -F "#{session_name}${SEP}#{session_id}${SEP}#{_TMUX_SESSION_ID}") \
