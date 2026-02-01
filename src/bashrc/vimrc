@@ -89,6 +89,15 @@ noremap <C-s>  :update<CR>
 vnoremap <C-s> <C-C>:update<CR>
 inoremap <C-s> <Esc>:update<CR>gi
 
+" C-/ - comment/uncomment (commentary plugin)
+nmap <C-/> gcc
+vmap <C-/> gcc
+imap <C-/> <C-O>gcc
+" Many terminals send Ctrl+_ when you press Ctrl+/
+nmap <C-_> gcc
+vmap <C-_> gcc
+imap <C-_> <C-O>gcc
+
 " There is no way to detect the paste mode changes in vim. That is why I use
 " here a hack to call this procedure on statusline update. It will detect
 " the paste mode change.
@@ -437,9 +446,9 @@ if has('syntax') && !exists('g:syntax_on')
   syntax enable
 endif
 
-" highlight column 80
+" highlight column 100
 if exists('+colorcolumn')
-  set colorcolumn=80
+  set colorcolumn=100
 endif
 
 nmap <leader>sp :call <SID>SynStack()<CR>
@@ -546,4 +555,7 @@ call ToggleStripTrailingWhitespace()
 let g:colorizer_auto_filetype = 'css,html'   " Automatically highlight filetypes
 let g:colorizer_fgcontrast = 0   " Adjust the contrast (-1, 0, 1, 2). When -1 - fg and bg are the same.
 
-
+" Under Wayland use wl-copy to copy in system clipboard
+if !empty($WAYLAND_DISPLAY)
+    au TextYankPost * if (v:event.operator == 'y') | silent! execute 'call system("wl-copy", @")' | endif
+endif

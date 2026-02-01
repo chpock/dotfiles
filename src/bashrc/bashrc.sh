@@ -2250,6 +2250,14 @@ _has pacman && _isnot root && pacman() {
     esac
 }
 
+_has far2l && far2l() {
+    [ $# -ne 0 ] || set -- --tty --cd "$PWD" --cd "$PWD"
+    if [ -n "$WAYLAND_DISPLAY" ] && _has wl-copy && _has wl-paste && [ -x "$HOME/.local/bin/far2l-clip" ]; then
+        set -- "$@" --clipboard="$HOME/.local/bin/far2l-clip"
+    fi
+    command far2l "$@"
+}
+
 clear() {
     # Due to unknown reason, clear command doesn't know how to clear scollback
     # buffer when TERM=tmux-256color. Let's use 'TERM=tmux' as a workaround in

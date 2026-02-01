@@ -92,6 +92,12 @@ command! Wqa :wqa
 noremap <C-s>  :update<CR>
 vnoremap <C-s> <C-C>:update<CR>
 inoremap <C-s> <Esc>:update<CR>gi
+nmap <C-/> gcc
+vmap <C-/> gcc
+imap <C-/> <C-O>gcc
+nmap <C-_> gcc
+vmap <C-_> gcc
+imap <C-_> <C-O>gcc
 func! PasteGuard()
 if !exists("g:paste_prev") | let g:paste_prev = &paste | endif
 if !exists("g:paste_guard") | let g:paste_guard = 0 | endif
@@ -388,7 +394,7 @@ if has('syntax') && !exists('g:syntax_on')
 syntax enable
 endif
 if exists('+colorcolumn')
-set colorcolumn=80
+set colorcolumn=100
 endif
 nmap <leader>sp :call <SID>SynStack()<CR>
 function! <SID>SynStack()
@@ -467,12 +473,15 @@ command ToggleStripTrailingWhitespace :call ToggleStripTrailingWhitespace()
 call ToggleStripTrailingWhitespace()
 let g:colorizer_auto_filetype = 'css,html'
 let g:colorizer_fgcontrast = 0
+if !empty($WAYLAND_DISPLAY)
+au TextYankPost * if (v:event.operator == 'y') | silent! execute 'call system("wl-copy", @")' | endif
+endif
 EOF
 
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
-LOCAL_TOOLS_FILE_HASH=0988C694
-BASHRC_FILE_HASH=33AC3CDB
+LOCAL_TOOLS_FILE_HASH=B925C68F
+BASHRC_FILE_HASH=1EDA8ABB
 declare -A -r __CPRINTF_COLORS=(
 [fw]=$'\e[37m' [fW]=$'\e[97m'
 [fk]=$'\e[30m' [fK]=$'\e[90m'
@@ -1726,11 +1735,11 @@ Buffers)   _buffers="$b";;
 Cached)    _cached="$b";;
 SwapTotal) _swapTotal="$b";;
 SwapFree)  _swapFree="$b";;
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 esac
 done < /proc/meminfo
 MEM_TOTAL=$(( _memTotal / 1024 ))
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 MEM_FREE=$(( (_memFree + _buffers + _cached) / 1024 ))
 SWAP_TOTAL=$(( _swapTotal / 1024 ))
 SWAP_FREE=$(( _swapFree / 1024 ))
@@ -2080,6 +2089,13 @@ sudo pacman "$@"
 *) command pacman "$@"
 ;;
 esac
+}
+_has far2l && far2l() {
+[ $# -ne 0 ] || set -- --tty --cd "$PWD" --cd "$PWD"
+if [ -n "$WAYLAND_DISPLAY" ] && _has wl-copy && _has wl-paste && [ -x "$HOME/.local/bin/far2l-clip" ]; then
+set -- "$@" --clipboard="$HOME/.local/bin/far2l-clip"
+fi
+command far2l "$@"
 }
 clear() {
 [ "$TERM" != "tmux-256color" ] || set -- -T tmux "$@"
