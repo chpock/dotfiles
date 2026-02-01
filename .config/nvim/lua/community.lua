@@ -28,6 +28,8 @@ return {
   { import = "astrocommunity.recipes.heirline-mode-text-statusline" },
   { import = "astrocommunity.recipes.diagnostic-virtual-lines-current-line" },
   { import = "astrocommunity.bars-and-lines.bufferline-nvim" },
+  { import = "astrocommunity.utility.live-preview" },
+  { import = "astrocommunity.ai.opencode-nvim" },
   -- { import = "astrocommunity.editing-support.undotree" },
   -- { import = "astrocommunity.search.nvim-hlslens" },
   -- { import = "astrocommunity.pack.harper" },

@@ -2,8 +2,8 @@ local function duplicate_comment_selection()
   local saved_reg = vim.fn.getreg('z')
   local saved_reg_type = vim.fn.getregtype('z')
   vim.cmd('normal! "zygv')   -- Yank
-  vim.cmd('normal gc')     -- Comment
-  vim.cmd('normal! `]')    -- Jump to bottom
+  vim.cmd('normal gc')       -- Comment
+  vim.cmd('normal! `]')      -- Jump to bottom
   vim.cmd('normal! "zp')     -- Paste
   vim.fn.setreg('z', saved_reg, saved_reg_type)
 end
@@ -175,9 +175,10 @@ return {
       --   filename = {
       --     [".foorc"] = "fooscript",
       --   },
-      --   pattern = {
-      --     [".*/etc/foo/.*"] = "fooscript",
-      --   },
+        pattern = {
+          ["Jenkinsfile.*"] = "groovy",
+          ["*.Jenkinsfile"] = "groovy",
+        },
       },
       -- vim options can be configured here
       options = {
@@ -206,6 +207,9 @@ return {
           list = true, -- show invisible characters
           listchars = "tab:»⸱,trail:⸱,extends:>,precedes:<,nbsp:⸱", -- what invisible chars to show
           virtualedit = "all", -- allow to move out of line edges
+          colorcolumn = "100", -- hightlight 100th column
+          title = true, -- set terminal title
+          titlestring = '%{fnamemodify(getcwd(), ":t")} - Nvim', -- use basename of PWD as title (project name)
         },
         g = { -- vim.g.<key>
           -- configure global vim variables (vim.g)
@@ -260,15 +264,39 @@ return {
           ["<C-E>"] = {
             function()
               if vim.bo.filetype == "neo-tree" then
-                vim.cmd.wincmd "p"
+                -- vim.cmd.wincmd "p"
+                vim.cmd.stopinsert()
+                local manager = require("neo-tree.sources.manager")
+                local state = manager.get_state("filesystem")
+                if state and state.tree then
+                  ---@diagnostic disable-next-line: undefined-field
+                  local node = state.tree:get_node()
+                  if node and node.type == "file" then
+                    _G.neotree_last_path = node:get_id()
+                  end
+                end
+                vim.cmd.Neotree "close"
               else
                 vim.cmd.stopinsert()
-                vim.cmd.Neotree "focus"
+                if _G.neotree_last_path and vim.uv.fs_stat(_G.neotree_last_path) then
+                  vim.cmd("Neotree focus reveal_file=" .. _G.neotree_last_path)
+                else
+                  vim.cmd.Neotree("focus")
+                end
               end
             end,
             desc = "Toggle Explorer focus",
           },
-          ["<C-Q>"] = { "<Cmd>qa!<CR>", desc = "Force quit" },
+          ["<C-Q>"] = {
+            -- close neo-tree before quiting, if this is not done, only neo-tree window will close.
+            function()
+              if vim.bo.filetype == "neo-tree" then
+                vim.cmd.Neotree "close"
+              end
+              vim.cmd("qa")
+            end,
+            desc = "Quit all",
+          },
         },
         n = {
           ["<C-L>"] = { "<Cmd>nohlsearch<CR>", desc = "Turn off search highlight" },
@@ -287,23 +315,56 @@ return {
           ["<C-E>"] = {
             function()
               if vim.bo.filetype == "neo-tree" then
-                vim.cmd.wincmd "p"
+                -- vim.cmd.wincmd "p"
+                local manager = require("neo-tree.sources.manager")
+                local state = manager.get_state("filesystem")
+                if state and state.tree then
+                  ---@diagnostic disable-next-line: undefined-field
+                  local node = state.tree:get_node()
+                  if node and node.type == "file" then
+                    _G.neotree_last_path = node:get_id()
+                  end
+                end
+                vim.cmd.Neotree "close"
               else
-                vim.cmd.Neotree "focus"
+                if _G.neotree_last_path and vim.uv.fs_stat(_G.neotree_last_path) then
+                  vim.cmd("Neotree focus reveal_file=" .. _G.neotree_last_path)
+                else
+                  vim.cmd.Neotree("focus")
+                end
               end
             end,
             desc = "Toggle Explorer focus",
           },
-          ["<C-Q>"] = { "<Cmd>qa<CR>", desc = "Quit all" },
+          ["<C-Q>"] = {
+            -- close neo-tree before quiting, if this is not done, only neo-tree window will close.
+            function()
+              if vim.bo.filetype == "neo-tree" then
+                vim.cmd.Neotree "close"
+              end
+              vim.cmd("qa")
+            end,
+            desc = "Quit all",
+          },
           ["q"] = {
             function()
+              local bufs = vim.fn.getbufinfo { buflisted = 1 }
+              local buf_path = vim.api.nvim_buf_get_name(0)
+              local is_last_opened_file = _G.neotree_last_path and buf_path == _G.neotree_last_path
               require("astrocore.buffer").close()
+              if #bufs <= 1 or is_last_opened_file then
+                if _G.neotree_last_path and vim.uv.fs_stat(_G.neotree_last_path) then
+                  vim.cmd("Neotree focus reveal_file=" .. _G.neotree_last_path)
+                else
+                  vim.cmd.Neotree("focus")
+                end
+              end
             end,
             desc = "Close buffer",
           },
           -- navigate buffer tabs
-          ["]b"] = { function() require("astrocore.buffer").nav(vim.v.count1) end, desc = "Next buffer" },
-          ["[b"] = { function() require("astrocore.buffer").nav(-vim.v.count1) end, desc = "Previous buffer" },
+          -- ["]b"] = { function() require("astrocore.buffer").nav(vim.v.count1) end, desc = "Next buffer" },
+          -- ["[b"] = { function() require("astrocore.buffer").nav(-vim.v.count1) end, desc = "Previous buffer" },
 
           -- Open Dashboard Automatically When No More Buffers
           -- ["<Leader>c"] = {
@@ -360,22 +421,57 @@ return {
             event = "QuitPre",
             desc = "Save session before quiting",
             callback = function()
+              -- local trace = debug.traceback()
+              -- -- 2. Log it to a file
+              -- local f = io.open("/tmp/nvim_death_trace.log", "w")
+              -- f:write("=== NEOVIM EXIT TRACE ===\n")
+              -- f:write(trace .. "\n")
+              -- -- 3. Also log window status just to be sure
+              -- f:write("\n=== WINDOW STATE ===\n")
+              -- f:write("Window Count: " .. #vim.api.nvim_list_wins() .. "\n")
+              -- f:close()
+
               require("session_manager").save_current_session()
             end,
           },
         },
-        -- Show file tree after opening a project/session
-        show_file_tree = {
+        -- Turn off insert mode after opening a project/session
+        stop_insert_mode_on_open = {
           {
             event = "User",
             pattern = "SessionLoadPost",
-            desc = "Show file tree on session load and turn off insert mode",
+            desc = "Turn off insert mode after opening a project/session",
             callback = function()
-              require("neo-tree.command").execute({ action = "show" })
               vim.cmd.stopinsert()
             end,
           }
-        }
+        },
+        -- Show file tree after opening a project/session
+        show_file_tree_on_empty_session = {
+          {
+            event = "User",
+            pattern = "SessionLoadPost",
+            desc = "Show file tree on session load if there are no opened files",
+            callback = function()
+              local is_no_name = vim.api.nvim_buf_get_name(0) == "" and vim.bo.buftype == ""
+              if is_no_name then
+                  vim.cmd.Neotree("focus")
+              end
+            end,
+          }
+        },
+        -- Show file tree after opening a project/session
+        -- show_file_tree = {
+        --   {
+        --     event = "User",
+        --     pattern = "SessionLoadPost",
+        --     desc = "Show file tree on session load and turn off insert mode",
+        --     callback = function()
+        --       require("neo-tree.command").execute({ action = "show" })
+        --       vim.cmd.stopinsert()
+        --     end,
+        --   }
+        -- }
       --   restore_session = {
       --     {
       --       event = "VimEnter",
