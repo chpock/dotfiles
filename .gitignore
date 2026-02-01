@@ -58,6 +58,7 @@
 /.config/geeqie/history
 /.config/geeqie/marks
 /.config/lnav/
+/.config/libreoffice/
 
 # Ignore files/dirs in .local
 /.local/bin/chrome-profile-*
