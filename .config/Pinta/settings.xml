@@ -15,7 +15,7 @@
   <setting name="last-selected-tool" type="System.String">MoveSelectedTool</setting>
   <setting name="primary-color" type="System.String">FF000000</setting>
   <setting name="secondary-color" type="System.String">FFFFFFFF</setting>
-  <setting name="recently-used-colors" type="System.String">FFE5E5E5,FFE5E5E5,FFE5E5E5,FFE5E5E5,FFE5E5E5,FFE5E5E5,FFE5E5E5,FFE5E5E5,FFE5E5E5,FFE5E5E5</setting>
+  <setting name="recently-used-colors" type="System.String">FFFFFFFF,FF000000,FFE5E5E5,FFE5E5E5,FFE5E5E5,FFE5E5E5,FFE5E5E5,FFE5E5E5,FFE5E5E5,FFE5E5E5</setting>
   <setting name="selection-combine-mode" type="System.Int32">0</setting>
   <setting name="paintbrushtool-antialias" type="System.Int32">0</setting>
   <setting name="paintbrushtool-brush-width" type="System.Int32">5</setting>
@@ -39,8 +39,7 @@
   <setting name="text-alignment" type="System.Int32">2</setting>
   <setting name="text-style" type="System.Int32">0</setting>
   <setting name="text-outline-width" type="System.Int32">2</setting>
-  <setting name="new-image-width" type="System.Int32">2095</setting>
-  <setting name="new-image-height" type="System.Int32">992</setting>
-  <setting name="new-image-bg" type="Pinta.BackgroundType">White</setting>
+  <setting name="new-image-width" type="System.Int32">1392</setting>
+  <setting name="new-image-height" type="System.Int32">1434</setting>
   <setting name="default-image-type" type="System.String">png</setting>
 </settings>
