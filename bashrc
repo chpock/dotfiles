@@ -481,7 +481,7 @@ EOF
 # avoid issue with some overflow when the file is more than 65536 bytes
 cat <<'EOF' > "$IAM_HOME/bashrc"
 LOCAL_TOOLS_FILE_HASH=F60FC648
-BASHRC_FILE_HASH=E8206889
+BASHRC_FILE_HASH=4D6015AE
 declare -A -r __CPRINTF_COLORS=(
 [fw]=$'\e[37m' [fW]=$'\e[97m'
 [fk]=$'\e[30m' [fK]=$'\e[90m'
@@ -1751,6 +1751,8 @@ MEM_FREE=0
 while IFS=$':\r\n' read -r a b; do
 if [ "$a" = "Pages free" ] || [ "$a" = "Pages inactive" ] || [ "$a" = "Pages speculative" ]; then
 b="${b// /}"
+EOF
+cat <<'EOF' >> "$IAM_HOME/bashrc"
 b="${b//./}"
 MEM_FREE=$(( MEM_FREE + b ))
 fi
@@ -1761,8 +1763,6 @@ if [ -n "$MEM_TOTAL" ]; then
 _showinfo "RAM" "$MEM_TOTAL" "$MEM_FREE"
 if [ "$SWAP_TOTAL" -eq 0 ]; then
 cprintf -- "Swap      : ~y~%s" "Not installed"
-EOF
-cat <<'EOF' >> "$IAM_HOME/bashrc"
 else
 _showinfo "Swap" "$SWAP_TOTAL" "$SWAP_FREE"
 fi
@@ -1976,43 +1976,11 @@ bind '"\e[2~": quoted-insert'
 bind '"\e[1;5D": backward-word'
 bind '"\e[1;5C": forward-word'
 if _has rgrc; then
-alias blkid='rgrc blkid'
-alias curl='rgrc curl'
-alias df='rgrc df'
-alias dig='rgrc dig'
-alias docker='rgrc docker'
-alias du='rgrc du'
-alias fdisk='rgrc fdisk'
-alias findmnt='rgrc findmnt'
-alias free='rgrc free'
-alias gcc='rgrc gcc'
-alias getfacl='rgrc getfacl'
-alias id='rgrc id'
-alias ifconfig='rgrc ifconfig'
-alias iptables='rgrc iptables'
-alias iwconfig='rgrc iwconfig'
-alias last='rgrc last'
-alias lsattr='rgrc lsattr'
-alias lsblk='rgrc lsblk'
-alias lsmod='rgrc lsmod'
-alias lsof='rgrc lsof'
-alias lspci='rgrc lspci'
-alias lsusb='rgrc lsusb'
-alias mount='rgrc mount'
-alias netstat='rgrc netstat'
-alias ping='rgrc ping'
-alias ps='rgrc ps'
-alias sensors='rgrc sensors'
-alias sql='rgrc sql'
-alias ss='rgrc ss'
-alias stat='rgrc stat'
-alias sysctl='rgrc sysctl'
-alias systemctl='rgrc systemctl'
-alias tail='rgrc tail'
-alias tune2fs='rgrc tune2fs'
-alias uptime='rgrc uptime'
-alias vmstat='rgrc vmstat'
-alias go='rgrc go'
+for cmd in ant blkid curl cvs df dig diskutil dnf docker du kdig dummy
+do
+_hasnot "$cmd" || alias "$cmd"="rgrc $cmd"
+done
+unset cmd
 fi
 env() {
 if [ $# -ne 0 ]; then

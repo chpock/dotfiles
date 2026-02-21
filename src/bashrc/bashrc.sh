@@ -2082,49 +2082,26 @@ bind '"\e[1;5C": forward-word'
 # E.g. function 'psa' uses 'ps'. Thus, alias 'ps' must be defined
 # before the function 'psa'.
 if _has rgrc; then
-    alias blkid='rgrc blkid'
-    alias curl='rgrc curl'
-    alias df='rgrc df'
-    alias dig='rgrc dig'
-    alias docker='rgrc docker'
-    alias du='rgrc du'
-    alias fdisk='rgrc fdisk'
-    alias findmnt='rgrc findmnt'
-    alias free='rgrc free'
-    alias gcc='rgrc gcc'
-    alias getfacl='rgrc getfacl'
-    alias id='rgrc id'
-    alias ifconfig='rgrc ifconfig'
-    alias iptables='rgrc iptables'
-    alias iwconfig='rgrc iwconfig'
-    alias last='rgrc last'
-    alias lsattr='rgrc lsattr'
-    alias lsblk='rgrc lsblk'
-    alias lsmod='rgrc lsmod'
-    alias lsof='rgrc lsof'
-    alias lspci='rgrc lspci'
-    alias lsusb='rgrc lsusb'
-    alias mount='rgrc mount'
-    alias netstat='rgrc netstat'
-    alias ping='rgrc ping'
-    alias ps='rgrc ps'
-    alias sensors='rgrc sensors'
-    alias sql='rgrc sql'
-    alias ss='rgrc ss'
-    alias stat='rgrc stat'
-    alias sysctl='rgrc sysctl'
-    alias systemctl='rgrc systemctl'
-    alias tail='rgrc tail'
-    alias tune2fs='rgrc tune2fs'
-    alias uptime='rgrc uptime'
-    alias vmstat='rgrc vmstat'
-    alias go='rgrc go'
+        # esperanto fdisk findmnt free gcc getfacl getsebool id ifconfig \
+        # iptables irclog iwconfig last ldap lsattr lsblk lsmod lsof \
+        # lspci lsusb mount mvn netstat nmap ntpdate ping ping2 podman proftpd \
+        # ps pv semanage sensors showmount sockstat sql ss stat sysctl systemctl \
+        # tcpdump traceroute tune2fs ulimit uptime vmstat wdiff whois go iostat
+    for cmd in ant blkid curl cvs df dig diskutil dnf docker du kdig dummy
+    do
+        # Disable: This expands when defined, not when used. Consider escaping. [SC2139]
+        # shellcheck disable=SC2139
+        _hasnot "$cmd" || alias "$cmd"="rgrc $cmd"
+    done
+    unset cmd
 fi
 
 env() {
     if [ $# -ne 0 ]; then
         command env "$@"
     else
+        # Disable: Note that A && B || C is not if-then-else. C may run when A is true. [SC2015]
+        # shellcheck disable=SC2015
         _has rgrc && [ -t 1 ] && set -- rgrc --color=on env || set -- command env
         if _has sort; then
             "$@" | LC_ALL=C sort
