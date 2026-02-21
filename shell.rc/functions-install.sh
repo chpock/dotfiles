@@ -1,6 +1,8 @@
 #!/bin/bash
 
 __INSTALL_VERSION="
+  moar          1.31.8 auto
+  rgrc          0.6.12 auto
   shellcheck    0.10.0
   awscli:aws    2.24.26
   kubectl       1.32.3
@@ -37,7 +39,6 @@ __INSTALL_VERSION="
   eks-node-viewer                       0.7.4
   robusta-krr:krr                       1.25.1
   7z            24.09
-  moar          1.31.8 auto
   tar-portable  1.35
   gzip-portable 1.13
   xz-portable   5.6.4
@@ -647,6 +648,24 @@ __install_moar() {
     __install_make_url -noformat "
         linux-x64   linux-amd64
     " && __install_download && __install_bin "archive" || return $?
+}
+
+__install_rgrc() {
+    local VERSION="$1" EXECUTABLE="$2"
+
+    if [ "$VERSION" = "-check" ]; then
+        __install_check_version "$EXECUTABLE" --version \
+            | awk '{print $NF}'
+        return 0
+    elif [ "$VERSION" = "-latest" ]; then
+        __install_get_latest_github "lazywalker/rgrc"
+        return 0
+    fi
+
+    local FORMAT URL="https://github.com/lazywalker/rgrc/releases/download/v${VERSION}/rgrc-"
+    __install_make_url "
+        linux-x64   x86_64-unknown-linux-musl.tar.gz
+    " && __install_download && __install_unpack &&  __install_bin || return $?
 }
 
 __install_jq() {
