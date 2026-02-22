@@ -1268,7 +1268,7 @@ if [ -n "$__INSTALL_AUTO" ]; then
         for TOOL in $__INSTALL_AUTO; do
             ,install "$__INSTALL_AUTO"
         done
-    ) >dev/null 2>&1 &
+    ) >/dev/null 2>&1 &
     disown $!
     unset __INSTALL_AUTO
 fi
