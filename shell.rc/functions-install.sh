@@ -1264,9 +1264,11 @@ unset __INSTALL_VERSION
 
 if [ -n "$__INSTALL_AUTO" ]; then
     # Install update auto-install tools
-    ,install "$__INSTALL_AUTO" >/dev/null 2>&1 &
-    disown $!
-    unset __INSTALL_AUTO
+    for TOOL in $__INSTALL_AUTO; do
+        ,install "$__INSTALL_AUTO" >/dev/null 2>&1 &
+        disown $!
+    done
+    unset __INSTALL_AUTO TOOL
 fi
 
 # Define simple wrappers for tools
