@@ -1,6 +1,60 @@
 #!/bin/bash
 
+if [ "${BASH_SOURCE[0]}" == "$0" ]; then
+
+    FORMAT=$'%(HEAD) %(color:yellow)%(refname:short)\t%(color:green)(%(committerdate:relative))\t%(color:blue)%(subject)%(color:reset)'
+
+    if [ "$1" = "get-local-branches" ]; then
+        git branch --sort=-committerdate --sort=-HEAD \
+            --format="$FORMAT" \
+            --color=always \
+            | column -ts$'\t'
+    elif [ "$1" = "get-remote-branches" ]; then
+        # shellcheck disable=SC2033
+        git branch -r --sort=-committerdate \
+            | grep -v '^\s*origin/HEAD' \
+            | while read -r r _; do b="${r#*/}"; git show-ref --verify --quiet "refs/heads/$b" || echo "$r"; done \
+            | xargs git branch -r \
+                --format="$FORMAT" \
+                --color=always \
+                --list \
+            | column -ts$'\t'
+    elif [ "$1" = "get-tags" ]; then
+        git tag --sort=-committerdate \
+            --format="$FORMAT" \
+            --color=always \
+            | column -ts$'\t'
+    elif [ "$1" = "checkout" ]; then
+        BRANCH="$(
+            SELF_FILE="$0"
+            export SELF_FILE
+            "$SHELL" "$0" get-local-branches \
+                | fzf --ansi --layout reverse --tiebreak begin \
+                    --highlight-line \
+                    --color hl:underline,hl+:underline \
+                    --border --border-label '[ Git Checkout ]' --border-label-pos 2 --color 'label:blue' \
+                    --input-border bottom --input-label '[ Ctrl-L: local branches | Ctrl-R: remote branches | Ctrl-T: tags ]' --input-label-pos -3 \
+                    --no-separator --info inline-right \
+                    --prompt 'Local branches > ' \
+                    --preview-window down,border-top,40% --preview-border line \
+                    --bind 'ctrl-/:change-preview-window(down,70%|hidden|)' \
+                    --bind "ctrl-l:reload('$SHELL' '$SELF_FILE' get-local-branches)+change-prompt(Local branches > )+first" \
+                    --bind "ctrl-r:reload('$SHELL' '$SELF_FILE' get-remote-branches)+change-prompt(Remote branches > )+first" \
+                    --bind "ctrl-t:reload('$SHELL' '$SELF_FILE' get-tags)+change-prompt(Tags > )+first" \
+                    --preview "git log --oneline --graph --date=short --color=always --pretty='format:%C(auto)%cd %h%d %s' \$(cut -c3- <<< {} | cut -d' ' -f1) --" \
+                | sed 's/^\* //' \
+                | awk '{print $1}' \
+                | sed 's#^origin/##'
+        )"
+        [ -z "$BRANCH" ] || git checkout "$BRANCH"
+    fi
+
+    exit 0
+fi
+
 _has git || return
+
+_absname -v __GIT_FUNCTION_SCRIPT "${BASH_SOURCE[0]}"
 
 _git-config-check() {
     # Msys ALWAYS set +x permissions for files with shebang.
@@ -40,6 +94,7 @@ _is_yadm() {
     return 0
 }
 
+# shellcheck disable=SC2032
 git() {
 
     if _is_yadm; then
@@ -84,6 +139,11 @@ git() {
             BRANCH="$(command git rev-parse --abbrev-ref HEAD)"
             (set -x; "$GIT_BIN" branch "--set-upstream-to=origin/$BRANCH" "$BRANCH")
         fi
+    elif [ "checkout" = "$1" ] && [ $# -eq 1 ] && _has fzf; then
+        git rev-parse >/dev/null 2>&1 \
+            && "$SHELL" "$__GIT_FUNCTION_SCRIPT" checkout \
+            || echo "Not a git repository."
+        return
     fi
     command git "$@"
 }
