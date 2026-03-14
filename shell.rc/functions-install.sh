@@ -7,7 +7,7 @@ __INSTALL_VERSION="
   awscli:aws    2.24.26
   kubectl       1.32.3
   helm          3.18.6
-  nelm          1.18.0
+  nelm          1.22.0
   dive          0.13.1
   jq            1.8.0
   k9s           0.50.16
