@@ -7,14 +7,10 @@
 # Don't ignore files from dotfiles github repository which are not from $HOME
 !/README.md
 !/LICENSE
-!/bashrc
-!/tmux.conf.template
-!/tools.list
 !/cheatsheets/
 !/far-manager/
 !/shell.rc/
 !/src/
-!/tools/
 !/wsl/
 
 # Ignore files/dirs in .config for electron-based apps
