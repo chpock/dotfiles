@@ -14,7 +14,7 @@ hl.on("hyprland.start", function ()
     exec("dms run")
     -- Autostart applications
     exec("/usr/bin/wl-clip-persist --clipboard regular --reconnect-tries 0 --ignore-event-on-error")
-    exec('/w/projects/personal-notes/mount.sh "$HOME/.notes-key')
+    exec('/w/projects/personal-notes/mount.sh "$HOME/.notes-key"')
     exec("/usr/bin/sleep 3 && /usr/bin/Telegram -startintray")
     exec("/usr/bin/sleep 4 && /opt/teams-for-linux/teams-for-linux --minimized true --ozone-platform-hint=auto")
     exec("/usr/bin/sleep 5 && /usr/bin/vesktop --start-minimized")

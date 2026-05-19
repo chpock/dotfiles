@@ -32,7 +32,7 @@ bind("CONTROL + grave", exec(table.concat({
 bind(mainMod .. " + W", exec('dbus-send --type=method_call --dest=org.kde.CrowTranslate /org/kde/CrowTranslate/MainWindow org.kde.CrowTranslate.MainWindow.open'))
 bind(mainMod .. " + T", exec('/usr/bin/planify.quick-add'))
 bind(mainMod .. " + SHIFT + T", exec('/usr/bin/planify'))
-bind(mainMod .. " + N", exec(terminal .. '--class Neovim -e bash -c "nvim --cmd \\"cd ~/notes\\" -c \\"NeovimProjectLoad ~/notes\\""'))
+bind(mainMod .. " + N", exec(terminal .. ' --class Neovim -e bash -c "nvim --cmd \\"cd ~/notes\\" -c \\"NeovimProjectLoad ~/notes\\""'))
 bind(mainMod .. " + SHIFT + N", exec('/usr/bin/vnote'))
 bind(mainMod .. " + E", exec('GNUPGHOME=/home/kot/.kk_home/gnupg EDITOR="vim -u ~/.kk_home/vimrc -i ~/.kk_home/viminfo" ' .. terminal .. ' --class Neovim -e nvim -c NeovimProjectHistory'))
 bind(mainMod .. " + space", exec('rofi -modes drun,run,window -show drun -show-icons -cycle false -sidebar-mode -window-format "{c:15} {t}" -display-drun "Applications" -display-run "Run" -display-window "Windows"'))
