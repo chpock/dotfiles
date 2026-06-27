@@ -6,6 +6,7 @@ require("animations")
 
 local hs = require("hyprsplit")
 local hy3 = hl.plugin.hy3
+-- local tg = require("tabgroups")
 
 hl.monitor({
     output   = "eDP-1",
@@ -27,6 +28,10 @@ hs.config({
 })
 
 hl.config({
+
+    debug = {
+        disable_logs = false,
+    },
 
      ecosystem = {
         -- Disable donation screen
@@ -51,7 +56,35 @@ hl.config({
         allow_tearing = false,
 
         layout = "hy3",
+        -- layout = "master",
     },
+
+    -- master = {
+    --     new_status = "slave",
+    --     new_on_active = "after",
+    --     mfact = 0.70,
+    --     orientation = "left",
+    -- },
+    --
+    -- group = {
+    --     auto_group = true,
+    --     insert_after_current = true,
+    --     focus_removed_window = false,
+    --     group_on_movetoworkspace = true,
+    --
+    --     groupbar = {
+    --         enabled = true,
+    --         render_titles = true,
+    --         scrolling = true,
+    --         height = 18,
+    --         text_padding = 6,
+    --         middle_click_close = true,
+    --     },
+    -- },
+    master = {
+        new_status = "master",
+    },
+
 
     decoration = {
         rounding       = 5,
@@ -82,10 +115,6 @@ hl.config({
 
     dwindle = {
         preserve_split = true, -- You probably want this
-    },
-
-    master = {
-        new_status = "master",
     },
 
     scrolling = {
