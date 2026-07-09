@@ -154,7 +154,7 @@ return {
       -- Configure core features of AstroNvim
       features = {
         large_buf = { size = 1024 * 256, lines = 10000 }, -- set global limits for large files for disabling features like treesitter
-        autopairs = false, -- disable autopairs
+        autopairs = true, -- enable autopairs
         cmp = true, -- enable completion at start
         diagnostics = { virtual_text = true, virtual_lines = false }, -- diagnostic settings on startup
         highlighturl = true, -- highlight URLs at start
@@ -183,7 +183,7 @@ return {
       -- vim options can be configured here
       options = {
         opt = { -- vim.opt.<key>
-          relativenumber = false, -- sets vim.opt.relativenumber
+          relativenumber = true, -- sets vim.opt.relativenumber
           number = true, -- sets vim.opt.number
           spell = false, -- sets vim.opt.spell
           signcolumn = "yes", -- sets vim.opt.signcolumn to yes
@@ -210,6 +210,12 @@ return {
           colorcolumn = "100", -- hightlight 100th column
           title = true, -- set terminal title
           titlestring = '%{fnamemodify(getcwd(), ":t")} - Nvim', -- use basename of PWD as title (project name)
+          jumpoptions = "view", -- don't center line with cursor on buffer switch
+          -- always show command line.
+          -- 1. vim-sneak sets cmdheight to '1' (https://github.com/justinmk/vim-sneak/blob/feea86adcfbf8e6b5e71fdd5f4f5736fd8819fdb/autoload/sneak.vim#L38)
+          --    if cmdheight is 0, it causes screen flickering.
+          -- 2. this line will show some usefull messages like '<full path> written' on file save
+          cmdheight = 1,
         },
         g = { -- vim.g.<key>
           -- configure global vim variables (vim.g)
@@ -279,7 +285,7 @@ return {
               else
                 vim.cmd.stopinsert()
                 if _G.neotree_last_path and vim.uv.fs_stat(_G.neotree_last_path) then
-                  vim.cmd("Neotree focus reveal_file=" .. _G.neotree_last_path)
+                  vim.cmd("Neotree focus reveal_file=" .. vim.fn.fnameescape(_G.neotree_last_path))
                 else
                   vim.cmd.Neotree("focus")
                 end
@@ -328,7 +334,7 @@ return {
                 vim.cmd.Neotree "close"
               else
                 if _G.neotree_last_path and vim.uv.fs_stat(_G.neotree_last_path) then
-                  vim.cmd("Neotree focus reveal_file=" .. _G.neotree_last_path)
+                  vim.cmd("Neotree focus reveal_file=" .. vim.fn.fnameescape(_G.neotree_last_path))
                 else
                   vim.cmd.Neotree("focus")
                 end
@@ -348,13 +354,47 @@ return {
           },
           ["q"] = {
             function()
+              -- Handle Diff mode
+              if vim.wo.diff then
+                local all_wins = vim.api.nvim_tabpage_list_wins(0)
+                local ephemeral_win = nil
+
+                -- Find the ephemeral Gitsigns window (buftype is not empty)
+                for _, win in ipairs(all_wins) do
+                  if vim.wo[win].diff then
+                    local buf = vim.api.nvim_win_get_buf(win)
+                    if vim.bo[buf].buftype ~= "" then
+                      ephemeral_win = win
+                      break
+                    end
+                  end
+                end
+
+                if ephemeral_win then
+                  -- Switch focus to the ephemeral window before closing
+                  -- This prevents AstroNvim layout manager from crashing
+                  if vim.api.nvim_get_current_win() ~= ephemeral_win then
+                    vim.api.nvim_set_current_win(ephemeral_win)
+                  end
+
+                  -- Close the active ephemeral window safely
+                  -- Gitsigns will automatically turn off diff mode on the main file
+                  pcall(vim.api.nvim_win_close, 0, true)
+                else
+                  -- Show explicit error notification and abort
+                  vim.notify("Ephemeral diff window not found. Nothing was closed.", vim.log.levels.ERROR)
+                end
+
+                return
+              end
+
               local bufs = vim.fn.getbufinfo { buflisted = 1 }
               local buf_path = vim.api.nvim_buf_get_name(0)
               local is_last_opened_file = _G.neotree_last_path and buf_path == _G.neotree_last_path
               require("astrocore.buffer").close()
               if #bufs <= 1 or is_last_opened_file then
                 if _G.neotree_last_path and vim.uv.fs_stat(_G.neotree_last_path) then
-                  vim.cmd("Neotree focus reveal_file=" .. _G.neotree_last_path)
+                  vim.cmd("Neotree focus reveal_file=" .. vim.fn.fnameescape(_G.neotree_last_path))
                 else
                   vim.cmd.Neotree("focus")
                 end
@@ -384,6 +424,14 @@ return {
 
           -- setting a mapping to false will disable it
           -- ["<C-S>"] = false,
+        },
+      },
+      commands = {
+        W = {
+          function()
+            vim.cmd.write()
+          end,
+          desc = "Write file",
         },
       },
       -- Disable session management (resession plugin) from Astronvim.

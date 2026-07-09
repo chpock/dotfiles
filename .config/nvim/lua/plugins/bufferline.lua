@@ -1,5 +1,10 @@
 local function smart_go_to(index)
 
+  if vim.wo.diff then
+    vim.notify("Unable to switch buffers: diff mode is active. Exit from diff mode first.", vim.log.levels.ERROR)
+    return
+  end
+
   if vim.bo.filetype == "neo-tree" then
     -- vim.cmd.wincmd "p"
     local manager = require("neo-tree.sources.manager")

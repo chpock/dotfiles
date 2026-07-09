@@ -5,8 +5,8 @@
 ---@type LazySpec
 return {
   "AstroNvim/astrocommunity",
-  -- import/override with your plugins folder
   { import = "astrocommunity.pack.lua" },
+  -- import/override with your plugins folder
   { import = "astrocommunity.pack.rust" },
   { import = "astrocommunity.pack.bash" },
   { import = "astrocommunity.pack.markdown" },
@@ -16,7 +16,7 @@ return {
   { import = "astrocommunity.pack.toml" },
   { import = "astrocommunity.pack.yaml" },
   { import = "astrocommunity.pack.docker" },
-  { import = "astrocommunity.pack.terraform" },
+  -- { import = "astrocommunity.pack.terraform" },
   { import = "astrocommunity.pack.go" },
   { import = "astrocommunity.pack.cpp" },
   { import = "astrocommunity.pack.helm" },
@@ -29,7 +29,14 @@ return {
   { import = "astrocommunity.recipes.diagnostic-virtual-lines-current-line" },
   { import = "astrocommunity.bars-and-lines.bufferline-nvim" },
   { import = "astrocommunity.utility.live-preview" },
-  { import = "astrocommunity.ai.opencode-nvim" },
+  -- { import = "astrocommunity.ai.opencode-nvim" },
+  { import = "astrocommunity.ai.sidekick-nvim" },
+  { import = "astrocommunity.snippet.mini-snippets" },
+  { import = "astrocommunity.markdown-and-latex.render-markdown-nvim" },
+  -- { import = "astrocommunity.motion.flash-nvim" },
+  --- only for practice
+  { import = "astrocommunity.workflow.hardtime-nvim" },
+  -- { import = "astrocommunity.workflow.precognition-nvim" },
   -- { import = "astrocommunity.editing-support.undotree" },
   -- { import = "astrocommunity.search.nvim-hlslens" },
   -- { import = "astrocommunity.pack.harper" },

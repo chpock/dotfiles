@@ -31,6 +31,9 @@ return {
 
         -- qml
         "qmlls",
+
+        -- opentofu
+        "tofu-ls",
       },
     },
   },

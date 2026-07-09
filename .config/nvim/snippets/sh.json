@@ -1,0 +1,19 @@
+{
+  "if": {
+    "prefix": "if",
+    "body": [
+      "if ${1:condition}; then",
+      "\t${0:default_action}",
+      "fi"
+    ],
+    "description": "Bash if statement (auto-expand)"
+  },
+  "elif": {
+    "prefix": "elif",
+    "body": [
+      "elif ${1:condition}; then",
+      "\t${0:default_action}"
+    ],
+    "description": "Bash elif statement (auto-expand)"
+  }
+}

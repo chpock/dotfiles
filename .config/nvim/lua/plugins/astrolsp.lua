@@ -1,3 +1,8 @@
+-- AstroLSP allows you to customize the features in AstroNvim's LSP configuration engine
+-- Configuration documentation can be found with `:h astrolsp`
+-- NOTE: We highly recommend setting up the Lua Language Server (`:LspInstall lua_ls`)
+--       as this provides autocomplete and documentation while editing
+
 ---@type LazySpec
 return {
   "AstroNvim/astrolsp",
@@ -5,7 +10,7 @@ return {
   opts = {
     -- Configuration table of features provided by AstroLSP
     features = {
-      codelens = true, -- enable/disable codelens refresh on start
+      codelens = false, -- disable codelens trash by default, can be enabled by <leader>uL
       inlay_hints = false, -- enable/disable inlay hints on start
       semantic_tokens = true, -- enable/disable semantic token highlighting
     },
@@ -34,20 +39,12 @@ return {
     servers = {
       -- "pyright"
       "qmlls",
+      "tofu_ls"
     },
-    -- customize language server configuration options passed to `lspconfig`
-    ---@diagnostic disable: missing-fields
+    -- customize language server configuration passed to `vim.lsp.config`
+    -- client specific configuration can also go in `lsp/` in your configuration root (see `:h lsp-config`)
     config = {
-      -- clangd = { capabilities = { offsetEncoding = "utf-8" } },
-      -- harper_ls = {
-      --   settings = {
-      --     ["harper-ls"] = {
-      --       linters = {
-      --         SentenceCapitalization = false,
-      --       },
-      --     },
-      --   },
-      -- },
+      -- ["*"] = { capabilities = {} }, -- modify default LSP client settings such as capabilities
       yamlls = {
         -- default is: { 'yaml', 'yaml.docker-compose', 'yaml.gitlab', 'yaml.helm-values' }
         filetypes = { 'yaml', 'yaml.docker-compose', 'yaml.gitlab', 'yaml.helm-values', 'yaml.cfn', 'yaml.sam', 'yaml.k8s', },
@@ -70,12 +67,13 @@ return {
     },
     -- customize how language servers are attached
     handlers = {
-      -- a function without a key is simply the default handler, functions take two parameters, the server name and the configured options table for that server
-      -- function(server, opts) require("lspconfig")[server].setup(opts) end
+      -- -- I use tofu-ls instead of terraform-ls
+      terraformls = false,
+      -- a function with the key `*` modifies the default handler, functions takes the server name as the parameter
+      -- ["*"] = function(server) vim.lsp.enable(server) end
 
-      -- the key is the server that is being setup with `lspconfig`
+      -- the key is the server that is being setup with `vim.lsp.config`
       -- rust_analyzer = false, -- setting a handler to false will disable the set up of that language server
-      -- pyright = function(_, opts) require("lspconfig").pyright.setup(opts) end -- or a custom handler function can be passed
     },
     -- Configure buffer local auto commands to add when attaching a language server
     autocmds = {
@@ -94,7 +92,7 @@ return {
           -- the rest of the autocmd options (:h nvim_create_autocmd)
           desc = "Refresh codelens (buffer)",
           callback = function(args)
-            if require("astrolsp").config.features.codelens then vim.lsp.codelens.refresh { bufnr = args.buf } end
+            if require("astrolsp").config.features.codelens then vim.lsp.codelens.enable(true, { bufnr = args.buf }) end
           end,
         },
       },
@@ -112,16 +110,16 @@ return {
           function() require("astrolsp.toggles").buffer_semantic_tokens() end,
           desc = "Toggle LSP semantic highlight (buffer)",
           cond = function(client)
-            return client.supports_method "textDocument/semanticTokens/full" and vim.lsp.semantic_tokens ~= nil
+            return client:supports_method "textDocument/semanticTokens/full" and vim.lsp.semantic_tokens ~= nil
           end,
         },
       },
     },
     -- A custom `on_attach` function to be run after the default `on_attach` function
-    -- takes two parameters `client` and `bufnr`  (`:h lspconfig-setup`)
-    -- on_attach = function(client, bufnr)
-    --   -- this would disable semanticTokensProvider for all clients
-    --   -- client.server_capabilities.semanticTokensProvider = nil
-    -- end,
+    -- takes two parameters `client` and `bufnr`  (`:h lsp-attach`)
+    on_attach = function(client, bufnr)
+      -- this would disable semanticTokensProvider for all clients
+      -- client.server_capabilities.semanticTokensProvider = nil
+    end,
   },
 }
