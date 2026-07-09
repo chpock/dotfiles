@@ -1,12 +1,13 @@
+package.path = "/w/projects/?/init.lua;" .. package.path
+
 require("autostart")
 require("rules")
 require("env")
 require("bindings")
 require("animations")
 
-local hs = require("hyprsplit")
-local hy3 = hl.plugin.hy3
--- local tg = require("tabgroups")
+local hs  = require("hyprsplit")
+local hyd = require("hyprdeck").setup({ log_level = "info" })
 
 hl.monitor({
     output   = "eDP-1",
@@ -55,35 +56,85 @@ hl.config({
         -- Please see https://wiki.hypr.land/Configuring/Advanced-and-Cool/Tearing/ before you turn this on
         allow_tearing = false,
 
-        layout = "hy3",
-        -- layout = "master",
+        layout = "master",
     },
 
-    -- master = {
-    --     new_status = "slave",
-    --     new_on_active = "after",
-    --     mfact = 0.70,
-    --     orientation = "left",
-    -- },
-    --
-    -- group = {
-    --     auto_group = true,
-    --     insert_after_current = true,
-    --     focus_removed_window = false,
-    --     group_on_movetoworkspace = true,
-    --
-    --     groupbar = {
-    --         enabled = true,
-    --         render_titles = true,
-    --         scrolling = true,
-    --         height = 18,
-    --         text_padding = 6,
-    --         middle_click_close = true,
-    --     },
-    -- },
     master = {
-        new_status = "master",
+        new_status = "slave",
+        new_on_active = "after",
+        mfact = 0.70,
+        orientation = "left",
     },
+
+    -- These colors were from hy3.
+    -- As for now, hyprland doesn't support color for borders and urgent windows in groupbar.
+    -- When it be able to support them, these colors can be applied.
+    --
+    --     tabs = {
+    --         border_width = 1,
+    --         colors = {
+    --             active = "rgba(33ccff20)",
+    --             active_border = "rgba(33ccffee)",
+    --             inactive = "rgba(30303020)",
+    --             inactive_border = "rgba(595959aa)",
+    --             urgent = "rgba(ff223340)",
+    --             urgent_border = "rgba(ff2233ee)",
+    --         },
+    --     },
+    group = {
+        auto_group = true,
+        insert_after_current = true,
+        focus_removed_window = false,
+        group_on_movetoworkspace = true,
+
+        col = {
+            border_active   = { colors = {"rgba(33ccffee)", "rgba(00ff99ee)"}, angle = 45 },
+            border_inactive = "rgba(595959aa)",
+            border_locked_active   = { colors = {"rgba(33ccffee)", "rgba(00ff99ee)"}, angle = 45 },
+            border_locked_inactive = "rgba(595959aa)",
+        },
+
+        groupbar = {
+            enabled = true,
+            render_titles = true,
+            scrolling = true,
+            middle_click_close = true,
+
+            height = 22,
+            font_size = 12,
+            font_family = "Sans",
+            text_padding = 0,
+
+            -- Render full per-tab backgrounds instead of just the thin indicator line
+            gradients = true,
+            indicator_height = 0,
+
+            -- Distinct backgrounds: cyan accent for active, dark grey for inactive
+            col = {
+                active   = "rgba(33ccff30)",
+                inactive = "rgba(2a2a2a55)",
+            },
+
+            text_color          = "rgba(ffffffdd)",
+            text_color_inactive = "rgba(b0b0b0ff)",
+
+            -- Round EACH tab individually (default rounds only the outer edges of the whole bar)
+            gradient_rounding = 8,
+            gradient_round_only_edges = false,
+
+            -- Visual separator between tabs (acts like the missing per-tab border)
+            gaps_in = 8,
+            gaps_out = 5,
+            keep_upper_gap = false,
+
+            -- Emphasize the focused tab
+            font_weight_active = "normal",
+            font_weight_inactive = "normal",
+        },
+    },
+    -- master = {
+    --     new_status = "master",
+    -- },
 
 
     decoration = {
@@ -135,6 +186,10 @@ hl.config({
         focus_on_activate        = false,
         -- Enable live reload
         disable_autoreload       = false,
+        -- Don't inherit fullscreen state when closing a fullscreen window.
+        -- Without this, closing a fullscreen window forces the next active
+        -- window (e.g. a tab group) into fullscreen, hiding the groupbar.
+        exit_window_retains_fullscreen = false,
     },
 
     input = {
@@ -153,27 +208,6 @@ hl.config({
         },
     },
 
-    plugin = {
-        hy3 = hy3 ~= nil and {
-            tab_first_window = true,
-            tabs = {
-                border_width = 1,
-                colors = {
-                    active = "rgba(33ccff20)",
-                    active_border = "rgba(33ccffee)",
-                    inactive = "rgba(30303020)",
-                    inactive_border = "rgba(595959aa)",
-                    urgent = "rgba(ff223340)",
-                    urgent_border = "rgba(ff2233ee)",
-                },
-            },
-            autotile = {
-                enable = true,
-                trigger_width = 800,
-                trigger_height = 500,
-            },
-        } or nil,
-    },
 })
 
 hl.gesture({
@@ -191,61 +225,56 @@ hl.device({
 
 local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 
-if hy3 ~= nil then
-    hl.bind(mainMod .. " + SHIFT + Q", hy3.kill_active())
+hl.bind(mainMod .. " + CONTROL + left",  hl.dsp.focus({ monitor = "-1" }))
+hl.bind(mainMod .. " + CONTROL + right", hl.dsp.focus({ monitor = "+1" }))
+
+hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.window.close())
+
+if hyd ~= nil then
     -- Move focus with mainMod + arrow keys
-    hl.bind(mainMod .. " + left",  hy3.move_focus("left"))
-    hl.bind(mainMod .. " + right", hy3.move_focus("right"))
-    hl.bind(mainMod .. " + up",    hy3.move_focus("up"))
-    hl.bind(mainMod .. " + down",  hy3.move_focus("down"))
-
-    hl.bind(mainMod .. " + CONTROL + left",  hy3.move_focus("left", { visible = true, wrap = false }))
-    hl.bind(mainMod .. " + CONTROL + right", hy3.move_focus("right", { visible = true, wrap = false }))
-
+    hl.bind(mainMod .. " + left",  hyd.dsp.focus({ direction = "left" }))
+    hl.bind(mainMod .. " + right", hyd.dsp.focus({ direction = "right" }))
+    hl.bind(mainMod .. " + up",    hyd.dsp.focus({ direction = "up" }))
+    hl.bind(mainMod .. " + down",  hyd.dsp.focus({ direction = "down" }))
     -- Move window with mainMod + SHIFT + arrow keys
-    hl.bind(mainMod .. " + SHIFT + left",  hy3.move_window("left", { once = true }))
-    hl.bind(mainMod .. " + SHIFT + right", hy3.move_window("right", { once = true }))
-    hl.bind(mainMod .. " + SHIFT + up",    hy3.move_window("up", { once = true }))
-    hl.bind(mainMod .. " + SHIFT + down",  hy3.move_window("down", { once = true }))
-    hl.bind(mainMod .. " + SHIFT + CONTROL + left",  hy3.move_window("left", { once = true, visible = true }))
-    hl.bind(mainMod .. " + SHIFT + CONTROL + right", hy3.move_window("right", { once = true, visible = true }))
-    hl.bind(mainMod .. " + SHIFT + CONTROL + up",    hy3.move_window("up", { once = true, visible = true }))
-    hl.bind(mainMod .. " + SHIFT + CONTROL + down",  hy3.move_window("down", { once = true, visible = true }))
+    hl.bind(mainMod .. " + SHIFT + left",  hyd.dsp.window.move({ direction = "left" }))
+    hl.bind(mainMod .. " + SHIFT + right", hyd.dsp.window.move({ direction = "right" }))
+    hl.bind(mainMod .. " + SHIFT + up",    hyd.dsp.window.move({ direction = "up" }))
+    hl.bind(mainMod .. " + SHIFT + down",  hyd.dsp.window.move({ direction = "down" }))
+
+    -- Switch workspaces with mainMod + [0-9]
+    -- Move active window to a workspace with mainMod + SHIFT + [0-9]
+    hl.bind(mainMod .. " + CONTROL + up",    hyd.dsp.window.move({ monitor = "+1" }))
+    hl.bind(mainMod .. " + CONTROL + down",  hyd.dsp.window.move({ monitor = "-1" }))
+    for i = 1, 10 do
+        local key = i % 10 -- 10 maps to key 0
+        hl.bind(mainMod .. " + " .. key,         hyd.dsp.focus({ workspace = i }))
+        hl.bind(mainMod .. " + SHIFT + " .. key, hyd.dsp.window.move({ workspace = i, follow = true }))
+    end
 else
-    hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.window.close())
     -- Move focus with mainMod + arrow keys
     hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }))
     hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
     hl.bind(mainMod .. " + up",    hl.dsp.focus({ direction = "up" }))
     hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down" }))
-end
 
-hl.bind(mainMod .. " + CONTROL + up",    hl.dsp.window.move({ monitor = "+1" }))
-hl.bind(mainMod .. " + CONTROL + down",  hl.dsp.window.move({ monitor = "-1" }))
+    -- Switch workspaces with mainMod + [0-9]
+    -- Move active window to a workspace with mainMod + SHIFT + [0-9]
+    hl.bind(mainMod .. " + CONTROL + up",    hl.dsp.window.move({ monitor = "+1" }))
+    hl.bind(mainMod .. " + CONTROL + down",  hl.dsp.window.move({ monitor = "-1" }))
 
-if hs ~= nil then
-    -- Switch workspaces with mainMod + [0-9]
-    -- Move active window to a workspace with mainMod + SHIFT + [0-9]
-    for i = 1, 10 do
-        local key = i % 10 -- 10 maps to key 0
-        hl.bind(mainMod .. " + " .. key,         hs.dsp.focus({ workspace = i}))
-        hl.bind(mainMod .. " + SHIFT + " .. key, hs.dsp.window.move({ workspace = i, follow = true }))
-    end
-elseif hy3 ~= nil then
-    -- Switch workspaces with mainMod + [0-9]
-    -- Move active window to a workspace with mainMod + SHIFT + [0-9]
-    for i = 1, 10 do
-        local key = i % 10 -- 10 maps to key 0
-        hl.bind(mainMod .. " + " .. key,         hl.dsp.focus({ workspace = i}))
-        hl.bind(mainMod .. " + SHIFT + " .. key, hy3.move_to_workspace(i))
-    end
-else
-    -- Switch workspaces with mainMod + [0-9]
-    -- Move active window to a workspace with mainMod + SHIFT + [0-9]
-    for i = 1, 10 do
-        local key = i % 10 -- 10 maps to key 0
-        hl.bind(mainMod .. " + " .. key,         hl.dsp.focus({ workspace = i}))
-        hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }))
+    if hs ~= nil then
+        for i = 1, 10 do
+            local key = i % 10 -- 10 maps to key 0
+            hl.bind(mainMod .. " + " .. key,         hs.dsp.focus({ workspace = i }))
+            hl.bind(mainMod .. " + SHIFT + " .. key, hs.dsp.window.move({ workspace = i, follow = true }))
+        end
+    else
+        for i = 1, 10 do
+            local key = i % 10 -- 10 maps to key 0
+            hl.bind(mainMod .. " + " .. key,         hl.dsp.focus({ workspace = i }))
+            hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }))
+        end
     end
 end
 

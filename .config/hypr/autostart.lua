@@ -2,7 +2,7 @@ local exec = hl.exec_cmd
 
 hl.on("hyprland.start", function ()
     -- Reload plugins
-    exec("hyprpm reload -n")
+    -- exec("hyprpm reload -n")
     -- Different set keyboard layout per window
     exec("/usr/bin/hyprland-per-window-layout")
     -- Required for clipboard history integration
