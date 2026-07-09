@@ -1,0 +1,22 @@
+{
+  "border": {
+    "color" : "widget/border",
+    "width" : 1
+  },
+
+  "background": {
+    "color" : "widget/background"
+  },
+
+  "padding": {
+    "top"    : 8,
+    "bottom" : 8,
+    "left"   : 8,
+    "right"  : 8
+  },
+
+  "spacing": {
+    "horizontal" : 15,
+    "vertical"   : 5
+  }
+}

@@ -1,0 +1,670 @@
+{
+  "slider": {
+    "bar": {
+      "height" : 4,
+
+      "color": {
+        "active"   : "blue",
+        "inactive" : "white_bright%10"
+      }
+    },
+
+    "thumb": {
+      "color"  : "blue",
+      "height" : 8,
+      "width"  : 4,
+      "gap"    : 2
+    },
+
+    "padding": {
+      "top"    : 0,
+      "bottom" : 0,
+      "left"   : 0,
+      "right"  : 0
+    }
+  },
+
+  "bar": {
+    "height" : 4,
+
+    "color": {
+      "active"   : "blue",
+      "inactive" : "white_bright%10"
+    },
+
+    "padding": {
+      "top"    : 0,
+      "bottom" : 0,
+      "left"   : 0,
+      "right"  : 0
+    }
+  },
+
+  "text": {
+    "color"                    : "white_bright",
+    "background"               : "transparent",
+    "overflow"                 : "none",
+    "heightMode"               : "normal",
+    "word_spacing_font_family" : "",
+    "text"                     : "?",
+
+    "font": {
+      "size"      : "normal",
+      "weight"    : "normal",
+      "family"    : "general",
+      "strikeout" : false
+    },
+
+    "padding": {
+      "top"    : 0,
+      "bottom" : 0,
+      "left"   : 0,
+      "right"  : 0
+    },
+
+    "scroll": {
+      "duration"   : 7,
+      "pauseStart" : 6000,
+      "pauseEnd"   : 2000
+    },
+
+    "alignment": {
+      "horizontal" : "left",
+      "vertical"   : "center"
+    },
+
+    "hover": {
+      "enabled" : false
+    }
+  },
+
+  "text_title": {
+    "color"                    : "megenta_bright",
+    "background"               : "transparent",
+    "heightMode"               : "normal",
+    "word_spacing_font_family" : "",
+    "text"                     : "?",
+
+    "font": {
+      "size"      : "normal",
+      "weight"    : "medium",
+      "family"    : "general",
+      "strikeout" : false
+    },
+
+    "padding": {
+      "top"    : 0,
+      "bottom" : 0,
+      "left"   : 0,
+      "right"  : 0
+    },
+
+    "alignment": {
+      "horizontal" : "left",
+      "vertical"   : "center"
+    },
+
+    "hover": {
+      "enabled" : false
+    },
+
+    "separator": {
+      "enabled" : true,
+      "color"   : "gray",
+      "text"    : ":"
+    }
+  },
+
+  "text_temperature": {
+    "word_spacing_font_family" : "",
+    "heightMode"               : "normal",
+    "color"                    : "white_bright",
+    "background"               : "transparent",
+    "text"                     : "?",
+
+    "font": {
+      "size"      : "normal",
+      "weight"    : "normal",
+      "family"    : "general",
+      "strikeout" : false
+    },
+
+    "padding": {
+      "top"    : 0,
+      "bottom" : 0,
+      "left"   : 0,
+      "right"  : 0
+    },
+
+    "alignment": {
+      "horizontal" : "left",
+      "vertical"   : "center"
+    },
+
+    "hover": {
+      "enabled" : false
+    },
+
+    "thresholds": {
+      "enabled" : true,
+
+      "ignore": {
+        "color" : "severity/ignore",
+        "value" : "none"
+      },
+
+      "good": {
+        "color" : "severity/good",
+        "value" : "none"
+      },
+
+      "warning": {
+        "color" : "severity/warning",
+        "value" : "none"
+      },
+
+      "critical": {
+        "color" : "severity/critical",
+        "value" : "none"
+      }
+    }
+  },
+
+  "text_percent": {
+    "word_spacing_font_family" : "",
+    "heightMode"               : "normal",
+    "color"                    : "white_bright",
+    "background"               : "transparent",
+    "text"                     : "?",
+
+    "font": {
+      "size"      : "normal",
+      "weight"    : "normal",
+      "family"    : "general",
+      "strikeout" : false
+    },
+
+    "padding": {
+      "top"    : 0,
+      "bottom" : 0,
+      "left"   : 0,
+      "right"  : 0
+    },
+
+    "alignment": {
+      "horizontal" : "left",
+      "vertical"   : "center"
+    },
+
+    "hover": {
+      "enabled" : false
+    },
+
+    "thresholds": {
+      "enabled" : true,
+
+      "ignore": {
+        "color" : "severity/ignore",
+        "value" : "none"
+      },
+
+      "good": {
+        "color" : "severity/good",
+        "value" : "none"
+      },
+
+      "warning": {
+        "color" : "severity/warning",
+        "value" : "none"
+      },
+
+      "critical": {
+        "color" : "severity/critical",
+        "value" : "none"
+      }
+    }
+  },
+
+  "text_severity": {
+    "word_spacing_font_family" : "",
+    "heightMode"               : "normal",
+    "color"                    : "white_bright",
+    "background"               : "transparent",
+    "text"                     : "?",
+
+    "font": {
+      "size"      : "normal",
+      "weight"    : "normal",
+      "family"    : "general",
+      "strikeout" : false
+    },
+
+    "padding": {
+      "top"    : 0,
+      "bottom" : 0,
+      "left"   : 0,
+      "right"  : 0
+    },
+
+    "alignment": {
+      "horizontal" : "left",
+      "vertical"   : "center"
+    },
+
+    "hover": {
+      "enabled" : false
+    },
+
+    "thresholds": {
+      "enabled" : true,
+
+      "ignore": {
+        "color" : "severity/ignore",
+        "value" : "none"
+      },
+
+      "good": {
+        "color" : "severity/good",
+        "value" : "none"
+      },
+
+      "warning": {
+        "color" : "severity/warning",
+        "value" : "none"
+      },
+
+      "critical": {
+        "color" : "severity/critical",
+        "value" : "none"
+      }
+    }
+  },
+
+  "text_duration": {
+    "word_spacing_font_family" : "",
+    "heightMode"               : "normal",
+    "color"                    : "white_bright",
+    "background"               : "transparent",
+    "text"                     : "?",
+
+    "font": {
+      "size"      : "normal",
+      "weight"    : "normal",
+      "family"    : "general",
+      "strikeout" : false
+    },
+
+    "padding": {
+      "top"    : 0,
+      "bottom" : 0,
+      "left"   : 0,
+      "right"  : 0
+    },
+
+    "alignment": {
+      "horizontal" : "left",
+      "vertical"   : "center"
+    },
+
+    "hover": {
+      "enabled" : false
+    },
+
+    "thresholds": {
+      "enabled" : true,
+
+      "ignore": {
+        "color" : "severity/ignore",
+        "value" : "none"
+      },
+
+      "good": {
+        "color" : "severity/good",
+        "value" : "none"
+      },
+
+      "warning": {
+        "color" : "severity/warning",
+        "value" : "none"
+      },
+
+      "critical": {
+        "color" : "severity/critical",
+        "value" : "none"
+      }
+    }
+  },
+
+  "text_datetime": {
+    "word_spacing_font_family" : "",
+    "heightMode"               : "normal",
+    "color"                    : "white_bright",
+    "background"               : "transparent",
+    "format"                   : "dd MMM yyyy, hh:mm",
+    "text"                     : "?",
+
+    "font": {
+      "size"      : "normal",
+      "weight"    : "normal",
+      "family"    : "general",
+      "strikeout" : false
+    },
+
+    "padding": {
+      "top"    : 0,
+      "bottom" : 0,
+      "left"   : 0,
+      "right"  : 0
+    },
+
+    "alignment": {
+      "horizontal" : "left",
+      "vertical"   : "center"
+    },
+
+    "hover": {
+      "enabled" : false
+    }
+  },
+
+  "text_bytes": {
+    "word_spacing_font_family" : "",
+    "heightMode"               : "normal",
+    "color"                    : "white_bright",
+    "background"               : "transparent",
+    "text"                     : "?",
+    "precision"                : 4,
+    "prefix"                   : "",
+
+    "font": {
+      "size"      : "normal",
+      "weight"    : "normal",
+      "family"    : "general",
+      "strikeout" : false
+    },
+
+    "padding": {
+      "top"    : 0,
+      "bottom" : 0,
+      "left"   : 0,
+      "right"  : 0
+    },
+
+    "alignment": {
+      "horizontal" : "left",
+      "vertical"   : "center"
+    },
+
+    "hover": {
+      "enabled" : false
+    }
+  },
+
+  "icon": {
+    "word_spacing_font_family" : "general",
+    "color"                    : "white_bright",
+    "background"               : "transparent",
+    "filled"                   : false,
+    "grade"                    : 200,
+    "weight"                   : 400,
+    "opticalSize"              : 24,
+    "icon"                     : "question_mark",
+
+    "font": {
+      "size"      : "normal",
+      "weight"    : "normal",
+      "family"    : "symbols",
+      "strikeout" : false
+    },
+
+    "padding": {
+      "top"    : 0,
+      "bottom" : 0,
+      "left"   : 0,
+      "right"  : 0
+    },
+
+    "hover": {
+      "enabled" : false,
+      "color"   : "blue"
+    },
+
+    "active": {
+      "color" : "yellow"
+    }
+  },
+
+  "graph_timeseries": {
+    "fill"   : "info/primary%30",
+    "height" : 40,
+    "points" : 50,
+
+    "stroke": {
+      "color" : "info/primary",
+      "width" : 1
+    },
+
+    "axisY": {
+      "max"    : 100,
+      "min"    : 0,
+      "extend" : false
+    },
+
+    "padding": {
+      "top"    : 0,
+      "bottom" : 0,
+      "left"   : 0,
+      "right"  : 0
+    },
+
+    "border": {
+      "width" : 1,
+      "color" : "info/primary"
+    }
+  },
+
+  "graph_bars": {
+    "height" : 40,
+
+    "padding": {
+      "top"    : 0,
+      "bottom" : 0,
+      "left"   : 0,
+      "right"  : 0
+    },
+
+    "border": {
+      "width" : 1,
+      "color" : "info/primary"
+    },
+
+    "thresholds": {
+      "enabled" : true,
+
+      "ignore": {
+        "color" : "severity/ignore",
+        "value" : "none"
+      },
+
+      "good": {
+        "color" : "severity/good",
+        "value" : "none"
+      },
+
+      "warning": {
+        "color" : "severity/warning",
+        "value" : "none"
+      },
+
+      "critical": {
+        "color" : "severity/critical",
+        "value" : "none"
+      }
+    }
+  },
+
+  "process_list": {
+    "common": {
+      "color"                    : "white_bright",
+      "background"               : "transparent",
+      "overflow"                 : "none",
+      "heightMode"               : "normal",
+      "word_spacing_font_family" : "",
+      "text"                     : "?",
+
+      "font": {
+        "size"      : "small",
+        "weight"    : "normal",
+        "family"    : "general",
+        "strikeout" : false
+      },
+
+      "padding": {
+        "top"    : 0,
+        "bottom" : 0,
+        "left"   : 0,
+        "right"  : 0
+      },
+
+      "scroll": {
+        "duration"   : 7,
+        "pauseStart" : 6000,
+        "pauseEnd"   : 2000
+      },
+
+      "alignment": {
+        "horizontal" : "left",
+        "vertical"   : "center"
+      },
+
+      "hover": {
+        "enabled" : false
+      }
+    },
+
+    "command": {
+      "color"                    : "white_bright",
+      "background"               : "transparent",
+      "overflow"                 : "elide",
+      "heightMode"               : "normal",
+      "word_spacing_font_family" : "",
+      "text"                     : "?",
+
+      "font": {
+        "size"      : "small",
+        "weight"    : "normal",
+        "family"    : "general",
+        "strikeout" : false
+      },
+
+      "padding": {
+        "top"    : 0,
+        "bottom" : 0,
+        "left"   : 0,
+        "right"  : "2ch"
+      },
+
+      "scroll": {
+        "duration"   : 7,
+        "pauseStart" : 6000,
+        "pauseEnd"   : 2000
+      },
+
+      "alignment": {
+        "horizontal" : "left",
+        "vertical"   : "center"
+      },
+
+      "hover": {
+        "enabled" : false
+      }
+    },
+
+    "args": {
+      "color"                    : "text/secondary",
+      "background"               : "transparent",
+      "overflow"                 : "elide",
+      "heightMode"               : "normal",
+      "word_spacing_font_family" : "",
+      "text"                     : "?",
+
+      "font": {
+        "size"      : "small",
+        "weight"    : "normal",
+        "family"    : "general",
+        "strikeout" : false
+      },
+
+      "padding": {
+        "top"    : 0,
+        "bottom" : 0,
+        "left"   : 0,
+        "right"  : "2ch"
+      },
+
+      "scroll": {
+        "duration"   : 7,
+        "pauseStart" : 6000,
+        "pauseEnd"   : 2000
+      },
+
+      "alignment": {
+        "horizontal" : "left",
+        "vertical"   : "center"
+      },
+
+      "hover": {
+        "enabled" : false
+      }
+    },
+
+    "value": {
+      "color"                    : "white_bright",
+      "background"               : "transparent",
+      "overflow"                 : "none",
+      "heightMode"               : "normal",
+      "word_spacing_font_family" : "",
+      "text"                     : "?",
+
+      "font": {
+        "size"      : "small",
+        "weight"    : "normal",
+        "family"    : "general",
+        "strikeout" : false
+      },
+
+      "padding": {
+        "top"    : 0,
+        "bottom" : 0,
+        "left"   : 0,
+        "right"  : 0
+      },
+
+      "scroll": {
+        "duration"   : 7,
+        "pauseStart" : 6000,
+        "pauseEnd"   : 2000
+      },
+
+      "alignment": {
+        "horizontal" : "right",
+        "vertical"   : "center"
+      },
+
+      "hover": {
+        "enabled" : false
+      }
+    },
+
+    "spacing": {
+      "horizontal" : 3
+    },
+
+    "padding": {
+      "top"    : 0,
+      "bottom" : 0,
+      "left"   : 0,
+      "right"  : 0
+    }
+  }
+}
