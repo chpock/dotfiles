@@ -3,6 +3,8 @@
 !/.local/
 !/.gitignore
 !/.gitmodules
+!/.pi
+!/.agents
 
 # Don't ignore files from dotfiles github repository which are not from $HOME
 !/README.md
@@ -55,8 +57,20 @@
 /.config/geeqie/marks
 /.config/lnav/
 /.config/libreoffice/
+/.config/quickdashboard/.qmlls.ini
+/.config/quickdashboard/qd
 
 # Ignore files/dirs in .local
 /.local/bin/chrome-profile-*
 /.local/state/
 /.local/share/
+
+# Ignore files/dirs for pi
+/.pi/agent/npm/
+/.pi/agent/sessions/
+/.pi/agent/tasks/
+/.pi/agent/tests/
+/.pi/agent/auth.json
+/.pi/agent/models-store.json
+
+
