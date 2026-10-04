@@ -1,0 +1,16 @@
+{
+  "workflow": "none",
+  "allowBrowserCookies": false,
+  "autoOpenBrowser": false,
+  "searchRouting": {
+    "providers": ["exa", "openai"],
+    "useCurrentModel": true,
+    "fallbackOn": [
+      "unsupported",
+      "transient",
+      "quota",
+      "network",
+      "invalid-response"
+    ]
+  }
+}
