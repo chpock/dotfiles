@@ -1,8 +1,0 @@
-{
-  "workflowsEnabled": false,
-  "strictAgentFiles": true,
-  "scopeModels": true,
-  "reportUsage": true,
-  "showCost": true,
-  "showModel": true
-}

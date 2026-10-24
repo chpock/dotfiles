@@ -1,9 +1,35 @@
 // installed by herdr
+// LOCALLY PATCHED for pi-subagents background work; NOT the stock integration.
 // managed by herdr; reinstalling or updating the integration overwrites this file.
-// add custom hooks/plugins beside this file instead of editing it.
 // HERDR_INTEGRATION_ID=pi
 // HERDR_INTEGRATION_VERSION=9
 // @ts-nocheck
+
+/*
+ * Local patch based on Herdr v0.9.3 / Pi integration v9.
+ * The integration identifiers above describe the upstream base, not this patch.
+ *
+ * Why: upstream tracks only the parent agent's activity. When the parent ends
+ * its turn while async subagents still run, it reports idle, which Herdr can
+ * display as done and announce as a completion.
+ *
+ * pi-subagents (verified with 0.76.1) already emits paired herdr:busy events
+ * { active: true/false, label?: string }. This patch consumes them here so the
+ * existing herdr:pi publisher remains the single owner of lifecycle state:
+ * blocked takes precedence; parent OR background activity means working;
+ * otherwise idle. A separate lifecycle reporter would compete with this one.
+ * The producer still owns child tracking and pane labels; no child polling here.
+ *
+ * LOCAL PATCH comments below mark the changed state calculation, new event
+ * handler, and startup/shutdown guards. The transport and state-report queue
+ * are unchanged. Reload startup may report idle before pi-subagents restores busy.
+ * Shutdown suppression assumes our session_shutdown handler runs before the
+ * producer's cleanup; reversing that order can also report idle. Uninterrupted
+ * working across /reload is outside this patch's accepted scope.
+ *
+ * Regression tests: ../tests/herdr-busy.test.mjs (also run rpiv-herdr-bridge.test.mjs).
+ * Rationale/review: ../../experiments/herdr-busy/review-findings.md.
+ */
 
 import net from "node:net";
 import path from "node:path";
@@ -182,6 +208,10 @@ export default function (pi) {
   }
 
   let agentActive = false;
+  // LOCAL PATCH: count outstanding paired busy signals, not individual children.
+  // pi-subagents holds one signal for all its active runs; other producers can
+  // hold their own, so releasing one must not clear another producer's activity.
+  let busyCount = 0;
   let blockedCount = 0;
   let blockedMessage: string | undefined;
   let lastState: AgentState | undefined;
@@ -192,13 +222,20 @@ export default function (pi) {
     if (blockedCount > 0) {
       return { state: "blocked" as const, message: blockedMessage };
     }
-    if (agentActive) {
+    // LOCAL PATCH: parent settlement must not finish still-running subagents.
+    // The blocked check above keeps user-input requests higher priority than busy.
+    if (agentActive || busyCount > 0) {
       return { state: "working" as const, message: undefined };
     }
     return { state: "idle" as const, message: undefined };
   }
 
   function publishState(force = false) {
+    // LOCAL PATCH: gate publication, not event accounting, so early restored
+    // signals survive. Also suppress headless, initializing and shutdown reports.
+    if (!rootSession) {
+      return;
+    }
     const next = desiredState();
     if (!force && next.state === lastState && next.message === lastMessage) {
       return;
@@ -208,10 +245,25 @@ export default function (pi) {
     queueState(next.state, next.message);
   }
 
-  pi.events.on("herdr:blocked", (data) => {
-    if (!rootSession) {
-      return;
+  // LOCAL PATCH: consume the activity protocol already emitted by pi-subagents.
+  // Its optional label is display metadata, not part of our lifecycle state.
+  pi.events.on("herdr:busy", (data: unknown) => {
+    const active = (data as { active?: unknown } | null)?.active;
+    // Reject malformed events rather than treating them as a release of busy.
+    if (typeof active !== "boolean") {
+      throw new TypeError("herdr:busy requires a boolean active field");
     }
+    // Count before session_start too: producers may restore their signals first.
+    busyCount = active ? busyCount + 1 : Math.max(0, busyCount - 1);
+    // On label changes (e.g. 1 -> 2 children), pi-subagents synchronously emits
+    // false then true without actually stopping. Publish after that pair, not
+    // between its events, to avoid a spurious idle/done notification.
+    queueMicrotask(() => publishState());
+  });
+
+  pi.events.on("herdr:blocked", (data) => {
+    // LOCAL PATCH: the old rootSession guard moved into publishState(), so early
+    // blocked signals are retained too; existing blocker counting is unchanged.
     if (!data?.active) {
       blockedCount = Math.max(0, blockedCount - 1);
       if (blockedCount === 0) {
@@ -232,12 +284,21 @@ export default function (pi) {
     if (ctx?.mode !== "tui") {
       return;
     }
-    rootSession = true;
+    // LOCAL PATCH: enable publication only after the initial session report
+    // finishes; busy callbacks must not overtake it. Do not reset early counts.
+    rootSession = false;
     updateSessionRef(ctx);
     await reportSession(event?.reason);
+    rootSession = true;
     // A reload can replace this extension mid-run without emitting another agent_start.
     agentActive = ctx?.isIdle?.() === false;
     publishState(true);
+  });
+
+  // LOCAL PATCH: suppress state reports from queued busy callbacks or later cleanup.
+  // This protects consumer-first shutdown, not every reload order (see header).
+  pi.on("session_shutdown", () => {
+    rootSession = false;
   });
 
   pi.on("agent_start", (_event, ctx) => {

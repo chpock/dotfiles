@@ -1,5 +1,6 @@
 {
-  "lastChangelogVersion": "1.0.0",
+  "$schema": "https://pi.dev/schemas/settings.schema.json",
+  "lastChangelogVersion": "1.4.0",
   "theme": "gruvbox-dark-hard",
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-6.1-sol",
@@ -9,18 +10,20 @@
     "npm:@cortexkit/aft-pi",
     "npm:pi-hide-providers",
     "npm:pi-web-access",
-    "npm:@tintinweb/pi-subagents",
-    "npm:@tintinweb/pi-tasks",
     "npm:@juicesharp/rpiv-ask-user-question",
-    "npm:@pedro_klein/pi-adhd",
     "npm:pi-context-view",
-    "npm:pi-powerline-footer",
-    "../../../../w/projects/pi-toolview"
+    "../../../../w/projects/pi-toolview",
+    "npm:pi-subagents",
+    "npm:pi-mini",
+    "npm:pi-mcp-adapter",
+    "npm:pi-intercom",
+    "npm:@tmustier/pi-usage-extension"
   ],
   "terminal": {
     "showTerminalProgress": false
   },
   "tuiMode": "fullscreen",
+  "fullscreenExitOutput": "resume-hint",
   "warnings": {
     "anthropicExtraUsage": true
   },
@@ -31,34 +34,322 @@
   "enabledModels": [
     "openai-codex/gpt-6-astra",
     "opencode-go/minimax-m3",
-    "opencode-go/qwen3.8-flash",
     "opencode-go/glm-5.2",
     "opencode-go/hy3",
     "opencode-go/kimi-k2.7-code",
     "opencode-go/longcat-2.0",
     "opencode-go/mimo-v2.5",
-    "opencode-go/minimax-m2.7",
     "opencode-go/qwen3.7-plus",
     "opencode-go/muse-spark-1.2-contributor",
     "opencode-go/muse-spark-1.3-contributor",
     "opencode-go/glm-5.3-flash",
     "openai-codex/gpt-6-sol",
     "openai-codex/gpt-6-luna",
-    "openai-codex/gpt-6.1-sol"
+    "openai-codex/gpt-6.1-sol",
+    "github-copilot/claude-opus-5.5",
+    "github-copilot/claude-sonnet-5.5",
+    "github-copilot/claude-haiku-5.5"
   ],
-  "powerline": {
-    "preset": "default",
-    "placement": "below",
-    "welcome": false,
-    "disabledSegments": [
-      "git"
+  "subagents": {
+    "defaultExtensions": [
+      "~/.pi/agent/npm/node_modules/@cortexkit/aft-pi/dist/index.js",
+      "~/.pi/agent/npm/node_modules/@cortexkit/pi-magic-context/dist/index.js"
     ],
-    "cost": {
-      "subscriptionDisplay": "both",
-      "currency": "USD"
-    },
-    "path": {
-      "mode": "abbreviated"
+    "agentOverrides": {
+      "codex-exec": {
+        "disabled": true
+      },
+      "codex-exec-writer": {
+        "disabled": true
+      },
+      "claude-code": {
+        "disabled": true
+      },
+      "claude-code-writer": {
+        "disabled": true
+      },
+      "cursor-agent": {
+        "disabled": true
+      },
+      "cursor-agent-writer": {
+        "disabled": true
+      },
+      "scout": {
+        "model": "openai-codex/gpt-6-luna",
+        "thinking": "low",
+        "inheritGlobalContext": true,
+        "inheritSkills": false,
+        "skills": [],
+        "tools": [
+          "read",
+          "grep",
+          "find",
+          "ls",
+          "bash",
+          "write",
+          "contact_supervisor",
+          "bash_status",
+          "bash_watch",
+          "bash_write",
+          "bash_kill",
+          "aft_search",
+          "aft_outline",
+          "aft_zoom",
+          "aft_callgraph",
+          "aft_inspect",
+          "aft_conflicts",
+          "ast_grep_search",
+          "ctx_search",
+          "ctx_expand",
+          "ctx_reduce"
+        ]
+      },
+      "worker": {
+        "model": "inherit",
+        "inheritGlobalContext": true,
+        "inheritSkills": false,
+        "skills": [
+          "agent-browser",
+          "testing",
+          "writing-for-agents",
+          "reverse-engineer-anything"
+        ],
+        "subagentOnlyExtensions": [
+          "~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"
+        ],
+        "tools": [
+          "read",
+          "grep",
+          "find",
+          "ls",
+          "bash",
+          "edit",
+          "write",
+          "contact_supervisor",
+          "bash_status",
+          "bash_watch",
+          "bash_write",
+          "bash_kill",
+          "aft_search",
+          "aft_outline",
+          "aft_zoom",
+          "aft_callgraph",
+          "aft_inspect",
+          "aft_conflicts",
+          "ast_grep_search",
+          "aft_import",
+          "aft_move",
+          "aft_delete",
+          "aft_safety",
+          "ast_grep_replace",
+          "ctx_search",
+          "ctx_expand",
+          "ctx_reduce",
+          "mcp"
+        ]
+      },
+      "delegate": {
+        "model": "inherit",
+        "thinking": "medium",
+        "inheritGlobalContext": true,
+        "inheritSkills": false,
+        "skills": [
+          "agent-browser",
+          "testing",
+          "writing-for-agents",
+          "reverse-engineer-anything"
+        ],
+        "subagentOnlyExtensions": [
+          "~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"
+        ],
+        "tools": [
+          "read",
+          "grep",
+          "find",
+          "ls",
+          "bash",
+          "edit",
+          "write",
+          "contact_supervisor",
+          "bash_status",
+          "bash_watch",
+          "bash_write",
+          "bash_kill",
+          "aft_search",
+          "aft_outline",
+          "aft_zoom",
+          "aft_callgraph",
+          "aft_inspect",
+          "aft_conflicts",
+          "ast_grep_search",
+          "aft_import",
+          "aft_move",
+          "aft_delete",
+          "aft_safety",
+          "ast_grep_replace",
+          "ctx_search",
+          "ctx_expand",
+          "ctx_reduce",
+          "mcp"
+        ]
+      },
+      "reviewer": {
+        "model": "openai-codex/gpt-6-astra",
+        "thinking": "high",
+        "inheritGlobalContext": true,
+        "inheritSkills": false,
+        "skills": [
+          "grill-for-unknowns",
+          "testing",
+          "writing-for-agents",
+          "reverse-engineer-anything"
+        ],
+        "subagentOnlyExtensions": [
+          "~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"
+        ],
+        "tools": [
+          "read",
+          "grep",
+          "find",
+          "ls",
+          "watchdog_diff",
+          "contact_supervisor",
+          "aft_search",
+          "aft_outline",
+          "aft_zoom",
+          "aft_callgraph",
+          "aft_inspect",
+          "aft_conflicts",
+          "ast_grep_search",
+          "ctx_search",
+          "ctx_expand",
+          "ctx_reduce",
+          "mcp"
+        ]
+      },
+      "oracle": {
+        "model": "openai-codex/gpt-6-astra",
+        "thinking": "high",
+        "inheritGlobalContext": true,
+        "inheritSkills": false,
+        "skills": [
+          "grill-for-unknowns",
+          "testing",
+          "writing-for-agents",
+          "reverse-engineer-anything"
+        ],
+        "subagentOnlyExtensions": [
+          "~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"
+        ],
+        "tools": [
+          "read",
+          "grep",
+          "find",
+          "ls",
+          "bash",
+          "contact_supervisor",
+          "bash_status",
+          "bash_watch",
+          "bash_write",
+          "bash_kill",
+          "aft_search",
+          "aft_outline",
+          "aft_zoom",
+          "aft_callgraph",
+          "aft_inspect",
+          "aft_conflicts",
+          "ast_grep_search",
+          "ctx_search",
+          "ctx_expand",
+          "ctx_reduce",
+          "mcp"
+        ]
+      },
+      "researcher": {
+        "model": "openai-codex/gpt-6-astra",
+        "thinking": "high",
+        "inheritGlobalContext": true,
+        "inheritSkills": false,
+        "skills": [
+          "reverse-engineer-anything"
+        ],
+        "subagentOnlyExtensions": [
+          "~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"
+        ],
+        "extensions": [
+          "~/.pi/agent/npm/node_modules/@cortexkit/aft-pi/dist/index.js",
+          "~/.pi/agent/npm/node_modules/@cortexkit/pi-magic-context/dist/index.js",
+          "~/.pi/agent/npm/node_modules/pi-web-access/dist/index.js"
+        ],
+        "tools": [
+          "read",
+          "grep",
+          "find",
+          "ls",
+          "write",
+          "contact_supervisor",
+          "aft_search",
+          "aft_outline",
+          "aft_zoom",
+          "aft_callgraph",
+          "aft_inspect",
+          "aft_conflicts",
+          "ast_grep_search",
+          "web_search",
+          "fetch_content",
+          "get_search_content",
+          "source_check",
+          "ctx_search",
+          "ctx_expand",
+          "ctx_reduce",
+          "mcp"
+        ]
+      },
+      "evidence-auditor": {
+        "model": "openai-codex/gpt-6-astra",
+        "thinking": "high",
+        "inheritGlobalContext": true,
+        "inheritSkills": false,
+        "skills": [
+          "reverse-engineer-anything"
+        ],
+        "subagentOnlyExtensions": [
+          "~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"
+        ],
+        "extensions": [
+          "~/.pi/agent/npm/node_modules/@cortexkit/aft-pi/dist/index.js",
+          "~/.pi/agent/npm/node_modules/@cortexkit/pi-magic-context/dist/index.js",
+          "~/.pi/agent/npm/node_modules/pi-web-access/dist/index.js"
+        ],
+        "tools": [
+          "read",
+          "grep",
+          "find",
+          "ls",
+          "contact_supervisor",
+          "aft_search",
+          "aft_outline",
+          "aft_zoom",
+          "aft_callgraph",
+          "aft_inspect",
+          "aft_conflicts",
+          "ast_grep_search",
+          "web_search",
+          "fetch_content",
+          "get_search_content",
+          "source_check",
+          "ctx_search",
+          "ctx_expand",
+          "ctx_reduce",
+          "mcp"
+        ]
+      }
     }
-  }
+  },
+  "editorPaddingX": 1,
+  "outputPad": 1,
+  "extensions": [
+    "-builtin:mcp",
+    "-builtin:codemode"
+  ]
 }

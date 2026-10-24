@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/earendil-works/pi/main/packages/coding-agent/src/modes/interactive/theme/theme-schema.json",
+  "$schema": "https://pi.dev/schemas/theme.schema.json",
   "name": "gruvbox-dark-hard",
   "appearance": "dark",
   "vars": {
@@ -76,7 +76,7 @@
     "syntaxKeyword": "bright_red",
     "syntaxFunction": "bright_green",
     "syntaxVariable": "bright_blue",
-    "syntaxString": "bright_yellow",
+    "syntaxString": "neutral_yellow",
     "syntaxNumber": "bright_purple",
     "syntaxType": "bright_aqua",
     "syntaxOperator": "bright_orange",
@@ -85,8 +85,8 @@
     "thinkingMinimal": "gray",
     "thinkingLow": "neutral_blue",
     "thinkingMedium": "neutral_aqua",
-    "thinkingHigh": "bright_yellow",
-    "thinkingXhigh": "bright_orange",
+    "thinkingHigh": "neutral_yellow",
+    "thinkingXhigh": "bright_yellow",
     "thinkingMax": "bright_purple",
     "bashMode": "bright_blue"
   },

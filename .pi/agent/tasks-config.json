@@ -1,8 +1,0 @@
-{
-  "taskScope": "session-global",
-  "autoCascade": false,
-  "autoClearCompleted": "on_list_complete",
-  "sortOrder": "active",
-  "collapseCompleted": true,
-  "maxVisible": 8
-}

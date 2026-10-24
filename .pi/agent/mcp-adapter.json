@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "rea": {
+      "lifecycle": "lazy-keep-alive"
+    }
+  },
+  "settings": {
+    "directTools": false,
+    "namespaceProxyTools": false,
+    "allowInstall": false
+  }
+}

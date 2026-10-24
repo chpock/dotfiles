@@ -66,11 +66,18 @@
 /.local/share/
 
 # Ignore files/dirs for pi
+/.pi/agent/bin/pi
 /.pi/agent/npm/
 /.pi/agent/sessions/
-/.pi/agent/tasks/
-/.pi/agent/tests/
+/.pi/agent/install/
 /.pi/agent/auth.json
 /.pi/agent/models-store.json
+/.pi/agent/crashes.json
+# This file is from npm:@tmustier/pi-usage-extension
+/.pi/agent/usage-extension-cache.json
+# These files/dirs are from pi-subagents
+/.pi/agent/intercom/
+/.pi/agent/missions/
+/.pi/agent/pi-subagents/
 
 

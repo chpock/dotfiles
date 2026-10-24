@@ -1,0 +1,212 @@
+#!/usr/bin/env bash
+# Resolve a fallback project namespace without creating files or contacting remotes.
+set -u -o pipefail
+export LC_ALL=C
+
+fail() {
+    printf 'pi-task-project-dir: %s\n' "$1" >&2
+    exit 1
+}
+
+if (( $# )); then
+    if (( $# == 1 )) && [[ $1 == --help || $1 == -h ]]; then
+        printf '%s\n' \
+            'Usage: pi-task-project-dir' \
+            '' \
+            'Print one absolute project directory for otherwise-unassigned task artifacts.' \
+            'Creates no files or directories. User/tool destinations take precedence.' \
+            '' \
+            "Base: \$XDG_DATA_HOME/pi/tasks; unset, empty or relative XDG_DATA_HOME falls" \
+            'back to ~/.local/share/pi/tasks. Identity: first effective fetch origin URL,' \
+            'or physical CWD when no Git origin exists. Names end with four lowercase' \
+            'SHA-256 hex characters of the unflattened local:/origin: identity.' \
+            '' \
+            'Supports HTTP(S), SCP-style SSH and ssh:// origins with ASCII hosts or' \
+            'bracketed hexadecimal IPv6. Host/path grouping is a forge naming convention,' \
+            'not universal SSH endpoint equivalence. Local/file origins, malformed URLs,' \
+            'queries/fragments and overlong names fail explicitly. Percent spelling is kept.' \
+            '' \
+            'The caller chooses YYYY-MM-DD-description beneath the returned directory.' \
+            'Requires Bash 4+, Git and GNU coreutils (realpath, sha256sum, stat).'
+        exit 0
+    fi
+    fail 'takes no arguments; use --help for usage'
+fi
+
+for tool in git realpath sha256sum stat; do
+    command -v "$tool" >/dev/null 2>&1 || fail "required command is unavailable: $tool"
+done
+
+# Retain user URL rewriting, but do not let inherited repository selectors override CWD.
+unset GIT_DIR GIT_WORK_TREE GIT_COMMON_DIR GIT_INDEX_FILE GIT_CEILING_DIRECTORIES
+
+capture() {
+    local result
+    # The suffix preserves trailing newlines so malformed multiline values stay detectable.
+    result=$("$@" 2>&1; printf '\034%d' "$?")
+    command_status=${result##*$'\034'}
+    command_output=${result%$'\034'*}
+    command_output=${command_output%$'\n'}
+}
+
+check_controls() {
+    [[ $1 != *[[:cntrl:]]* ]] || fail "$2 contains control characters"
+}
+
+run_git() {
+    capture git -C "$cwd" "$@"
+}
+
+check_git() {
+    (( command_status == 0 )) || fail "$1 failed (Git exit $command_status); check repository access and configuration"
+}
+
+valid_ipv6() {
+    local address=$1 left right
+    local -a groups
+    local pattern='^([0-9a-fA-F]{1,4}:)*[0-9a-fA-F]{1,4}$'
+    [[ $address == *:* && $address != *:::* ]] || return 1
+    if [[ $address == *::* ]]; then
+        left=${address%%::*}
+        right=${address#*::}
+        [[ $right != *::* ]] || return 1
+        [[ -z $left || $left =~ $pattern ]] || return 1
+        [[ -z $right || $right =~ $pattern ]] || return 1
+        IFS=: read -r -a groups <<< "${left}${left:+${right:+:}}${right}"
+        (( ${#groups[@]} < 8 ))
+    else
+        [[ $address =~ $pattern ]] || return 1
+        IFS=: read -r -a groups <<< "$address"
+        (( ${#groups[@]} == 8 ))
+    fi
+}
+
+normalize_origin() {
+    local origin=$1 scheme rest authority host port='' repo_path part
+    local -a segments
+    check_controls "$origin" 'Git origin'
+    [[ -n $origin && $origin != [[:space:]]* && $origin != *[[:space:]] ]] ||
+        fail 'Git origin must be nonempty and have no surrounding whitespace'
+    [[ $origin != *\?* && $origin != *\#* ]] || fail 'origin queries and fragments are unsupported'
+    if [[ $origin == *://* ]]; then
+        scheme=${origin%%://*}
+        scheme=${scheme,,}
+        case $scheme in http|https|ssh) ;; *) fail 'unsupported origin scheme; use HTTP(S) or SSH' ;; esac
+        rest=${origin#*://}
+        [[ $rest == */* ]] || fail 'origin requires a repository path'
+        authority=${rest%%/*}
+        authority=${authority##*@}
+        repo_path=${rest#*/}
+    else
+        if [[ $origin =~ ^([^/@:[:space:]]+@)?(\[[^]]+\]|[^/:[:space:]]+):(.+)$ ]]; then
+            authority=${BASH_REMATCH[2]}
+            repo_path=${BASH_REMATCH[3]}
+            scheme=ssh
+        else
+            fail 'local-path or malformed origins are unsupported; use HTTP(S) or SSH'
+        fi
+    fi
+    if [[ $authority =~ ^\[([0-9a-fA-F:]+)\](:([0-9]+))?$ ]]; then
+        host=${BASH_REMATCH[1]}
+        port=${BASH_REMATCH[3]-}
+        valid_ipv6 "$host" || fail 'origin IPv6 address is invalid or unsupported'
+        host="[${host,,}]"
+    elif [[ $authority =~ ^([a-zA-Z0-9._-]+)(:([0-9]+))?$ ]]; then
+        host=${BASH_REMATCH[1],,}
+        port=${BASH_REMATCH[3]-}
+    else
+        fail 'origin hostname or port is invalid or unsupported'
+    fi
+    if [[ -n $port ]]; then
+        (( ${#port} <= 5 )) || fail 'origin port must be between 1 and 65535'
+        port=$((10#$port))
+        (( port >= 1 && port <= 65535 )) || fail 'origin port must be between 1 and 65535'
+        case "$scheme:$port" in http:80|https:443|ssh:22) ;; *) host+=":$port" ;; esac
+    fi
+    while [[ $repo_path == /* ]]; do repo_path=${repo_path#/}; done
+    while [[ $repo_path == */ ]]; do repo_path=${repo_path%/}; done
+    repo_path=${repo_path%.git}
+    [[ -n $repo_path && $repo_path != */ && $repo_path != *\\* ]] || fail 'origin requires a nonempty repository name and no backslashes'
+    IFS=/ read -r -a segments <<< "$repo_path"
+    for part in "${segments[@]}"; do
+        [[ -n $part && $part != . && $part != .. ]] || fail 'origin repository path contains empty or dot segments'
+    done
+    identity="origin:$host/$repo_path"
+    readable="$host-${repo_path//\//-}"
+}
+
+capture pwd -P
+(( command_status == 0 )) || fail 'cannot determine physical CWD'
+cwd=$command_output
+check_controls "$cwd" 'CWD'
+source=$cwd
+
+run_git rev-parse --absolute-git-dir
+if (( command_status != 0 )); then
+    case $command_output in
+        'fatal: not a git repository (or any of the parent directories): .git'*) ;;
+        'fatal: not a git repository (or any parent up to mount point '*) ;;
+        *) check_git 'Git repository discovery' ;;
+    esac
+    identity="local:$cwd"
+else
+    git_dir=$command_output
+    run_git rev-parse --show-toplevel
+    if (( command_status == 0 )); then
+        source=$command_output
+    else
+        run_git rev-parse --is-bare-repository
+        check_git 'Git repository inspection'
+        [[ $command_output == true ]] || fail 'CWD must be inside a working tree or bare repository'
+        source=$git_dir
+    fi
+    run_git remote get-url origin
+    if (( command_status == 2 )) && [[ $command_output == "error: No such remote 'origin'" ]]; then
+        identity="local:$cwd"
+    else
+        check_git 'Git origin lookup'
+        normalize_origin "$command_output"
+    fi
+fi
+if [[ $identity == local:* ]]; then
+    readable="local-${cwd#/}"
+    readable=${readable//\//-}
+fi
+
+digest=$(printf '%s' "$identity" | sha256sum) || fail 'could not hash the project identity'
+name="$readable-${digest:0:4}"
+if [[ ${XDG_DATA_HOME-} == /* ]]; then
+    data=$XDG_DATA_HOME
+else
+    home=${HOME-}
+    if [[ -z $home ]]; then home=~; fi
+    [[ $home == /* ]] || fail 'the home directory must be absolute'
+    data="$home/.local/share"
+fi
+check_controls "$data" 'Data directory'
+capture realpath -m -- "$data/pi/tasks"
+(( command_status == 0 )) || fail 'could not normalize the data directory'
+base=$command_output
+check_controls "$base" 'Resolved data directory'
+existing=$base
+while [[ ! -e $existing && ! -L $existing ]]; do
+    existing=${existing%/*}
+    [[ -n $existing ]] || existing=/
+done
+[[ -d $existing ]] || fail 'an ancestor of the data directory is not a directory'
+capture stat -f -c '%l' -- "$existing"
+if (( command_status != 0 )) || [[ ! $command_output =~ ^[0-9]+$ ]]; then
+    fail 'could not determine the filesystem name limit'
+fi
+(( ${#name} <= command_output )) || fail 'project directory name exceeds the filesystem component limit; it was not truncated'
+capture realpath -m -- "$base/$name"
+(( command_status == 0 )) || fail 'could not normalize the project directory'
+destination=$command_output
+check_controls "$destination" 'Resolved project directory'
+if [[ $source == / || $destination == "$source" || $destination == "$source/"* ]]; then
+    fail 'the resolved task directory would be inside the source directory'
+fi
+if [[ ( -e $destination || -L $destination ) && ! -d $destination ]]; then
+    fail 'the project destination exists but is not a directory'
+fi
+printf '%s\n' "$destination"
