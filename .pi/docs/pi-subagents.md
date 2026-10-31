@@ -52,17 +52,19 @@ Fleet placement changes only the UI, not model context. Disabling schedules does
 
 ## Model and thinking choices
 
-The [shared main baseline](settings.md#default-model-and-thinking) is the reference for worker and delegate. Capability profiles and abstract depths are defined in the [selection guide](model-selection.md#capability-and-reasoning-profiles); model-specific support and comparison belong in the [dated assessment](models-2026-10-17.md#capability-profile-mapping).
+The [shared main baseline](settings.md#default-model-and-thinking) is the reference for worker, delegate and reviewer. The [2026-10-31 decision](model-decisions.md#2026-10-31--more-reasoning-for-execution-sol-for-routine-review) records the practical motivation and accepted trade-offs. Capability profiles and abstract depths are defined in the [selection guide](model-selection.md#capability-and-reasoning-profiles); model-specific support and comparison belong in the [dated assessment](models-2026-10-17.md#capability-profile-mapping).
 
 | Role | Selected model / thinking | Motivation |
 | --- | --- | --- |
 | `scout` | `openai-codex/gpt-6-luna` / `low` | Focused code/file navigation, not investigative research. |
-| `worker` | Inherited main model / `high`, aligned with the main default | Preserve implementation quality; keep the matching builtin thinking rather than pinning a cheaper model. |
-| `delegate` | Inherited main model / fixed `medium` | Lightweight leaf tasks need less depth than the main high baseline. |
-| `reviewer` | `openai-codex/gpt-6-astra` / `high` | Substantive independent review needs completeness and careful defect triage. |
+| `worker` | Inherited main model / fixed `xhigh`, aligned with the main default | Preserve the main session's model capability and reasoning depth for implementation; delegation must not weaken the execution profile. |
+| `delegate` | Inherited main model / fixed `high` | More thorough execution of small, fully specified tasks, while retaining less depth than the main xhigh baseline. |
+| `reviewer` | Inherited main model / fixed `max` | Frequent routine review needs lower resource weights than Astra; use the main model's maximum reasoning depth without claiming equivalence to Astra. |
 | `oracle` | `openai-codex/gpt-6-astra` / `high` | Bounded consequential diagnosis and reconciliation of decisions. |
 | `researcher` | Astra/high for consequential or conflicting analysis; Sol 6.1/medium for explicitly bounded routine synthesis | Match assignment scope, not token price alone; retain source verification by the parent. |
 | `evidence-auditor` | `openai-codex/gpt-6-astra` / `high` | Independent verification of decision-critical claims. |
+
+For completeness-sensitive critical reviews, use an individually justified `openai-codex/gpt-6-astra:high` launch override. Do not automatically repeat every Sol review with Astra. Reviewer remains fresh and independently reads current evidence; using the same model as the author may leave shared blind spots.
 
 For researcher, use an explicit Sol/medium launch only when bounded revisable work is identifiable in advance; otherwise keep the stronger Astra/high default. This keeps the scope distinction without treating every research task as lightweight.
 
@@ -75,14 +77,14 @@ The table is parent launch policy, not a claim that every row is a shipped defau
 | `scout` | Focused/Light: navigate code/files; return exact paths/ranges, relevant seams/instructions and the first useful place to inspect. | Fresh, narrow question. Verify consequential paths/claims; assess useful coverage, missing seams and inaccurate handoffs, not citation count. | Files are already known; task requires investigative research, architecture or causal analysis. Hand off that question rather than expand scout's scope. |
 | `worker` | Authorized implementation/validation. **Inherit the main model and align thinking with the configured main default**, not a fixed cheaper model. Use the settings baseline below, without live thinking tracking. Return changed files, actual checks, failures and residual risks. | Fresh by default with sufficient approved decisions/evidence; one writer per coupled slice. Acceptance, contract compliance, escaped defects and rework determine quality. | Direct execution is cheaper than handoff; new architecture/scope decisions arise; parent model is unsuitable. Escalate to parent, not a silent worker-model substitution. |
 | `delegate` | Small fully specified leaf task. **Inherit the main model and use a fixed supported thinking level chosen below the configured main default.** Return the requested bounded artifact/result and checks. | Fresh sufficient packet. Judge acceptance without parent redo, omitted constraints, correction rounds and total overhead. | Work is implementation better owned by worker or needs orchestration; reconsider the fixed profile when the configured main defaults change. |
-| `reviewer` | Usually Deep/Deep for substantive behavior/contract review. Independently read current targets and affected dependencies/tests; return located, evidenced defects and limits. | Fresh to avoid inheriting the author's conclusion. Track confirmed defects, false claims, severity and triage/rework. Recall requires a known defect set; finding count is not recall. | Trivial observation can be checked directly; another reviewer would repeat the same question. No shell/source edits: ask parent to run needed checks, never claim fictional execution. |
+| `reviewer` | Substantive behavior/contract review with the routine Sol/max profile; use Astra/high for individually justified completeness-sensitive checks. Independently read current targets and affected dependencies/tests; return located, evidenced defects and limits. | Fresh to avoid inheriting the author's conclusion. Track confirmed defects, false claims, severity and triage/rework. Recall requires a known defect set; finding count is not recall. | Trivial observation can be checked directly; another reviewer would repeat the same question. No shell/source edits: ask parent to run needed checks, never claim fictional execution. |
 | `oracle` | Deep/Deep: resolve a bounded hard diagnosis, architectural contradiction or decision drift. Return reconstructed decisions, evidence, alternatives, recommendation and unknowns. | Fork when decision history is essential; otherwise provide an explicit decision packet. Judge consequential contradictions and useful advice, not consultation length. | Routine implementation/review; a second decision-maker is not needed. Escalate unresolved operator trade-offs to parent. |
 | `researcher` | General/Normal for bounded retrieval and source-grounded synthesis; Deep/Deep for consequential conflicting evidence. Return material claims, exact sources/passages, dates, uncertainty and transfer limits. | Fresh question and stop criteria. Judge supported material claims, decisive gaps and contradictions, not search/citation volume. | One known source answers the question; originals are inaccessible or a material ambiguity remains after the bounded search—report the gap or request a focused escalation. |
 | `evidence-auditor` | Deep/Deep for independent verification of a decision-critical claim set. Return supported/contradicted/unclear/missing classifications and evidence. | Fresh, supplied claims/citations but independently inspected originals. Track critical-claim coverage, classification errors and unaudited claims. | Routine research needs no separate formal audit; do not repeat the entire search or treat supplied citations as proof. |
 
 Routine research and high-consequence analytical research are different assignments even when they use the same role. Model/depth changes must match the task, not just the role name. Narrow verification after a fix to the affected behavior and its blast radius; do not restart identical full reviews automatically.
 
-### Worker and delegate settings
+### Worker, delegate and reviewer settings
 
 Assume the main agent uses the [selected shared defaults](settings.md#default-model-and-thinking). Choose fixed role thinking when preparing the configuration, not by recalculating a decrement at each launch.
 
@@ -92,22 +94,24 @@ Merge-only fragment for `subagents.agentOverrides` in `~/.pi/agent/settings.json
 {
   "subagents": {
     "agentOverrides": {
-      "worker": { "model": "inherit" },
-      "delegate": { "model": "inherit", "thinking": "medium" }
+      "worker": { "model": "inherit", "thinking": "xhigh" },
+      "delegate": { "model": "inherit", "thinking": "high" },
+      "reviewer": { "model": "inherit", "thinking": "max" }
     }
   }
 }
 ```
 
-- **Worker:** inherit the main model; match the configured main thinking. Retain a shipped thinking value when it already matches; otherwise set an explicit role override. Model inheritance is not permission to replace worker with a cheaper fixed model.
-- **Delegate:** inherit the main model; set a fixed, supported lower thinking value suitable for lightweight tasks. The fixed choice here is medium. Revisit it when the main defaults change.
-- In native pi-subagents 0.78.0, `model: "inherit"` and a fixed role `thinking` are supported together. `inherit` technically selects the active parent session model; it is not a reference to the `defaultModel` JSON key. Under the stated baseline assumption these select the same model. A temporary session change does not trigger a thinking recalculation.
+- **Worker:** inherit the main model; explicitly set xhigh to match the configured main thinking, replacing the builtin high. Model inheritance is not permission to replace worker with a cheaper fixed model.
+- **Delegate:** inherit the main model; set fixed high for bounded leaf tasks, below the main xhigh baseline. Revisit it when the main defaults change.
+- **Reviewer:** inherit the main model; set fixed max for routine independent review. Preserve the exceptional Astra/high launch policy above.
+- In native pi-subagents 0.84.0, `model: "inherit"` and a fixed role `thinking` are supported together. `inherit` technically selects the active parent session model; it is not a reference to the `defaultModel` JSON key. Under the stated baseline assumption these select the same model. A temporary session change does not trigger a thinking recalculation.
 
 There is no requirement for dynamic parent-thinking inheritance, an automatic downshift, a routing plugin or special fresh/fork behavior. `thinking: false` removes the role field rather than selecting a fixed effort; use the documented fixed value instead. When changing model/provider or main thinking, follow the [refresh workflow](model-selection.md#refresh-workflow) and update affected fixed values together.
 
 ### Effective thinking support
 
-Pi labels are not always distinct provider efforts. In Pi 1.3.0's OpenAI mapping, `minimal` and `low` both select provider `low`. Sol 6.1/Astra do not support `none`; an unsupported `off` request clamps to `minimal`, so it does not disable reasoning. For Sol 6/Luna/5.6, `off` maps to supported `none`. Medium and high are supported for the selected worker/delegate model.
+Pi labels are not always distinct provider efforts. In Pi 1.3.0's OpenAI mapping, `minimal` and `low` both select provider `low`. Sol 6.1/Astra do not support `none`; an unsupported `off` request clamps to `minimal`, so it does not disable reasoning. For Sol 6/Luna/5.6, `off` maps to supported `none`. Pi 1.4.0's Sol 6.1 catalog supports high, xhigh and max without clamping; its mappings preserve xhigh and max as distinct provider efforts.
 
 `xhigh` and `max` are distinct. Codex Ultra is a product orchestration mode, not a Pi effort label. Native `fast` requests priority service and is not an effort setting. These are client-setting semantics; provider capabilities are recorded separately in the dated report.
 
@@ -118,7 +122,7 @@ Pi labels are not always distinct provider efforts. In Pi 1.3.0's OpenAI mapping
 - Supply outcome, authority, exact target/cwd, relevant decisions and evidence anchors, acceptance/checks, output and stop/escalation rules. Do not copy a transcript when a sufficient packet exists. Fresh does not mean dropping operator/project constraints; fork is justified when history is evidence.
 - Return conclusions **and navigable evidence**: paths/ranges or URLs/passages, version/date, checks actually performed and limits. Compress bulk logs/search results, not proof. Reuse a scout's map rather than rediscovering everything; independently inspect consequential seams before accepting a change.
 - Parallelize independent reads; keep mutation ownership explicit and isolate justified concurrent writers. Children remain leaf roles under this local configuration.
-- Avoid redundant watchdog reviews, maximum effort, fast service tiers, provider-wide searches and broad extension/skill loading by default. Each needs a concrete benefit. Do not disable required global instructions or remove relevant capabilities just to shorten context.
+- Avoid redundant watchdog reviews, fast service tiers, provider-wide searches and broad extension/skill loading by default. Maximum effort is selected for routine reviewer under the decision above, not as a default for every role; other uses need a concrete benefit. Do not disable required global instructions or remove relevant capabilities just to shorten context.
 
 ## Skills
 
@@ -301,6 +305,7 @@ Installed files used for this configuration:
 - Skill/MCP contracts: Pi 1.2.0 `docs/skills.md` and `docs/settings.md`, under that release's `@earendil-works/pi-coding-agent/` directory.
 - Model/effort semantics: Pi 1.3.0 `README.md`, `docs/models.md`, `docs/settings.md`, and `dist/core/{model-resolver,sdk,agent-session}.js` under `~/.pi/agent/install/releases/1.3.0/node_modules/@earendil-works/pi-coding-agent/`; bundled `@earendil-works/pi-ai/dist/{models.js,providers/openai-codex.js,providers/data/openai-codex.json}`. These sources establish configuration semantics; the [dated assessment's source ledger](models-2026-10-17.md#sources) covers model evidence only.
 - pi-subagents: `docs/{agents,configuration,models,observability}.md`, `agents/*.md`, and `skills/pi-subagents/references/prompting-and-roles.md` under `~/.pi/agent/npm/node_modules/pi-subagents/` (role overrides, model/effort policy, extension loading, prompt assembly, and skills). Optional upstream model-tier examples do not override the operator's settings-based worker/delegate policy.
+- Current profile resolution: Pi 1.4.0 `docs/settings.md`, `dist/core/settings-manager.js`, and bundled `@earendil-works/pi-ai/dist/{models.js,providers/data/openai-codex.json}`; pi-subagents 0.84.0 `docs/models.md`, `src/agents/agents.js`, `src/shared/model-info.js`, and `src/runs/shared/model-resolution.js`. These establish inherited model selection, fixed role thinking, and distinct supported Sol xhigh/max mappings.
 - pi-subagents implementation: `src/agents/agents.js`, `src/agents/skills.js`, `src/runs/shared/child-tool-plan.js`, `src/runs/shared/child-launch-plan.js`, `src/runs/shared/effective-system-prompt.js`, and `src/runs/shared/subagent-prompt-runtime.js`, relative to that package root.
 - Skill contents at the inventory locations above; [testing rationale](../../.agents/skills/testing/README.md).
 - Shared adapter behavior and upstream references: [settings.md](settings.md#references).

@@ -8,6 +8,8 @@ Use this guide when revisiting model/provider choices or preparing `models-YYYY-
 
 Choose the least resource-intensive evidenced option that meets the task's quality requirements. Consider all work needed for an accepted result, not an isolated inference. Use provider documentation, relevant source code, published articles/studies and critically assessed discussions. Model selection and future refreshes exclude local model experiments, benchmark campaigns and real comparative usage/performance measurements. Ordinary configuration/document checks and functional verification of unrelated software/MCP behavior remain separate.
 
+Ordinary-use observations supplied by the operator can also motivate a local model/thinking decision. Distinguish the observation from its causal interpretation and do not generalize it into a universal model ranking. Record that practical basis, the accepted choice and its trade-offs in [model-decisions.md](model-decisions.md); no local benchmark campaign or comparative measurement program is required. Dated assessments remain reports of published evidence.
+
 Separate model capability, reasoning effort, task scope, context and authority. More capability or effort is not automatically better for every task; lower token weights do not justify weakening a critical role without supporting evidence.
 
 ## Capability and reasoning profiles
@@ -71,7 +73,7 @@ Refresh after model additions/retirements, provider/auth/product/plan changes, r
 3. Revisit prior primary sources and targeted new evidence under the stopping rule. Assess task fit and relative resource weights separately; retain concrete unknowns and source conflicts.
 4. Produce the dated report using the contract below. Compare candidates with the abstract requirements; retain stronger choices where sources do not justify weakening them. The report ends at model/profile conclusions, not role overrides or merge fragments.
 5. Obtain independent review of material evidence and scope boundaries; verify findings against originals and resolve or explicitly disposition them. Check links, source IDs and numerical calculations with ordinary static checks.
-6. Propose affected configuration choices and rationale in their owning guides. Separate proposed choices, operator approval and applying runtime files. No automatic fallback after quota exhaustion/errors is implied.
+6. Propose affected configuration choices and rationale in their owning guides; record dated changes of choice in [model-decisions.md](model-decisions.md). Separate proposed choices, operator approval and applying runtime files. No automatic fallback after quota exhaustion/errors is implied.
 7. Update current-assessment links in CONTEXT.md and the three guides consistently; retain older dated reports as evidence. Apply runtime changes only when separately authorized.
 
 ## Writing a dated assessment

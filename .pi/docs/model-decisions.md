@@ -6,7 +6,7 @@ The [selection guide](model-selection.md) owns the reusable method; [dated asses
 
 ## 2026-10-31 — More reasoning for execution; Sol for routine review
 
-**Status:** Approved; runtime settings not yet applied. The configuration guides still describe the preceding baseline.
+**Status:** Applied to `agent/settings.json` and the configuration guides on 2026-10-31. This sets the baseline for new sessions and launches; it does not switch existing sessions or running children.
 
 ### Practical basis
 
@@ -38,7 +38,7 @@ Astra / `high` remains available for individually justified, completeness-sensit
 
 ### Application boundary and reconsideration
 
-This decision approves the profiles, not a new inheritance mechanism. Native `model: "inherit"` selects the active parent model, not the `defaultModel` setting; fixed role thinking does not automatically follow a session-level thinking change. Configuration work must make the intended main/worker parity explicit and distinguish the selected baseline from temporary session overrides.
+The configuration uses native `model: "inherit"` for worker, delegate and reviewer, with fixed role thinking xhigh, high and max respectively. This selects the active parent model, not the `defaultModel` setting; role thinking does not automatically follow a session-level thinking change. Worker matches the selected main baseline. If the parent is temporarily switched to another model or thinking level, launch choices must preserve the intended worker parity and respect the selected model's supported levels.
 
 Before marking the decision applied, update the affected configuration-guide values and runtime settings together and verify the effective model/thinking of newly launched roles. Existing sessions and children do not retroactively adopt new defaults.
 

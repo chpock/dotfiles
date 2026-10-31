@@ -93,7 +93,7 @@ Selected main-agent baseline, as a merge fragment for `~/.pi/agent/settings.json
 {
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-6.1-sol",
-  "defaultThinkingLevel": "high"
+  "defaultThinkingLevel": "xhigh"
 }
 ```
 
@@ -101,11 +101,11 @@ Selected main-agent baseline, as a merge fragment for `~/.pi/agent/settings.json
 | --- | --- | --- |
 | `defaultProvider: "openai-codex"` | Uses the ChatGPT-sign-in provider as the startup preference, matching the subscription access path. Provider identity matters: an API-key model with the same bare ID is a different connection/accounting path. | Pi chooses a provider automatically when no stronger selection exists. |
 | `defaultModel: "gpt-6.1-sol"` | Selects a General-capability model for complex work with lower credit weights than Astra. The [model comparison](models-2026-10-17.md#task-specific-capabilities) supplies the supporting evidence. | Pi chooses a model automatically when no stronger selection exists. |
-| `defaultThinkingLevel: "high"` | Sets the main startup depth for substantive implementation/analysis. This is a supported effort, not a fixed token budget or quota multiplier. | A per-model startup setting can apply; otherwise Pi's builtin default is `medium`, subject to model support and stronger session/launch selection. |
+| `defaultThinkingLevel: "xhigh"` | Increases main-session reasoning depth because ordinary Sol/high use produced unacceptable gross errors. The [2026-10-31 decision](model-decisions.md#2026-10-31--more-reasoning-for-execution-sol-for-routine-review) records the practical basis and accepted limits. This is a supported effort, not a fixed token budget or quota multiplier. | A per-model startup setting can apply; otherwise Pi's builtin default is `medium`, subject to model support and stronger session/launch selection. |
 
 These are startup defaults, not a mechanism that overwrites every active session: CLI/explicit selection, project settings, per-model thinking and restored session state can matter. The design assumes the main agent uses the selected defaults; no live tracking of temporary session changes is required.
 
-The [worker/delegate settings](pi-subagents.md#worker-and-delegate-settings) use inherited model selection plus fixed role thinking aligned with this baseline. Keep their values and merge fragment in that guide. Changing the shared defaults requires reviewing the affected fixed role values together.
+The [worker/delegate/reviewer settings](pi-subagents.md#worker-delegate-and-reviewer-settings) use inherited model selection plus fixed role thinking: worker matches this baseline, delegate uses high for bounded tasks, and reviewer uses max for routine review. Keep their values and merge fragment in that guide. Changing the shared defaults requires reviewing the affected fixed role values together.
 
 ### Provider compatibility
 
