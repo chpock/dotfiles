@@ -12,12 +12,12 @@
     "npm:pi-web-access",
     "npm:@juicesharp/rpiv-ask-user-question",
     "npm:pi-context-view",
-    "../../../../w/projects/pi-toolview",
     "npm:pi-subagents",
     "npm:pi-mini",
     "npm:pi-mcp-adapter",
     "npm:pi-intercom",
-    "npm:@tmustier/pi-usage-extension"
+    "npm:@tmustier/pi-usage-extension",
+    "/w/projects/pi-toolview"
   ],
   "terminal": {
     "showTerminalProgress": false
@@ -109,6 +109,7 @@
         "inheritGlobalContext": true,
         "inheritSkills": false,
         "skills": [
+          "ub-mode",
           "agent-browser",
           "testing",
           "writing-for-agents",
@@ -154,6 +155,7 @@
         "inheritGlobalContext": true,
         "inheritSkills": false,
         "skills": [
+          "ub-mode",
           "agent-browser",
           "testing",
           "writing-for-agents",
@@ -199,6 +201,7 @@
         "inheritGlobalContext": true,
         "inheritSkills": false,
         "skills": [
+          "ub-mode",
           "grill-for-unknowns",
           "testing",
           "writing-for-agents",
@@ -233,6 +236,7 @@
         "inheritGlobalContext": true,
         "inheritSkills": false,
         "skills": [
+          "ub-mode",
           "grill-for-unknowns",
           "testing",
           "writing-for-agents",

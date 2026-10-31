@@ -1,1 +1,7 @@
-{"syntaxTheme":{"kind":"pi"},"terminalColorsEnabled":true,"nativeHighlightingEnabled":true}
+{
+  "syntaxTheme": {
+    "kind": "pi"
+  },
+  "terminalColorsEnabled": true,
+  "nativeHighlightingEnabled": true
+}

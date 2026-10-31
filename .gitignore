@@ -79,5 +79,11 @@
 /.pi/agent/intercom/
 /.pi/agent/missions/
 /.pi/agent/pi-subagents/
+# These files are from pi-mcp-adapter
+/.pi/agent/mcp-npx-cache.json
+/.pi/agent/mcp-cache.json
+/.pi/agent/mcp-last-seen-version.json
+# These files are from pi-web-access
+/.pi/agent/pi-web-access/last-seen-version.json
 
 
