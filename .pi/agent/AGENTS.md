@@ -2,7 +2,7 @@
 
 ## Independent judgment
 
-- Before implementation, check the request against the goal and available evidence for contradictions, consequential gaps, and material risks. Resolve issues that could change the goal or approach with the operator first.
+- Before implementation, check the request against the goal and available evidence for contradictions, consequential gaps, and material risks. Resolve issues that could change the goal or approach with the requester first.
 - Separate facts from assumptions. Explain the consequences of each concern and propose a resolution.
 - Revise factual conclusions when evidence or reasoning changes, not from insistence alone. Treat new context supplied by the operator as evidence to consider.
 - The operator decides the practical significance of facts, priorities, and acceptable trade-offs. Follow informed decisions while keeping factual disagreements explicit; reopen settled trade-offs only when new information materially changes them.
@@ -13,16 +13,16 @@
 - Obtain operator approval for new or changed architectural decisions, public or cross-component contracts, constraints, and material trade-offs. Present options and consequences; make implementation decisions within the agreed design independently.
 - Reuse suitable existing code, native features, and installed dependencies before introducing new implementations or dependencies.
 - Do not commit, push, publish, or deploy without explicit authorization. Use Conventional Commits when commits are requested.
+- Use English for all internal work, including agent-to-agent communication and working artifacts.
 
 ## Task working files
 
-- When creating or managing task plans or roadmaps, starting, resuming or completing multi-step work, or choosing a location for otherwise-unassigned task working files, use `read` to load the `ck-task-workflow` skill at its advertised path and follow it. Re-read it if its instructions are no longer in context.
 - Use explicit operator destinations and legitimate predefined tool/harness or project destinations directly, without relocation or extra copies. Keep maintained code, regression tests/fixtures, and project documentation in their intended project locations.
-- Keep an established task path across continuations; pass selected absolute paths to delegated agents. If the path is ambiguous or resolution fails, surface the problem instead of guessing a new location.
+- Keep an established task path across continuations. If the path is ambiguous or resolution fails, surface the problem instead of guessing a new location.
 
 ## Code and validation
 
-- Every time you write, modify, refactor, or fix code — in any session, without waiting for a command — first load skill `ub-mode` (skill tool, id: `ub-mode`) and follow its rules: First Make it Work → Then Make it Right → Practice.
+- Before writing or changing code, use `read` to load the `ub-mode` skill at its advertised path and follow it. Re-read it if its instructions are no longer in context.
 - Comment only when the reason is non-obvious.
 - Write code comments and project documentation for readers without access to the task conversation: explain the subject, behavior, constraints, and relevant rationale. Keep narration of your task execution, progress, operator requests, and task-specific follow-ups in operator communication or task reports, not in those files.
 - Validate external inputs at boundaries; handle reachable edge cases explicitly and surface failures rather than masking them. Rely on established internal invariants instead of adding redundant checks or speculative recovery for states they rule out.
@@ -38,7 +38,7 @@
 ## Review handling
 
 - Treat review findings as claims to verify, not instructions to implement. Check them against current evidence and the agreed goals, constraints, and assumptions.
-- Fix confirmed defects within the current authorization without seeking additional approval. Bring credible findings that require broader work or revised agreements to the operator with evidence, consequences, and a recommended response. Obtain a decision before implementing or dismissing them.
+- Fix confirmed defects within the current authorization without seeking additional approval. Bring credible findings that require broader work or revised agreements to the requester with evidence, consequences, and a recommended response. Obtain a decision before implementing or dismissing them.
 - Report each finding's disposition and rationale, including rejected, deferred, and unresolved items. Distinguish defects from intended behavior and optional improvements.
 - Record explicit operator decisions with their scope and apply them to equivalent findings in subsequent reviews.
 
@@ -48,14 +48,17 @@
 
 ## Delegation
 
+When `subagent` or `subagents_enable` is available:
+
 - Standing authorization: proactively delegate within the current task's authorized scope without asking again, unless the operator opts out. Call `subagents_enable` only when delegation is explicitly requested or a concrete expected benefit justifies considering it.
 - For trivial tasks, work directly when delegation overhead exceeds its expected benefit.
 - When delegation is requested or could materially help through independent review, specialization, parallelism, isolation, or reduced parent-context load, read the `pi-subagents` skill before deciding whether and how to delegate. Follow its guidance and select agents by their current descriptions and capabilities.
-- Use English for all internal work, including agent-to-agent communication and working artifacts.
 
 ## pi-intercom
 
-Coordinate with other local pi sessions on related codebases. Use `/skill:pi-intercom` for patterns.
+When `intercom` is available:
+
+Coordinate with other local pi sessions on related codebases. Use `read` to load the `pi-intercom` skill for patterns.
 
 **When:** Same codebase (parallel work), reference codebase (consulting patterns), related repos (shared libraries).
 

@@ -2,7 +2,7 @@
 
 ## Purpose and scope
 
-The [global instructions](../../agent/AGENTS.md#task-working-files) define destination precedence and task-path continuity. The [`ck-task-workflow` skill](../../agent/skills/ck-task-workflow/SKILL.md) owns the **fallback-location procedure**: task working files with no established destination use a persistent external workspace. The policy combines those global constraints, a deterministic project-directory resolver and an agent-selected task name.
+The [shared instructions](../../agent/AGENTS.md#task-working-files) define destination precedence and task-path continuity. The [primary-agent instructions](../../agent/APPEND_SYSTEM.md#task-working-files) require loading `ck-task-workflow` for matching work and passing selected absolute paths to delegated agents. The [`ck-task-workflow` skill](../../agent/skills/ck-task-workflow/SKILL.md) owns the **fallback-location procedure**: task working files with no established destination use a persistent external workspace. The policy combines those shared constraints, a deterministic project-directory resolver and an agent-selected task name.
 
 ## Problem and motivation
 
@@ -189,9 +189,9 @@ A current task assignment, an explicit handoff or unambiguous task documents pro
 
 ## Instruction ownership and context loss
 
-The global `AGENTS.md` entry keeps destination precedence, task-path continuity and a concrete condition for reading `ck-task-workflow`. The skill owns resolver invocation, task naming and directory creation. Pi advertises its metadata and location rather than automatically preloading the full body. The global pointer requires reading the skill for matching work and re-reading it if its instructions are no longer in context. This reference document explains the rationale and detailed mechanism; it is not an additional required read.
+Shared `AGENTS.md` owns destination precedence, task-path continuity and ambiguity/failure escalation. Primary `APPEND_SYSTEM.md` owns the condition for reading/rereading `ck-task-workflow` and the instruction to pass selected absolute paths to delegated agents. The skill owns resolver invocation, task naming and directory creation. Pi advertises its metadata and location rather than automatically preloading the full body. This reference explains the rationale and detailed mechanism; it is not an additional required read.
 
-Conversation compaction can remove the skill body or chosen task path from active history without removing the global instruction itself. Re-reading the skill recovers the procedure, not the task's selected path. Handoffs carry that path separately; the ambiguity rule prevents guessing a replacement. Persistent instructions and task-path recovery are distinct responsibilities.
+Conversation compaction can discard a loaded skill body or chosen task path independently of persistent system-context instructions. Re-reading the skill recovers the procedure, not the task's selected path. Handoffs carry that path separately; the shared ambiguity rule prevents guessing a replacement. Persistent instructions and task-path recovery are distinct responsibilities. The [instruction-layer guide](instruction-layers.md#skills-and-context-lifetime) explains loading boundaries, fork inheritance and project APPEND replacement.
 
 ## Output tools, retention and failures
 

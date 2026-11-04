@@ -4,7 +4,7 @@
 
 Use the global `AGENTS.md` for policy shared by the primary agent and applicable subagents. Use `APPEND_SYSTEM.md` for the primary agent's operator-facing coordination and working profile. Keep detailed, conditional methods in skills and bounded task facts in delegation briefs.
 
-This is the selected instruction architecture, not a claim that the live instruction files have already been repartitioned. The actual files and effective session configuration determine what each request receives. This guide explains the design, its rationale, limitations and alternatives; it is not an additional mandatory instruction source or a deployment checklist.
+The [shared policy](../../agent/AGENTS.md) and [primary profile](../../agent/APPEND_SYSTEM.md) are the authoritative instruction bodies. Effective session configuration determines which text each request receives. This guide explains their organization, rationale, limitations and alternatives; it is not an additional mandatory instruction source or a deployment checklist.
 
 The loading contracts below were checked against **Pi 1.4.0** and **pi-subagents 0.84.0**. These are evidence versions, not a requirement to pin those releases indefinitely. Recheck the relevant contracts after upgrades.
 
@@ -48,24 +48,23 @@ The shared file carries concise standing requirements for all relevant agents:
 - commit, push, publication and deployment authorization;
 - applicable language rules for internal work;
 - destination precedence, established artifact bindings and no invented replacement paths;
-- decision boundaries and the route for escalation appropriate to the current role.
+- decision boundaries and the route for escalation appropriate to the current role;
+- delegation and peer-session coordination rules when the corresponding tools are available.
 
 Apply each requirement within the assignment and available capabilities. A read-only reviewer can identify a missing test without obtaining permission to edit code or run shell commands. A skill's instructions do not widen that role's tool or task authority.
 
-Classify individual requirements rather than moving whole headings by their title. For example, an internal-language rule remains shared even if its old location happens to be a section named Delegation.
+Content ownership follows applicability, not heading names. Internal-work language and conditional delegation/intercom rules remain shared rather than becoming primary-only merely because they concern agent coordination.
 
 ### Primary `APPEND_SYSTEM.md`
 
-The primary profile carries responsibilities of the agent working directly with the operator:
+The primary profile contains two additional instructions:
 
-- clarify the overall goal, priorities and material trade-offs with the operator;
-- own the project plan/roadmap lifecycle and the applicable `ck-task-workflow` read trigger;
-- select and coordinate bounded delegations, synthesize their results and maintain overall task state;
-- resolve otherwise-unassigned working destinations and provide selected paths to children;
-- present the final result and unresolved decisions to the operator;
-- follow the primary session's communication/profile preferences.
+- read/reread `ck-task-workflow` for plans, roadmaps, multi-step work and otherwise-unassigned working-file placement;
+- pass selected absolute paths to delegated agents.
 
-This is a local content convention built on Pi's loading behavior. Pi does not parse these responsibility categories or define APPEND as a universally primary-only file. The profile can contain substantive primary duties, not just cosmetic preferences; its replaceability is therefore a material limitation, described below.
+The skill owns the detailed task/roadmap lifecycle, destination-selection procedure and overall completion assessment. Shared evidence, approval, review, delegation and communication rules remain in AGENTS rather than being restated in APPEND. The primary agent receives both files; the addendum supplements the common rules.
+
+This is a local content convention built on Pi's loading behavior. Pi does not parse these responsibility categories or define APPEND as a universally primary-only file. The workflow trigger is a substantive primary duty, not just a cosmetic preference; its replaceability is therefore a material limitation, described below.
 
 A child may be assigned to review a plan or improve the workflow itself. That bounded assignment supplies the relevant documents as inputs; it does not transfer ownership of the whole project lifecycle. Explicitly authorized nested coordination is likewise limited to its granted scope, not prohibited merely because it is delegated.
 
@@ -144,7 +143,7 @@ There is no automatically adopted launcher, manual copy, global/project concaten
 
 Pi and the configured child skill catalogs initially advertise metadata, not full procedure bodies. A matching task or a surviving read instruction still needs the model to read the skill. A skill catalog entry therefore differs from automatically delivered common policy.
 
-The `ck-task-workflow` catalog omission for children does not cancel an applicable instruction still present in AGENTS. Separating the read trigger itself is necessary when repartitioning the files; primary-only wording inside the skill is too late to prevent an unqualified read obligation.
+The `ck-task-workflow` read trigger is in the primary APPEND, not shared AGENTS; default child catalogs also omit the skill. Fresh native children therefore do not inherit that trigger through the common-policy file. Catalog omission alone is not an instruction filter or a barrier to reading a known file, and a fork can retain the parent's trigger and skill text. A project APPEND can replace the user's trigger along with the rest of that profile.
 
 Read skill bodies and ordinary briefs are conversation content. They may be summarized or reduced; their exact lifetime depends on the runtime. System-context assembly is a different route, but it is not proof that arbitrary prompt-transforming extensions can never remove or replace content. Claims about survival require observations of actual requests, not just filenames or TUI history.
 

@@ -79,7 +79,8 @@ Material decisions and concise current state belong in the plan. Detailed logs a
 
 | Owner | Responsibility |
 | --- | --- |
-| Global `AGENTS.md`, Task working files | Persistent destination precedence, no relocation/extra copies, maintained project locations, established task-path/handoff rules and ambiguity/failure escalation. Also requires loading this skill for matching work. |
+| [Shared `AGENTS.md`, Task working files](../../AGENTS.md#task-working-files) | Persistent destination precedence, no relocation/extra copies, maintained project locations, established task-path continuity and ambiguity/failure escalation. |
+| [Primary `APPEND_SYSTEM.md`, Task working files](../../APPEND_SYSTEM.md#task-working-files) | Requires reading/rereading this skill for matching work and passing selected absolute paths to delegated agents. |
 | [`SKILL.md`](SKILL.md) and its conditional branches | Task lifecycle, plan contents/readiness, identity/lookup/state transitions and the operative resolver/naming/create-only-when-needed procedure. |
 | [Task-workspace reference](../../../docs/agents-md/task-workspaces.md) | Detailed resolver contract, rationale, examples, normalization, retention and limits. Explanatory, not a required additional read. |
 | `ck-testing` and `ub-mode` | Their test-design and code-engineering methods; those instructions are not duplicated here. |
@@ -92,13 +93,13 @@ Existing project conventions and explicit task requirements remain controlling. 
 
 The Pi-specific user skill location is `~/.pi/agent/skills/ck-task-workflow/SKILL.md`. Pi discovers `<agent-dir>/skills/` automatically; the agent directory defaults to `~/.pi/agent` and can be overridden with `PI_CODING_AGENT_DIR`. Pi advertises the skill's name, description and path; its body is loaded with `read`, not an assumed tool named `skill`.
 
-The global pointer covers plan creation/management, starting/resuming/completing multi-step work and unassigned working-file placement. It requires rereading after context loss. Conditional references carry their own loading conditions; reloading only the main file does not recover a needed planning branch.
+The primary-agent pointer in `APPEND_SYSTEM.md` covers plan/roadmap creation and management, starting/resuming/completing multi-step work and unassigned working-file placement. It requires rereading after context loss. Conditional references carry their own loading conditions; reloading only the main file does not recover a needed planning branch.
 
 Persistent instructions and task recovery are distinct. Reading the skill recovers the procedure, not a forgotten task path, decisions or evidence. The current assignment, plan and handoff carry those separately; ambiguous recovery remains subject to the global escalation rule.
 
-The primary agent retains normal skill discovery; child roles with explicit skill catalogs omit this skill by default. Catalog selection does not cancel inherited global instructions, prevent reading known files or scrub an already-forked conversation. In particular, omission from a child catalog is not proof that an applicable global read requirement has stopped applying.
+The primary agent retains normal skill discovery; default child catalogs omit this skill. Shared `AGENTS.md` does not impose the workflow read requirement, and fresh native children do not automatically load the operator's APPEND. This separates routine instruction delivery, not filesystem access or authority: a child may read an assigned workflow document, and a fork can retain the parent's instructions and previously read skill text.
 
-Discovery and the global pointer are distinct from the intended primary-agent scope and do not mechanically enforce it. Same-name project skills and supported launch overrides can affect the resolved instructions; inspect the effective location when validating availability.
+The [instruction-layer guide](../../../docs/agents-md/instruction-layers.md#how-the-selected-mechanism-works) explains fresh/fork loading and project APPEND replacement. Same-name project skills and supported launch overrides can affect the resolved instructions; inspect the effective location when validating availability. Discovery and delivery do not guarantee correct application.
 
 ## Maintaining and validating the skill
 
@@ -106,7 +107,7 @@ Keep operative instructions in the main file and its substantive conditional bra
 
 Extend only agreed behavior. Keep plan identity, lookup and transitions together in their lifecycle owner; new approval gates, queues, mandatory review stages or tools require their own agreement. Conditional files earn their place through useful branch-specific procedure rather than empty routing or template hierarchies.
 
-Validate native discovery for the primary agent, omission from default child catalogs, preserved unrelated role settings and local links. For operative workflow changes, inspect bounded primary-agent task behavior: relevant reads, standalone and roadmap/member planning, root/grouped lookup and conflicts, independent lifecycle moves that preserve identity/material bindings, dependency-aware execution, aggregate completion, preserved destinations and simple work that avoids unnecessary files. Catalog checks do not prove an inherited read requirement is absent; a loader or source-presence check alone cannot establish adherence to a workflow, and a successful model probe is not a guarantee of future compliance.
+Validate native discovery for the primary agent, omission from default child catalogs, preserved unrelated role settings and local links. For operative workflow changes, inspect bounded primary-agent task behavior: relevant reads, standalone and roadmap/member planning, root/grouped lookup and conflicts, independent lifecycle moves that preserve identity/material bindings, dependency-aware execution, aggregate completion, preserved destinations and simple work that avoids unnecessary files. Catalog checks alone do not establish delivered instructions; inspect effective prompt content for that claim. Delivery checks alone cannot establish adherence to a workflow, and a successful model probe is not a guarantee of future compliance.
 
 ## References
 
