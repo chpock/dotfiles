@@ -85,5 +85,7 @@
 /.pi/agent/mcp-last-seen-version.json
 # These files are from pi-web-access
 /.pi/agent/pi-web-access/last-seen-version.json
+# These files are from @cortexkit/pi-anthropic-auth
+/.pi/agent/anthropic-auth-*.json
 
 

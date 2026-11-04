@@ -2,7 +2,7 @@
 
 ## Purpose and scope
 
-The [global instructions](../../agent/AGENTS.md#task-working-files) define a **fallback-location policy**: task working files with no established destination belong in a persistent external workspace. The policy combines destination precedence, a deterministic project-directory resolver and an agent-selected task name.
+The [global instructions](../../agent/AGENTS.md#task-working-files) define destination precedence and task-path continuity. The [`ck-task-workflow` skill](../../agent/skills/ck-task-workflow/SKILL.md) owns the **fallback-location procedure**: task working files with no established destination use a persistent external workspace. The policy combines those global constraints, a deterministic project-directory resolver and an agent-selected task name.
 
 ## Problem and motivation
 
@@ -47,6 +47,8 @@ Artifacts are written directly to their selected destinations. The fallback intr
 
 Purpose determines the classification, not extension or filename. A scratch reproduction can become a maintained regression test; in that role it belongs in the project's test suite rather than remaining the only regression coverage in external storage. This policy does not replace build-system output/cache conventions.
 
+Project task plans and roadmaps have a [defined plan-store convention](../../agent/skills/ck-task-workflow/plan-lifecycle.md#scope-and-location) owned by `ck-task-workflow`. It covers standalone plans and roadmap-owned plans under the same lifecycle, supplying their destination before general fallback placement. Existing bindings and stronger assigned destinations retain precedence. The resolver itself does not allocate or move these documents.
+
 ## Task-directory layout
 
 For new fallback work, the resolver runs in the relevant **source CWD**, not in the external workspace. Its result identifies the project, not the individual task. The agent combines that result with a locally dated task name:
@@ -73,7 +75,7 @@ Optional files and subdirectories can follow the needs of the task:
 
 ```text
 <project-dir>/YYYY-MM-DD-investigate-schema-discovery/
-    plan.md
+    investigation.md
     scratch/
     evidence/
     test-runs/
@@ -83,9 +85,9 @@ This tree is optional organization, not an automatically created or mandatory sk
 
 ### Task names
 
-The full name is `YYYY-MM-DD-<description>`.
+A general fallback task name is `YYYY-MM-DD-<description>`. Project plans and roadmaps use the [lifecycle naming convention](../../agent/skills/ck-task-workflow/plan-lifecycle.md#stable-names), which adds a document-kind marker. An established plan/roadmap name also identifies any newly needed material directory; it is not regenerated or stripped of its marker when execution starts.
 
-- `YYYY-MM-DD` is the local date when the task directory is established, obtained from the host rather than guessed by the model.
+- `YYYY-MM-DD` is the local date when the task name is first established, obtained from the host rather than guessed by the model. A name chosen during project planning remains unchanged if execution or physical directory creation happens later.
 - The description is 1–64 ASCII characters and matches `[a-z0-9]+(-[a-z0-9]+)*`.
 - Use lowercase English words and digits separated by single hyphens. No spaces, underscores, leading/trailing hyphens or repeated hyphens.
 - The date and its separating hyphen are outside the 64-character description limit.
@@ -185,17 +187,17 @@ An established fallback task path remains authoritative for that task. Midnight,
 
 A current task assignment, an explicit handoff or unambiguous task documents provide recovery evidence. Several plausible directories are an ambiguity, not a reason to select the newest one or silently create another task. There is no registry, manifest or automatic recovery service.
 
-## Why the rule is in AGENTS.md
+## Instruction ownership and context loss
 
-The global `AGENTS.md` entry contains the self-contained operational rule: destination precedence, the resolver command, task naming and continuation behavior. Pi includes discovered global instructions in its system-prompt context, so applying the rule does not depend on selecting a skill or reading this reference document. This document explains the rationale and detailed mechanism.
+The global `AGENTS.md` entry keeps destination precedence, task-path continuity and a concrete condition for reading `ck-task-workflow`. The skill owns resolver invocation, task naming and directory creation. Pi advertises its metadata and location rather than automatically preloading the full body. The global pointer requires reading the skill for matching work and re-reading it if its instructions are no longer in context. This reference document explains the rationale and detailed mechanism; it is not an additional required read.
 
-Conversation compaction can remove the chosen task path from active history without removing the global instruction itself. Handoffs carry that path separately; the rule alone cannot recover it. Persistent instructions and task-path recovery are distinct responsibilities.
+Conversation compaction can remove the skill body or chosen task path from active history without removing the global instruction itself. Re-reading the skill recovers the procedure, not the task's selected path. Handoffs carry that path separately; the ambiguity rule prevents guessing a replacement. Persistent instructions and task-path recovery are distinct responsibilities.
 
 ## Output tools, retention and failures
 
 A tool's supported output binding determines where its automatic files go; prose alone cannot redirect those writes. For otherwise-unassigned output, the binding selects the task workspace. Existing documented tool output/cache destinations remain authoritative rather than being rewritten by this policy.
 
-A tool that clears its output directory uses a dedicated run subdirectory, such as `test-runs/<run-name>`, not the task root holding plans and evidence. Separate files/subdirectories prevent parallel writers from overwriting one another. There is no run-name allocator or mandatory run layout.
+A tool that clears its output directory uses a dedicated run subdirectory, such as `test-runs/<run-name>`, not the task root holding notes and evidence. Separate files/subdirectories prevent parallel writers from overwriting one another. There is no run-name allocator or mandatory run layout.
 
 Resolver, directory-creation or output-routing errors remain explicit failures rather than triggering a silent switch to `/tmp`, the checkout or session storage. The resolver rejects unsupported/local/file origin forms, query/fragment suffixes, control characters, malformed supported origins, unusable non-directory path components, overlong project-name components and output resolving into the current source directory. Names are not silently truncated, and Git errors do not expose the raw credential-bearing origin in diagnostics. These checks do not guarantee that every future write succeeds or protect against concurrent external filesystem changes.
 

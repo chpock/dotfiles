@@ -17,7 +17,8 @@
     "npm:pi-mcp-adapter",
     "npm:pi-intercom",
     "npm:@tmustier/pi-usage-extension",
-    "/w/projects/pi-toolview"
+    "/w/projects/pi-toolview",
+    "npm:@cortexkit/pi-anthropic-auth@2.4.10"
   ],
   "terminal": {
     "showTerminalProgress": false
@@ -48,7 +49,10 @@
     "openai-codex/gpt-6.1-sol",
     "github-copilot/claude-opus-5.5",
     "github-copilot/claude-sonnet-5.5",
-    "github-copilot/claude-haiku-5.5"
+    "github-copilot/claude-haiku-5.5",
+    "anthropic/claude-opus-5-5",
+    "anthropic/claude-sonnet-5-5",
+    "anthropic/claude-haiku-5-5"
   ],
   "subagents": {
     "defaultExtensions": [
@@ -112,7 +116,7 @@
         "skills": [
           "ub-mode",
           "agent-browser",
-          "testing",
+          "ck-testing",
           "writing-for-agents",
           "reverse-engineer-anything"
         ],
@@ -158,7 +162,7 @@
         "skills": [
           "ub-mode",
           "agent-browser",
-          "testing",
+          "ck-testing",
           "writing-for-agents",
           "reverse-engineer-anything"
         ],
@@ -204,7 +208,7 @@
         "skills": [
           "ub-mode",
           "grill-for-unknowns",
-          "testing",
+          "ck-testing",
           "writing-for-agents",
           "reverse-engineer-anything"
         ],
@@ -239,7 +243,7 @@
         "skills": [
           "ub-mode",
           "grill-for-unknowns",
-          "testing",
+          "ck-testing",
           "writing-for-agents",
           "reverse-engineer-anything"
         ],

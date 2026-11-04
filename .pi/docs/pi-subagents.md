@@ -2,7 +2,7 @@
 
 This guide describes the selected pi-subagents configuration and its rationale: models/thinking, role boundaries, child providers, tools, skills and MCP/REA access. It is a configuration reference, not a change log or deployment audit. Shared Pi defaults and MCP settings belong in [settings.md](settings.md); see [CONTEXT.md](CONTEXT.md) for document boundaries.
 
-Model/thinking semantics are based on **Pi 1.3.0** and **pi-subagents 0.78.0**; skill/MCP contracts retain their earlier Pi 1.2.0 basis unless stated otherwise. MCP provider examples specify the official npm `pi-mcp-adapter` setup. These are source-contract versions, not deployment status.
+Model/thinking semantics are based on **Pi 1.3.0** and **pi-subagents 0.78.0**; skill/MCP contracts retain their earlier Pi 1.2.0 basis unless stated otherwise. The instruction-inheritance section additionally uses Pi 1.4.0 and pi-subagents 0.84.0. MCP provider examples specify the official npm `pi-mcp-adapter` setup. These are source-contract versions, not deployment status.
 
 **Shared baseline:** [main model and thinking](settings.md#default-model-and-thinking). **Model evidence:** [2026-10-17 assessment](models-2026-10-17.md). **When reviewing models or preparing another assessment:** use [model-selection.md](model-selection.md), which owns capability profiles, research rules and the report format.
 
@@ -29,6 +29,17 @@ These are user-level defaults across projects. Project definitions/settings and 
 - Role `tools` lists are explicit allowlists. A listed extension tool needs its provider loaded; loading a provider alone does not grant every tool it registers. Preserve existing inspection/execution boundaries when adding a capability. A read-only research task can still return an assigned report; it does not authorize source edits.
 
 MCP is an additional provider only for the selected roles; its wiring is defined in [MCP and REA access](#mcp-and-rea-access). Model/other runtime overrides remain in the same settings file; this guide does not redefine upstream prompts, output defaults, or acceptance behavior.
+
+### Instruction inheritance and primary-only text
+
+The selected content architecture uses shared global `AGENTS.md` and primary-agent `APPEND_SYSTEM.md`. Its [design guide](agents-md/instruction-layers.md#purpose-and-selected-architecture) explains the problem, content ownership, rationale and alternatives; the actual instruction files remain the source for what is currently written, not a promise that repartitioning has already been applied.
+
+- For fresh native children, `inheritProjectContext: true` permits context-file loading and `inheritGlobalContext: true` retains the global file. Disabling project-context inheritance also removes that common-file route; skill inheritance is separate.
+- The native loader explicitly supplies child append input, preventing automatic discovery of the operator's APPEND file. An append-mode child's own role prompt is not that operator file.
+- A fork retains the parent's effective system prompt/history, including primary instructions even when the child's inheritance flags are false. These settings therefore do not guarantee primary-text exclusion from every child.
+- Child decisions go through the supervisor within existing authority; preserving common rules does not grant tools or overall task/roadmap ownership. See the [decision-routing contract](agents-md/instruction-layers.md#decisions-and-delegated-authority).
+
+The [fresh/fork and override limits](agents-md/instruction-layers.md#how-the-selected-mechanism-works) and [observable contract](agents-md/instruction-layers.md#observable-contract-and-verification-limits) distinguish source-supported loading from runtime verification. Retain the native roles and existing context preferences unless an explicit decision changes them.
 
 ## Display and schedules
 
@@ -140,7 +151,7 @@ Newly installed skills need an assignment decision before becoming defaults. Add
 
 ### Selected skill catalog
 
-The six user skills live at `~/.agents/skills/<name>/SKILL.md`. The two package skills live at `~/.pi/agent/npm/node_modules/pi-subagents/skills/<name>/SKILL.md`.
+The personal `ck-testing` and `ck-task-workflow` skills live at `~/.pi/agent/skills/<name>/SKILL.md`, Pi's user-level skill directory. The other user skills live at `~/.agents/skills/<name>/SKILL.md`. The two package skills live at `~/.pi/agent/npm/node_modules/pi-subagents/skills/<name>/SKILL.md`.
 
 | Skill | Source / automatic visibility in the main agent | Purpose |
 | --- | --- | --- |
@@ -148,7 +159,9 @@ The six user skills live at `~/.agents/skills/<name>/SKILL.md`. The two package 
 | `grill-for-unknowns` | User / visible | Evidence-grounded critique of plans, assumptions, material unknowns, and acceptance criteria. |
 | `handoff` | User / manual only | Summarize the current conversation for continuation by another session. |
 | `reverse-engineer-anything` | User / visible | REA-based investigation of shipped artifacts and requested runtime evidence; not ordinary source-repository navigation. |
-| `testing` | User / visible | Design, write, modify, or review tests and validation checks. |
+| `ck-task-workflow` | Pi user / visible | Primary-agent coordination of task plans, roadmaps, overall progress and working-file placement. |
+| `ck-testing` | Pi user / visible | Design, write, modify, or review tests and validation checks. |
+| `ub-mode` | User / visible | Code-change engineering principles and the checks specified by that skill, within existing role/task permissions. |
 | `writing-for-agents` | User / visible | Design agent-facing instructions, including skills and `AGENTS.md` / `CLAUDE.md`. |
 | `council-mode` | Package / visible | Parent-supervised advisor selection, bounded discussion, and decision synthesis. |
 | `pi-subagents` | Package / visible | Parent-side delegation, orchestration, and subagent management. |
@@ -157,15 +170,15 @@ The six user skills live at `~/.agents/skills/<name>/SKILL.md`. The two package 
 
 ### Default assignments by role
 
-Every row below has `inheritSkills: false`. An empty selection is deliberate, not missing configuration.
+Every row below has `inheritSkills: false`. The selected skills are the complete normal catalog, not additive examples.
 
 | Agent | Selected skills | Why these skills fit |
 | --- | --- | --- |
-| `worker` | `agent-browser`, `testing`, `writing-for-agents`, `reverse-engineer-anything` | Implements authorized tasks, including browser/UI verification, tests, and agent-facing documentation. REA provides artifact/runtime evidence when implementation or reconstruction needs it. |
-| `delegate` | `agent-browser`, `testing`, `writing-for-agents`, `reverse-engineer-anything` | Handles bounded general work and can obtain relevant artifact evidence itself. Broad execution tools and MCP access do not make it an orchestrator. |
-| `reviewer` | `grill-for-unknowns`, `testing`, `writing-for-agents`, `reverse-engineer-anything` | Reviews plans, tests, and agent-facing instructions, and independently checks artifact claims through REA. Its no-shell/no-repository-edit task contract remains; broad MCP capability is not a mechanical read-only filter. |
-| `oracle` | `grill-for-unknowns`, `testing`, `writing-for-agents`, `reverse-engineer-anything` | Challenges decisions and assumptions using relevant source and artifact evidence. It remains advisory and read-only rather than taking over execution or the user conversation. |
-| `scout` | None (`[]`) | Navigates code and files for a handoff, rather than performing investigative research. Finding tests/instructions is not designing or reviewing them. The operator explicitly excluded this role from REA/MCP. |
+| `worker` | `ub-mode`, `agent-browser`, `ck-testing`, `writing-for-agents`, `reverse-engineer-anything` | Implements authorized tasks, including browser/UI verification, tests, and agent-facing documentation. REA provides artifact/runtime evidence when implementation or reconstruction needs it. |
+| `delegate` | `ub-mode`, `agent-browser`, `ck-testing`, `writing-for-agents`, `reverse-engineer-anything` | Handles bounded general work and can obtain relevant artifact evidence itself. Broad execution tools and MCP access do not make it an orchestrator. |
+| `reviewer` | `ub-mode`, `grill-for-unknowns`, `ck-testing`, `writing-for-agents`, `reverse-engineer-anything` | Reviews plans, tests, and agent-facing instructions, and independently checks artifact claims through REA. Its no-shell/no-repository-edit task contract remains; broad MCP capability is not a mechanical read-only filter. |
+| `oracle` | `ub-mode`, `grill-for-unknowns`, `ck-testing`, `writing-for-agents`, `reverse-engineer-anything` | Challenges decisions and assumptions using relevant source and artifact evidence. It remains advisory and read-only rather than taking over execution or the user conversation. |
+| `scout` | None | Navigates code and files for a handoff, rather than performing investigative research. Finding tests/instructions is not designing or reviewing them. The operator explicitly excluded this role from REA/MCP. |
 | `researcher` | `reverse-engineer-anything` | Combines web/repository sources with shipped-artifact or requested runtime evidence when the research question needs it. Test construction and instruction design remain task-specific, not defaults. |
 | `evidence-auditor` | `reverse-engineer-anything` | Independently verifies claims against primary sources, including artifacts through REA. Its evidence-audit procedure is not automatically a test-design or instruction-review assignment. |
 
@@ -173,11 +186,13 @@ For an exceptional testing-specific research/audit or instruction-design investi
 
 ### Assignment boundaries and exclusions
 
+**`ck-task-workflow` — primary-agent coordination, not a child default.** The [skill](../agent/skills/ck-task-workflow/SKILL.md) owns task/roadmap coordination; bounded child assignments do not transfer that ownership. The parent provides relevant context and working paths, while children return results and blockers through their existing channels. An undefined artifact destination is escalated to the parent; explicit and managed report destinations remain in use. All seven default catalogs omit the skill, without changing global-instruction inheritance or preventing direct file reads. An applicable inherited instruction remains controlling regardless of catalog selection. Explicitly delegated workflow development/review may receive relevant instructions as task input rather than a permanent role default.
+
 **`agent-browser` — execution roles only.** The installed CLI is reachable through `bash` for `worker` and `delegate`. `reviewer`, `researcher`, and `evidence-auditor` have no shell tool. `scout` restricts shell use to non-interactive inspection; `oracle` is an advisory, read-only analyst. They do not receive a default app-interaction workflow merely because browsing could be useful. Research/audit web-fetch tools remain available unchanged. CLI presence does not prove browser installation, authentication, or readiness for a particular target.
 
 **`grill-for-unknowns` — plan/advisory review, not routine task expansion.** It is selected for `reviewer` and `oracle` because exposing consequential assumptions is part of their roles. Apply it when a planning/critique task warrants it, not as a mandatory interview for every diff. Its broader workflow does not authorize these roles to update `CONTEXT.md`, write ADRs, prototype, start children, or contact the human directly: findings and unresolved decisions go to the parent through their existing report/supervisor channel. Those role boundaries already exist in the builtin prompts. Execution roles should escalate gaps in an approved task rather than reopen the whole design process; source-reconnaissance and research/audit roles do not own that planning workflow.
 
-**`testing` and `writing-for-agents` — actors that construct or evaluate the relevant artifacts.** They serve the implementation and review/advisory roles listed above. Ordinary scouting, research, and source-claim auditing do not trigger them merely because the output is a Markdown report or the source mentions tests. `writing-for-agents` supplies useful design criteria for instruction review; its description is authoring-oriented, so catalog availability alone is not evidence that every review will load it automatically.
+**`ck-testing` and `writing-for-agents` — actors that construct or evaluate the relevant artifacts.** They serve the implementation and review/advisory roles listed above. Ordinary scouting, research, and source-claim auditing do not trigger them merely because the output is a Markdown report or the source mentions tests. `writing-for-agents` supplies useful design criteria for instruction review; its description is authoring-oriented, so catalog availability alone is not evidence that every review will load it automatically.
 
 **`reverse-engineer-anything` — all enabled roles except `scout`.** Both investigative and execution roles can obtain artifact evidence when their task needs it. The route is the common `mcp` proxy plus this skill, not eager REA tool declarations. Skill availability, tool access, and backend readiness are separate checks. Ordinary source-repository navigation still does not need REA; granting this skill does not make every task a reverse-engineering task.
 
@@ -307,7 +322,7 @@ Installed files used for this configuration:
 - pi-subagents: `docs/{agents,configuration,models,observability}.md`, `agents/*.md`, and `skills/pi-subagents/references/prompting-and-roles.md` under `~/.pi/agent/npm/node_modules/pi-subagents/` (role overrides, model/effort policy, extension loading, prompt assembly, and skills). Optional upstream model-tier examples do not override the operator's settings-based worker/delegate policy.
 - Current profile resolution: Pi 1.4.0 `docs/settings.md`, `dist/core/settings-manager.js`, and bundled `@earendil-works/pi-ai/dist/{models.js,providers/data/openai-codex.json}`; pi-subagents 0.84.0 `docs/models.md`, `src/agents/agents.js`, `src/shared/model-info.js`, and `src/runs/shared/model-resolution.js`. These establish inherited model selection, fixed role thinking, and distinct supported Sol xhigh/max mappings.
 - pi-subagents implementation: `src/agents/agents.js`, `src/agents/skills.js`, `src/runs/shared/child-tool-plan.js`, `src/runs/shared/child-launch-plan.js`, `src/runs/shared/effective-system-prompt.js`, and `src/runs/shared/subagent-prompt-runtime.js`, relative to that package root.
-- Skill contents at the inventory locations above; [testing rationale](../../.agents/skills/testing/README.md).
+- Skill contents at the inventory locations above; [testing rationale](../agent/skills/ck-testing/README.md) and [task-workflow rationale](../agent/skills/ck-task-workflow/README.md).
 - Shared adapter behavior and upstream references: [settings.md](settings.md#references).
 
 Recheck relevant installed behavior after an extension/Pi update rather than assuming this version's private helper APIs remain stable.

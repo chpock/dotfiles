@@ -16,9 +16,8 @@
 
 ## Task working files
 
+- When creating or managing task plans or roadmaps, starting, resuming or completing multi-step work, or choosing a location for otherwise-unassigned task working files, use `read` to load the `ck-task-workflow` skill at its advertised path and follow it. Re-read it if its instructions are no longer in context.
 - Use explicit operator destinations and legitimate predefined tool/harness or project destinations directly, without relocation or extra copies. Keep maintained code, regression tests/fixtures, and project documentation in their intended project locations.
-- For otherwise-unassigned plans, scratch scripts, reports, or test evidence, reuse an applicable task directory; otherwise run `"${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}/bin/pi-task-project-dir"` in the source CWD and use `<returned-dir>/YYYY-MM-DD-<description>`. For this shell command, a configured `PI_CODING_AGENT_DIR` must be an absolute path.
-- Obtain the date from the host's local calendar. The description must match `[a-z0-9]+(-[a-z0-9]+)*` and be at most 64 characters. Create directories only when a working file is needed.
 - Keep an established task path across continuations; pass selected absolute paths to delegated agents. If the path is ambiguous or resolution fails, surface the problem instead of guessing a new location.
 
 ## Code and validation
