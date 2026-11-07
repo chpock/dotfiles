@@ -12,6 +12,23 @@ Ordinary-use observations supplied by the operator can also motivate a local mod
 
 Separate model capability, reasoning effort, task scope, context and authority. More capability or effort is not automatically better for every task; lower token weights do not justify weakening a critical role without supporting evidence.
 
+## Task-based model tiers
+
+Use the [pi-subagents model tiers](https://github.com/nicobailon/pi-subagents/blob/main/docs/models.md#recommended-model-tiering-optional) as the starting framework: classify the work by the decisions and analysis it still requires, then select an evidenced model and supported reasoning effort. The upstream tiers are author recommendations, not shipped role defaults or comparative model measurements.
+
+| Tier | Task shape | Selection boundary |
+| --- | --- | --- |
+| **Fast workhorse** | Reconnaissance, lookups and mechanical transformations. | A fast capable model with light reasoning for narrow work whose result can be checked directly. |
+| **Standard well-scoped** | Straightforward implementation, routine multi-file changes, focused checks and bounded general delegation. | A capable executor for agreed requirements; substantial reasoning effort may be appropriate without selecting the strongest model. |
+| **Deep but bounded** | Difficult diagnosis, consequential contradictions and hard reasoning with explicit goals and completion criteria. | A stronger reasoning model for the named hard problem, not an autonomous open-ended assignment. |
+| **Taste and intent** | Interpreting unclear goals, UX/design judgment, product trade-offs and writing quality. | Select for interpretation and judgment; this is a different task dimension, not a universally higher intelligence tier. |
+
+A precisely worded task is not necessarily Standard well-scoped: it can still leave architecture, cross-component behavior or difficult causal analysis unresolved. Settle those questions in the parent or an authorized advisory step, or explicitly select a stronger model for that assignment. Executors must still inspect the real code, recognize gaps and escalate unapproved decisions.
+
+Read the actual role prompt, context, tools and acceptance behavior before assigning a tier. A role name does not guarantee task complexity; a generic delegate is not automatically an orchestrator. Keep local role assignments and exceptions in [pi-subagents.md](pi-subagents.md#role-scope-and-launch-policy), rather than treating upstream example model IDs as current settings. Validate those IDs against current evidence and operator experience; examples for an earlier model generation do not establish the next generation's capability.
+
+The profiles below express the capabilities and reasoning needed within a tier; they do not form a competing role-routing ladder. Model, effort, task shape and authority remain separate choices.
+
 ## Capability and reasoning profiles
 
 The abstract models express requirements, not vendor tiers or a universal intelligence score:
@@ -68,8 +85,8 @@ Start with varied searches, inspect the strongest originals, then make one focus
 
 Refresh after model additions/retirements, provider/auth/product/plan changes, relevant client effort/context changes or credible published capability/consumption findings.
 
-1. Read selected requirements and choices in [settings.md](settings.md) and [pi-subagents.md](pi-subagents.md). Preserve operator constraints, role authority and the worker/delegate policy; revisit fixed efforts when the shared baseline changes. Inspect implementation only where needed to establish setting semantics, not to produce a deployment inventory.
-2. Check compatibility: exact model/product identity, lifecycle, authentication path, tools, context/output and effort support. Registry visibility, configured enablement and product/account access are different facts. Keep client-specific setting implications in the configuration guides. If a replacement runner cannot inherit the main model, explicitly pin the selected main-default model and fixed role thinking; this is a configuration choice, not automatic fallback after failure.
+1. Read selected requirements and choices in [settings.md](settings.md) and [pi-subagents.md](pi-subagents.md). Classify the affected work with the [task-based tiers](#task-based-model-tiers), inspect actual role prompts and preserve operator constraints and role authority. Revisit the selected model and fixed effort when the task boundary or relevant baseline changes. Inspect implementation only where needed to establish setting semantics, not to produce a deployment inventory.
+2. Check compatibility: exact model/product identity, lifecycle, authentication path, tools, context/output and effort support. Registry visibility, configured enablement and product/account access are different facts. Keep client-specific setting implications in the configuration guides. Preserve each role's selected fixed or inherited model semantics when changing runners; an explicit pin must name the approved role model, not automatically the main default. This is a configuration choice, not automatic fallback after failure.
 3. Revisit prior primary sources and targeted new evidence under the stopping rule. Assess task fit and relative resource weights separately; retain concrete unknowns and source conflicts.
 4. Produce the dated report using the contract below. Compare candidates with the abstract requirements; retain stronger choices where sources do not justify weakening them. The report ends at model/profile conclusions, not role overrides or merge fragments.
 5. Obtain independent review of material evidence and scope boundaries; verify findings against originals and resolve or explicitly disposition them. Check links, source IDs and numerical calculations with ordinary static checks.
@@ -94,7 +111,7 @@ Keep local configuration inventories, role assignments, JSON settings proposals,
 
 ## Practice evidence and transfer limits
 
-The following sources informed the method and role/context policy; they are not model-comparison results. All were accessed **2026-10-17**. Revisit them when their relevant contract changes.
+The following sources informed the method and role/context policy; they are not model-comparison results. Unless another date is stated, they were accessed **2026-10-17**. Revisit them when their relevant contract changes.
 
 | Source / version | Supporting passage or executable evidence | Lesson and transfer limit |
 | --- | --- | --- |
@@ -108,4 +125,4 @@ The following sources informed the method and role/context policy; they are not 
 | [Codex discussion #39808](https://github.com/openai/codex/issues/39808), 2026-08-20 | “This is not a controlled benchmark and does not isolate which component is responsible”; “The window is capacity, not necessarily actual input size.” | Anecdotal support for considering context/coordination overhead, not proof of a quota regression or accepted cause. |
 | [OpenCode discussion #29067](https://github.com/anomalyco/opencode/issues/29067), 2026-05-24 | Alleged loss of parent variant; bot explains closure by unmet guidelines. | Anecdote motivating scrutiny of effort/resume semantics; procedural NOT_PLANNED closure is neither a root cause nor a design contract. |
 
-The pi-subagents 0.78.0 `docs/models.md` and `skills/pi-subagents/references/prompting-and-roles.md` offer optional tiers, including cheaper workers and a separate intent/taste profile. They are recommendations, not shipped hard defaults or authority to override the selected worker policy. Intent sensitivity is a task-specific dimension, not another automatic tier. Suggested reviewer editing in a reference table does not change the actual review role's tool/authority contract.
+The [pi-subagents model tiers](https://github.com/nicobailon/pi-subagents/blob/main/docs/models.md#recommended-model-tiering-optional), accessed **2026-11-04** and also present in installed pi-subagents **0.84.0**, supply the [task-based framework](#task-based-model-tiers). The accompanying `skills/pi-subagents/references/prompting-and-roles.md` distinguishes fast capable execution, strong review and bounded advisory reasoning. These are author recommendations, not model-quality measurements or role authority. Upstream example model generations and effort names require a fresh fit check; the selected review profile and no-edit boundary remain owned by the local role policy.

@@ -57,14 +57,15 @@ Content ownership follows applicability, not heading names. Internal-work langua
 
 ### Primary `APPEND_SYSTEM.md`
 
-The primary profile contains two additional instructions:
+The primary profile owns additional coordination duties:
 
 - read/reread `ck-task-workflow` for plans, roadmaps, multi-step work and otherwise-unassigned working-file placement;
-- pass selected absolute paths to delegated agents.
+- pass selected absolute paths to delegated agents;
+- apply the [second-opinion consultation policy](../pi-subagents.md#independent-second-opinion), including required companion opinions and parent verification. Its operative instructions remain in APPEND, not in every child role.
 
 The skill owns the detailed task/roadmap lifecycle, destination-selection procedure and overall completion assessment. Shared evidence, approval, review, delegation and communication rules remain in AGENTS rather than being restated in APPEND. The primary agent receives both files; the addendum supplements the common rules.
 
-This is a local content convention built on Pi's loading behavior. Pi does not parse these responsibility categories or define APPEND as a universally primary-only file. The workflow trigger is a substantive primary duty, not just a cosmetic preference; its replaceability is therefore a material limitation, described below.
+This is a local content convention built on Pi's loading behavior. Pi does not parse these responsibility categories or define APPEND as a universally primary-only file. The workflow trigger and mandatory consultation policy are substantive primary duties, not just cosmetic preferences; their replaceability is therefore a material limitation, described below.
 
 A child may be assigned to review a plan or improve the workflow itself. That bounded assignment supplies the relevant documents as inputs; it does not transfer ownership of the whole project lifecycle. Explicitly authorized nested coordination is likewise limited to its granted scope, not prohibited merely because it is delegated.
 
@@ -77,7 +78,7 @@ A child may be assigned to review a plan or improve the workflow itself. That bo
 | Detailed conditional methods | Relevant skills | Load the procedure when its task conditions apply. |
 | Repository facts, build/test commands and local conventions | Project/ancestor context files | Keep project-owned knowledge with its actual scope. |
 | Exact task, authority, paths, evidence, output and stop conditions | Delegated brief | These differ between assignments and cannot be inferred from standing rules. |
-| Role purpose and capability limits | Builtin role plus minimal supported overrides | Preserve author-owned role guidance rather than copying it to add common rules. |
+| Role purpose and capability limits | Builtin role plus minimal supported overrides, or an intentional custom role definition | Preserve author-owned builtin guidance; keep a new role's own procedure separate from parent coordination and common rules. |
 | Technical background and alternatives | This guide and linked references | Explain the mechanism without enlarging every request. |
 
 Keep each requirement in one authoritative place. Do not make every brief repeat the standing policy or keep competing copies in AGENTS, APPEND, skills and role prompts. A plain Markdown link is not an automatically expanded import.
@@ -102,7 +103,7 @@ Project context files are discovered from the working directory and its ancestor
 
 ### Fresh native subagents
 
-The selected common-policy route requires both `inheritProjectContext: true` and `inheritGlobalContext: true` for relevant fresh children. In the analyzed version, global inheritance defaults to false; the configured seven roles explicitly enable it. If project-context inheritance disables all context files, the global flag cannot independently restore them. The [role guide](../pi-subagents.md#shared-child-configuration) owns those settings.
+The selected common-policy route requires both `inheritProjectContext: true` and `inheritGlobalContext: true` for relevant fresh children. In the analyzed version, global inheritance defaults to false; all eight configured native roles explicitly enable it. If project-context inheritance disables all context files, the global flag cannot independently restore them. The [role guide](../pi-subagents.md#shared-child-configuration) owns those settings.
 
 The native child loader explicitly supplies append input to Pi. Without a child append prompt it passes an empty list, preventing rediscovery of the operator's APPEND file. In a child using append mode, the supplied text is the child's own role prompt; it is not an instruction to import the operator profile. Both discovered user and project APPEND files are bypassed by that explicit input.
 

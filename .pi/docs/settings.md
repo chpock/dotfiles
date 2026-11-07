@@ -105,7 +105,7 @@ Selected main-agent baseline, as a merge fragment for `~/.pi/agent/settings.json
 
 These are startup defaults, not a mechanism that overwrites every active session: CLI/explicit selection, project settings, per-model thinking and restored session state can matter. The design assumes the main agent uses the selected defaults; no live tracking of temporary session changes is required.
 
-The [worker/delegate/reviewer settings](pi-subagents.md#worker-delegate-and-reviewer-settings) use inherited model selection plus fixed role thinking: worker matches this baseline, delegate uses high for bounded tasks, and reviewer uses max for routine review. Keep their values and merge fragment in that guide. Changing the shared defaults requires reviewing the affected fixed role values together.
+The [worker/delegate/reviewer settings](pi-subagents.md#worker-delegate-and-reviewer-settings) pin worker and delegate to Luna/max for bounded execution; reviewer inherits the active main model with fixed max thinking. Keep their values and merge fragment in that guide. Switching the main model does not switch the pinned executors. Review affected role choices and supported efforts when changing the shared defaults or task boundaries.
 
 ### Provider compatibility
 
@@ -118,7 +118,8 @@ The provider uses `openai-codex-responses`; product access still depends on the 
 `enabledModels` is an explicit working selection, not the complete catalog:
 
 - `openai-codex`: the four OpenAI models selected for use, with the main default and child assignments documented in their owning sections.
-- `opencode-go`: selected models whose **Go-plan Monthly limit is exactly $60** in the provider's [usage-limits table](https://opencode.ai/v2/docs/console/go/#usage-limits). This records the operator's allowance-efficiency preference and excludes lower-allowance models from the normal scope. It is not the Go Plus table and not a claim that all models have the same token rates or request capacity.
+- `opencode-go`: **only `deepseek-v4.1-flash`**. The operator does not intend to use the other models from this provider. In the [Go-plan usage-limits table](https://opencode.ai/v2/docs/console/go/#usage-limits), checked **2026-11-04**, DeepSeek V4.1 Flash is the only model listed with a **$100 Monthly limit**, for both Peak and Off-Peak usage. This is the Go plan, not Go Plus or Go Teams. The [decision journal](model-decisions.md#2026-11-04--deepseek-flash-only-for-opencode-go) records the replacement of the former $60-based selection.
+- `github-copilot` and `anthropic`: Claude Opus/Sonnet/Haiku 5.5 through each provider. As of **2026-11-04**, these are selected as the latest generation in each retained class with favorable published pricing relative to preceding same-class versions. The [Claude 5.5 decision](model-decisions.md#2026-11-04--claude-55-for-anthropic-and-copilot) records the comparison, including Sonnet's lower cache-read rate rather than lower base input/output prices versus Sonnet 5. These are distinct connection/authentication paths, not interchangeable model IDs or identical subscription accounting.
 
 Selected merge fragment:
 
@@ -129,23 +130,20 @@ Selected merge fragment:
     "openai-codex/gpt-6-sol",
     "openai-codex/gpt-6-luna",
     "openai-codex/gpt-6.1-sol",
-    "opencode-go/minimax-m3",
-    "opencode-go/glm-5.2",
-    "opencode-go/hy3",
-    "opencode-go/kimi-k2.7-code",
-    "opencode-go/longcat-2.0",
-    "opencode-go/mimo-v2.5",
-    "opencode-go/qwen3.7-plus",
-    "opencode-go/muse-spark-1.2-contributor",
-    "opencode-go/muse-spark-1.3-contributor",
-    "opencode-go/glm-5.3-flash"
+    "github-copilot/claude-opus-5.5",
+    "github-copilot/claude-sonnet-5.5",
+    "github-copilot/claude-haiku-5.5",
+    "anthropic/claude-opus-5-5",
+    "anthropic/claude-sonnet-5-5",
+    "anthropic/claude-haiku-5-5",
+    "opencode-go/deepseek-v4.1-flash"
   ]
 }
 ```
 
-This is a selected subset of qualifying models, not an instruction to add every newly listed or temporarily promoted model. Recheck the plan/limit when changing this list; the dollar amount is the provider's allowance unit, not a subscription bill or an OpenAI API-price comparison.
+This is an explicit model choice, not a rule to add every future model with the same allowance. Recheck the plan/limit when changing this list; the dollar amount is the provider's allowance unit, not the subscription price, a locally configured spending cap or an OpenAI API-price comparison. It does not establish equal token rates or request capacity across models.
 
-Pi uses `enabledModels` for startup selection and model cycling; `/model` can switch between scoped and all available models. Explicit model selection, launch overrides and child settings are not a provider-side spending barrier. Without a nonempty scope, cycling can use all available models. Likewise, OpenCode's separate **Use balance** console option can permit pay-as-you-go fallback after an allowance is exhausted; this file neither enables nor disables it.
+Pi uses `enabledModels` for startup selection and model cycling; `/model` can switch between scoped and all available models. Explicit model selection, launch overrides and child settings are not a provider-side spending barrier. Without a nonempty scope, cycling can use all available models. Likewise, OpenCode's separate **Extra Usage** console option can permit pay-as-you-go fallback after an allowance is exhausted; this file neither enables nor disables it.
 
 ## Package selection
 
@@ -294,7 +292,7 @@ These checks establish the exercised operations, not all REA capabilities. Nativ
 
 - Shared settings/omission behavior and models: Pi 1.3.0 `docs/{settings,configuration,models,packages,themes}.md` under `~/.pi/agent/install/releases/1.3.0/node_modules/@earendil-works/pi-coding-agent/`.
 - Scope and metadata semantics: that release's `dist/{main.js,core/{settings-manager,settings-schema,agent-session}.js,modes/interactive/{interactive-mode.js,components/model-selector.js}}`.
-- Go inclusion criterion: [OpenCode Go usage limits](https://opencode.ai/v2/docs/console/go/#usage-limits), Go tab; [usage beyond limits](https://opencode.ai/v2/docs/console/go/#usage-beyond-limits).
+- Go allowance rationale and fallback behavior: [OpenCode Go usage limits](https://opencode.ai/v2/docs/console/go/#usage-limits), Go tab, checked 2026-11-04; [usage beyond limits](https://opencode.ai/v2/docs/console/go/#usage-beyond-limits).
 - Package capabilities: installed package READMEs under `~/.pi/agent/npm/node_modules/` and the [local toolview README](../../../../w/projects/pi-toolview/README.md). Theme design and renderer references: [themes/README.md](../agent/themes/README.md).
 - MCP setup: `docs/settings.md`, `docs/packages.md`, `docs/mcp.md`, and `docs/extensions.md` under the Pi 1.2.0 release's `@earendil-works/pi-coding-agent/` directory.
 - [Current model evidence](models-2026-10-17.md); [child configuration](pi-subagents.md); [model-selection method](model-selection.md).

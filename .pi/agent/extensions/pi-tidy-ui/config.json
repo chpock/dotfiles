@@ -3,5 +3,6 @@
     "kind": "pi"
   },
   "terminalColorsEnabled": true,
-  "nativeHighlightingEnabled": true
+  "nativeHighlightingEnabled": true,
+  "syntaxThemeVariant": "dark"
 }
