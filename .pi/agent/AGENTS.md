@@ -22,7 +22,6 @@
 
 ## Code and validation
 
-- Before writing or changing code, use `read` to load the `ub-mode` skill at its advertised path and follow it. Re-read it if its instructions are no longer in context.
 - Comment only when the reason is non-obvious.
 - Write code comments and project documentation for readers without access to the task conversation: explain the subject, behavior, constraints, and relevant rationale. Keep narration of your task execution, progress, operator requests, and task-specific follow-ups in operator communication or task reports, not in those files.
 - Validate external inputs at boundaries; handle reachable edge cases explicitly and surface failures rather than masking them. Rely on established internal invariants instead of adding redundant checks or speculative recovery for states they rule out.

@@ -7,7 +7,7 @@ description: Use as the primary agent for task planning and roadmaps, starting, 
 
 This workflow is for the primary agent coordinating work directly with the operator. Retain ownership of the overall plan/roadmap lifecycle when delegating bounded subtasks: provide the relevant task context and selected working paths, use returned results and blockers to update task state, and resolve requests for otherwise-unassigned artifact destinations.
 
-Apply the procedures relevant to the assignment, within its authority and existing project requirements. Global authority, testing, review and delegation rules remain controlling; `ck-testing` and `ub-mode` own their respective methods.
+Apply the procedures relevant to the assignment, within its authority and existing project requirements. Global authority, testing, review and delegation rules remain controlling; `ck-testing` owns test-design methods.
 
 ## Choose the needed workflow
 

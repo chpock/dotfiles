@@ -202,7 +202,6 @@ The personal `ck-testing` and `ck-task-workflow` skills live at `~/.pi/agent/ski
 | `reverse-engineer-anything` | User / visible | REA-based investigation of shipped artifacts and requested runtime evidence; not ordinary source-repository navigation. |
 | `ck-task-workflow` | Pi user / visible | Primary-agent coordination of task plans, roadmaps, overall progress and working-file placement. |
 | `ck-testing` | Pi user / visible | Design, write, modify, or review tests and validation checks. |
-| `ub-mode` | User / visible | Code-change engineering principles and the checks specified by that skill, within existing role/task permissions. |
 | `writing-for-agents` | User / visible | Design agent-facing instructions, including skills and `AGENTS.md` / `CLAUDE.md`. |
 | `council-mode` | Package / visible | Parent-supervised advisor selection, bounded discussion, and decision synthesis. |
 | `pi-subagents` | Package / visible | Parent-side delegation, orchestration, and subagent management. |
@@ -215,10 +214,10 @@ Every row below has `inheritSkills: false`. The selected skills are the complete
 
 | Agent | Selected skills | Why these skills fit |
 | --- | --- | --- |
-| `worker` | `ub-mode`, `agent-browser`, `ck-testing`, `writing-for-agents`, `reverse-engineer-anything` | Implements authorized tasks, including browser/UI verification, tests, and agent-facing documentation. REA provides artifact/runtime evidence when implementation or reconstruction needs it. |
-| `delegate` | `ub-mode`, `agent-browser`, `ck-testing`, `writing-for-agents`, `reverse-engineer-anything` | Handles bounded general work and can obtain relevant artifact evidence itself. Broad execution tools and MCP access do not make it an orchestrator. |
-| `reviewer` | `ub-mode`, `grill-for-unknowns`, `ck-testing`, `writing-for-agents`, `reverse-engineer-anything` | Reviews plans, tests, and agent-facing instructions, and independently checks artifact claims through REA. Its no-shell/no-repository-edit task contract remains; broad MCP capability is not a mechanical read-only filter. |
-| `oracle` | `ub-mode`, `grill-for-unknowns`, `ck-testing`, `writing-for-agents`, `reverse-engineer-anything` | Challenges decisions and assumptions using relevant source and artifact evidence. It remains advisory and read-only rather than taking over execution or the user conversation. |
+| `worker` | `agent-browser`, `ck-testing`, `writing-for-agents`, `reverse-engineer-anything` | Implements authorized tasks, including browser/UI verification, tests, and agent-facing documentation. REA provides artifact/runtime evidence when implementation or reconstruction needs it. |
+| `delegate` | `agent-browser`, `ck-testing`, `writing-for-agents`, `reverse-engineer-anything` | Handles bounded general work and can obtain relevant artifact evidence itself. Broad execution tools and MCP access do not make it an orchestrator. |
+| `reviewer` | `grill-for-unknowns`, `ck-testing`, `writing-for-agents`, `reverse-engineer-anything` | Reviews plans, tests, and agent-facing instructions, and independently checks artifact claims through REA. Its no-shell/no-repository-edit task contract remains; broad MCP capability is not a mechanical read-only filter. |
+| `oracle` | `grill-for-unknowns`, `ck-testing`, `writing-for-agents`, `reverse-engineer-anything` | Challenges decisions and assumptions using relevant source and artifact evidence. It remains advisory and read-only rather than taking over execution or the user conversation. |
 | `scout` | None | Navigates code and files for a handoff, rather than performing investigative research. Finding tests/instructions is not designing or reviewing them. The operator explicitly excluded this role from REA/MCP. |
 | `second-opinion` | None | Uses its self-contained advisory procedure and a supplied decision packet; no execution, browser, orchestration or REA workflow is assigned by default. |
 | `researcher` | `reverse-engineer-anything` | Combines web/repository sources with shipped-artifact or requested runtime evidence when the research question needs it. Test construction and instruction design remain task-specific, not defaults. |

@@ -105,7 +105,6 @@
         "inheritGlobalContext": true,
         "inheritSkills": false,
         "skills": [
-          "ub-mode",
           "agent-browser",
           "ck-testing",
           "writing-for-agents",
@@ -152,7 +151,6 @@
         "inheritGlobalContext": true,
         "inheritSkills": false,
         "skills": [
-          "ub-mode",
           "agent-browser",
           "ck-testing",
           "writing-for-agents",
@@ -198,7 +196,6 @@
         "inheritGlobalContext": true,
         "inheritSkills": false,
         "skills": [
-          "ub-mode",
           "grill-for-unknowns",
           "ck-testing",
           "writing-for-agents",
@@ -237,7 +234,6 @@
         "inheritGlobalContext": true,
         "inheritSkills": false,
         "skills": [
-          "ub-mode",
           "grill-for-unknowns",
           "ck-testing",
           "writing-for-agents",

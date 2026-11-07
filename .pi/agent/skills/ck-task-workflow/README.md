@@ -83,7 +83,7 @@ Material decisions and concise current state belong in the plan. Detailed logs a
 | [Primary `APPEND_SYSTEM.md`, Task working files](../../APPEND_SYSTEM.md#task-working-files) | Requires reading/rereading this skill for matching work and passing selected absolute paths to delegated agents. |
 | [`SKILL.md`](SKILL.md) and its conditional branches | Task lifecycle, plan contents/readiness, identity/lookup/state transitions and the operative resolver/naming/create-only-when-needed procedure. |
 | [Task-workspace reference](../../../docs/agents-md/task-workspaces.md) | Detailed resolver contract, rationale, examples, normalization, retention and limits. Explanatory, not a required additional read. |
-| `ck-testing` and `ub-mode` | Their test-design and code-engineering methods; those instructions are not duplicated here. |
+| `ck-testing` | Test-design methods; those instructions are not duplicated here. |
 | Global/operator/project authority, testing and review rules | Permissions, scope changes, validation requirements and handling review findings. A plan or workspace does not expand authority. |
 | [Pi subagent guide](../../../docs/pi-subagents.md#default-assignments-by-role) | Role assignments and the exclusion of this skill from default child catalogs, not a second copy of this coordination workflow. |
 
