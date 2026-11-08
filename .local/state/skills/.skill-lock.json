@@ -1,0 +1,125 @@
+{
+  "version": 3,
+  "skills": {
+    "agent-browser": {
+      "source": "vercel-labs/agent-browser",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/vercel-labs/agent-browser.git",
+      "skillPath": "skills/agent-browser/SKILL.md",
+      "skillFolderHash": "29ba9c12789b1c54ab76ad40e2472e646d141b85",
+      "installedAt": "2026-04-27T11:26:46.271Z",
+      "updatedAt": "2026-11-08T22:00:14.600Z"
+    },
+    "architectural-decisions": {
+      "source": "repowise-dev/repowise",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/repowise-dev/repowise.git",
+      "ref": "main",
+      "skillPath": "plugins/codex/skills/architectural-decisions/SKILL.md",
+      "skillFolderHash": "7d3f31b505649e1b6a16b51b27d834a9fbd0ebeb",
+      "installedAt": "2026-11-08T21:49:19.151Z",
+      "updatedAt": "2026-11-08T21:52:00.771Z"
+    },
+    "change-review": {
+      "source": "repowise-dev/repowise",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/repowise-dev/repowise.git",
+      "ref": "main",
+      "skillPath": "plugins/codex/skills/change-review/SKILL.md",
+      "skillFolderHash": "098eeb1847cb66213d2583746e605be44e1b6ca5",
+      "installedAt": "2026-11-08T21:49:19.154Z",
+      "updatedAt": "2026-11-08T21:52:00.772Z"
+    },
+    "code-health": {
+      "source": "repowise-dev/repowise",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/repowise-dev/repowise.git",
+      "ref": "main",
+      "skillPath": "plugins/codex/skills/code-health/SKILL.md",
+      "skillFolderHash": "d5fb168471bf2803c50a5e144f0a73ea3b646bea",
+      "installedAt": "2026-11-08T21:49:19.154Z",
+      "updatedAt": "2026-11-08T21:52:00.775Z"
+    },
+    "codebase-exploration": {
+      "source": "repowise-dev/repowise",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/repowise-dev/repowise.git",
+      "ref": "main",
+      "skillPath": "plugins/codex/skills/codebase-exploration/SKILL.md",
+      "skillFolderHash": "055702c422ef50bb83fd33fb37d1622d93f7ce4c",
+      "installedAt": "2026-11-08T21:49:19.154Z",
+      "updatedAt": "2026-11-08T21:52:00.776Z"
+    },
+    "dead-code-cleanup": {
+      "source": "repowise-dev/repowise",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/repowise-dev/repowise.git",
+      "ref": "main",
+      "skillPath": "plugins/codex/skills/dead-code-cleanup/SKILL.md",
+      "skillFolderHash": "e772f0f1be6eb958132d95af82ee7fac5688e05f",
+      "installedAt": "2026-11-08T21:49:19.155Z",
+      "updatedAt": "2026-11-08T21:52:00.776Z"
+    },
+    "pre-modification-check": {
+      "source": "repowise-dev/repowise",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/repowise-dev/repowise.git",
+      "ref": "main",
+      "skillPath": "plugins/codex/skills/pre-modification-check/SKILL.md",
+      "skillFolderHash": "37d81bca5b1cde4ef4c2193e8dbd1f544ab071d2",
+      "installedAt": "2026-11-08T21:49:19.155Z",
+      "updatedAt": "2026-11-08T21:52:00.777Z"
+    },
+    "find-skills": {
+      "source": "vercel-labs/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/vercel-labs/skills.git",
+      "skillPath": "skills/find-skills/SKILL.md",
+      "skillFolderHash": "76a98a285cb0434f3d39e1a873823556330e398b",
+      "installedAt": "2026-11-08T21:49:26.548Z",
+      "updatedAt": "2026-11-08T21:49:26.548Z"
+    },
+    "codebase-design": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "ref": "main",
+      "skillPath": "skills/engineering/codebase-design/SKILL.md",
+      "skillFolderHash": "4cbe1c131e1ea54109cb1e4e5f3c505810db6606",
+      "installedAt": "2026-11-08T21:57:09.812Z",
+      "updatedAt": "2026-11-08T21:57:09.812Z"
+    },
+    "handoff": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "ref": "main",
+      "skillPath": "skills/productivity/handoff/SKILL.md",
+      "skillFolderHash": "ce24892bd2d4b9e7fd5ac9b95c03175e18bef388",
+      "installedAt": "2026-11-08T21:57:09.814Z",
+      "updatedAt": "2026-11-08T21:57:09.814Z"
+    },
+    "writing-for-agents": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "ref": "main",
+      "skillPath": "skills/productivity/writing-for-agents/SKILL.md",
+      "skillFolderHash": "ad2925850efb8973a72d2e666f7a975f9a2d4a9b",
+      "installedAt": "2026-11-08T21:57:09.815Z",
+      "updatedAt": "2026-11-08T21:57:09.815Z"
+    },
+    "grill-for-unknowns": {
+      "source": "nicobailon/grill-for-unknowns",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/nicobailon/grill-for-unknowns.git",
+      "skillPath": "plugins/grill-for-unknowns/SKILL.md",
+      "skillFolderHash": "18596ac75e680e307104eeab6608b848ff0ee4f3",
+      "installedAt": "2026-11-08T21:58:07.368Z",
+      "updatedAt": "2026-11-08T21:58:07.368Z"
+    }
+  },
+  "dismissed": {
+    "findSkillsPrompt": true
+  }
+}
