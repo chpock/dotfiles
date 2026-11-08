@@ -74,7 +74,10 @@
         "thinking": "low",
         "inheritGlobalContext": true,
         "inheritSkills": false,
-        "skills": [],
+        "skills": ["ck-repowise"],
+        "subagentOnlyExtensions": [
+          "~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"
+        ],
         "tools": [
           "read",
           "grep",
@@ -96,7 +99,8 @@
           "ast_grep_search",
           "ctx_search",
           "ctx_expand",
-          "ctx_reduce"
+          "ctx_reduce",
+          "mcp"
         ]
       },
       "worker": {
@@ -108,7 +112,8 @@
           "agent-browser",
           "ck-testing",
           "writing-for-agents",
-          "codebase-design"
+          "codebase-design",
+          "ck-repowise"
         ],
         "subagentOnlyExtensions": [
           "~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"
@@ -154,7 +159,8 @@
           "agent-browser",
           "ck-testing",
           "writing-for-agents",
-          "codebase-design"
+          "codebase-design",
+          "ck-repowise"
         ],
         "subagentOnlyExtensions": [
           "~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"
@@ -199,7 +205,8 @@
           "grill-for-unknowns",
           "ck-testing",
           "writing-for-agents",
-          "codebase-design"
+          "codebase-design",
+          "ck-repowise"
         ],
         "subagentOnlyExtensions": [
           "~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"
@@ -235,10 +242,14 @@
         "inheritSkills": false,
         "defaultContext": "fresh",
         "skills": [
-          "codebase-design"
+          "codebase-design",
+          "ck-repowise"
         ],
         "extensions": [
           "~/.pi/agent/npm/node_modules/pi-web-access/dist/index.js"
+        ],
+        "subagentOnlyExtensions": [
+          "~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"
         ],
         "tools": [
           "read",
@@ -249,7 +260,8 @@
           "fetch_content",
           "get_search_content",
           "source_check",
-          "contact_supervisor"
+          "contact_supervisor",
+          "mcp"
         ]
       },
       "oracle": {
@@ -261,7 +273,8 @@
           "grill-for-unknowns",
           "ck-testing",
           "writing-for-agents",
-          "codebase-design"
+          "codebase-design",
+          "ck-repowise"
         ],
         "subagentOnlyExtensions": [
           "~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"
@@ -295,7 +308,7 @@
         "thinking": "high",
         "inheritGlobalContext": true,
         "inheritSkills": false,
-        "skills": [],
+        "skills": ["ck-repowise"],
         "subagentOnlyExtensions": [
           "~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"
         ],
@@ -333,7 +346,7 @@
         "thinking": "high",
         "inheritGlobalContext": true,
         "inheritSkills": false,
-        "skills": [],
+        "skills": ["ck-repowise"],
         "subagentOnlyExtensions": [
           "~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"
         ],

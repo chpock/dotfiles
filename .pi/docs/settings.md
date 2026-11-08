@@ -2,7 +2,7 @@
 
 This guide describes the selected shared Pi configuration: values, motivation, effects and behavior when omitted. It is a configuration reference, not a change log or deployment audit.
 
-Scope: shared `settings.json` choices, package selection and MCP/REA settings. [pi-subagents.md](pi-subagents.md) owns child-role settings and their rationale. Model evidence is in the [2026-10-17 assessment](models-2026-10-17.md); the [selection guide](model-selection.md) owns the reusable research method. See [CONTEXT.md](CONTEXT.md) for document boundaries.
+Scope: shared `settings.json` choices, package selection and MCP settings. [pi-subagents.md](pi-subagents.md) owns child-role settings and their rationale. Model evidence is in the [2026-10-17 assessment](models-2026-10-17.md); the [selection guide](model-selection.md) owns the reusable research method. See [CONTEXT.md](CONTEXT.md) for document boundaries.
 
 ## Configuration ownership
 
@@ -10,10 +10,10 @@ Scope: shared `settings.json` choices, package selection and MCP/REA settings. [
 | --- | --- |
 | [`~/.pi/agent/settings.json`](../agent/settings.json) | Shared model defaults/scope, interface, reporting, packages and built-in selection. The `subagents` subtree is owned by [pi-subagents.md](pi-subagents.md). |
 | [`~/.pi/agent/themes/README.md`](../agent/themes/README.md) | Theme selection rationale, color-role design and renderer boundaries. |
-| `~/.pi/agent/mcp.json` | REA server registration: transport, command, and pinned version. |
-| `~/.pi/agent/mcp-adapter.json` | Adapter exposure, installation policy, and REA lifecycle. It augments the registration rather than copying its command. |
+| `~/.pi/agent/mcp.json` | Repowise server registration: transport, command and arguments. |
+| `~/.pi/agent/mcp-adapter.json` | Adapter exposure and installation policy. It augments the registration rather than copying its command. |
 
-The MCP sections specify the official `npm:pi-mcp-adapter` setup with the schema-discovery behavior below. MCP platform examples use Pi **1.2.0** and REA **6.4.0**; model-setting semantics follow Pi **1.3.0**. These versions identify the source contracts used, not an audit of deployed packages.
+The MCP sections specify the official `npm:pi-mcp-adapter` setup with the schema-discovery behavior below. MCP platform examples use Pi **1.2.0**; model-setting semantics follow Pi **1.3.0**. These versions identify the source contracts used, not an audit of deployed packages.
 
 These are user-level defaults. The adapter also reads shared MCP files and project configuration. The global adapter overlay takes precedence over the global Pi MCP registration; project files can override user-level configuration, and per-server settings can override global adapter defaults. Inspect the effective configuration in the actual working directory when diagnosing a difference; see the adapter's [precedence reference](https://github.com/nicobailon/pi-mcp-adapter/blob/main/docs/configuration.md#precedence).
 
@@ -159,7 +159,7 @@ Pi uses `enabledModels` for startup selection and model cycling; `/model` can sw
 | `/w/projects/pi-toolview` | Load the maintained local tool-card/editor/footer presentation package directly, keeping tool output compact and navigable. |
 | `npm:pi-subagents` | Native specialist/implementation/review delegation with parent-owned decisions and acceptance. Models, permissions and role rationale belong in [pi-subagents.md](pi-subagents.md). |
 | `npm:pi-mini` | An opt-in low-clutter chat for quick terminal questions. It activates only with `--tui-mini` in terminal UI mode; merely loading it does not replace the normal fullscreen setup or disable session saving. |
-| `npm:pi-mcp-adapter` | On-demand MCP/REA discovery through one proxy, without eager catalogs or script tools; the design and parameters are [below](#mcp-and-rea). |
+| `npm:pi-mcp-adapter` | On-demand MCP discovery through one proxy, without eager catalogs or script tools; the design and parameters are [below](#mcp-access). |
 
 Relative local sources resolve from the settings file; npm entries load managed installed packages. A local source loads from its directory without copying and therefore depends on that checkout being present. The selected adapter source is the official npm package, as specified by the MCP design. Removing every package would also remove these extensions' features unless loaded by another route; native built-ins and user-extension discovery remain independent.
 
@@ -171,22 +171,21 @@ Other extension files such as `web-search.json`, CortexKit JSONC and UI overlays
 
 ## Main skill discovery
 
-Pi discovers user skills in `~/.pi/agent/skills/` and `~/.agents/skills/`. The top-level `skills` array in [`agent/settings.json`](../agent/settings.json) contains native exact resource exclusions (`-path`) for shared skills not selected for this Pi setup. These filters remove resources from the main agent's discovered catalog without deleting their shared directories or disabling tools/providers.
+Pi discovers user skills in `~/.pi/agent/skills/` and `~/.agents/skills/`, alongside selected package skills. The shared settings use native discovery without a top-level `skills` filter; each skill's frontmatter controls whether it is advertised for automatic selection.
 
-The remaining catalog includes `codebase-design`. Pi advertises each skill's name, description and path; the main agent decides when to read and apply it from the task, without an operator reminder or forced invocation. Selection remains model behavior rather than guaranteed programmatic routing.
+The catalog includes `codebase-design` and `ck-repowise`. Pi advertises each skill's name, description and path; the main agent decides when to read and apply it from the task, without an operator reminder or forced invocation. Selection remains model behavior rather than guaranteed programmatic routing.
 
-Child catalogs are configured separately by the [subagent skill assignments](pi-subagents.md#skills). Main resource exclusions are not a child resolver denylist: a supported explicit child selection or a direct file read can still reach a shared skill. Project/launch overrides and forked context also retain their documented scope. Excluding a skill is not a filesystem access restriction or removal of an MCP server.
+Child catalogs are configured separately by the [subagent skill assignments](pi-subagents.md#skills). A child's explicit selection can differ from the main catalog, and a direct file read can reach a shared skill. Project/launch overrides and forked context retain their documented scope. Catalog selection is not a filesystem access restriction or removal of an MCP server.
 
-## MCP and REA
+## MCP access
 
 ### Goal and chosen design
 
 - Keep `codemode` unavailable, not merely discourage its use.
-- Make the REA catalog discoverable on demand without declaring every tool schema in ordinary model requests.
-- Preserve REA's in-session analysis state across idle pauses.
-- Use the official adapter and REA's supported version-pinned launcher, without a command pointing into the transient `npx` cache.
+- Discover configured server catalogs on demand without declaring every tool schema in ordinary model requests.
+- Use the official adapter with one common **`mcp` proxy** for search, description, and execution.
 
-The adapter exposes one common **`mcp` proxy** for search, description, and execution. Server access is independent of skill-catalog selection: the registration, adapter and role tool grants determine availability. Ordinary source-code navigation does not require REA.
+Server access is independent of skill-catalog selection: the registration, adapter and role tool grants determine availability. Ordinary source-code navigation does not require Repowise; AFT remains primary for current-source location and inspection.
 
 ### Pi package and built-ins
 
@@ -209,25 +208,13 @@ Merge this fragment into the existing lists; it is not a replacement configurati
 
 `autoEnableCodemode: false` only controls automatic activation by native MCP. It is not the solution here: native MCP is disabled, and codemode itself must not load. Native `exposure: "deferred"` and `tool_search` are not needed for this proxy-only design.
 
-### REA registration
+### Repowise registration and routing
 
-REA setup owns the registration in `~/.pi/agent/mcp.json`:
+The global `~/.pi/agent/mcp.json` registers the installed `repowise` executable with `args: ["mcp"]`, without a fixed repository argument or `cwd`. The adapter passes the session working directory to the stdio process. Repowise uses that directory or discovers an enclosing indexed repository/workspace; start the relevant Pi session at the target root and confirm the reported repository before querying. Project settings can still override this registration.
 
-```json
-{
-  "mcpServers": {
-    "rea": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "rea-agents@6.4.0", "mcp"]
-    }
-  }
-}
-```
+The global `AGENTS.md` pointer and the [ck-repowise skill](../agent/skills/ck-repowise/SKILL.md) own on-demand use and index preparation. This avoids project-local MCP and instruction files; native index data still lives in `.repowise/`. MCP does not automatically create a missing index. Preparation/refresh requires write authorization; read-only roles request it from the parent. Model-backed generation is not enabled by this registration.
 
-The adapter reads Pi's MCP registration. Keep the transport and command in this one file; do not duplicate them in the adapter overlay. `npx` can acquire the pinned package when it is not cached. A standalone `rea` command in `PATH` is not required.
-
-REA setup or an upgrade may change the registration or install discoverable resources. Review those changes together with the overlay, resource exclusions and backend prerequisites.
+Repowise keeps the adapter's default lazy lifecycle: it can disconnect after idleness and reopen the on-disk index on demand. The skill owns index freshness and session-reconnection checks. Keep the server command in `mcp.json`, rather than duplicating it in the adapter overlay.
 
 ### Adapter policy
 
@@ -235,15 +222,9 @@ REA setup or an upgrade may change the registration or install discoverable reso
 
 ```json
 {
-  "mcpServers": {
-    "rea": {
-      "lifecycle": "lazy-keep-alive"
-    }
-  },
   "settings": {
     "directTools": false,
     "namespaceProxyTools": false,
-    "scriptMode": false,
     "allowInstall": false
   }
 }
@@ -252,22 +233,18 @@ REA setup or an upgrade may change the registration or install discoverable reso
 | Setting | Why and effect | If omitted |
 | --- | --- | --- |
 | `directTools: false` | Keeps calls behind `mcp`; individual MCP tools are not registered as direct model tools. | Already defaults to false; the explicit value records the proxy-only policy. A per-server or higher-precedence override can still change exposure. |
-| `namespaceProxyTools: false` | Omits redundant server-specific proxies such as `mcp__rea`. | Defaults to true, adding a separate proxy for each enabled server. |
-| `scriptMode: false` | Keeps the adapter's JavaScript tool `mcpScript` disabled, independently of Pi's codemode setting. | Already defaults to false; the explicit value records the no-script-tools policy. |
+| `namespaceProxyTools: false` | Omits redundant server-specific proxies. | Defaults to true, adding a separate proxy for each enabled server. |
 | `allowInstall: false` | Refuses `mcp` requests with `action: "install"`; configured-server discovery and calls remain available. | Defaults to true, allowing additional server registrations through the proxy. This setting is not an OS-level installation ban. |
-| `mcpServers.rea.lifecycle: "lazy-keep-alive"` | Starts REA when needed and retains its server session instead of disconnecting for idleness. | The default `lazy` mode disconnects after the idle timeout, normally 10 minutes. A new process/session does not retain old in-memory analysis references. |
 
-Lazy loading is not a promise of zero startup work: missing or invalid cached metadata can trigger a discovery connection. Metadata stored on disk is distinct from tool schemas declared to the model. Once REA starts, keep-alive trades resident memory for continuity.
-
-Keep-alive does not preserve state across `/reload`, Pi exit, crashes, or server-session replacement. Save important results as durable files before ending the session.
+Lazy loading is not a promise of zero startup work: missing or invalid cached metadata can trigger a discovery connection. Metadata stored on disk is distinct from tool schemas declared to the model. `/reload` and session replacement recreate server connections; an on-disk repository index is independent of those connections.
 
 ### Parameter discovery and large responses
 
 Search is a compact summary, not a complete parameter contract. Before constructing a request with unfamiliar parameters, use the selected tool's `describe` result:
 
 ```javascript
-mcp({ search: "inspect_analysis_view", server: "rea" })
-mcp({ describe: "rea_inspect_analysis_view", server: "rea" })
+mcp({ server: "repowise" })
+mcp({ describe: "<returned tool name>", server: "repowise" })
 ```
 
 - Plain structural schemas stay compact.
@@ -287,13 +264,12 @@ Pi's outer tool event is named `mcp`, with the selected operation in its argumen
 
 After relevant configuration or package changes:
 
-1. Reload each affected Pi instance after important foreground and background work has finished, or start a fresh session. `/reload` replaces extension state and ends the current REA server session.
-2. Inspect actual initial tool declarations: one `mcp` proxy, no `codemode`, `mcpScript`, server-specific proxies, or eagerly declared REA catalog. Targeted discovery should not promote the catalog into direct tools.
+1. Reload each affected Pi instance after important foreground and background work has finished, or start a fresh session. `/reload` replaces extension state and server connections.
+2. Inspect the effective server configuration and actual initial tool declarations: one `mcp` proxy, no `codemode`, script tools, server-specific proxies, or eagerly declared server catalog. Targeted discovery should not promote the catalog into direct tools.
 3. Check model-visible `describe` output for both referenced/nested schemas and numerical constraints or annotations. Compare with the server's input schema; hidden metadata or a successful call with pre-known arguments is not sufficient evidence of usable discovery.
-4. Analyze a small known artifact, then retrieve retained evidence in the same session. Observe one analysis call and a subsequent view call, not a repeated analysis. A catalog/status reply alone proves neither analysis nor retention.
-5. If lifecycle settings change, repeat the retained-view check after an idle interval exceeding the default timeout; verify it succeeds without reanalysis.
+4. For changes affecting server calls or repository routing, query a known indexed repository and confirm that the reported repository and returned facts match the target. Follow the [skill's freshness and preparation checks](../agent/skills/ck-repowise/SKILL.md); unavailable indexes are a capability gap, not successful analysis.
 
-These checks establish the exercised operations, not all REA capabilities. Native decompilers such as Ghidra, Hopper, or IDA are separate dependencies and must be checked for tasks that require them.
+Scope validation to what changed. Configuration removal needs effective-loader and discovery checks; it does not require rebuilding an unrelated repository index.
 
 ## References
 
@@ -305,5 +281,4 @@ These checks establish the exercised operations, not all REA capabilities. Nativ
 - [Current model evidence](models-2026-10-17.md); [child configuration](pi-subagents.md); [model-selection method](model-selection.md).
 - Client declarations and transport: Pi 1.3.0 bundled `@earendil-works/pi-ai/dist/providers/{data/openai-codex.json,openai-codex.js}`.
 - Adapter: [configuration](https://github.com/nicobailon/pi-mcp-adapter/blob/main/docs/configuration.md) and [tool discovery, approvals, and output limits](https://github.com/nicobailon/pi-mcp-adapter/blob/main/docs/tools.md).
-- [REA documentation](https://github.com/morluto/rea/blob/main/README.md).
-- Main skill discovery and exact resource exclusions: Pi 1.5.0 `docs/{skills,settings}.md` and `dist/core/{skills,package-manager}.js` under `~/.pi/agent/install/releases/1.5.0/node_modules/@earendil-works/pi-coding-agent/`.
+- Main skill discovery: Pi 1.5.0 `docs/{skills,settings}.md` and `dist/core/{skills,package-manager}.js` under `~/.pi/agent/install/releases/1.5.0/node_modules/@earendil-works/pi-coding-agent/`.

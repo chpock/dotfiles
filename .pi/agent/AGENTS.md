@@ -26,6 +26,10 @@
 - Write code comments and project documentation for readers without access to the task conversation: explain the subject, behavior, constraints, and relevant rationale. Keep narration of your task execution, progress, operator requests, and task-specific follow-ups in operator communication or task reports, not in those files.
 - Validate external inputs at boundaries; handle reachable edge cases explicitly and surface failures rather than masking them. Rely on established internal invariants instead of adding redundant checks or speculative recovery for states they rule out.
 
+## Repository context
+
+- For repository-wide architecture, dependencies or change impact, historical decisions, index-backed health analysis, or Repowise setup/index maintenance, read and apply the `ck-repowise` skill at `~/.pi/agent/skills/ck-repowise/SKILL.md`. Keep AFT primary for locating and reading current source; routine known-file work does not require Repowise.
+
 ## Testing
 
 - Scope validation by what the change can invalidate, including indirect effects through dependencies and contracts. Include affected areas even when their files were not edited; shared location alone does not establish relevance.

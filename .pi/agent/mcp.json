@@ -1,18 +1,9 @@
 {
   "mcpServers": {
-    "rea": {
-      "type": "stdio",
-      "command": "npx",
-      "args": [
-        "-y",
-        "rea-agents@6.4.0",
-        "mcp"
-      ],
-      "env": {
-        "GHIDRA_INSTALL_DIR": "/opt/ghidra",
-        "REA_GHIDRA_STARTUP_TIMEOUT_MS": "1800000"
-      },
-      "timeout": 1830
+    "repowise": {
+      "command": "repowise",
+      "args": ["mcp"],
+      "description": "Repository architecture, dependency and change-impact context, history and index health for the session's project."
     }
   }
 }

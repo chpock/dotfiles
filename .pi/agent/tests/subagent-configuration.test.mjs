@@ -19,17 +19,17 @@ const { SettingsManager } = await import(new URL("dist/core/settings-manager.js"
 const { loadSkills } = await import(new URL("dist/core/skills.js", piDir));
 const settings = JSON.parse(await readFile(new URL("../settings.json", import.meta.url), "utf8"));
 const discovery = discoverAgents(cwd, "both", settings.defaultProvider);
-const executorSkills = ["agent-browser", "ck-testing", "writing-for-agents", "codebase-design"];
-const advisorySkills = ["grill-for-unknowns", "ck-testing", "writing-for-agents", "codebase-design"];
+const executorSkills = ["agent-browser", "ck-testing", "writing-for-agents", "codebase-design", "ck-repowise"];
+const advisorySkills = ["grill-for-unknowns", "ck-testing", "writing-for-agents", "codebase-design", "ck-repowise"];
 const expectedCatalogs = {
   worker: executorSkills,
   delegate: executorSkills,
   reviewer: advisorySkills,
   oracle: advisorySkills,
-  "second-opinion": ["codebase-design"],
-  scout: [],
-  researcher: [],
-  "evidence-auditor": [],
+  "second-opinion": ["codebase-design", "ck-repowise"],
+  scout: ["ck-repowise"],
+  researcher: ["ck-repowise"],
+  "evidence-auditor": ["ck-repowise"],
 };
 
 function role(name) {
@@ -54,7 +54,13 @@ for (const [name, expected] of Object.entries(expectedCatalogs)) {
     assert.ok(skills.resolved.every((skill) => !skill.disableModelInvocation));
     const prompt = buildEffectiveSystemPrompt({ agent, resolvedSkills: skills.resolved, cwd });
     assert.equal(prompt.includes("<name>codebase-design</name>"), expected.includes("codebase-design"));
-    assert.equal(prompt.includes("<name>reverse-engineer-anything</name>"), false);
+    const repowise = skills.resolved.find((skill) => skill.name === "ck-repowise");
+    assert.ok(repowise);
+    assert.equal(repowise.path, join(agentDir, "skills", "ck-repowise", "SKILL.md"));
+    assert.ok(prompt.includes("<name>ck-repowise</name>"));
+    assert.equal(prompt.includes(repowise.content), false);
+    assert.ok(agent.tools.includes("mcp"));
+    assert.ok(agent.subagentOnlyExtensions.includes("~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"));
     const design = skills.resolved.find((skill) => skill.name === "codebase-design");
     if (design) {
       assert.equal(design.path, join(homedir(), ".agents", "skills", "codebase-design", "SKILL.md"));
@@ -78,9 +84,10 @@ test("second-opinion operational settings have one owner and preserve its inspec
     inheritGlobalContext: true,
     inheritSkills: false,
     defaultContext: "fresh",
-    skills: ["codebase-design"],
+    skills: ["codebase-design", "ck-repowise"],
     extensions: ["~/.pi/agent/npm/node_modules/pi-web-access/dist/index.js"],
-    tools: ["read", "grep", "find", "ls", "web_search", "fetch_content", "get_search_content", "source_check", "contact_supervisor"],
+    subagentOnlyExtensions: ["~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"],
+    tools: ["read", "grep", "find", "ls", "web_search", "fetch_content", "get_search_content", "source_check", "contact_supervisor", "mcp"],
   };
   assert.deepEqual(configured, expected);
   for (const [field, value] of Object.entries(expected)) {
@@ -89,7 +96,7 @@ test("second-opinion operational settings have one owner and preserve its inspec
   assert.equal(agent.systemPrompt, definition.body);
 });
 
-test("main native resource discovery excludes the retired skill while retaining design guidance", async () => {
+test("main native resource discovery retains design and repository guidance", async () => {
   // Keep package installation and extension execution outside a discovery-only check.
   const settingsManager = SettingsManager.inMemory({ skills: settings.skills ?? [] });
   const manager = new DefaultPackageManager({ cwd, agentDir, settingsManager });
@@ -98,7 +105,7 @@ test("main native resource discovery excludes the retired skill while retaining 
   const loaded = loadSkills({ cwd, agentDir, includeDefaults: false, skillPaths: resources.skills.filter((resource) => resource.enabled).map((resource) => resource.path) });
   const names = loaded.skills.map((skill) => skill.name);
   assert.ok(names.includes("codebase-design"));
-  assert.ok(!names.includes("reverse-engineer-anything"));
+  assert.ok(names.includes("ck-repowise"));
 });
 
 
