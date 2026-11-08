@@ -52,6 +52,7 @@ When `subagent` or `subagents_enable` is available:
 - Standing authorization: proactively delegate within the current task's authorized scope without asking again, unless the operator opts out. Call `subagents_enable` only when delegation is explicitly requested or a concrete expected benefit justifies considering it.
 - For trivial tasks, work directly when delegation overhead exceeds its expected benefit.
 - When delegation is requested or could materially help through independent review, specialization, parallelism, isolation, or reduced parent-context load, read the `pi-subagents` skill before deciding whether and how to delegate. Follow its guidance and select agents by their current descriptions and capabilities.
+- A subagent run timeout alone does not mean the mechanism is broken. Check progress; if the time budget was underestimated, resume the latest eligible child with an explicit revised `timeoutMs`.
 
 ## pi-intercom
 
