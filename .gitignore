@@ -4,7 +4,6 @@
 !/.gitignore
 !/.gitmodules
 !/.pi
-!/.agents
 
 # Don't ignore files from dotfiles github repository which are not from $HOME
 !/README.md
@@ -62,8 +61,12 @@
 
 # Ignore files/dirs in .local
 /.local/bin/chrome-profile-*
-/.local/state/
+/.local/state/*
 /.local/share/
+
+# Agent's skills
+!/.agents
+!/.local/state/skills/
 
 # Ignore files/dirs for pi
 /.pi/agent/bin/pi
