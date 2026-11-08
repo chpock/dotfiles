@@ -1,15 +1,6 @@
 ---
 name: second-opinion
 description: Independent read-only second opinion on questions, arguments, decisions, alternatives, and trade-offs in any domain
-advertise: true
-acceptanceRole: read-only
-systemPromptMode: replace
-inheritProjectContext: true
-inheritGlobalContext: true
-inheritSkills: false
-defaultContext: fresh
-tools: read, grep, find, ls, web_search, fetch_content, get_search_content, source_check, contact_supervisor
-extensions: ~/.pi/agent/npm/node_modules/pi-web-access/dist/index.js
 ---
 
 You are `second-opinion`: an independent advisory inspector for questions in any domain.

@@ -12,7 +12,6 @@ Scope: shared `settings.json` choices, package selection and MCP/REA settings. [
 | [`~/.pi/agent/themes/README.md`](../agent/themes/README.md) | Theme selection rationale, color-role design and renderer boundaries. |
 | `~/.pi/agent/mcp.json` | REA server registration: transport, command, and pinned version. |
 | `~/.pi/agent/mcp-adapter.json` | Adapter exposure, installation policy, and REA lifecycle. It augments the registration rather than copying its command. |
-| `~/.agents/skills/reverse-engineer-anything/SKILL.md` | Task guidance for using REA. A skill does not register a server or grant tools. |
 
 The MCP sections specify the official `npm:pi-mcp-adapter` setup with the schema-discovery behavior below. MCP platform examples use Pi **1.2.0** and REA **6.4.0**; model-setting semantics follow Pi **1.3.0**. These versions identify the source contracts used, not an audit of deployed packages.
 
@@ -170,6 +169,14 @@ The `subagents` subtree is covered by [pi-subagents.md](pi-subagents.md): `defau
 
 Other extension files such as `web-search.json`, CortexKit JSONC and UI overlays are separate configuration topics. This guide's `settings.json` coverage does not imply those files have been documented.
 
+## Main skill discovery
+
+Pi discovers user skills in `~/.pi/agent/skills/` and `~/.agents/skills/`. The top-level `skills` array in [`agent/settings.json`](../agent/settings.json) contains native exact resource exclusions (`-path`) for shared skills not selected for this Pi setup. These filters remove resources from the main agent's discovered catalog without deleting their shared directories or disabling tools/providers.
+
+The remaining catalog includes `codebase-design`. Pi advertises each skill's name, description and path; the main agent decides when to read and apply it from the task, without an operator reminder or forced invocation. Selection remains model behavior rather than guaranteed programmatic routing.
+
+Child catalogs are configured separately by the [subagent skill assignments](pi-subagents.md#skills). Main resource exclusions are not a child resolver denylist: a supported explicit child selection or a direct file read can still reach a shared skill. Project/launch overrides and forked context also retain their documented scope. Excluding a skill is not a filesystem access restriction or removal of an MCP server.
+
 ## MCP and REA
 
 ### Goal and chosen design
@@ -179,7 +186,7 @@ Other extension files such as `web-search.json`, CortexKit JSONC and UI overlays
 - Preserve REA's in-session analysis state across idle pauses.
 - Use the official adapter and REA's supported version-pinned launcher, without a command pointing into the transient `npx` cache.
 
-The adapter exposes one common **`mcp` proxy** for search, description, and execution. The REA skill supplies research methodology; the adapter supplies access to the server. Neither replaces the other. Ordinary source-code navigation does not require REA.
+The adapter exposes one common **`mcp` proxy** for search, description, and execution. Server access is independent of skill-catalog selection: the registration, adapter and role tool grants determine availability. Ordinary source-code navigation does not require REA.
 
 ### Pi package and built-ins
 
@@ -220,7 +227,7 @@ REA setup owns the registration in `~/.pi/agent/mcp.json`:
 
 The adapter reads Pi's MCP registration. Keep the transport and command in this one file; do not duplicate them in the adapter overlay. `npx` can acquire the pinned package when it is not cached. A standalone `rea` command in `PATH` is not required.
 
-REA setup or an upgrade may change the registration or skill. Review those changes together with the overlay and backend prerequisites.
+REA setup or an upgrade may change the registration or install discoverable resources. Review those changes together with the overlay, resource exclusions and backend prerequisites.
 
 ### Adapter policy
 
@@ -298,4 +305,5 @@ These checks establish the exercised operations, not all REA capabilities. Nativ
 - [Current model evidence](models-2026-10-17.md); [child configuration](pi-subagents.md); [model-selection method](model-selection.md).
 - Client declarations and transport: Pi 1.3.0 bundled `@earendil-works/pi-ai/dist/providers/{data/openai-codex.json,openai-codex.js}`.
 - Adapter: [configuration](https://github.com/nicobailon/pi-mcp-adapter/blob/main/docs/configuration.md) and [tool discovery, approvals, and output limits](https://github.com/nicobailon/pi-mcp-adapter/blob/main/docs/tools.md).
-- [REA documentation](https://github.com/morluto/rea/blob/main/README.md) and the installed `reverse-engineer-anything` skill.
+- [REA documentation](https://github.com/morluto/rea/blob/main/README.md).
+- Main skill discovery and exact resource exclusions: Pi 1.5.0 `docs/{skills,settings}.md` and `dist/core/{skills,package-manager}.js` under `~/.pi/agent/install/releases/1.5.0/node_modules/@earendil-works/pi-coding-agent/`.

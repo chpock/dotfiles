@@ -108,7 +108,7 @@
           "agent-browser",
           "ck-testing",
           "writing-for-agents",
-          "reverse-engineer-anything"
+          "codebase-design"
         ],
         "subagentOnlyExtensions": [
           "~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"
@@ -154,7 +154,7 @@
           "agent-browser",
           "ck-testing",
           "writing-for-agents",
-          "reverse-engineer-anything"
+          "codebase-design"
         ],
         "subagentOnlyExtensions": [
           "~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"
@@ -199,7 +199,7 @@
           "grill-for-unknowns",
           "ck-testing",
           "writing-for-agents",
-          "reverse-engineer-anything"
+          "codebase-design"
         ],
         "subagentOnlyExtensions": [
           "~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"
@@ -226,7 +226,31 @@
       },
       "second-opinion": {
         "model": "opencode-go/deepseek-v4.1-flash",
-        "thinking": "max"
+        "thinking": "max",
+        "advertise": true,
+        "acceptanceRole": "read-only",
+        "systemPromptMode": "replace",
+        "inheritProjectContext": true,
+        "inheritGlobalContext": true,
+        "inheritSkills": false,
+        "defaultContext": "fresh",
+        "skills": [
+          "codebase-design"
+        ],
+        "extensions": [
+          "~/.pi/agent/npm/node_modules/pi-web-access/dist/index.js"
+        ],
+        "tools": [
+          "read",
+          "grep",
+          "find",
+          "ls",
+          "web_search",
+          "fetch_content",
+          "get_search_content",
+          "source_check",
+          "contact_supervisor"
+        ]
       },
       "oracle": {
         "model": "openai-codex/gpt-6-astra",
@@ -237,7 +261,7 @@
           "grill-for-unknowns",
           "ck-testing",
           "writing-for-agents",
-          "reverse-engineer-anything"
+          "codebase-design"
         ],
         "subagentOnlyExtensions": [
           "~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"
@@ -271,9 +295,7 @@
         "thinking": "high",
         "inheritGlobalContext": true,
         "inheritSkills": false,
-        "skills": [
-          "reverse-engineer-anything"
-        ],
+        "skills": [],
         "subagentOnlyExtensions": [
           "~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"
         ],
@@ -311,9 +333,7 @@
         "thinking": "high",
         "inheritGlobalContext": true,
         "inheritSkills": false,
-        "skills": [
-          "reverse-engineer-anything"
-        ],
+        "skills": [],
         "subagentOnlyExtensions": [
           "~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"
         ],
