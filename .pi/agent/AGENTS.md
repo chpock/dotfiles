@@ -28,7 +28,9 @@
 
 ## Repository context
 
-- For Repowise-backed analysis, apply the matching available Repowise workflow skill. Before using Repowise skills or tools, read `~/.pi/agent/skills/ck-repowise/SKILL.md` for Pi access, repository selection, index safety and authority boundaries. Keep AFT primary for locating and reading current source; routine known-file lookups do not require Repowise.
+- For planned code edits/refactoring, repository exploration/planning, code-health/change-impact analysis, code review, architecture/dependency/history questions, or index maintenance, first verify that this session's CWD is inside a Git worktree, using Git or a CWD-specific verified parent handoff. Once confirmed, load and follow the `ck-repowise` skill, then the matching Repowise workflow skill.
+- Keep AFT primary for source lookup, reading and editing.
+- For eligible work, local `.repowise/` index preparation under the skill's safety procedure is standing-authorized, including read-only repository analysis. This does not authorize source/editor/hook changes, commits or model-backed generation.
 
 ## Testing
 
@@ -47,7 +49,7 @@
 
 ## Questions are read-only
 
-- For questions, answer first; obtain approval before making changes, even trivial ones.
+- For questions, answer first; obtain approval before making changes, even trivial ones, except the local Repowise index preparation authorized under Repository context.
 
 ## Delegation
 

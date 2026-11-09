@@ -209,7 +209,7 @@ The personal `ck-testing`, `ck-task-workflow` and `ck-repowise` skills live at `
 
 The six Repowise workflow skills above are installed unchanged from `repowise-dev/repowise`, `plugins/codex/skills/<name>/SKILL.md`, into `~/.agents/skills/<name>/SKILL.md`. They are standard Pi-compatible skills, not an installed Codex plugin. The existing skills manager records their source, `main` ref, paths and folder hashes in `~/.local/state/skills/.skill-lock.json`; this tracks a branch, not an immutable commit pin. Use the existing skills manager with that registry for upstream updates; keep local integration rules in `ck-repowise` rather than editing vendor files.
 
-The workflow skills own their analysis methods; `ck-repowise` owns the Pi-specific transport, repository and index lifecycle. The shared `AGENTS.md` pointer requires reading the adapter skill before applying upstream workflows. Its integration rules handle unavailable Codex commands, model-backed answers, source-verification and approval differences without copying all six procedures. Selection is lazy metadata, not a mandatory bundle read or additional authority.
+The workflow skills own their analysis methods; `ck-repowise` owns the Pi-specific transport, repository and index lifecycle. The shared `AGENTS.md` gate applies before loading either: each session must have an existing Git-worktree CWD and relevant repository work. For eligible work, load the adapter and matching workflow, not the whole bundle. Its integration rules handle unavailable Codex commands, model-backed answers, source verification and guarded automatic preparation without copying all six procedures. Catalog metadata remains lazy, not additional tool authority.
 
 ### Default assignments by role
 
@@ -251,7 +251,7 @@ For an exceptional testing-specific research/audit, health investigation or inst
 
 **`codebase-design` — implementation, review and advisory roles.** The main agent and five selected children decide autonomously when actual work requires module/interface design, responsibility placement or testability analysis. The operator supplies the task, not a required skill invocation. Availability does not mandate redesign, merging modules, or applying every heuristic to every change. Existing architecture, testing and approval requirements remain controlling. The optional parallel alternative-design branch stays with the parent: selected children have no subagent-spawning permission.
 
-**Repowise workflows and `ck-repowise` — analysis methods plus a shared Pi adapter.** All eight active native roles receive the adapter and their assigned workflow metadata. The global `AGENTS.md` pointer reaches the adapter before upstream workflows or tool use; AFT remains primary for current source. Selected workflows do not filter the gateway's tool catalog. Index preparation follows task authorization and actual tool availability, not role categories; a missing tool or authorization is reported as a concrete gap. Upstream confidence and deletion flags are not proof or approval, and `get_answer` may invoke a model independently of index-generation flags. The adapter owns these integration boundaries; skill assignment neither grants model-backed calls nor requires project MCP/instruction files. The six disabled external CLI profiles are unchanged.
+**Repowise workflows and `ck-repowise` — analysis methods plus a shared Pi adapter.** All eight active native roles receive the adapter and their assigned workflow metadata. The shared instructions require Git-worktree sessions doing eligible work to load/apply them, and exclude non-Git CWDs, unrelated tasks and pure known-file reading. This is model-directed selection, not a runtime access barrier. Planned code edits trigger use even when the file is already known. AFT remains primary for current source. The primary verifies Git membership and prepares the index before relevant delegation, passing CWD-specific root/readiness evidence. Children lacking that evidence or a ready/current index request verification/preparation through their supervisor channel; they do not ask the operator about index presence or gain shell/write permissions. Each child's own CWD controls eligibility. Selected workflows do not filter the gateway's tool catalog. Upstream confidence and deletion flags are not proof or approval, and `get_answer` may invoke a model independently of index-generation flags. The adapter owns these integration boundaries; skill assignment neither grants model-backed calls nor requires project MCP/instruction files. The six disabled external CLI profiles are unchanged.
 
 **`pi-subagents`, `council-mode` and `pi-intercom` — parent coordination only.** No enabled child role has the `subagent` tool. An oracle can participate in a council without receiving instructions to run the council. Likewise, `delegate` is a leaf executor despite its name. The extension additionally filters the `pi-subagents` orchestration skill out of child discovery/resolution; `council-mode` is excluded here by the local assignment decision. `pi-intercom` coordinates related local sessions through the parent's intercom tool; none of these child allowlists grant that tool.
 
@@ -356,6 +356,22 @@ Each child has its own MCP connections, separate from the parent and other child
 4. Use the installed loaders/resolver and prompt-building hooks to inspect all affected roles: names, resolved paths, no unresolved or hidden selections, no ambient-skill leakage, and preserved tool/task boundaries. Include project-local discovery/override cases when skill selection changes. Check returned data and generated prompts, not phrases in implementation files.
 5. For meaningful skill/provider routing changes, inspect fresh child transcripts for the advertised catalog and actual skill reads. Discovery, correct skill selection, and quality of the work are separate claims. An ordinary unrelated task should not be forced to load a specialized skill.
 6. Independently review substantive assignment changes and verify each finding against the current files and approved role boundaries.
+
+### Repowise task-routing regression
+
+`node --test agent/tests/subagent-configuration.test.mjs` checks native catalogs, lazy metadata, provider inheritance and preserved role boundaries without model requests. The opt-in [workflow integration test](../agent/tests/repowise-workflow.integration.mjs) uses the configured main model and real Repowise CLI/MCP on disposable Git/non-Git fixtures:
+
+```bash
+node agent/tests/repowise-workflow.integration.mjs --run-models --output-dir /absolute/evidence/directory
+```
+
+It requires working credentials and authorization for real model requests. Evidence and session journals stay below the explicit destination. The MCP guard rejects model-backed answer calls; the recorded CLI shim admits only guarded init/update, MCP startup and help/version. These checks are not a shell sandbox. It exercises automatic initialization, known-file edits, excluded tasks, subdirectory/worktree membership, repository binding and unchanged source/editor/hooks. A verification query is recorded separately from model-initiated calls. For role routing and supervisor coordination, use fresh native `subagent` runs and inspect their actual session journals; the main SDK test does not substitute for those checks.
+
+The CLI guard can be checked without model requests or a real Repowise backend:
+
+```bash
+node agent/tests/repowise-workflow.integration.mjs --check-cli-guard --output-dir /absolute/evidence/directory
+```
 
 ### MCP configuration and package changes
 

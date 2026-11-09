@@ -3,6 +3,10 @@
     "repowise": {
       "command": "repowise",
       "args": ["mcp"],
+      "env": {
+        "REPOWISE_SKIP_EDITOR_SETUP": "1",
+        "REPOWISE_TELEMETRY_DISABLED": "1"
+      },
       "description": "Repository architecture, dependency and change-impact context, history and index health for the session's project."
     }
   }
