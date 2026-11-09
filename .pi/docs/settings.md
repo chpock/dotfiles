@@ -165,7 +165,7 @@ Relative local sources resolve from the settings file; npm entries load managed 
 
 ## Child settings ownership
 
-The `subagents` subtree is covered by [pi-subagents.md](pi-subagents.md): `defaultExtensions`, disabled external profiles, every selected role's `model`/`thinking`, instruction and skill inheritance, `skills`, `tools`, `extensions`, and `subagentOnlyExtensions`. Keep those values and their motivation there rather than maintaining a second child configuration here.
+The `subagents` subtree is covered by [pi-subagents.md](pi-subagents.md): `defaultExtensions`, `defaultSubagentOnlyExtensions`, disabled external profiles, every selected role's `model`/`thinking`, instruction and skill inheritance, `skills`, `tools`, and role-specific provider overrides. Keep those values and their motivation there rather than maintaining a second child configuration here.
 
 Other extension files such as `web-search.json`, CortexKit JSONC and UI overlays are separate configuration topics. This guide's `settings.json` coverage does not imply those files have been documented.
 
@@ -173,7 +173,7 @@ Other extension files such as `web-search.json`, CortexKit JSONC and UI overlays
 
 Pi discovers user skills in `~/.pi/agent/skills/` and `~/.agents/skills/`, alongside selected package skills. The shared settings use native discovery without a top-level `skills` filter; each skill's frontmatter controls whether it is advertised for automatic selection.
 
-The catalog includes `codebase-design` and `ck-repowise`. Pi advertises each skill's name, description and path; the main agent decides when to read and apply it from the task, without an operator reminder or forced invocation. Selection remains model behavior rather than guaranteed programmatic routing.
+The catalog includes `codebase-design`, the `ck-repowise` integration skill and the six [upstream Repowise workflow skills](pi-subagents.md#upstream-repowise-skills). Pi advertises each skill's name, description and path; the main agent decides when to read and apply matching procedures, without an operator reminder or forced invocation. Before Repowise workflow/tool use, the shared instruction pointer selects `ck-repowise` for Pi-specific boundaries. Selection remains model behavior rather than guaranteed programmatic routing.
 
 Child catalogs are configured separately by the [subagent skill assignments](pi-subagents.md#skills). A child's explicit selection can differ from the main catalog, and a direct file read can reach a shared skill. Project/launch overrides and forked context retain their documented scope. Catalog selection is not a filesystem access restriction or removal of an MCP server.
 
@@ -212,7 +212,7 @@ Merge this fragment into the existing lists; it is not a replacement configurati
 
 The global `~/.pi/agent/mcp.json` registers the installed `repowise` executable with `args: ["mcp"]`, without a fixed repository argument or `cwd`. The adapter passes the session working directory to the stdio process. Repowise uses that directory or discovers an enclosing indexed repository/workspace; start the relevant Pi session at the target root and confirm the reported repository before querying. Project settings can still override this registration.
 
-The global `AGENTS.md` pointer and the [ck-repowise skill](../agent/skills/ck-repowise/SKILL.md) own on-demand use and index preparation. This avoids project-local MCP and instruction files; native index data still lives in `.repowise/`. MCP does not automatically create a missing index. Preparation/refresh requires write authorization; read-only roles request it from the parent. Model-backed generation is not enabled by this registration.
+The global `AGENTS.md` pointer and the [ck-repowise skill](../agent/skills/ck-repowise/SKILL.md) own on-demand integration and index preparation; the official skills own task-specific analysis methods. This avoids project-local MCP and instruction files; native index data still lives in `.repowise/`. MCP does not automatically create a missing index. Preparation/refresh follows the task's write authorization and actual tool availability. The registration does not configure a model provider, but `get_answer` can autodetect existing credentials and invoke synthesis; index `--no-prose` is not a no-spend guarantee for later queries. Follow the integration skill's model-call approval boundary.
 
 Repowise keeps the adapter's default lazy lifecycle: it can disconnect after idleness and reopen the on-disk index on demand. The skill owns index freshness and session-reconnection checks. Keep the server command in `mcp.json`, rather than duplicating it in the adapter overlay.
 

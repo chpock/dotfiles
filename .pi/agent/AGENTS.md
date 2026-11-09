@@ -28,7 +28,7 @@
 
 ## Repository context
 
-- For repository-wide architecture, dependencies or change impact, historical decisions, index-backed health analysis, or Repowise setup/index maintenance, read and apply the `ck-repowise` skill at `~/.pi/agent/skills/ck-repowise/SKILL.md`. Keep AFT primary for locating and reading current source; routine known-file work does not require Repowise.
+- For Repowise-backed analysis, apply the matching available Repowise workflow skill. Before using Repowise skills or tools, read `~/.pi/agent/skills/ck-repowise/SKILL.md` for Pi access, repository selection, index safety and authority boundaries. Keep AFT primary for locating and reading current source; routine known-file lookups do not require Repowise.
 
 ## Testing
 

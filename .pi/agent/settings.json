@@ -50,6 +50,9 @@
       "~/.pi/agent/npm/node_modules/@cortexkit/aft-pi/dist/index.js",
       "~/.pi/agent/npm/node_modules/@cortexkit/pi-magic-context/dist/index.js"
     ],
+    "defaultSubagentOnlyExtensions": [
+      "~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"
+    ],
     "agentOverrides": {
       "codex-exec": {
         "disabled": true
@@ -74,10 +77,7 @@
         "thinking": "low",
         "inheritGlobalContext": true,
         "inheritSkills": false,
-        "skills": ["ck-repowise"],
-        "subagentOnlyExtensions": [
-          "~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"
-        ],
+        "skills": ["ck-repowise", "codebase-exploration"],
         "tools": [
           "read",
           "grep",
@@ -113,10 +113,13 @@
           "ck-testing",
           "writing-for-agents",
           "codebase-design",
-          "ck-repowise"
-        ],
-        "subagentOnlyExtensions": [
-          "~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"
+          "ck-repowise",
+          "codebase-exploration",
+          "architectural-decisions",
+          "pre-modification-check",
+          "change-review",
+          "code-health",
+          "dead-code-cleanup"
         ],
         "tools": [
           "read",
@@ -160,10 +163,13 @@
           "ck-testing",
           "writing-for-agents",
           "codebase-design",
-          "ck-repowise"
-        ],
-        "subagentOnlyExtensions": [
-          "~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"
+          "ck-repowise",
+          "codebase-exploration",
+          "architectural-decisions",
+          "pre-modification-check",
+          "change-review",
+          "code-health",
+          "dead-code-cleanup"
         ],
         "tools": [
           "read",
@@ -206,10 +212,12 @@
           "ck-testing",
           "writing-for-agents",
           "codebase-design",
-          "ck-repowise"
-        ],
-        "subagentOnlyExtensions": [
-          "~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"
+          "ck-repowise",
+          "codebase-exploration",
+          "architectural-decisions",
+          "change-review",
+          "code-health",
+          "dead-code-cleanup"
         ],
         "tools": [
           "read",
@@ -243,13 +251,15 @@
         "defaultContext": "fresh",
         "skills": [
           "codebase-design",
-          "ck-repowise"
+          "ck-repowise",
+          "codebase-exploration",
+          "architectural-decisions",
+          "change-review",
+          "code-health",
+          "dead-code-cleanup"
         ],
         "extensions": [
           "~/.pi/agent/npm/node_modules/pi-web-access/dist/index.js"
-        ],
-        "subagentOnlyExtensions": [
-          "~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"
         ],
         "tools": [
           "read",
@@ -274,10 +284,12 @@
           "ck-testing",
           "writing-for-agents",
           "codebase-design",
-          "ck-repowise"
-        ],
-        "subagentOnlyExtensions": [
-          "~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"
+          "ck-repowise",
+          "codebase-exploration",
+          "architectural-decisions",
+          "change-review",
+          "code-health",
+          "dead-code-cleanup"
         ],
         "tools": [
           "read",
@@ -308,10 +320,7 @@
         "thinking": "high",
         "inheritGlobalContext": true,
         "inheritSkills": false,
-        "skills": ["ck-repowise"],
-        "subagentOnlyExtensions": [
-          "~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"
-        ],
+        "skills": ["ck-repowise", "codebase-exploration", "architectural-decisions"],
         "extensions": [
           "~/.pi/agent/npm/node_modules/@cortexkit/aft-pi/dist/index.js",
           "~/.pi/agent/npm/node_modules/@cortexkit/pi-magic-context/dist/index.js",
@@ -346,10 +355,7 @@
         "thinking": "high",
         "inheritGlobalContext": true,
         "inheritSkills": false,
-        "skills": ["ck-repowise"],
-        "subagentOnlyExtensions": [
-          "~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"
-        ],
+        "skills": ["ck-repowise", "codebase-exploration", "architectural-decisions"],
         "extensions": [
           "~/.pi/agent/npm/node_modules/@cortexkit/aft-pi/dist/index.js",
           "~/.pi/agent/npm/node_modules/@cortexkit/pi-magic-context/dist/index.js",

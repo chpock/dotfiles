@@ -19,17 +19,19 @@ const { SettingsManager } = await import(new URL("dist/core/settings-manager.js"
 const { loadSkills } = await import(new URL("dist/core/skills.js", piDir));
 const settings = JSON.parse(await readFile(new URL("../settings.json", import.meta.url), "utf8"));
 const discovery = discoverAgents(cwd, "both", settings.defaultProvider);
-const executorSkills = ["agent-browser", "ck-testing", "writing-for-agents", "codebase-design", "ck-repowise"];
-const advisorySkills = ["grill-for-unknowns", "ck-testing", "writing-for-agents", "codebase-design", "ck-repowise"];
+const repowiseSkills = ["codebase-exploration", "architectural-decisions", "pre-modification-check", "change-review", "code-health", "dead-code-cleanup"];
+const repowiseAdvisorySkills = repowiseSkills.filter((name) => name !== "pre-modification-check");
+const executorSkills = ["agent-browser", "ck-testing", "writing-for-agents", "codebase-design", "ck-repowise", ...repowiseSkills];
+const advisorySkills = ["grill-for-unknowns", "ck-testing", "writing-for-agents", "codebase-design", "ck-repowise", ...repowiseAdvisorySkills];
 const expectedCatalogs = {
   worker: executorSkills,
   delegate: executorSkills,
   reviewer: advisorySkills,
   oracle: advisorySkills,
-  "second-opinion": ["codebase-design", "ck-repowise"],
-  scout: ["ck-repowise"],
-  researcher: ["ck-repowise"],
-  "evidence-auditor": ["ck-repowise"],
+  "second-opinion": ["codebase-design", "ck-repowise", ...repowiseAdvisorySkills],
+  scout: ["ck-repowise", "codebase-exploration"],
+  researcher: ["ck-repowise", "codebase-exploration", "architectural-decisions"],
+  "evidence-auditor": ["ck-repowise", "codebase-exploration", "architectural-decisions"],
 };
 
 function role(name) {
@@ -61,6 +63,14 @@ for (const [name, expected] of Object.entries(expectedCatalogs)) {
     assert.equal(prompt.includes(repowise.content), false);
     assert.ok(agent.tools.includes("mcp"));
     assert.ok(agent.subagentOnlyExtensions.includes("~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"));
+    for (const skillName of repowiseSkills) {
+      const selected = skills.resolved.find((skill) => skill.name === skillName);
+      assert.equal(prompt.includes(`<name>${skillName}</name>`), expected.includes(skillName));
+      if (selected) {
+        assert.equal(selected.path, join(homedir(), ".agents", "skills", skillName, "SKILL.md"));
+        assert.equal(prompt.includes(selected.content), false);
+      }
+    }
     const design = skills.resolved.find((skill) => skill.name === "codebase-design");
     if (design) {
       assert.equal(design.path, join(homedir(), ".agents", "skills", "codebase-design", "SKILL.md"));
@@ -69,7 +79,7 @@ for (const [name, expected] of Object.entries(expectedCatalogs)) {
   });
 }
 
-test("second-opinion operational settings have one owner and preserve its inspection boundary", async () => {
+test("second-opinion role-specific settings have one owner and preserve its inspection boundary", async () => {
   const definition = parseFrontmatter(await readFile(new URL("../agents/second-opinion.md", import.meta.url), "utf8"));
   assert.deepEqual(Object.keys(definition.frontmatter).sort(), ["description", "name"]);
   const configured = settings.subagents.agentOverrides["second-opinion"];
@@ -84,9 +94,8 @@ test("second-opinion operational settings have one owner and preserve its inspec
     inheritGlobalContext: true,
     inheritSkills: false,
     defaultContext: "fresh",
-    skills: ["codebase-design", "ck-repowise"],
+    skills: expectedCatalogs["second-opinion"],
     extensions: ["~/.pi/agent/npm/node_modules/pi-web-access/dist/index.js"],
-    subagentOnlyExtensions: ["~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"],
     tools: ["read", "grep", "find", "ls", "web_search", "fetch_content", "get_search_content", "source_check", "contact_supervisor", "mcp"],
   };
   assert.deepEqual(configured, expected);
@@ -106,6 +115,7 @@ test("main native resource discovery retains design and repository guidance", as
   const names = loaded.skills.map((skill) => skill.name);
   assert.ok(names.includes("codebase-design"));
   assert.ok(names.includes("ck-repowise"));
+  for (const name of repowiseSkills) assert.ok(names.includes(name), name);
 });
 
 
@@ -130,4 +140,51 @@ test("project catalog overrides and local skill definitions keep native preceden
   assert.deepEqual(selected.missing, []);
   assert.equal(selected.resolved[0].path, join(localDir, "SKILL.md"));
   assert.equal(selected.resolved[0].content, "# Local design guidance");
+});
+
+
+test("new native roles inherit the shared MCP provider without overriding explicit provider lists or tool grants", async (t) => {
+  const project = await mkdtemp(join(tmpdir(), "pi-mcp-default-"));
+  t.after(() => rm(project, { recursive: true, force: true }));
+  const agentsDir = join(project, ".pi", "agents");
+  await mkdir(agentsDir, { recursive: true });
+  const webExtension = join(agentDir, "npm", "node_modules", "pi-web-access", "dist", "index.js");
+  await writeFile(join(project, ".pi", "settings.json"), JSON.stringify({
+    subagents: { agentOverrides: { "mcp-empty-fixture": { subagentOnlyExtensions: [] } } },
+  }));
+  for (const [name, provider] of [["mcp-default-fixture", ""], ["mcp-explicit-fixture", `subagentOnlyExtensions: ${webExtension}\n`], ["mcp-empty-fixture", ""]]) {
+    await writeFile(join(agentsDir, `${name}.md`), `---\nname: ${name}\ndescription: Native provider precedence fixture\ntools: read\n${provider}---\n\nInspect assigned files without changes.\n`);
+  }
+  const loaded = discoverAgents(project, "both", settings.defaultProvider);
+  assert.deepEqual(loaded.agentDiagnostics, []);
+  for (const [name, expected] of [
+    ["mcp-default-fixture", ["~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts"]],
+    ["mcp-explicit-fixture", [webExtension]],
+    ["mcp-empty-fixture", []],
+  ]) {
+    const agent = loaded.agents.find((candidate) => candidate.name === name);
+    assert.ok(agent, name);
+    assert.deepEqual(agent.subagentOnlyExtensions, expected, name);
+    assert.deepEqual(agent.tools, ["read"], name);
+  }
+});
+
+
+test("a project child-only default replaces the user default without changing builtin tool grants", async (t) => {
+  const project = await mkdtemp(join(tmpdir(), "pi-mcp-project-default-"));
+  t.after(() => rm(project, { recursive: true, force: true }));
+  await mkdir(join(project, ".pi"), { recursive: true });
+  const webExtension = join(agentDir, "npm", "node_modules", "pi-web-access", "dist", "index.js");
+  for (const providers of [[], [webExtension]]) {
+    await writeFile(join(project, ".pi", "settings.json"), JSON.stringify({
+      subagents: { defaultSubagentOnlyExtensions: providers },
+    }));
+    const loaded = discoverAgents(project, "both", settings.defaultProvider);
+    assert.deepEqual(loaded.agentDiagnostics, []);
+    const worker = loaded.agents.find((agent) => agent.name === "worker");
+    assert.ok(worker);
+    assert.deepEqual(worker.subagentOnlyExtensions, providers);
+    assert.deepEqual(worker.extensions, role("worker").extensions);
+    assert.deepEqual(worker.tools, role("worker").tools);
+  }
 });
