@@ -206,7 +206,7 @@ return {
           copyindent = true, -- copy the previous indentation on autoindenting
           list = true, -- show invisible characters
           listchars = "tab:»⸱,trail:⸱,extends:>,precedes:<,nbsp:⸱", -- what invisible chars to show
-          virtualedit = "all", -- allow to move out of line edges
+          virtualedit = "block", -- allow to move out of line edges only in block mode
           colorcolumn = "100", -- hightlight 100th column
           title = true, -- set terminal title
           titlestring = '%{fnamemodify(getcwd(), ":t")} - Nvim', -- use basename of PWD as title (project name)

@@ -31,12 +31,14 @@ return {
         "/w/projects/*",
         "/w/projects/envista/*",
         "/w/projects/envista-github/*",
+        "/w/projects/dxc/*",
         "/w/repositories/*",
         "/w/repositories/envista/*",
         "/w/repositories/envista-github/*",
         "~/notes",
         "~/.config",
         "~/.config/nvim",
+        "~/.pi",
       },
       session_manager_opts = {
         autosave_ignore_dirs = {

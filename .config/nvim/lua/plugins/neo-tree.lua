@@ -12,6 +12,28 @@ return {
     },
     event_handlers = {
       {
+        event = "neo_tree_window_before_close",
+        handler = function(args)
+          if args.position ~= "left" and args.position ~= "right" then return end
+          local widths = vim.t[args.tabid].neotree_widths or {}
+          widths[args.position] = vim.api.nvim_win_get_width(args.winid)
+          vim.t[args.tabid].neotree_widths = widths
+        end,
+      },
+      {
+        event = "neo_tree_window_after_open",
+        handler = function(args)
+          if args.position ~= "left" and args.position ~= "right" then return end
+          -- Switching sources reuses the window; keep its live width in that case.
+          if vim.w[args.winid].neotree_width_restored then return end
+          local widths = vim.t[args.tabid].neotree_widths or {}
+          if widths[args.position] then
+            vim.api.nvim_win_set_width(args.winid, widths[args.position])
+          end
+          vim.w[args.winid].neotree_width_restored = true
+        end,
+      },
+      {
         event = "file_opened",
         handler = function(file_path)
           -- auto close when a file is selected
