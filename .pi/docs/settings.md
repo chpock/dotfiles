@@ -17,6 +17,10 @@ The MCP sections specify the official `npm:pi-mcp-adapter` setup with the schema
 
 These are user-level defaults. The adapter also reads shared MCP files and project configuration. The global adapter overlay takes precedence over the global Pi MCP registration; project files can override user-level configuration, and per-server settings can override global adapter defaults. Inspect the effective configuration in the actual working directory when diagnosing a difference; see the adapter's [precedence reference](https://github.com/nicobailon/pi-mcp-adapter/blob/main/docs/configuration.md#precedence).
 
+## Configuration maintenance policy
+
+Do not create or run tests for this local Pi configuration, including disposable test scripts and model-backed test scenarios. This policy is limited to Pi configuration; it does not change testing requirements for other software projects that use Pi.
+
 ## Settings metadata
 
 | Setting | Why and effect | If omitted |
@@ -265,11 +269,9 @@ Pi's outer tool event is named `mcp`, with the selected operation in its argumen
 After relevant configuration or package changes:
 
 1. Reload each affected Pi instance after important foreground and background work has finished, or start a fresh session. `/reload` replaces extension state and server connections.
-2. Inspect the effective server configuration and actual initial tool declarations: one `mcp` proxy, no `codemode`, script tools, server-specific proxies, or eagerly declared server catalog. Targeted discovery should not promote the catalog into direct tools.
-3. Check model-visible `describe` output for both referenced/nested schemas and numerical constraints or annotations. Compare with the server's input schema; hidden metadata or a successful call with pre-known arguments is not sufficient evidence of usable discovery.
-4. For changes affecting server calls or repository routing, query a known indexed repository and confirm that the reported repository and returned facts match the target. Follow the [skill's freshness and preparation checks](../agent/skills/ck-repowise/SKILL.md); unavailable indexes are a capability gap, not successful analysis.
+2. Inspect the affected configuration files and relevant source contracts directly: retain the `mcp` proxy and the exclusions for `codemode`, script tools and direct server-specific selectors.
 
-Scope validation to what changed. Configuration removal needs effective-loader and discovery checks; it does not require rebuilding an unrelated repository index.
+Follow the [configuration maintenance policy](#configuration-maintenance-policy): do not create tests or launch test scenarios for these changes. State unresolved runtime questions explicitly rather than presenting file inspection as proof of live behavior.
 
 ## References
 

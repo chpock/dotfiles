@@ -262,6 +262,8 @@
           "dead-code-cleanup"
         ],
         "extensions": [
+          "~/.pi/agent/npm/node_modules/@cortexkit/aft-pi/dist/index.js",
+          "~/.pi/agent/npm/node_modules/@cortexkit/pi-magic-context/dist/index.js",
           "~/.pi/agent/npm/node_modules/pi-web-access/dist/index.js"
         ],
         "tools": [
@@ -269,11 +271,23 @@
           "grep",
           "find",
           "ls",
+          "watchdog_diff",
+          "web_enable",
           "web_search",
           "fetch_content",
           "get_search_content",
           "source_check",
           "contact_supervisor",
+          "aft_search",
+          "aft_outline",
+          "aft_zoom",
+          "aft_callgraph",
+          "aft_inspect",
+          "aft_conflicts",
+          "ast_grep_search",
+          "ctx_search",
+          "ctx_expand",
+          "ctx_reduce",
           "mcp"
         ]
       },
@@ -293,6 +307,11 @@
           "change-review",
           "code-health",
           "dead-code-cleanup"
+        ],
+        "extensions": [
+          "~/.pi/agent/npm/node_modules/@cortexkit/aft-pi/dist/index.js",
+          "~/.pi/agent/npm/node_modules/@cortexkit/pi-magic-context/dist/index.js",
+          "~/.pi/agent/npm/node_modules/pi-web-access/dist/index.js"
         ],
         "tools": [
           "read",
@@ -315,6 +334,11 @@
           "ctx_search",
           "ctx_expand",
           "ctx_reduce",
+          "web_enable",
+          "web_search",
+          "fetch_content",
+          "get_search_content",
+          "source_check",
           "mcp"
         ]
       },
@@ -347,6 +371,7 @@
           "aft_inspect",
           "aft_conflicts",
           "ast_grep_search",
+          "web_enable",
           "web_search",
           "fetch_content",
           "get_search_content",
@@ -385,6 +410,7 @@
           "aft_inspect",
           "aft_conflicts",
           "ast_grep_search",
+          "web_enable",
           "web_search",
           "fetch_content",
           "get_search_content",
