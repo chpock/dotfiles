@@ -43,7 +43,8 @@
     "anthropic/claude-opus-5-5",
     "anthropic/claude-sonnet-5-5",
     "anthropic/claude-haiku-5-5",
-    "opencode-go/deepseek-v4.1-flash"
+    "opencode-go/deepseek-v4.1-flash",
+    "anthropic/claude-fable-5"
   ],
   "subagents": {
     "defaultExtensions": [

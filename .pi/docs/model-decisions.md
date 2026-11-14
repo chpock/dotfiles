@@ -122,7 +122,7 @@ Revisit the choice when newer same-class models, relevant prices or account term
 
 **Status:** Approved and applied to the custom user agent definition, `agent/settings.json` and the primary `agent/APPEND_SYSTEM.md` profile on 2026-11-04. Existing sessions need the updated profile/catalog loaded; already-running children retain their launch configuration.
 
-**Supersession:** The [2026-11-13 decision](#2026-11-13--high-thinking-for-second-opinions) replaces the `max` default with `high` and removes model/effort selection from the primary consultation instructions. The advisory purpose, mandatory consultations and parent-verification duties remain in force.
+**Supersession:** The [2026-11-13 decision](#2026-11-13--high-thinking-for-second-opinions) replaces the `max` default with `high` and removes model/effort selection from the primary consultation instructions. The [2026-11-14 consultation-policy decision](agents-md/second-opinion.md) subsequently replaces the broad invocation conditions and expands the mandatory companion roles, retaining the advisory purpose and parent-verification duties. The account below records the original 2026-11-04 choice, not the current invocation criteria.
 
 ### Basis and accepted choice
 
@@ -134,7 +134,7 @@ The role adapts the upstream oracle's decision discipline, reviewer's evidence r
 
 - The primary profile owns mandatory use for complex or ambiguous questions, material trade-offs and choices between plausible solutions, plus a companion opinion whenever reviewer or oracle is launched. Independent scrutiny supplements those roles rather than replacing them. Their existing profiles remain unchanged.
 - The parent must verify material claims and recommendations against primary evidence, the task contract and operator priorities, and account for accepted, rejected and unresolved concerns. Agreement between agents is not proof. New commitments or unsettled operator compromises still require the operator's decision.
-- Fresh context avoids importing another agent's verdict as authority, but requires a sufficient question/decision/evidence packet. The role retains shared instructions, inspects files and web sources, and has no shell, edit, MCP or nested-delegation tools. It returns findings for managed persistence; read-only tool selection is not an operating-system sandbox or a ban on framework/cache writes.
+- Fresh context avoids importing another agent's verdict as authority, but requires a sufficient question/decision/evidence packet. At the time of this decision, the role retained shared instructions, inspected files and web sources, and had no shell, edit, MCP or nested-delegation tools. The [role guide](pi-subagents.md#independent-second-opinion) describes subsequent capability changes and current permissions. It returns findings for managed persistence; read-only tool selection is not an operating-system sandbox or a ban on framework/cache writes.
 - The model and effort are explicit role overrides, independent of the parent provider. Pi 1.4.0's installed Go catalog supports `max` without clamping. This client-side support is not a claim of equal reasoning capability across models or independent measurement of server-side computation.
 - Mandatory consultation is an instruction policy, not automatic scheduling or a universal compliance guarantee. Existing project-APPEND replacement and fork-inheritance limitations of the [instruction architecture](agents-md/instruction-layers.md) remain; no loader patch or routing extension is introduced. Missing required opinions are reported for an operator decision, not silently waived or retried on another model.
 - Extra consultations, parent verification and optional web research consume resources. The Go allowance is not a per-question cost guarantee or a cap on other configured web-service usage. Maximum thinking does not establish total consumption or recommendation accuracy.
@@ -144,6 +144,8 @@ The [role guide](pi-subagents.md#independent-second-opinion) owns current wiring
 ## 2026-11-13 — High thinking for second opinions
 
 **Status:** Approved and applied to `agent/settings.json`, `agent/APPEND_SYSTEM.md` and the role guide on 2026-11-13. The new default applies when the updated role configuration is loaded; already-running children retain their launch-time effort.
+
+**Later policy change:** The [2026-11-14 decision](agents-md/second-opinion.md) revises invocation conditions and companion-role coverage without changing the model or thinking selection. Statements below about unchanged consultation conditions describe the scope of the 2026-11-13 change.
 
 ### Practical basis and accepted choice
 
