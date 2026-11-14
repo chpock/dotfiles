@@ -86,7 +86,7 @@ test("second-opinion role-specific settings have one owner and preserve its insp
   const agent = role("second-opinion");
   const expected = {
     model: "opencode-go/deepseek-v4.1-flash",
-    thinking: "max",
+    thinking: "high",
     advertise: true,
     acceptanceRole: "read-only",
     systemPromptMode: "replace",

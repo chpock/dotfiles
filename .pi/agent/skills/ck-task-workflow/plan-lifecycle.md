@@ -27,7 +27,7 @@ Each document has one original in exactly one state. A grouping directory identi
 - Reuse established names. For a new identity, use `YYYY-MM-DD-plan-<description>` for a task plan, whether standalone or owned, and `YYYY-MM-DD-roadmap-<description>` for a roadmap. Apply the host-local date and description rules in [Task working files](SKILL.md#task-working-files); the kind marker is outside the 64-character description limit.
 - Before choosing a new name, check for that exact `<name>.md` across all supported locations below and account for known bindings. Reuse the existing document for the same work; unrelated work needs a distinct description. Names are project-wide, not scoped to a roadmap or state; an archived name is not available for another task.
 - State the full name in the document and keep its filename `<name>.md`. It remains unchanged through transitions, later sessions, title edits and later execution dates. Preserve older unmarked names and known bindings rather than applying the new format retrospectively.
-- Use full names in durable references, for example `Task: 2026-11-03-plan-add-csv-export` or `Roadmap: 2026-11-03-roadmap-export-modernization`, rather than paths containing the current state. Within-project references use known project context; cross-project references also identify the project namespace.
+- Use full names in task-coordination references, for example `Task: 2026-11-03-plan-add-csv-export` or `Roadmap: 2026-11-03-roadmap-export-modernization`, rather than paths containing the current state. Within-project references use known project context; cross-project references also identify the project namespace.
 
 ## Resolve a name reference
 
@@ -60,4 +60,6 @@ Apply transitions independently: moving a roadmap file does not move its groupin
 
 The document is the single original in the plan store, not a second `plan.md` inside its working directory. Preserve existing material-directory bindings. For otherwise-unassigned material with no prior binding, use `<project-dir>/<name>` for the relevant task or roadmap; create it only when a material file is needed. Use the established full name, not a new date or the containing roadmap's name for a member task.
 
-Record the working directory in the relevant document when applicable. Logs, investigations and reports retain their destination rules; lifecycle transitions do not move them or introduce copies. Moving a document changes only its state-dependent file path, not its identity, project, owner or material binding. Existing historical path references are not rewritten automatically; new durable references use names.
+Record working-directory bindings in live-task coordination, not in maintained deliverables. Logs, investigations and reports retain their destination rules; lifecycle transitions do not move them or introduce copies. Moving a document changes only its state-dependent file path, not its identity, project, owner or material binding. Existing historical path references are not rewritten automatically; new plan/roadmap references in task coordination use names.
+
+Stable identities and the archive state support task coordination; neither guarantees post-completion retention. They do not make task-storage files suitable references for durable artifacts.

@@ -21,3 +21,40 @@ Eligibility and the appropriate resume API remain the responsibility of the nati
 ### Scope
 
 The rule concerns interpretation and recovery after a run timeout. It neither prescribes a fixed duration nor changes timeout configuration. Existing delegation authority and task boundaries still apply; a timeout alone does not invalidate the chosen delegation approach.
+
+## Tool-output handoffs
+
+### Authoritative instruction
+
+The tool-output handoff bullet in [`AGENTS.md`, Delegation](../../agent/AGENTS.md#delegation) owns the standing rule. It supplies an action at delegation time, not a blanket claim about subagent file permissions. The rule applies to authorized delegation to subagents; it grants neither delegation authority nor new tools.
+
+### Problem and motivation
+
+A tool result available to one session is not automatically an input to another. A path returned by the tool can identify session-private storage rather than a file the receiving agent can read. A shared working directory and a parent-child relationship do not themselves transfer access.
+
+AFT's protected bash-task store illustrates this boundary: its ordinary output-read exception is tied to the native session that owns the task. A fresh AFT-backed child can therefore be refused the parent's stdout even when both sessions use the same project directory. Ordinary task reports can remain readable, and a child using native Pi readers has a different access path. The restriction is not evidence that every subagent is unable to read every tool result or external file.
+
+### Rationale and scope
+
+Short output needs no file. An existing readable report needs no duplicate; a dedicated handoff artifact is useful when required evidence otherwise exists only in session-private output. Keep the underlying tool-managed records in their established location rather than mirroring the tool store.
+
+The assignment determines the evidence boundary. A summary or excerpt can be sufficient for a bounded question, but it does not satisfy a request to inspect the complete original output. In that case the handoff preserves the full output unchanged; selecting only favorable lines would prevent the reviewer from looking for omitted contradictions. A recorded digest does not replace access to the bytes needed to verify it, nor does an exported file itself prove that it is identical to the origin.
+
+Existing destination, disclosure and copying constraints still apply. If they prevent a required handoff, surface that conflict rather than silently weakening the review or bypassing the access policy. A child missing required evidence reports the gap to its parent within its existing authority; a read-only role does not acquire permission to create the artifact, rerun commands or change tools.
+
+### Failure cases without the rule
+
+| Handoff assumption | Possible consequence |
+| --- | --- |
+| A private stdout path is sufficient because parent and child share a project. | The child reaches an access refusal instead of the evidence; escalation and re-export interrupt the review. |
+| A path readable by one role is readable by every role. | Different tool implementations are mistaken for a universal access contract; a reported limitation may go untested. |
+| A parent's selected observations replace requested full output. | Omitted failures or contradictions cannot be inspected independently, while the review may appear more complete than it is. |
+| A blocked read is an instruction to retry through other readers or widen permissions. | An evidence-transfer problem becomes an unauthorized change to the protection boundary. |
+
+### Evidence and limits
+
+Native tool-managed output retains its own expiry rules. A handoff artifact in task storage follows the [task-storage lifetime](task-workspaces.md#storage-lifetime-and-durable-artifacts); accessibility during the task is not a post-completion retention guarantee.
+
+A motivating incident recorded one AFT-backed `grep` refusal. The paired native-reader child did not attempt stdout, so its asserted inability was not a second demonstrated denial. The exact historical AFT build was not pinned.
+
+The mechanism is source-confirmed in [AFT v0.64.0's private-store floor](https://github.com/cortexkit/aft/blob/v0.64.0/crates/aft/src/access_policy.rs#L647-L815) and [session-owned artifact checks](https://github.com/cortexkit/aft/blob/v0.64.0/crates/aft/src/bash_background/registry.rs#L2202-L2309), with the same relevant ownership boundary inspected in v0.63.5. This is a workflow rule, not an AFT permission grant or a promise that every chosen artifact path is readable. Tool/backend changes require separate authorization.

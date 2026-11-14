@@ -2,7 +2,7 @@
 
 ## Purpose and scope
 
-The [shared instructions](../../agent/AGENTS.md#task-working-files) define destination precedence and task-path continuity. The [primary-agent instructions](../../agent/APPEND_SYSTEM.md#task-working-files) require loading `ck-task-workflow` for matching work and passing selected absolute paths to delegated agents. The [`ck-task-workflow` skill](../../agent/skills/ck-task-workflow/SKILL.md) owns the **fallback-location procedure**: task working files with no established destination use a persistent external workspace. The policy combines those shared constraints, a deterministic project-directory resolver and an agent-selected task name.
+The [shared instructions](../../agent/AGENTS.md#task-working-files) define destination precedence, task-storage lifetime, independence of durable artifacts and task-path continuity. The [primary-agent instructions](../../agent/APPEND_SYSTEM.md#task-working-files) require loading `ck-task-workflow` for matching work and passing selected absolute paths to delegated agents. The [`ck-task-workflow` skill](../../agent/skills/ck-task-workflow/SKILL.md) owns the **fallback-location procedure**: task working files with no established destination use a persistent external workspace. The policy combines those shared constraints, a deterministic project-directory resolver and an agent-selected task name.
 
 ## Problem and motivation
 
@@ -10,7 +10,7 @@ Plans, one-off reproductions, logs, screenshots and review notes are useful duri
 
 An undefined destination also makes continuity fragile: one agent chooses a repository directory, another uses `/tmp`, and a later session cannot locate either. A persistent project/task namespace gives genuinely unassigned files a predictable home without requiring a project registry.
 
-The fallback root is independent of the coding agent's session-history directory. Its contents can survive transcript retention, session replacement and worktree deletion. It also works for non-Git CWDs such as `~/work/editor-config`; a repository or manual project registration is not a prerequisite.
+The fallback root is independent of the coding agent's session-history directory. During the task, its contents persist across transcript retention, session replacement and worktree deletion, regardless of how long execution takes. It also works for non-Git CWDs such as `~/work/editor-config`; a repository or manual project registration is not a prerequisite.
 
 This is deliberately **not** a requirement to relocate every artifact:
 
@@ -18,6 +18,16 @@ This is deliberately **not** a requirement to relocate every artifact:
 - Legitimate predefined tool/harness and established project destinations stay in use.
 - Maintained code, regression tests, intended fixtures, configuration and documentation remain project deliverables.
 - Existing transcripts, native reports, capture files and caches retain their own storage mechanisms.
+
+## Storage lifetime and durable artifacts
+
+Persistent/durable describes retention throughout the task, whether execution lasts a day, a week, a month or longer. After completion, task storage may be garbage-collected at any time. Its location outside session history is not a post-completion retention guarantee.
+
+The lifetime and durable-reference constraint belongs in the shared instructions because it applies to every agent creating maintained artifacts, not only to a primary agent managing a task. The skill applies it during task completion; this reference explains its rationale.
+
+Working paths remain useful in live-task assignments, handoffs, plans and reports. Maintained code, tests, documentation, configuration and long-lived agent memory cannot rely on or cite concrete task-storage files. This includes absolute or relative paths, links and named-file citations: replacing a path with a task/plan name does not make the source permanent. Generic examples describing the storage contract are not citations of actual task files.
+
+A durable artifact preserves the knowledge its readers need in maintained project locations. That means retaining relevant conclusions, rationale, constraints or required fixtures, not copying every log or relocating native tool records. A file's current existence or a successful link check establishes present availability, not an acceptable long-term reference. Preservation that would exceed the authorized scope remains a decision to surface rather than an automatic archive migration.
 
 ## Destination precedence
 
@@ -119,7 +129,7 @@ These shell commands require an absolute path when `PI_CODING_AGENT_DIR` is set.
 
 The base is `$XDG_DATA_HOME/pi/tasks` when `XDG_DATA_HOME` is absolute. An unset, empty or relative value selects `~/.local/share/pi/tasks`; in that case the home directory must be absolute. Existing symlinks and path components are physically resolved, so the printed physical path can differ from the textual environment value.
 
-This uses the persistent-data category from the [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir/latest/), not a disposable cache. The resolver has no age-based cleanup mechanism.
+This uses the data location from the [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir/latest/) for task-lifetime persistence, not permanent archival. The resolver has no age-based cleanup mechanism of its own; that does not prevent post-completion garbage collection by another actor.
 
 ### Choosing the project identity
 
@@ -189,7 +199,7 @@ A current task assignment, an explicit handoff or unambiguous task documents pro
 
 ## Instruction ownership and context loss
 
-Shared `AGENTS.md` owns destination precedence, task-path continuity and ambiguity/failure escalation. Primary `APPEND_SYSTEM.md` owns the condition for reading/rereading `ck-task-workflow` and the instruction to pass selected absolute paths to delegated agents. The skill owns resolver invocation, task naming and directory creation. Pi advertises its metadata and location rather than automatically preloading the full body. This reference explains the rationale and detailed mechanism; it is not an additional required read.
+Shared `AGENTS.md` owns destination precedence, task-storage lifetime, independence of durable artifacts, task-path continuity and ambiguity/failure escalation. Primary `APPEND_SYSTEM.md` owns the condition for reading/rereading `ck-task-workflow` and the instruction to pass selected absolute paths to delegated agents. The skill owns resolver invocation, task naming and directory creation. Pi advertises its metadata and location rather than automatically preloading the full body. This reference explains the rationale and detailed mechanism; it is not an additional required read.
 
 Conversation compaction can discard a loaded skill body or chosen task path independently of persistent system-context instructions. Re-reading the skill recovers the procedure, not the task's selected path. Handoffs carry that path separately; the shared ambiguity rule prevents guessing a replacement. Persistent instructions and task-path recovery are distinct responsibilities. The [instruction-layer guide](instruction-layers.md#skills-and-context-lifetime) explains loading boundaries, fork inheritance and project APPEND replacement.
 
@@ -201,6 +211,6 @@ A tool that clears its output directory uses a dedicated run subdirectory, such 
 
 Resolver, directory-creation or output-routing errors remain explicit failures rather than triggering a silent switch to `/tmp`, the checkout or session storage. The resolver rejects unsupported/local/file origin forms, query/fragment suffixes, control characters, malformed supported origins, unusable non-directory path components, overlong project-name components and output resolving into the current source directory. Names are not silently truncated, and Git errors do not expose the raw credential-bearing origin in diagnostics. These checks do not guarantee that every future write succeeds or protect against concurrent external filesystem changes.
 
-External files are not automatically versioned, shared or backed up with the source repository. Sensitive logs/screenshots remain subject to access and retention requirements. Material intended for long-term project maintenance belongs in the project's documentation/tests through an authorized change; external working files are not a substitute for deliverables. Cleanup requires explicit authorization and is not an implied side effect of resolution.
+External files are not automatically versioned, shared or backed up with the source repository. Sensitive logs/screenshots remain subject to access and retention requirements. Material intended for long-term project maintenance belongs in the project's documentation/tests through an authorized change; external working files are not a substitute for deliverables. Agent-initiated cleanup requires explicit authorization and is not an implied side effect of resolution. The post-completion garbage-collection lifecycle does not grant an agent permission to delete working files.
 
 The policy is an instruction-and-routing convention, not a filesystem permission sandbox, repository-write interceptor or guarantee that every tool obeys prose.

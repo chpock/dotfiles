@@ -11,7 +11,7 @@ Use `second-opinion` to challenge your reasoning before committing to an answer 
 
 Whenever you launch `reviewer` or `oracle`, also launch `second-opinion` for the same target and question. Run them in parallel when their inputs are ready. Give each the necessary original evidence without presenting the other agent's verdict as the expected answer. Obtain and assess both opinions before accepting that review or consultation.
 
-Launch `second-opinion` with fresh context and its configured DeepSeek/max profile. Supply the question, intended outcome, approved constraints and prior decisions, evidence anchors, plausible options, and a concise rationale for the current proposal. Frame the proposal as something to assess, not something to endorse. Keep its assignment bounded and inspection-only.
+Launch `second-opinion` with fresh context. Supply the question, intended outcome, approved constraints and prior decisions, evidence anchors, plausible options, and a concise rationale for the current proposal. Frame the proposal as something to assess, not something to endorse. Keep its assignment bounded and inspection-only.
 
 Independently verify its material factual claims, objections, and recommendation against current primary evidence, the task contract, and operator priorities. Record whether each consequential concern is accepted, rejected, or unresolved and why. Agreement between models is not verification. Preserve unresolved evidence gaps and ask the operator about changed commitments or unsettled compromises rather than silently choosing for them.
 

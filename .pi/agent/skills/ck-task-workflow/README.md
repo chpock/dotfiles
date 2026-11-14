@@ -1,6 +1,6 @@
 # ck-task-workflow
 
-A Pi user-level, model-invoked skill for the primary agent coordinating tasks directly with the operator: planning, execution, continuation and completion, including stable plan/roadmap identities, independent lifecycle organization and persistent working-material placement.
+A Pi user-level, model-invoked skill for the primary agent coordinating tasks directly with the operator: planning, execution, continuation and completion, including stable plan/roadmap identities, independent lifecycle organization and persistent working-material placement for the task's lifetime.
 
 ## Problem and purpose
 
@@ -9,6 +9,8 @@ A list of actions is not necessarily an executable plan. It can omit the reason 
 This skill connects the task's agreed outcomes to stages, current evidence and an honest completion report. Written plans are proportionate to uncertainty and continuity needs: small unambiguous work does not acquire a mandatory planning ceremony, while a planning request does not silently become implementation permission.
 
 External working storage solves a separate continuity problem. Plans, scratch reproductions and test evidence can otherwise become scattered across source checkouts, temporary directories and unrelated sessions. The persistent project/task namespace is a fallback for unassigned artifacts, not a relocation mechanism for explicit destinations, project deliverables or native reports.
+
+Task storage is persistent/durable for the entire task, whether execution takes a day, a week, a month or longer. After completion it may be garbage-collected at any time. Persistence supports continuity during the task, not permanent archival. Knowledge needed by maintained deliverables belongs in their maintained project locations rather than in references to task-storage files.
 
 ## Primary-agent and delegated-work boundary
 
@@ -56,9 +58,9 @@ The standalone release plan needs no roadmap. The two grouped plans have the sam
 
 New names contain `plan` or `roadmap` between the date and description. The date belongs to the initially selected name, not the later activation or directory-creation date. Existing unmarked identities remain valid without renaming. Each member's evidence retains its separate task binding rather than inheriting the roadmap's working directory.
 
-Durable references such as `Task: 2026-11-03-plan-add-csv-export` and `Roadmap: 2026-11-03-roadmap-export-modernization` describe identity rather than current location. Exact lookup covers the three state roots and their immediate grouping directories. Names remain project-wide unique; zero or multiple matches cannot be resolved by a title guess or latest modification time. This exchanges clickable file links for lookup without a registry or rewriting references. Project context is still necessary, and explicit nonstandard locations retain their bindings. Historical path references do not acquire automatic redirects.
+Task-coordination references such as `Task: 2026-11-03-plan-add-csv-export` and `Roadmap: 2026-11-03-roadmap-export-modernization` describe identity rather than current location. Exact lookup covers the three state roots and their immediate grouping directories. Names remain project-wide unique; zero or multiple matches cannot be resolved by a title guess or latest modification time. This exchanges clickable file links for lookup without a registry or rewriting references. Project context is still necessary, and explicit nonstandard locations retain their bindings. Historical path references do not acquire automatic redirects. Stable names do not make task-storage files suitable sources for durable artifacts.
 
-The directory represents lifecycle stage. Progress and readiness remain substantive facts in the plan: focused work can be planning-only, blocked or awaiting required acceptance. Archived plans preserve the completed/cancelled outcome and evidence or decision, rather than treating every closed item as a successful implementation. A pause preserves progress for continuation; it is not erasure or automatic selection of another task.
+The directory represents lifecycle stage. Progress and readiness remain substantive facts in the plan: focused work can be planning-only, blocked or awaiting required acceptance. Archived plans record the completed/cancelled outcome and evidence or decision, rather than treating every closed item as a successful implementation. Archiving is a workflow state, not a guarantee of post-completion retention. A pause preserves progress for continuation; it is not erasure or automatic selection of another task.
 
 This is a default convention for new project plans, not a migration of existing documents. Assigned plan paths, maintained project material and native reports retain their own destinations. A standard-store plan is not copied into its working directory, and no new report destination follows merely from creating it.
 
@@ -73,13 +75,13 @@ This is a default convention for new project plans, not a migration of existing 
 - A roadmap may reference a standalone plan or another roadmap's member without adopting or copying it. Overall completion follows its own criteria and evidence, not the count of archived task plans.
 - A test log already routed by its tool keeps that destination. Only an otherwise-unassigned artifact needs the resolver-selected external task directory; no second copy is introduced.
 
-Material decisions and concise current state belong in the plan. Detailed logs and evidence remain at their applicable destinations, linked rather than pasted into the plan. The skill does not require every task to create a report file or durable workspace.
+Material decisions and concise current state belong in the plan. Detailed logs and evidence remain at their applicable destinations, linked rather than pasted into the plan. The skill does not require every task to create a report file or workspace.
 
 ## Ownership and boundaries
 
 | Owner | Responsibility |
 | --- | --- |
-| [Shared `AGENTS.md`, Task working files](../../AGENTS.md#task-working-files) | Persistent destination precedence, no relocation/extra copies, maintained project locations, established task-path continuity and ambiguity/failure escalation. |
+| [Shared `AGENTS.md`, Task working files](../../AGENTS.md#task-working-files) | Destination precedence, task-storage lifetime, independence of durable artifacts, no relocation/extra copies, maintained project locations, established task-path continuity and ambiguity/failure escalation. |
 | [Primary `APPEND_SYSTEM.md`, Task working files](../../APPEND_SYSTEM.md#task-working-files) | Requires reading/rereading this skill for matching work and passing selected absolute paths to delegated agents. |
 | [`SKILL.md`](SKILL.md) and its conditional branches | Task lifecycle, plan contents/readiness, identity/lookup/state transitions and the operative resolver/naming/create-only-when-needed procedure. |
 | [Task-workspace reference](../../../docs/agents-md/task-workspaces.md) | Detailed resolver contract, rationale, examples, normalization, retention and limits. Explanatory, not a required additional read. |

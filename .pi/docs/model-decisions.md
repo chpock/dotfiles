@@ -122,6 +122,8 @@ Revisit the choice when newer same-class models, relevant prices or account term
 
 **Status:** Approved and applied to the custom user agent definition, `agent/settings.json` and the primary `agent/APPEND_SYSTEM.md` profile on 2026-11-04. Existing sessions need the updated profile/catalog loaded; already-running children retain their launch configuration.
 
+**Supersession:** The [2026-11-13 decision](#2026-11-13--high-thinking-for-second-opinions) replaces the `max` default with `high` and removes model/effort selection from the primary consultation instructions. The advisory purpose, mandatory consultations and parent-verification duties remain in force.
+
 ### Basis and accepted choice
 
 The operator wants frequent additional scrutiny of arguments, reasoning, decisions, alternatives and compromises in any domain, not only architecture or code review. Select **`second-opinion`** on **`opencode-go/deepseek-v4.1-flash` / `max`** as a bounded, inspection-only advisor. The existing [OpenCode Go choice](#2026-11-04--deepseek-flash-only-for-opencode-go) provides the named model and its $100 Go-plan monthly allowance as the resource rationale; this decision assigns that model to the new role without changing the selected-model scope.
@@ -138,3 +140,22 @@ The role adapts the upstream oracle's decision discipline, reviewer's evidence r
 - Extra consultations, parent verification and optional web research consume resources. The Go allowance is not a per-question cost guarantee or a cap on other configured web-service usage. Maximum thinking does not establish total consumption or recommendation accuracy.
 
 The [role guide](pi-subagents.md#independent-second-opinion) owns current wiring and behavior. Reconsider the profile if practical use reveals too many unsupported objections, missed material issues, excessive parent rework or unacceptable consumption; no comparative benchmark claim is made by installing the role.
+
+## 2026-11-13 — High thinking for second opinions
+
+**Status:** Approved and applied to `agent/settings.json`, `agent/APPEND_SYSTEM.md` and the role guide on 2026-11-13. The new default applies when the updated role configuration is loaded; already-running children retain their launch-time effort.
+
+### Practical basis and accepted choice
+
+The operator reports that **DeepSeek V4.1 Flash / max** takes too long to answer in ordinary second-opinion use and consumes the included Go allowance faster than planned. These are observations from practical use, not a controlled timing or consumption comparison.
+
+Change the `second-opinion` default from **`max` to `high`**, keeping **`opencode-go/deepseek-v4.1-flash`** and the existing inspection-only role. Its purpose is an additional critical perspective on arguments, assumptions and decisions, not the final authority or a replacement for specialist review. The operator does not consider maximum thinking essential for this supporting role and accepts a lower default depth to improve responsiveness and preserve the planned allowance. This does not establish equal quality at high and max or a guaranteed reduction in elapsed time or usage.
+
+### Configuration ownership and boundaries
+
+- `subagents.agentOverrides.second-opinion.thinking` in `agent/settings.json` owns the default. Ordinary launches obtain model/effort from the role configuration rather than repeating them in the primary instructions.
+- Remove the explicit DeepSeek/max launch requirement from `agent/APPEND_SYSTEM.md`; do not replace it with a fixed high requirement. That file continues to own when to consult, the fresh-context brief and independent parent verification, not model/effort selection.
+- This supersedes only the original second-opinion default and its launch-time restatement. Mandatory consultation, reviewer/oracle companion opinions, source verification, role authority, tools, skills, providers and all other role profiles remain unchanged.
+- Supported explicit launch/project overrides remain available under the existing native precedence rules. No hard ceiling, automatic effort escalation, routing mechanism or fallback is introduced. Existing primary sessions need `/reload` to load the revised instructions and mapping.
+
+The [role guide](pi-subagents.md#independent-second-opinion) owns current wiring. Reconsider high if ordinary use reveals missed material objections or excessive parent rework; do not assume either a measured quality loss or equivalence before observing it.

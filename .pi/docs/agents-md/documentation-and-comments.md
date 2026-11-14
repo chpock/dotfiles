@@ -116,6 +116,7 @@ A useful review asks:
 3. Does its meaning remain valid after this particular task is finished?
 4. If it is historical, does the document actually own that history and give the necessary reference point?
 5. Is a claimed reason supported by evidence, rather than inferred from the fact that a request was made?
+6. Is it free of references to task-storage files, including paths and named-file citations? The [storage-lifetime reference](task-workspaces.md#storage-lifetime-and-durable-artifacts) explains why present availability is insufficient.
 
 A passage that only reports task execution belongs in communication or a task report. A passage with lasting information can be rewritten to preserve that information. An unnecessary added comment can be removed rather than expanded. This is a semantic distinction, not a mechanical ban list, and instructions do not guarantee model compliance.
 

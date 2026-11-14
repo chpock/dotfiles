@@ -18,6 +18,7 @@
 ## Task working files
 
 - Use explicit operator destinations and legitimate predefined tool/harness or project destinations directly, without relocation or extra copies. Keep maintained code, regression tests/fixtures, and project documentation in their intended project locations.
+- Keep references to task-storage files out of artifacts meant to outlive the task; lasting knowledge belongs in maintained project locations. Task storage is persistent/durable throughout the task, but may be garbage-collected at any time after completion.
 - Keep an established task path across continuations. If the path is ambiguous or resolution fails, surface the problem instead of guessing a new location.
 
 ## Code and validation
@@ -58,6 +59,7 @@ When `subagent` or `subagents_enable` is available:
 - Standing authorization: proactively delegate within the current task's authorized scope without asking again, unless the operator opts out. Call `subagents_enable` only when delegation is explicitly requested or a concrete expected benefit justifies considering it.
 - For trivial tasks, work directly when delegation overhead exceeds its expected benefit.
 - When delegation is requested or could materially help through independent review, specialization, parallelism, isolation, or reduced parent-context load, read the `pi-subagents` skill before deciding whether and how to delegate. Follow its guidance and select agents by their current descriptions and capabilities.
+- Supply required tool output to subagents in the task text or a readable task artifact; session-private output paths do not grant child access. Preserve complete, unchanged output when full-output inspection is required.
 - A subagent run timeout alone does not mean the mechanism is broken. Check progress; if the time budget was underestimated, resume the latest eligible child with an explicit revised `timeoutMs`.
 
 ## pi-intercom

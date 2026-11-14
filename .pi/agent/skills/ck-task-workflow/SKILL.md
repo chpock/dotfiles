@@ -37,13 +37,14 @@ Apply the procedures relevant to the assignment, within its authority and existi
 ## Complete or hand off
 
 - For multi-step work, reconcile each completion criterion with the result: fulfilled and verified; work performed but unverified or failing verification; not fulfilled; or changed/excluded by an agreed decision. Support the disposition with relevant evidence or the decision.
+- Before completing the task, check its lasting deliverables and memory updates for task-storage references; preserve required findings within the authorized scope or report the gap.
 - Report remaining blockers, limitations and deviations explicitly. Do not present a partial handoff as completed implementation or an agreed omission as a passed check.
 - For a plan in the standard project store, use the lifecycle procedure to reflect verified completion, an explicit pause or cancellation; unfinished work is not archived as completed.
-- An operator response or a tool's managed report can be sufficient. Create a separate report file only when requested or needed for the task's durable record, using the applicable destination rules.
+- An operator response or a tool's managed report can be sufficient. Create a separate report file only when requested or needed for the task's review or handoff, using the applicable destination rules.
 
 ## Task working files
 
-Apply the global rules for destination precedence and established task-path continuity before selecting a new fallback directory.
+Apply the global rules for destination precedence, task-storage lifetime, durable references and established task-path continuity before selecting a new fallback directory.
 
 - For otherwise-unassigned plans, scratch scripts, reports, or test evidence, reuse an applicable task directory; otherwise run `"${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}/bin/pi-task-project-dir"` in the source CWD and use `<returned-dir>/YYYY-MM-DD-<description>`. For this shell command, a configured `PI_CODING_AGENT_DIR` must be an absolute path.
 - Obtain the date from the host's local calendar. The description must match `[a-z0-9]+(-[a-z0-9]+)*` and be at most 64 characters. Create directories only when a working file is needed.
