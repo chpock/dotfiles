@@ -61,7 +61,8 @@ The primary profile owns additional coordination duties:
 
 - read/reread `ck-task-workflow` for plans, roadmaps, multi-step work and otherwise-unassigned working-file placement;
 - pass selected absolute paths to delegated agents;
-- apply the [second-opinion consultation policy](../../agent/APPEND_SYSTEM.md#independent-second-opinion), including required companion opinions and parent verification. Its operative instructions remain in APPEND, not in every child role; the [policy decision record](second-opinion.md) explains the invocation criteria, operator goals and alternatives.
+- apply the [second-opinion consultation policy](../../agent/APPEND_SYSTEM.md#independent-second-opinion), including required companion opinions and parent verification. Its operative instructions remain in APPEND, not in every child role; the [policy decision record](second-opinion.md) explains the invocation criteria, operator goals and alternatives;
+- apply [consultation reporting](../../agent/APPEND_SYSTEM.md#consultation-reporting), preserving the starting position, each advisor's contribution and the resulting recommendation for the operator. The [reporting guide](consultation-reporting.md) explains its purpose and operation; shared verification, disposition and approval rules remain in AGENTS.
 
 The skill owns the detailed task/roadmap lifecycle, destination-selection procedure and overall completion assessment. Shared evidence, approval, review, delegation and communication rules remain in AGENTS rather than being restated in APPEND. The primary agent receives both files; the addendum supplements the common rules.
 

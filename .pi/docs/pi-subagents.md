@@ -107,6 +107,8 @@ The table is parent launch policy, not a claim that every row is a shipped defau
 
 Routine research and high-consequence analytical research are different assignments even when they use the same role. Model/depth changes must match the task, not just the role name. Narrow verification after a fix to the affected behavior and its blast radius; do not restart identical full reviews automatically.
 
+The primary profile owns [operator-facing consultation reporting](../agent/APPEND_SYSTEM.md#consultation-reporting). Its [explanatory guide](agents-md/consultation-reporting.md) covers preservation of alternatives, contribution attribution and reporting outcomes without changing role configuration.
+
 ### Worker and delegate boundaries
 
 Both roles execute their assignments directly and have the same local tools, explicit skills and MCP provider. Neither has native subagent-spawning permission. The upstream phrase about delegate's orchestration inside a parent workflow does not grant nested delegation; the parent owns routing and follow-up launches.

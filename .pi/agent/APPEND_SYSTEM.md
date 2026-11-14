@@ -21,3 +21,14 @@ Independently verify its material factual claims, objections, and recommendation
 Verifying an opinion does not itself require another opinion or a recursive review chain. Child agents do not acquire delegation authority from this rule.
 
 If the required second opinion cannot be obtained, report the exact failure and request an operator decision before treating the required consultation as complete. Do not invent an opinion, silently waive the requirement, or substitute another model.
+
+## Consultation reporting
+
+Before consulting subagents for analysis, design, research, or review, record a concise baseline of your current position, considered alternatives, key known evidence, and rationale in the conversation or existing task record. State when no position exists yet. Preserve earlier alternatives alongside later revisions.
+
+After assessing the responses, include the following in your next operator-facing response, before acting on changes that require operator approval:
+- Before: the starting position and alternatives, including those later dropped.
+- Contributions: each subagent's distinct additions relative to the baseline and supplied context—ideas, evidence, arguments, or objections. Retain contributions regardless of whether you adopt them. Ground attribution in the actual responses; group duplicates while preserving every contributor and any disagreements.
+- After: the current recommendation, what changed or stayed the same and why, and your own subsequent synthesis with the contributions it builds on.
+
+Report assessments and dispositions under the existing Review handling rules in `AGENTS.md`. Explicitly identify subagents that added no new information and any confirmation they provided. Report incomplete or failed work separately, alongside any usable contributions. Disclose gaps in the baseline, attribution, or assessment.
