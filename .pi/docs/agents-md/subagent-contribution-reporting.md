@@ -1,4 +1,4 @@
-# Consultation reporting
+# Subagent contribution reporting
 
 ## Purpose and ownership
 
@@ -11,9 +11,9 @@ The reporting policy preserves that decision-level history and makes each adviso
 - Let the operator assess rejected ideas against their own priorities and steer subsequent work.
 - Make delegation useful to evaluate: new information, confirmation of known information, and incomplete work are distinguishable outcomes.
 
-The operative instructions live in [`agent/APPEND_SYSTEM.md`, Consultation reporting](../../agent/APPEND_SYSTEM.md#consultation-reporting). This guide explains their purpose and operation; it is not another rule source or a required read before every consultation. The [instruction-layer guide](instruction-layers.md#content-ownership) explains primary/shared ownership.
+The operative instructions live in [`agent/APPEND_SYSTEM.md`, Subagent contribution reporting](../../agent/APPEND_SYSTEM.md#subagent-contribution-reporting). This guide explains their purpose and operation; it is not another rule source or a required read before every consultation. The [instruction-layer guide](instruction-layers.md#content-ownership) explains primary/shared ownership.
 
-The reporting duty belongs to the primary agent coordinating consultations for analysis, design, research, or review. It is broader than the `second-opinion` role. A child can describe its own output, but it cannot reliably reconstruct the parent's earlier options, determine everything the parent already knew, or attribute a synthesis assembled from several responses.
+The reporting duty belongs to the primary agent requesting analysis, design, research, or review from any subagent. Its scope is defined by the requested work, not by a particular role such as `second-opinion` or `consultant`. A child can describe its own output, but it cannot reliably reconstruct the parent's earlier options, determine everything the parent already knew, or attribute a synthesis assembled from several responses.
 
 ## The problem the report addresses
 

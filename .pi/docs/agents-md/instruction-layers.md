@@ -62,7 +62,8 @@ The primary profile owns additional coordination duties:
 - read/reread `ck-task-workflow` for plans, roadmaps, multi-step work and otherwise-unassigned working-file placement;
 - pass selected absolute paths to delegated agents;
 - apply the [second-opinion consultation policy](../../agent/APPEND_SYSTEM.md#independent-second-opinion), including required companion opinions and parent verification. Its operative instructions remain in APPEND, not in every child role; the [policy decision record](second-opinion.md) explains the invocation criteria, operator goals and alternatives;
-- apply [consultation reporting](../../agent/APPEND_SYSTEM.md#consultation-reporting), preserving the starting position, each advisor's contribution and the resulting recommendation for the operator. The [reporting guide](consultation-reporting.md) explains its purpose and operation; shared verification, disposition and approval rules remain in AGENTS.
+- apply [subagent contribution reporting](../../agent/APPEND_SYSTEM.md#subagent-contribution-reporting), preserving the starting position, each advisor's contribution and the resulting recommendation for the operator. The [reporting guide](subagent-contribution-reporting.md) explains its purpose and operation; shared verification, disposition and approval rules remain in AGENTS;
+- manage [consultant authorization and continuation](../../agent/APPEND_SYSTEM.md#consultant) within the operator's session/task grant. The [consultant policy guide](consultant.md) explains selective resource use, revocation and retained consultation without adding a programmatic gate.
 
 The skill owns the detailed task/roadmap lifecycle, destination-selection procedure and overall completion assessment. Shared evidence, approval, review, delegation and communication rules remain in AGENTS rather than being restated in APPEND. The primary agent receives both files; the addendum supplements the common rules.
 
@@ -104,7 +105,7 @@ Project context files are discovered from the working directory and its ancestor
 
 ### Fresh native subagents
 
-The selected common-policy route requires both `inheritProjectContext: true` and `inheritGlobalContext: true` for relevant fresh children. In the analyzed version, global inheritance defaults to false; all eight configured native roles explicitly enable it. If project-context inheritance disables all context files, the global flag cannot independently restore them. The [role guide](../pi-subagents.md#shared-child-configuration) owns those settings.
+The selected common-policy route requires both `inheritProjectContext: true` and `inheritGlobalContext: true` for relevant fresh children. In the analyzed version, global inheritance defaults to false; all configured native roles explicitly enable it. If project-context inheritance disables all context files, the global flag cannot independently restore them. The [role guide](../pi-subagents.md#shared-child-configuration) owns those settings.
 
 The native child loader explicitly supplies append input to Pi. Without a child append prompt it passes an empty list, preventing rediscovery of the operator's APPEND file. In a child using append mode, the supplied text is the child's own role prompt; it is not an instruction to import the operator profile. Both discovered user and project APPEND files are bypassed by that explicit input.
 

@@ -242,7 +242,7 @@
       "second-opinion": {
         "model": "opencode-go/deepseek-v4.1-flash",
         "thinking": "high",
-        "advertise": true,
+        "advertise": false,
         "acceptanceRole": "read-only",
         "systemPromptMode": "replace",
         "inheritProjectContext": true,
@@ -262,6 +262,55 @@
           "~/.pi/agent/npm/node_modules/@cortexkit/aft-pi/dist/index.js",
           "~/.pi/agent/npm/node_modules/@cortexkit/pi-magic-context/dist/index.js",
           "~/.pi/agent/npm/node_modules/pi-web-access/dist/index.js"
+        ],
+        "tools": [
+          "read",
+          "grep",
+          "find",
+          "watchdog_diff",
+          "web_enable",
+          "web_search",
+          "fetch_content",
+          "get_search_content",
+          "source_check",
+          "contact_supervisor",
+          "aft_search",
+          "aft_outline",
+          "aft_zoom",
+          "aft_callgraph",
+          "aft_inspect",
+          "aft_conflicts",
+          "ast_grep_search",
+          "ctx_search",
+          "ctx_expand",
+          "ctx_reduce",
+          "mcp"
+        ]
+      },
+      "consultant": {
+        "model": "anthropic/claude-sonnet-5-5",
+        "thinking": "medium",
+        "advertise": false,
+        "acceptanceRole": "read-only",
+        "systemPromptMode": "replace",
+        "inheritProjectContext": true,
+        "inheritGlobalContext": true,
+        "inheritSkills": false,
+        "defaultContext": "fresh",
+        "skills": [
+          "codebase-design",
+          "ck-repowise",
+          "codebase-exploration",
+          "architectural-decisions",
+          "change-review",
+          "code-health",
+          "dead-code-cleanup"
+        ],
+        "extensions": [
+          "~/.pi/agent/npm/node_modules/@cortexkit/aft-pi/dist/index.js",
+          "~/.pi/agent/npm/node_modules/@cortexkit/pi-magic-context/dist/index.js",
+          "~/.pi/agent/npm/node_modules/pi-web-access/dist/index.js",
+          "~/.pi/agent/npm/node_modules/@cortexkit/pi-anthropic-auth/dist/index.js"
         ],
         "tools": [
           "read",

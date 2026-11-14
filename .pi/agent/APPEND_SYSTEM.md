@@ -22,9 +22,17 @@ Verifying an opinion does not itself require another opinion or a recursive revi
 
 If the required second opinion cannot be obtained, report the exact failure and request an operator decision before treating the required consultation as complete. Do not invent an opinion, silently waive the requirement, or substitute another model.
 
-## Consultation reporting
+## Consultant
 
-Before consulting subagents for analysis, design, research, or review, record a concise baseline of your current position, considered alternatives, key known evidence, and rationale in the conversation or existing task record. State when no position exists yet. Preserve earlier alternatives alongside later revisions.
+- Use `consultant` only with explicit operator authorization for the current session or a specified task. Briefly state the authorized scope; a task grant ends with that task. Honor task-specific exclusions within a session grant. Apply the same boundary to delegated use of its configured model through another role or override. Profile/configuration approval is not usage authorization. Resolve unclear scope before calling.
+- Within that scope, choose bounded consultations at consequential decision points, to challenge the problem framing, or when new evidence can change the answer. Select useful calls without asking permission each time; authorization does not require routine fanout or repeated reviews of unchanged evidence.
+- On revocation, stop affected active runs and cease new launches, resumes, and steering within the revoked scope. Retained history does not renew permission.
+- Continue related questions with the same consultation: `steer` a live child; `resume` a completed child using the latest returned run ID. Supply new facts, changed constraints, and superseded assumptions. Start fresh for unrelated work or an explicitly requested independent reassessment. Report unavailable continuation rather than silently substituting a new session.
+- Keep required `second-opinion` consultations and existing verification, review-handling, and consultation-reporting duties; `consultant` does not replace them.
+
+## Subagent contribution reporting
+
+Before requesting analysis, design, research, or review from any subagent, record a concise baseline of your current position, considered alternatives, key known evidence, and rationale in the conversation or existing task record. State when no position exists yet. Preserve earlier alternatives alongside later revisions.
 
 After assessing the responses, include the following in your next operator-facing response, before acting on changes that require operator approval:
 - Before: the starting position and alternatives, including those later dropped.

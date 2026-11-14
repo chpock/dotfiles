@@ -2,7 +2,7 @@
 
 This guide describes the selected pi-subagents configuration and its rationale: models/thinking, role boundaries, child providers, tools, skills and MCP access. It is a configuration reference, not a change log or deployment audit. Shared Pi defaults and MCP settings belong in [settings.md](settings.md); see [CONTEXT.md](CONTEXT.md) for document boundaries.
 
-Model/thinking semantics are based on **Pi 1.3.0** and **pi-subagents 0.78.0**; MCP contracts retain their earlier Pi 1.2.0 basis unless stated otherwise. Instruction inheritance additionally uses Pi 1.4.0 and pi-subagents 0.84.0. Skill selection, resource exclusion and custom-role settings ownership use **Pi 1.5.0** and **pi-subagents 0.87.0**. MCP provider examples specify the official npm `pi-mcp-adapter` setup. Web permission/activation semantics use **Pi 1.5.2**, **pi-subagents 0.88.1** and **pi-web-access 0.47.0**. These are source-contract versions, not deployment status.
+Model/thinking semantics are based on **Pi 1.3.0** and **pi-subagents 0.78.0**; MCP contracts retain their earlier Pi 1.2.0 basis unless stated otherwise. Instruction inheritance additionally uses Pi 1.4.0 and pi-subagents 0.84.0. Skill selection, resource exclusion and custom-role settings ownership use **Pi 1.5.0** and **pi-subagents 0.87.0**. MCP provider examples specify the official npm `pi-mcp-adapter` setup. Web permission/activation semantics use **Pi 1.5.2**, **pi-subagents 0.88.1** and **pi-web-access 0.47.0**. Consultant continuation uses the same Pi/pi-subagents versions; its provider entry point is from **pi-anthropic-auth 2.4.10**. These are source-contract versions, not deployment status.
 
 **Shared baseline:** [main model and thinking](settings.md#default-model-and-thinking). **Model evidence:** [2026-10-17 assessment](models-2026-10-17.md). **When reviewing models or preparing another assessment:** use [model-selection.md](model-selection.md), which owns capability profiles, research rules and the report format.
 
@@ -17,9 +17,10 @@ Model/thinking semantics are based on **Pi 1.3.0** and **pi-subagents 0.78.0**; 
 | [`~/.pi/agent/settings.json`](../agent/settings.json), `subagents.agentOverrides` | Owns local role differences: models/thinking, context inheritance, tools, extensions, and skills. |
 | `~/.pi/agent/npm/node_modules/pi-subagents/agents/` | Upstream builtin prompts and defaults; do not copy them merely to change individual settings. |
 | [`~/.pi/agent/agents/second-opinion.md`](../agent/agents/second-opinion.md) | Custom role identity and advisory prompt. Its role-specific model, context, tools, base provider and skills are owned by `subagents.agentOverrides.second-opinion` in settings; common child-provider defaults are inherited. |
+| [`~/.pi/agent/agents/consultant.md`](../agent/agents/consultant.md) | Custom consultation identity and advisory prompt. Operational settings belong to `subagents.agentOverrides.consultant`; authorization and continuation policy belong to the primary APPEND. |
 | Each selected skill's `SKILL.md` | Owns that skill's instructions; do not duplicate them here or in role prompts. |
 
-Scope is the seven enabled builtin native roles and the custom native `second-opinion` role listed below. The six external CLI profiles (`codex-exec`, `claude-code`, `cursor-agent`, and their `-writer` variants) have `disabled: true` because the operator does not use the Codex, Claude Code or Cursor agent harnesses. Omitting those overrides would allow their builtin profiles to be discovered, subject to runner availability; disabling a profile does not uninstall its CLI. `advisor` is an alias for `oracle`, not a separate configured role.
+Scope is the seven enabled builtin native roles and the custom native `second-opinion` and `consultant` roles listed below. The six external CLI profiles (`codex-exec`, `claude-code`, `cursor-agent`, and their `-writer` variants) have `disabled: true` because the operator does not use the Codex, Claude Code or Cursor agent harnesses. Omitting those overrides would allow their builtin profiles to be discovered, subject to runner availability; disabling a profile does not uninstall its CLI. `advisor` is an alias for `oracle`, not a separate configured role.
 
 These are user-level settings across projects. Project definitions/settings and supported launch overrides can replace the effective selection. Such replacements must preserve the mandatory inspection baseline below; native override support is not permission to remove required capabilities. Inspect the resolved role rather than assuming lists merge.
 
@@ -29,8 +30,8 @@ These are user-level settings across projects. Project definitions/settings and 
 
 - `subagents.defaultExtensions` loads AFT and Magic Context from their installed package entry points. This explicit list avoids ambient parent-extension discovery; it is not an additive list of every parent package.
 - `subagents.defaultSubagentOnlyExtensions` supplies the MCP adapter as a common child-only addition to the selected base providers. A role's own `subagentOnlyExtensions` replaces this default rather than merging with it; it does not replace the separate `extensions` list.
-- `oracle`, `researcher`, `evidence-auditor` and `second-opinion` have explicit `extensions` lists containing the same two providers plus `pi-web-access`. Omitting those role lists would fall back to the base list, which does not supply their required web tools. All four roles permit the [complete Web allowlist, including its activation helper](#web-permissions-and-deferred-activation).
-- All eight roles retain project and global instructions through `inheritProjectContext: true` and `inheritGlobalContext: true`. Builtin project-context defaults are retained; local settings select global inheritance and explicitly configure both flags for the custom role. Without global inheritance, global instructions are excluded by default. Skill inheritance is controlled separately below.
+- `oracle`, `researcher`, `evidence-auditor`, `second-opinion` and `consultant` have explicit `extensions` lists containing the same two providers plus `pi-web-access`; consultant also loads its Anthropic provider. Omitting those role lists would fall back to the base list, which does not supply their required web tools or consultant's authentication provider. These roles permit the [complete Web allowlist, including its activation helper](#web-permissions-and-deferred-activation).
+- All configured native roles retain project and global instructions through `inheritProjectContext: true` and `inheritGlobalContext: true`. Builtin project-context defaults are retained; local settings select global inheritance and explicitly configure both flags for the custom roles. Without global inheritance, global instructions are excluded by default. Skill inheritance is controlled separately below.
 - A role-specific `extensions` list replaces the base provider list; it must retain AFT and Magic Context when adding other providers. The child-only MCP adapter is additive to that selected list. Likewise, replacement `tools` lists must retain Base, including for inspection-only roles.
 - Role `tools` lists are explicit allowlists. A listed extension tool needs its provider loaded; loading a provider alone does not grant every tool it registers. Preserve existing inspection/execution boundaries when adding a capability. A read-only research task can still return an assigned report; it does not authorize source edits.
 
@@ -38,11 +39,11 @@ The native child diagnoses missing declared tools at startup. Treat a missing pr
 
 Magic Context also supplies its normal context guidance and session handling. `ctx_reduce` queues reduction of the child's own context; `ctx_memory` and `ctx_note` remain excluded. AFT-backed reads follow AFT's access policy: loading AFT does not grant access to another session's private output. Apply the [evidence-handoff rule](agents-md/delegation.md#tool-output-handoffs) rather than substituting another reader.
 
-MCP is an additional provider for all eight active roles; its wiring is defined in [MCP access](#mcp-access). Model/other runtime overrides remain in the same settings file; this guide does not redefine upstream prompts, output defaults, or acceptance behavior. The custom role's prompt is maintained in its own definition.
+MCP is an additional provider for all active native roles; its wiring is defined in [MCP access](#mcp-access). Model/other runtime overrides remain in the same settings file; this guide does not redefine upstream prompts, output defaults, or acceptance behavior. Each custom role's prompt is maintained in its own definition.
 
 ### Instruction inheritance and primary-only text
 
-The [global `AGENTS.md`](../agent/AGENTS.md) supplies shared policy; the [operator's `APPEND_SYSTEM.md`](../agent/APPEND_SYSTEM.md) supplies the primary workflow trigger, absolute-path handoff instruction and second-opinion consultation policy. The [design guide](agents-md/instruction-layers.md#purpose-and-selected-architecture) explains content ownership, rationale and alternatives. Effective child loading follows the inheritance and fresh/fork rules below.
+The [global `AGENTS.md`](../agent/AGENTS.md) supplies shared policy; the [operator's `APPEND_SYSTEM.md`](../agent/APPEND_SYSTEM.md) supplies the primary workflow trigger, absolute-path handoff instruction, consultation/reporting policies and scoped consultant authorization. The [design guide](agents-md/instruction-layers.md#purpose-and-selected-architecture) explains content ownership, rationale and alternatives. Effective child loading follows the inheritance and fresh/fork rules below.
 
 - For fresh native children, `inheritProjectContext: true` permits context-file loading and `inheritGlobalContext: true` retains the global file. Disabling project-context inheritance also removes that common-file route; skill inheritance is separate.
 - The native loader explicitly supplies child append input, preventing automatic discovery of the operator's APPEND file. An append-mode child's own role prompt is not that operator file.
@@ -85,6 +86,7 @@ Select roles by the [task-based model tiers](model-selection.md#task-based-model
 | `researcher` | Astra/high for consequential or conflicting analysis; Sol 6.1/medium for explicitly bounded routine synthesis | Match assignment scope, not token price alone; retain source verification by the parent. |
 | `evidence-auditor` | `openai-codex/gpt-6-astra` / `high` | Independent verification of decision-critical claims. |
 | `second-opinion` | `opencode-go/deepseek-v4.1-flash` / `high` | Additional scrutiny across any domain, with parent verification. High replaces max after the operator reported slow replies and faster-than-planned allowance consumption; maximum depth is not essential for this supporting role. See the [thinking decision](model-decisions.md#2026-11-13--high-thinking-for-second-opinions). |
+| `consultant` | `anthropic/claude-sonnet-5-5` / `medium` | Operator-authorized expert perspective using a limited subscription resource, with continuing consultation on related questions. The [model decision](model-decisions.md#2026-11-14--operator-authorized-sonnet-consultant) records the choice without claiming measured superiority or savings. |
 
 For completeness-sensitive critical reviews, use an individually justified `openai-codex/gpt-6-astra:high` launch override. Do not automatically repeat every Sol review with Astra. Reviewer remains fresh and independently reads current evidence; using the same model as the author may leave shared blind spots.
 
@@ -104,10 +106,11 @@ The table is parent launch policy, not a claim that every row is a shipped defau
 | `researcher` | General/Normal for bounded retrieval and source-grounded synthesis; Deep/Deep for consequential conflicting evidence. Return material claims, exact sources/passages, dates, uncertainty and transfer limits. | Fresh question and stop criteria. Judge supported material claims, decisive gaps and contradictions, not search/citation volume. | One known source answers the question; originals are inaccessible or a material ambiguity remains after the bounded search—report the gap or request a focused escalation. |
 | `evidence-auditor` | Deep/Deep for independent verification of a decision-critical claim set. Return supported/contradicted/unclear/missing classifications and evidence. | Fresh, supplied claims/citations but independently inspected originals. Track critical-claim coverage, classification errors and unaudited claims. | Routine research needs no separate formal audit; do not repeat the entire search or treat supplied citations as proof. |
 | `second-opinion` | Bounded inspection of arguments, assumptions, conclusions, alternatives and trade-offs in any domain. Return a supported assessment, recommendation, evidence and parent-verification targets. | Fresh decision packet; justified agreement is valid. Mandatory consultation conditions are owned by the primary profile. | No implementation, shell, mutating services, nested delegation or approval authority. Report missing evidence or reserved decisions rather than guessing. |
+| `consultant` | Independent expert critique, blind-spot detection and alternative solutions in any domain, including revised advice as evidence changes. | Explicit session/task authorization; fresh first consultation, retained continuation for related follow-ups. Selective use and reporting are owned by the primary profile. | No automatic invitation, routine fanout, implementation, shell, mutating services, nested delegation or approval authority. Resolve missing evidence and reserved decisions with the parent. |
 
 Routine research and high-consequence analytical research are different assignments even when they use the same role. Model/depth changes must match the task, not just the role name. Narrow verification after a fix to the affected behavior and its blast radius; do not restart identical full reviews automatically.
 
-The primary profile owns [operator-facing consultation reporting](../agent/APPEND_SYSTEM.md#consultation-reporting). Its [explanatory guide](agents-md/consultation-reporting.md) covers preservation of alternatives, contribution attribution and reporting outcomes without changing role configuration.
+The primary profile owns [operator-facing subagent contribution reporting](../agent/APPEND_SYSTEM.md#subagent-contribution-reporting). Its [explanatory guide](agents-md/subagent-contribution-reporting.md) covers preservation of alternatives, contribution attribution and reporting outcomes without changing role configuration.
 
 ### Worker and delegate boundaries
 
@@ -127,7 +130,52 @@ The role uses fresh context, retained shared instructions and no ambient skill i
 
 The role-specific operational configuration is owned by `subagents.agentOverrides.second-opinion` in [`agent/settings.json`](../agent/settings.json): model/thinking, advertisement, acceptance role, prompt mode, project/global/skill inheritance, default context, selected skills, base provider and tools. The common MCP provider is inherited from `subagents.defaultSubagentOnlyExtensions`. These fields are not duplicated in the Markdown definition; that file supplies only its name, description and prompt body. The custom role uses the same native settings-override mechanism as the builtin roles.
 
-The configured DeepSeek/high default is independent of the active parent provider. Pi 1.5.0's Go catalog exposes `low`, `high` and `max`; `high` is supported without clamping. Ordinary launches use the role's configured model/effort; the primary consultation instructions do not specify either. The [2026-11-13 decision](model-decisions.md#2026-11-13--high-thinking-for-second-opinions) records the practical latency and allowance rationale, without claiming measured savings or equal quality at high and max. Without the model/thinking override, the custom definition has no such pin and follows applicable defaults; a supported explicit launch/project override can also replace it. `advertise: true` adds discoverability after catalog refresh, not automatic routing. No fallback model or recursive consultation chain is configured.
+The configured DeepSeek/high default is independent of the active parent provider. Pi 1.5.0's Go catalog exposes `low`, `high` and `max`; `high` is supported without clamping. Ordinary launches use the role's configured model/effort; the primary consultation instructions do not specify either. The [2026-11-13 decision](model-decisions.md#2026-11-13--high-thinking-for-second-opinions) records the practical latency and allowance rationale, without claiming measured savings or equal quality at high and max. Without the model/thinking override, the custom definition has no such pin and follows applicable defaults; a supported explicit launch/project override can also replace it. No fallback model or recursive consultation chain is configured.
+
+`advertise: false` avoids an extra parent-prompt name/description entry because the primary APPEND already explicitly names the role and governs its use. This affects only automatic prompt discovery: native catalog lookup and explicit launches, the role's instructions/tools, and the primary's consultation duties are unchanged. Sessions whose project APPEND omits the policy also lack this automatic reminder of the role; advertisement itself would not restore the missing rules.
+
+### Operator-authorized consultant
+
+[`consultant`](../agent/agents/consultant.md) is a custom native advisory role for difficult questions and continuing discussion, not an external Claude Code process. The [primary policy](../agent/APPEND_SYSTEM.md#consultant) owns authorization and selective use; the [policy guide](agents-md/consultant.md) explains session/task grants, revocation, rationale and alternatives. Configuration approval alone does not authorize an invocation.
+
+`subagents.agentOverrides.consultant` owns all operational fields. The Markdown definition supplies only name, description and advisory prompt, as with `second-opinion`.
+
+| Selection | Effect, rationale and omission behavior |
+| --- | --- |
+| `model: "anthropic/claude-sonnet-5-5"`, `thinking: "medium"` | Pins the operator-selected provider/model and default effort independently of the parent. Without these fields the custom definition has no pin and follows native defaults. Supported launch/project overrides remain possible, not independently authorized. |
+| `defaultContext: "fresh"`, `systemPromptMode: "replace"` | Starts a new consultation from the supplied evidence and role prompt rather than copying the parent's conversation. Replace is also the native default. Fresh is an initial-context preference, not an instruction to erase a resumed transcript. |
+| Project/global inheritance enabled; ambient skill inheritance disabled | Retains shared rules and the selected advisory skill catalog without importing every parent skill. Both context flags are explicit for this custom role. |
+| `acceptanceRole: "read-only"` and Base + Diff + Web + Web loader + MCP | Matches second-opinion's inspection capabilities without shell, file-writing, shared-memory-writing or nested-delegation tools. The acceptance label alone does not restrict tools. Findings return through the response for runtime persistence. |
+| `advertise: false` | Keeps this opt-in resource out of the extra parent-prompt agent catalog; the primary instruction names it and native discovery can still find it. False is also the native default. Advertisement is not a launch guard. |
+| AFT, Magic Context, Web and Anthropic provider in `extensions` | Preserves the mandatory baseline while explicitly loading the installed subscription provider in isolated background children. The MCP adapter remains inherited through the separate shared child-only default. |
+
+The additional provider entry point is `~/.pi/agent/npm/node_modules/@cortexkit/pi-anthropic-auth/dist/index.js`. Its installed implementation registers `anthropic`, its model catalog, native account access and streaming path. A role's explicit extension list disables ambient discovery; the parent's package declaration or a qualified model name alone does not load this provider into an isolated background child. This selection reuses the existing provider and account configuration; it does not install another authentication mechanism or prove that an account can currently serve a request.
+
+No role-specific `interactive`, `memory`, timeout, keepalive or permanent enable/disable mechanism is configured. `interactive` is compatibility metadata, not an enforced mode; role `memory` is a separate notes feature. Native timeouts bound each execution rather than idle time between consultations. The parent's existing async-by-default launch policy is sufficient.
+
+#### Continuing a consultation
+
+Native `resume` opens the retained child `.jsonl` and appends a new exchange. It starts a new execution, not a permanently live process, while retaining the recorded agent/model/thinking/tool contract. Initial `defaultContext: "fresh"` does not reset it. A resumed child does not silently adopt newly edited role settings; a different model/thinking selection requires a fresh consultation.
+
+```javascript
+// Initial call, only inside an operator-authorized scope.
+subagent({ agent: "consultant", task: "<bounded question and evidence>", async: true })
+
+// After completion, continue the same consultation.
+subagent({
+  action: "resume",
+  id: "<latest returned run ID>",
+  message: "<new facts, superseded premises, and follow-up question>"
+})
+```
+
+Each resume returns a new run ID; it becomes the continuation target. For a still-running child, use `steer` instead. A direct run may be absent from `children.list`, which lists retained workflow children rather than every direct launch. Known direct IDs can be inspected with `status`; `resume` performs the authoritative eligibility check. Report missing history or refused continuation rather than presenting a fresh fallback as the same conversation.
+
+Normal completion leaves the conversation available for later continuation without consuming a live execution timeout during the pause. `stop` is terminal, not a way to park the consultant; stopped runs are not resumable. Revoking permission for an active run can therefore end its future resumability, while retained completed history does not itself grant permission for another call.
+
+Continuation depends on the owning parent-session identity, retained transcript, recovery metadata and eligible run state. Reopening the same saved parent session preserves its identity; a process restart alone is not an ownership change. The native cleanup policy has a 90-day retention window for resumable records; other protection rules can keep them longer, while supporting files under the default temporary root can disappear sooner. Neither a transcript alone nor a saved report guarantees revival, and this configuration does not relocate storage or change cleanup policy.
+
+The restored model context remains subject to normal context/compaction behavior. Reuse preserves conversational continuity, not guaranteed cache hits, smaller requests or reduced subscription consumption. The parent supplies changes since the last exchange; the consultant's prompt requires current evidence where file/source state matters.
 
 ### Worker, delegate and reviewer settings
 
@@ -177,7 +225,7 @@ Pi labels are not always distinct provider efforts. In Pi 1.3.0's OpenAI mapping
 
 ### Selection policy
 
-All eight roles have explicit `skills` arrays and `inheritSkills: false` in `subagents.agentOverrides` in [`agent/settings.json`](../agent/settings.json), including the custom `second-opinion` role.
+All configured native roles have explicit `skills` arrays and `inheritSkills: false` in `subagents.agentOverrides` in [`agent/settings.json`](../agent/settings.json), including the custom `second-opinion` and `consultant` roles.
 
 - The array selects the role's normal skill catalog; an empty array intentionally selects none.
 - Disabling inheritance prevents unrelated current or future ambient skills from entering that catalog. Both fields are explicit so the policy does not depend on future builtin defaults.
@@ -231,17 +279,18 @@ Every row below has `inheritSkills: false`. A role's complete normal catalog is 
 | `oracle` | `grill-for-unknowns`, `ck-testing`, `writing-for-agents`, `codebase-design`, `ck-repowise` | Challenges decisions and compares module/interface alternatives. Explicit selection supplies the skill in fresh launches as well as the normal fork-based context. It remains advisory and read-only. |
 | `scout` | `ck-repowise` | Finds relevant entry points, types, data flow and constraints for a handoff; exploration supplies indexed orientation, callers, risk and rationale lookups. |
 | `second-opinion` | `codebase-design`, `ck-repowise` | Tests arguments and alternatives; design guidance and the assigned Repowise analysis methods support technical questions without narrowing its general advisory remit. |
+| `consultant` | `codebase-design`, `ck-repowise` | Uses the same advisory analysis catalog for difficult technical questions and follow-ups, without narrowing its general remit or granting execution authority. |
 | `researcher` | `ck-repowise` | Researches questions using web/repository primary evidence; exploration and decision history help find implementations and explain their provenance. |
 | `evidence-auditor` | `ck-repowise` | Checks consequential claims against primary sources; indexed context and rationale records help verify repository-specific assertions. |
 
-| Repowise workflow | `worker` | `delegate` | `reviewer` | `oracle` | `second-opinion` | `scout` | `researcher` | `evidence-auditor` |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `codebase-exploration` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `architectural-decisions` | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | ✓ |
-| `pre-modification-check` | ✓ | ✓ | — | — | — | — | — | — |
-| `change-review` | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — |
-| `code-health` | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — |
-| `dead-code-cleanup` | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — |
+| Repowise workflow | `worker` | `delegate` | `reviewer` | `oracle` | `second-opinion` | `consultant` | `scout` | `researcher` | `evidence-auditor` |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `codebase-exploration` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `architectural-decisions` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | ✓ |
+| `pre-modification-check` | ✓ | ✓ | — | — | — | — | — | — | — |
+| `change-review` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — |
+| `code-health` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — |
+| `dead-code-cleanup` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — |
 
 Assignments follow each role's ordinary work: implementation and validation use all six workflows; review/advisory work uses change, health, unused-code and decision analysis; research/audit work uses repository facts and their provenance; scouting uses orientation and navigation. The pre-edit workflow supports actors making source changes. These are task-specific methods, not instructions to execute every procedure on every task.
 
@@ -249,7 +298,7 @@ For an exceptional testing-specific research/audit, health investigation or inst
 
 ### Assignment boundaries and exclusions
 
-**`ck-task-workflow` — primary-agent coordination, not a child default.** The [skill](../agent/skills/ck-task-workflow/SKILL.md) owns task/roadmap coordination; bounded child assignments do not transfer that ownership. The parent provides relevant context and working paths, while children return results and blockers through their existing channels. An undefined artifact destination is escalated to the parent; explicit and managed report destinations remain in use. All eight default catalogs omit the skill. Its read trigger is in the primary APPEND, not shared AGENTS; fresh native children bypass that operator profile. Catalog omission does not prevent direct file reads or remove instructions retained in a fork. Explicitly delegated workflow development/review may receive relevant instructions as task input rather than a permanent role default.
+**`ck-task-workflow` — primary-agent coordination, not a child default.** The [skill](../agent/skills/ck-task-workflow/SKILL.md) owns task/roadmap coordination; bounded child assignments do not transfer that ownership. The parent provides relevant context and working paths, while children return results and blockers through their existing channels. An undefined artifact destination is escalated to the parent; explicit and managed report destinations remain in use. All default catalogs omit the skill. Its read trigger is in the primary APPEND, not shared AGENTS; fresh native children bypass that operator profile. Catalog omission does not prevent direct file reads or remove instructions retained in a fork. Explicitly delegated workflow development/review may receive relevant instructions as task input rather than a permanent role default.
 
 **`agent-browser` — execution roles only.** The installed CLI is reachable through `bash` for `worker` and `delegate`. `reviewer`, `researcher`, and `evidence-auditor` have no shell tool. `scout` restricts shell use to non-interactive inspection; `oracle` is an advisory, read-only analyst. They do not receive a default app-interaction workflow merely because browsing could be useful. Research/audit web-fetch tools remain available unchanged. CLI presence does not prove browser installation, authentication, or readiness for a particular target.
 
@@ -257,9 +306,9 @@ For an exceptional testing-specific research/audit, health investigation or inst
 
 **`ck-testing` and `writing-for-agents` — actors that construct or evaluate the relevant artifacts.** They serve the implementation and review/advisory roles listed above. Ordinary scouting, research, and source-claim auditing do not trigger them merely because the output is a Markdown report or the source mentions tests. `writing-for-agents` supplies useful design criteria for instruction review; its description is authoring-oriented, so catalog availability alone is not evidence that every review will load it automatically.
 
-**`codebase-design` — implementation, review and advisory roles.** The main agent and five selected children decide autonomously when actual work requires module/interface design, responsibility placement or testability analysis. The operator supplies the task, not a required skill invocation. Availability does not mandate redesign, merging modules, or applying every heuristic to every change. Existing architecture, testing and approval requirements remain controlling. The optional parallel alternative-design branch stays with the parent: selected children have no subagent-spawning permission.
+**`codebase-design` — implementation, review and advisory roles.** The main agent and the selected implementation/advisory children decide autonomously when actual work requires module/interface design, responsibility placement or testability analysis. The operator supplies the task, not a required skill invocation. Availability does not mandate redesign, merging modules, or applying every heuristic to every change. Existing architecture, testing and approval requirements remain controlling. The optional parallel alternative-design branch stays with the parent: selected children have no subagent-spawning permission.
 
-**Repowise workflows and `ck-repowise` — analysis methods plus a shared Pi adapter.** All eight active native roles receive the adapter and their assigned workflow metadata. The shared instructions require Git-worktree sessions doing eligible work to load/apply them, and exclude non-Git CWDs, unrelated tasks and pure known-file reading. This is model-directed selection, not a runtime access barrier. Planned code edits trigger use even when the file is already known. AFT remains primary for current source. The primary verifies Git membership and prepares the index before relevant delegation, passing CWD-specific root/readiness evidence. Children lacking that evidence or a ready/current index request verification/preparation through their supervisor channel; they do not ask the operator about index presence or gain shell/write permissions. Each child's own CWD controls eligibility. Selected workflows do not filter the gateway's tool catalog. Upstream confidence and deletion flags are not proof or approval, and `get_answer` may invoke a model independently of index-generation flags. The adapter owns these integration boundaries; skill assignment neither grants model-backed calls nor requires project MCP/instruction files. The six disabled external CLI profiles are unchanged.
+**Repowise workflows and `ck-repowise` — analysis methods plus a shared Pi adapter.** All active native roles receive the adapter and their assigned workflow metadata. The shared instructions require Git-worktree sessions doing eligible work to load/apply them, and exclude non-Git CWDs, unrelated tasks and pure known-file reading. This is model-directed selection, not a runtime access barrier. Planned code edits trigger use even when the file is already known. AFT remains primary for current source. The primary verifies Git membership and prepares the index before relevant delegation, passing CWD-specific root/readiness evidence. Children lacking that evidence or a ready/current index request verification/preparation through their supervisor channel; they do not ask the operator about index presence or gain shell/write permissions. Each child's own CWD controls eligibility. Selected workflows do not filter the gateway's tool catalog. Upstream confidence and deletion flags are not proof or approval, and `get_answer` may invoke a model independently of index-generation flags. The adapter owns these integration boundaries; skill assignment neither grants model-backed calls nor requires project MCP/instruction files. The six disabled external CLI profiles are unchanged.
 
 **`pi-subagents`, `council-mode` and `pi-intercom` — parent coordination only.** No enabled child role has the `subagent` tool. An oracle can participate in a council without receiving instructions to run the council. Likewise, `delegate` is a leaf executor despite its name. The extension additionally filters the `pi-subagents` orchestration skill out of child discovery/resolution; `council-mode` is excluded here by the local assignment decision. `pi-intercom` coordinates related local sessions through the parent's intercom tool; none of these child allowlists grant that tool.
 
@@ -284,13 +333,13 @@ The extension's agent-list output can also suggest specialized reviewer passes f
 
 ## MCP access
 
-All eight active native roles use the common proxy, obtaining tool descriptions on demand. The gateway reaches the enabled servers in the shared configuration; selected skills and MCP access are independent. The official adapter installation, Repowise registration, and shared settings are prerequisites described in [settings.md](settings.md#mcp-access); do not duplicate the server command or adapter-policy fragment in each role.
+All active native roles use the common proxy, obtaining tool descriptions on demand. The gateway reaches the enabled servers in the shared configuration; selected skills and MCP access are independent. The official adapter installation, Repowise registration, and shared settings are prerequisites described in [settings.md](settings.md#mcp-access); do not duplicate the server command or adapter-policy fragment in each role.
 
 ### Grants and provider loading
 
 | Roles | Tool grant | Child provider |
 | --- | --- | --- |
-| `worker`, `delegate`, `reviewer`, `oracle`, `researcher`, `evidence-auditor`, `scout`, `second-opinion` | `mcp` | `~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts` |
+| `worker`, `delegate`, `reviewer`, `oracle`, `researcher`, `evidence-auditor`, `scout`, `second-opinion`, `consultant` | `mcp` | `~/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts` |
 
 Each MCP-enabled role needs two independent pieces. Skill selection is separate and does not enable or disable the server:
 
@@ -309,13 +358,13 @@ Shared **addition** inside `subagents` in `~/.pi/agent/settings.json`:
 }
 ```
 
-All eight active roles inherit this list; the adapter path is not repeated in their overrides. Keep `mcp` in each role's existing `tools` allowlist alongside its AFT, Magic Context, web, and execution/inspection tools. This fragment is not a replacement for the complete `subagents` object. Use the installed package entry point, not a copied extension or a transient cache path.
+All active native roles inherit this list; the adapter path is not repeated in their overrides. Keep `mcp` in each role's existing `tools` allowlist alongside its AFT, Magic Context, web, and execution/inspection tools. This fragment is not a replacement for the complete `subagents` object. Use the installed package entry point, not a copied extension or a transient cache path.
 
 The default also applies to newly discovered native roles without their own child-only list, but does not add names to an explicit `tools` allowlist. An explicit role `subagentOnlyExtensions` list replaces the shared list, including when empty; include the adapter there if the role still needs `mcp`. A project-level `defaultSubagentOnlyExtensions` replaces the user-level default, not individual entries. These are overridable loading defaults, not unconditional injection or task authorization.
 
 ### Selected file, shell and research tools
 
-`agentOverrides.<role>.tools` is an explicit replacement allowlist, not a list of additions to the builtin role. All eight roles, including the custom second-opinion role, select their allowlists in settings. The following groups define the selected sets without repeating identical names for every role. They describe tool permissions, not permission to use every tool on every assignment.
+`agentOverrides.<role>.tools` is an explicit replacement allowlist, not a list of additions to the builtin role. All configured native roles, including the custom second-opinion and consultant roles, select their allowlists in settings. The following groups define the selected sets without repeating identical names for every role. They describe tool permissions, not permission to use every tool on every assignment.
 
 | Group | Tools | Motivation |
 | --- | --- | --- |
@@ -323,8 +372,8 @@ The default also applies to newly discovered native roles without their own chil
 | Shell | `bash`, `bash_status`, `bash_watch`, `bash_write`, `bash_kill` | Run and control necessary commands, background jobs or PTYs. A role/task's read-only inspection limit still applies; a shell is not mechanically read-only. |
 | Write | `write` | Create authorized files or an assigned report artifact. Scout/research report permission does not authorize edits to the investigated project. |
 | Mutation | `edit`, `aft_import`, `aft_move`, `aft_delete`, `aft_safety`, `ast_grep_replace` | Implementation edits, imports, moves/deletions and structural rewrites, with recovery/checkpoints. Keep these source-mutation tools with execution roles. |
-| Web | `web_search`, `fetch_content`, `get_search_content`, `source_check` | Find external sources, inspect originals/stored passages and audit claims. Available to oracle, research/audit roles and the general second-opinion inspector. |
-| Web loader | `web_enable` | Permit deferred Web activation so unused Web definitions can stay out of the initial model context. All four Web roles retain this helper **and** every Web tool name; see [permission versus activation](#web-permissions-and-deferred-activation). It does not search or fetch. |
+| Web | `web_search`, `fetch_content`, `get_search_content`, `source_check` | Find external sources, inspect originals/stored passages and audit claims. Available to oracle, research/audit roles and the general second-opinion/consultant advisors. |
+| Web loader | `web_enable` | Permit deferred Web activation so unused Web definitions can stay out of the initial model context. All Web-enabled roles retain this helper **and** every Web tool name; see [permission versus activation](#web-permissions-and-deferred-activation). It does not search or fetch. |
 | Diff | `watchdog_diff` | Read staged/unstaged changes against HEAD captured at child launch, plus untracked file paths, without shell access. Committed ranges are unsupported. The native child runtime supplies this helper; it needs neither the full pi-subagents extension in the child nor automatic watchdog runs. |
 | MCP | `mcp` | Lazy configured-server access under the [MCP boundary](#tool-exposure-and-authority), not direct/eager server schemas. |
 
@@ -338,12 +387,13 @@ The default also applies to newly discovered native roles without their own chil
 | `researcher` | Base + Write + Web + Web loader + MCP | Repository/external/artifact research and assigned report output, without shell or source mutation. |
 | `evidence-auditor` | Base + Web + Web loader + MCP | Independently inspect claim evidence; return findings through managed output rather than grant file writing for its own sake. |
 | `second-opinion` | Base + Diff + Web + Web loader + MCP | The same source/context and Git-diff inspection as reviewer, plus web and the common gateway. Inspect supplied arguments and relevant sources without shell, file mutation, shared-memory writing or mutating services. |
+| `consultant` | Base + Diff + Web + Web loader + MCP | The same inspection boundary as second-opinion for operator-authorized expert advice and follow-ups, with its separate model/provider and grant policy. |
 
-A missing tool/provider produces a capability gap; a name in an allowlist is not proof of registration. Omitting `tools` would fall back to the role/runtime's selection instead of preserving this explicit boundary. Keep AFT/MC in `defaultExtensions` and every explicit role `extensions` list; retain Base in every role's tools. The four web-enabled roles add their web provider to that baseline. Keep the adapter in the shared `defaultSubagentOnlyExtensions` with `mcp` in each role's tool allowlist, as described above. No child receives `subagent`, `todowrite`, `ctx_memory` or `ctx_note`: orchestration, task ownership and durable project decisions stay with the parent in this configuration.
+A missing tool/provider produces a capability gap; a name in an allowlist is not proof of registration. Omitting `tools` would fall back to the role/runtime's selection instead of preserving this explicit boundary. Keep AFT/MC in `defaultExtensions` and every explicit role `extensions` list; retain Base in every role's tools. The web-enabled roles add their web provider to that baseline. Keep the adapter in the shared `defaultSubagentOnlyExtensions` with `mcp` in each role's tool allowlist, as described above. No child receives `subagent`, `todowrite`, `ctx_memory` or `ctx_note`: orchestration, task ownership and durable project decisions stay with the parent in this configuration.
 
 ### File navigation choices
 
-All eight native roles deliberately retain `grep` and `find` but omit `ls` from their explicit tool allowlists:
+All configured native roles deliberately retain `grep` and `find` but omit `ls` from their explicit tool allowlists:
 
 1. **Keep `grep` for capabilities beyond `aft_search`.** With the selected AFT overrides, the tool named `grep` is AFT-backed, not Pi's original implementation. Its file/directory scope and `include` glob filter provide controls absent from `aft_search`; removing the name would also remove AFT's replacement. The unprefixed name does not imply a non-AFT backend.
 2. **Keep `find` for file discovery without `bash`.** It provides a dedicated file-path glob search, including to roles without shell access. The stock scout prompt explicitly says to use `find` for path discovery. Retaining the tool keeps that instruction usable without copying or changing the upstream prompt; removing it could encourage a fallback to shell `find` instead of the intended tool.
@@ -353,7 +403,7 @@ These choices depend on retaining the selected AFT `read` and `grep` overrides, 
 
 ### Web permissions and deferred activation
 
-The Web-enabled roles (`oracle`, `researcher`, `evidence-auditor`, `second-opinion`) deliberately allow **all five names**: `web_enable`, `web_search`, `fetch_content`, `get_search_content` and `source_check`. These are entries in each role's existing complete `tools` list, not a replacement for Base or its other grants. The `pi-web-access` provider must also be loaded.
+The Web-enabled roles (`oracle`, `researcher`, `evidence-auditor`, `second-opinion`, `consultant`) deliberately allow **all five names**: `web_enable`, `web_search`, `fetch_content`, `get_search_content` and `source_check`. These are entries in each role's existing complete `tools` list, not a replacement for Base or its other grants. The `pi-web-access` provider must also be loaded.
 
 Two separate mechanisms explain the apparently redundant list:
 
@@ -374,7 +424,7 @@ For the selected four-capability setup, with its provider loaded and a fresh ses
 - `"dynamic"` forces deferred activation on fresh sessions, including models where subsequent activation may invalidate the prompt cache.
 - `"eager"` keeps the operational tools available immediately and does not register the helper. These explicit role lists require `web_enable` at startup, so switching to `"eager"` also requires revising those grants; changing only the mode creates a missing declared-tool diagnostic. This differs from `"auto"` choosing eager exposure for an incompatible model: in that case the helper remains registered, though initially inactive.
 
-In the model catalog used for this contract, `openai-codex/gpt-6-astra` advertises compatible tool additions, so fresh `oracle`, `researcher` and `evidence-auditor` sessions can defer in `"auto"`. `opencode-go/deepseek-v4.1-flash` does not advertise the required compatibility, so `second-opinion` keeps the four definitions immediately available in `"auto"`, despite permitting the helper. Do not claim initial context savings for that role under this catalog. Recheck effective model metadata after catalog/provider updates rather than assuming every role follows Astra's behavior.
+In the model catalog used for this contract, `openai-codex/gpt-6-astra` advertises compatible tool additions, so fresh `oracle`, `researcher` and `evidence-auditor` sessions can defer in `"auto"`. `opencode-go/deepseek-v4.1-flash` does not advertise the required compatibility, so `second-opinion` keeps the four definitions immediately available in `"auto"`, despite permitting the helper. Do not claim initial context savings for that role under this catalog. Consultant's Anthropic provider is a separate compatibility path; its complete allowlist does not by itself establish deferred exposure. Recheck effective model metadata after catalog/provider updates rather than assuming every role follows Astra's behavior.
 
 The role allowlists permit the native deferred path; they do not force a different global activation policy. Adding `web_enable` therefore enables potential context savings, not a guarantee for every model. If a task needs Web immediately, activation adds a tool-call round and then the four definitions anyway; reduced total usage or cost is not guaranteed.
 
@@ -408,8 +458,8 @@ The [Pi configuration maintenance policy](settings.md#configuration-maintenance-
 
 ### MCP configuration and package changes
 
-- Inspect the selected provider paths and tool allowlists for affected roles, including the custom role when shared loading changes affect it. All eight active roles need the `mcp` proxy and its adapter provider; skill selection does not revoke this grant. Preserve the exclusions for `codemode`, script tools and direct server-specific selectors.
-- Keep the parent package and all eight child-provider entry points on the same installed adapter package. If its installation location changes, update every affected path.
+- Inspect the selected provider paths and tool allowlists for affected roles, including the custom roles when shared loading changes affect them. All active native roles need the `mcp` proxy and its adapter provider; skill selection does not revoke this grant. Preserve the exclusions for `codemode`, script tools and direct server-specific selectors.
+- Keep the parent package and all child-provider entry points on the same installed adapter package. If its installation location changes, update every affected path.
 - Follow the [shared MCP maintenance guidance](settings.md#applying-and-validating-changes) without adding test scenarios.
 
 ### Applying changes and document boundaries
@@ -427,6 +477,7 @@ Installed files used for this configuration:
 - Current skill/ownership contracts: Pi 1.5.0 `docs/{settings,skills}.md` and `dist/core/{package-manager,skills}.js` under `~/.pi/agent/install/releases/1.5.0/node_modules/@earendil-works/pi-coding-agent/`; pi-subagents 0.87.0 `src/agents/{agents,skills,proactive-skills}.js`, `src/runs/shared/{child-tool-plan,child-launch-plan,effective-system-prompt,subagent-prompt-runtime}.js`, relative to its installed package root. These establish native discovery, custom-role overrides, selected metadata injection and advisory recommendations.
 - File navigation choices: AFT 0.64.0 `README.md` (Hoisted built-in overrides) and `dist/index.js` (read/grep registrations and search parameters), plus Pi 1.5.2 `dist/core/tools/{find,ls}.js`. These establish the AFT-backed unprefixed names, separate search controls, glob discovery and directory-listing output.
 - Web allowlist and activation semantics: Pi 1.5.2 `dist/core/{sdk,agent-session}.js`; pi-subagents 0.88.1 `src/runs/shared/child-session.js`; pi-web-access 0.47.0 `README.md` (Tool activation), `index.ts` and `tool-activation.ts`, under their installed package roots. These establish strict permission filtering, the no-loader eager path, model-dependent auto activation and recorded-session selection.
+- Consultant continuation: pi-subagents 0.88.1 `docs/tool-reference.md` (Retained children, resume, steer, stop), `src/runs/shared/child-session.js`, `src/runs/foreground/subagent-executor.js` and `src/runs/background/async-retention.js`; Pi 1.5.2 `dist/core/session-manager.js`. Provider selection: `@cortexkit/pi-anthropic-auth` 2.4.10 `package.json` and `dist/index.js` (Anthropic registration and model metadata). Paths are relative to the installed package roots; source contracts do not prove successful authentication, model requests or future retention.
 - Skill contents at the inventory locations above; [testing rationale](../agent/skills/ck-testing/README.md) and [task-workflow rationale](../agent/skills/ck-task-workflow/README.md).
 - Shared adapter behavior and upstream references: [settings.md](settings.md#references).
 

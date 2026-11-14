@@ -161,3 +161,24 @@ Change the `second-opinion` default from **`max` to `high`**, keeping **`opencod
 - Supported explicit launch/project overrides remain available under the existing native precedence rules. No hard ceiling, automatic effort escalation, routing mechanism or fallback is introduced. Existing primary sessions need `/reload` to load the revised instructions and mapping.
 
 The [role guide](pi-subagents.md#independent-second-opinion) owns current wiring. Reconsider high if ordinary use reveals missed material objections or excessive parent rework; do not assume either a measured quality loss or equivalence before observing it.
+
+## 2026-11-14 — Operator-authorized Sonnet consultant
+
+**Status:** Approved and configured in `agent/settings.json`, the custom `consultant` definition and the primary APPEND profile on 2026-11-14. Existing primary sessions need the updated instructions/mapping loaded; configuration is not evidence of a successful model request or permission to make one.
+
+### Basis and accepted choice
+
+The operator wants a strong additional perspective from a separately subscribed provider, with a limited allowance reserved for expressly authorized sessions or tasks. The intended use includes criticism of framing and proposed solutions, blind-spot detection, alternative approaches, and follow-up advice as new facts arrive.
+
+Select **`consultant`** on **`anthropic/claude-sonnet-5-5`**, with default **`medium`** thinking. The choice is the operator's resource and model preference, not a measured equivalence to Astra, superiority over DeepSeek, or quota-saving result. Existing role assignments and the mandatory second-opinion policy remain unchanged.
+
+### Mechanism and accepted trade-offs
+
+- A separate native profile makes the resource identity clear without repeatedly overriding another role's model. Model/effort and capabilities remain in settings; the role file owns the advisory method.
+- Parent instructions govern explicit session/task grants, selective invocation and revocation. This is not a programmatic spending guard; approving the configuration is not authorizing use.
+- Native retained-session continuation preserves a related consultation across completed answers. A new execution reuses history through `resume`; a permanently running process, extra role-memory mechanism and longer idle timeout are unnecessary.
+- Fresh first context and new consultations for unrelated work preserve relevance. Follow-ups carry changed facts and superseded assumptions; history does not replace current source inspection.
+- Existing Anthropic authentication is loaded explicitly in the child alongside AFT, Magic Context and Web. No provider-account settings, storage lifetime, cache policy or global launch defaults are changed.
+- Continued history can increase prompt consumption and does not guarantee provider-cache hits or availability after temporary-file cleanup. Real authentication and quota availability remain separate from source/configuration inspection. The local prohibition on configuration tests remains in force.
+
+The [consultant policy guide](agents-md/consultant.md) explains authorization and alternatives; [pi-subagents.md](pi-subagents.md#operator-authorized-consultant) owns concrete settings and native continuation limits. Revisit the profile if ordinary authorized use exposes unsuitable advice, excessive consumption or continuity requirements beyond native retention.
