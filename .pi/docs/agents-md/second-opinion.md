@@ -2,11 +2,11 @@
 
 ## Decision and ownership
 
-**Decision date: 2026-11-14. Status: approved and applied.** The operator approved the complete revised `Independent second opinion` section, including the explicit costly-to-reverse decision/action branch and mandatory companions for four roles.
+**Invocation-policy decision: 2026-11-14. Status: approved and applied.** The operator approved the complete revised `Independent second opinion` section, including the explicit costly-to-reverse decision/action branch and mandatory companions for four roles. The [2026-11-17 scope clarification](#2026-11-17--critique-scope-not-duplicate-execution) changes briefing and inspection depth, not these invocation conditions.
 
-The authoritative instructions are in [`agent/APPEND_SYSTEM.md`, Independent second opinion](../../agent/APPEND_SYSTEM.md#independent-second-opinion). This document records the operator's goals, the alternatives considered, the deliberation with Fable, and the reasons for the selected wording. It is explanatory decision history, not another invocation rule or a required read before every consultation. Historical quotations below are rejected or superseded proposals unless identified as selected.
+The authoritative instructions are in [`agent/APPEND_SYSTEM.md`, Independent second opinion](../../agent/APPEND_SYSTEM.md#independent-second-opinion). This document records the operator's goals, the alternatives considered, the deliberation with Fable, and the later scope clarification. It is explanatory decision history, not another invocation rule or a required read before every consultation. Historical quotations below are rejected or superseded proposals unless identified as selected.
 
-The [role definition](../../agent/agents/second-opinion.md) owns how the advisor assesses an assignment. The [pi-subagents guide](../pi-subagents.md#independent-second-opinion) owns runtime configuration; the [instruction-layer guide](instruction-layers.md) owns loading and inheritance boundaries. This decision changes parent instructions, not the role's model, thinking level, tools, providers, prompt, or inspection-only authority. Earlier model choices remain recorded in the [model decision journal](../model-decisions.md#2026-11-04--independent-second-opinion-on-deepseek-flash).
+The [role definition](../../agent/agents/second-opinion.md) owns how the advisor assesses an assignment. The [pi-subagents guide](../pi-subagents.md#independent-second-opinion) owns runtime configuration; the [instruction-layer guide](instruction-layers.md) owns loading and inheritance boundaries. The 2026-11-14 decision changed parent instructions, not the role's model, thinking level, tools, providers, prompt, or inspection-only authority. The 2026-11-17 clarification also updates the role's evidence-inspection step. Earlier model choices remain recorded in the [model decision journal](../model-decisions.md#2026-11-04--independent-second-opinion-on-deepseek-flash).
 
 ## Operator goal
 
@@ -157,3 +157,34 @@ The change grants no new child delegation authority, no approval authority, and 
 - “Less aggressive” means more selective general invocation while preserving the accepted mandatory companions. It does not establish a numerical reduction in total launches, latency, or resource use; expanding the companion list can increase consultations on that branch.
 - The counterexamples and wording comparisons establish reasons for the choice, not measured behavioral efficacy. Practical effect is assessed through ordinary use. The [local configuration maintenance policy](../settings.md#configuration-maintenance-policy) prohibits configuration tests and model-backed test scenarios.
 - The instruction is prompt policy, not a scheduler hook. Existing primary sessions need `/reload` to load the revised profile. The [project-APPEND replacement and fork boundaries](instruction-layers.md#project-append-replacement) remain; this decision does not change prompt-loading behavior.
+
+## 2026-11-17 — Critique scope, not duplicate execution
+
+**Status: approved and applied.** This clarification addresses repeated execution inside a consultation, not how often the role is invoked. Operational wording remains in the parent profile and role definition; this section records its origin and rationale.
+
+### Evidence and diagnosis
+
+The operator reported that `second-opinion` often appeared to redo the primary's work and caused long waits. Static inspection covered the current instructions and four existing local runs from 2026-11-14–15. Representative observations:
+
+| Existing run | Assigned work and observed activity |
+| --- | --- |
+| `b7ae5d89` | Explicitly assigned all 11 ck-repowise files plus coordinated settings and guide changes, using the same common brief as the parallel reviewer. It made 161 tool calls in about 14 minutes; the parent later steered it to finish without expanding into a full Repowise audit. |
+| `0900dfdd` | Asked whether moving two instructions lost authorization or AFT priority, with a new source survey explicitly out of scope. It made 5 tool calls in about 45 seconds. |
+| `c7781346` | Made 54 tool calls in about 8.5 minutes, but received two material proposal updates during the run. Its duration cannot all be attributed to redundant work. |
+
+These are observations from existing logs, not configuration tests or a controlled comparison of task wording, models or thinking levels. The clearest observed source of duplication was assignment breadth: a complete second review was explicitly requested. The role already required critique and stopping at a conclusion or decisive evidence gap; a separate causal contribution from its wording was not established. Independent source rechecking is legitimate; duplicating the full investigation is not its default purpose.
+
+### Meaning of the clarification
+
+- The parent supplies its current reasoning as the object of critique. It may be provisional; a finalized answer from the parent or parallel specialist is not a prerequisite.
+- The role checks decisive premises against primary evidence and investigates specific questions that could change the assessment. Such questions can arise from missing premises, omitted requirements, contradictions or alternative explanations; they need not be supplied by the parent.
+- The same target and question remain mandatory for companion opinions. They do not require identical exhaustive review checklists. Critique still covers reasoning, framing, omissions and alternatives, not facts alone.
+- Existing source-based independence, stopping, evidence-gap reporting, parent verification and operator decision rights remain. Agreement or another agent's verdict is not evidence.
+
+### Wording choices and limits
+
+Following `writing-for-agents`, only the parent briefing paragraph and role method step 2 were replaced. The parent instruction assigns a positive activity—critique of reasoning and material omissions—paired with a guardrail against repeating the underlying task. The role instruction bounds inspection by decisive premises and a specific consequential question, rather than adding another generic request to be concise.
+
+A contradiction-only expansion rule was dropped because an absent premise need not contradict anything. Advisory review also identified the loss of the explicit safeguard against relying on the parent's confidence or another agent's verdict in an early shortened draft. The final text preserves that evidentiary safeguard without adding a separate assessment-ordering clause. Existing critique and stopping rules were retained instead of duplicated.
+
+No invocation trigger, mandatory companion, model, thinking level, tool permission or runtime mechanism changed. A fact-only checker, removal of companions, model changes and arbitrary time/tool quotas were not selected. The clarification does not guarantee latency savings or eliminate the cost of independent inspection. No reload, configuration tests, probes or model-backed test scenarios were performed; the existing activation boundaries above still apply.

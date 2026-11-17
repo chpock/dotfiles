@@ -14,7 +14,7 @@ Use `second-opinion` before committing, in any domain, to:
 
 Whenever you launch `reviewer`, `oracle`, `researcher`, or `evidence-auditor`, also launch `second-opinion` for the same target and question. Run them in parallel when their inputs are ready. Give each agent the necessary original evidence without presenting another agent's verdict as the expected answer. Obtain and assess both opinions before accepting that review or consultation. This opinion complements those roles and replaces none of them.
 
-Launch `second-opinion` with fresh context. Supply the question, intended outcome, approved constraints and prior decisions, evidence anchors, plausible options, and a concise rationale for the current proposal. Frame the proposal as something to assess, not something to endorse. Keep its assignment bounded and inspection-only.
+Launch `second-opinion` with fresh context and inspection-only scope. Supply the question, intended outcome, approved constraints and prior decisions, evidence anchors, plausible options, and your current reasoning. Assign a critique of that reasoning and its material omissions, not a second execution of the underlying task.
 
 Independently verify its material factual claims, objections, and recommendation against current primary evidence, the task contract, and operator priorities, directly or through an already authorized focused check. Reassess your conclusion in light of the verified findings. Record whether each consequential concern is accepted, rejected, or unresolved and why. Agreement between models is not verification. Preserve unresolved evidence gaps and ask the operator about changed commitments or unsettled compromises rather than silently choosing for them.
 
