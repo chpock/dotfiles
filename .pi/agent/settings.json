@@ -20,6 +20,14 @@
     "/w/projects/pi-toolview",
     "npm:@cortexkit/pi-anthropic-auth@2.4.10"
   ],
+  "skills": [
+    "-/home/kot/.agents/skills/codebase-exploration/SKILL.md",
+    "-/home/kot/.agents/skills/architectural-decisions/SKILL.md",
+    "-/home/kot/.agents/skills/pre-modification-check/SKILL.md",
+    "-/home/kot/.agents/skills/change-review/SKILL.md",
+    "-/home/kot/.agents/skills/code-health/SKILL.md",
+    "-/home/kot/.agents/skills/dead-code-cleanup/SKILL.md"
+  ],
   "terminal": {
     "showTerminalProgress": false
   },
@@ -79,8 +87,7 @@
         "inheritGlobalContext": true,
         "inheritSkills": false,
         "skills": [
-          "ck-repowise",
-          "codebase-exploration"
+          "ck-repowise"
         ],
         "tools": [
           "read",
@@ -116,13 +123,7 @@
           "ck-testing",
           "writing-for-agents",
           "codebase-design",
-          "ck-repowise",
-          "codebase-exploration",
-          "architectural-decisions",
-          "pre-modification-check",
-          "change-review",
-          "code-health",
-          "dead-code-cleanup"
+          "ck-repowise"
         ],
         "tools": [
           "read",
@@ -165,13 +166,7 @@
           "ck-testing",
           "writing-for-agents",
           "codebase-design",
-          "ck-repowise",
-          "codebase-exploration",
-          "architectural-decisions",
-          "pre-modification-check",
-          "change-review",
-          "code-health",
-          "dead-code-cleanup"
+          "ck-repowise"
         ],
         "tools": [
           "read",
@@ -213,12 +208,7 @@
           "ck-testing",
           "writing-for-agents",
           "codebase-design",
-          "ck-repowise",
-          "codebase-exploration",
-          "architectural-decisions",
-          "change-review",
-          "code-health",
-          "dead-code-cleanup"
+          "ck-repowise"
         ],
         "tools": [
           "read",
@@ -251,12 +241,7 @@
         "defaultContext": "fresh",
         "skills": [
           "codebase-design",
-          "ck-repowise",
-          "codebase-exploration",
-          "architectural-decisions",
-          "change-review",
-          "code-health",
-          "dead-code-cleanup"
+          "ck-repowise"
         ],
         "extensions": [
           "~/.pi/agent/npm/node_modules/@cortexkit/aft-pi/dist/index.js",
@@ -299,12 +284,7 @@
         "defaultContext": "fresh",
         "skills": [
           "codebase-design",
-          "ck-repowise",
-          "codebase-exploration",
-          "architectural-decisions",
-          "change-review",
-          "code-health",
-          "dead-code-cleanup"
+          "ck-repowise"
         ],
         "extensions": [
           "~/.pi/agent/npm/node_modules/@cortexkit/aft-pi/dist/index.js",
@@ -346,12 +326,7 @@
           "ck-testing",
           "writing-for-agents",
           "codebase-design",
-          "ck-repowise",
-          "codebase-exploration",
-          "architectural-decisions",
-          "change-review",
-          "code-health",
-          "dead-code-cleanup"
+          "ck-repowise"
         ],
         "extensions": [
           "~/.pi/agent/npm/node_modules/@cortexkit/aft-pi/dist/index.js",
@@ -392,9 +367,7 @@
         "inheritGlobalContext": true,
         "inheritSkills": false,
         "skills": [
-          "ck-repowise",
-          "codebase-exploration",
-          "architectural-decisions"
+          "ck-repowise"
         ],
         "extensions": [
           "~/.pi/agent/npm/node_modules/@cortexkit/aft-pi/dist/index.js",
@@ -431,9 +404,7 @@
         "inheritGlobalContext": true,
         "inheritSkills": false,
         "skills": [
-          "ck-repowise",
-          "codebase-exploration",
-          "architectural-decisions"
+          "ck-repowise"
         ],
         "extensions": [
           "~/.pi/agent/npm/node_modules/@cortexkit/aft-pi/dist/index.js",
@@ -472,7 +443,7 @@
     "-builtin:codemode"
   ],
   "extensionChangelogVersions": {
-    "{\"source\":\"npm:pi-web-access\",\"scope\":\"user\"}": "0.47.0",
+    "{\"source\":\"npm:pi-web-access\",\"scope\":\"user\"}": "0.48.0",
     "{\"source\":\"npm:pi-context-view\",\"scope\":\"user\"}": "0.8.4",
     "{\"source\":\"npm:pi-subagents\",\"scope\":\"user\"}": "0.88.1",
     "{\"source\":\"npm:pi-mcp-adapter\",\"scope\":\"user\"}": "7.0.1",

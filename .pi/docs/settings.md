@@ -175,9 +175,24 @@ Other extension files such as `web-search.json`, CortexKit JSONC and UI overlays
 
 ## Main skill discovery
 
-Pi discovers user skills in `~/.pi/agent/skills/` and `~/.agents/skills/`, alongside selected package skills. The shared settings use native discovery without a top-level `skills` filter; each skill's frontmatter controls whether it is advertised for automatic selection.
+Pi discovers user skills in `~/.pi/agent/skills/` and `~/.agents/skills/`, alongside selected package skills. The shared top-level `skills` array contains six native exact-path exclusions:
 
-The catalog includes `codebase-design`, the `ck-repowise` integration skill and the six [upstream Repowise workflow skills](pi-subagents.md#upstream-repowise-skills). Pi advertises each skill's name, description and path. The shared `AGENTS.md` gate requires both a session CWD inside an existing Git worktree and a relevant task: planned code edits/refactoring, repository exploration/planning, code-health/change-impact analysis, code review, architecture/dependency/history questions, or explicit index maintenance. Only then does the agent load `ck-repowise` and the matching workflow. For non-Git CWDs, unrelated tasks and pure known-file reads, agents are instructed to leave these skill bodies unloaded and make no Repowise calls. Skill loading and correct application remain model behavior, not a runtime access barrier.
+```json
+{
+  "skills": [
+    "-/home/kot/.agents/skills/codebase-exploration/SKILL.md",
+    "-/home/kot/.agents/skills/architectural-decisions/SKILL.md",
+    "-/home/kot/.agents/skills/pre-modification-check/SKILL.md",
+    "-/home/kot/.agents/skills/change-review/SKILL.md",
+    "-/home/kot/.agents/skills/code-health/SKILL.md",
+    "-/home/kot/.agents/skills/dead-code-cleanup/SKILL.md"
+  ]
+}
+```
+
+These entries exclude the installed global vendor resources from ordinary main discovery/commands without changing their files or the other discovered skills. Omitting them would expose the competing upstream workflows again. Exact path exclusions do not hide every same-name project/launch resource, prevent explicit file reads, or erase retained fork context. The [upstream inventory](pi-subagents.md#upstream-repowise-skills) owns their installation/manager details.
+
+`ck-repowise` is the sole advertised Repowise procedure owner. Its [entry skill](../agent/skills/ck-repowise/SKILL.md) selects plain case documents from the current activity before deriving analytical needs; its [README](../agent/skills/ck-repowise/README.md) explains organization and maintenance. The compact loading condition remains in [AGENTS.md](../agent/AGENTS.md#working-style), not a duplicate task list here. Qualifying source work can load the skill even for a known file, while a case can correctly select no query. Ordinary prose/configuration edits and semantic document agreement alone do not activate it. Concrete literal-reference/history cases remain distinct. Skill application is model behavior, not a runtime access barrier.
 
 Child catalogs are configured separately by the [subagent skill assignments](pi-subagents.md#skills). A child's explicit selection can differ from the main catalog, and a direct file read can reach a shared skill. Project/launch overrides and forked context retain their documented scope. Catalog selection is not a filesystem access restriction or removal of an MCP server.
 
@@ -216,7 +231,7 @@ Merge this fragment into the existing lists; it is not a replacement configurati
 
 The global `~/.pi/agent/mcp.json` registers the installed `repowise` executable with `args: ["mcp"]`, without a fixed repository argument or `cwd`. Its `REPOWISE_SKIP_EDITOR_SETUP=1` environment suppresses CLI-startup editor migrations, including when the adapter starts the server for metadata discovery. The adapter passes the session working directory to the stdio process. Repowise uses that directory or discovers an enclosing indexed repository/workspace; start the relevant Pi session at the target root and confirm the reported repository before relying on queries. Project settings can still replace this registration, including its environment.
 
-The global `AGENTS.md` gate and the [ck-repowise skill](../agent/skills/ck-repowise/SKILL.md) own integration and automatic index preparation; the official skills own task-specific analysis methods. Eligible work has standing authorization for guarded local index preparation, including read-only analysis. The primary verifies/prepares before analysis and delegation; children request missing preparation from the primary, not the operator. This uses existing tools and instructions, not an MCP auto-index feature or new extension. Repository index data remains in `.repowise/`; existing editor/coverage preferences can still block a safe refresh and require a preference decision rather than another index-presence approval. MCP availability and startup catalog discovery remain independent of task eligibility. The registration does not configure a model provider, but `get_answer` can autodetect existing credentials and invoke synthesis; index `--no-prose` is not a no-spend guarantee for later queries. Follow the integration skill's model-call approval boundary.
+The global `AGENTS.md` gate owns eligibility; [ck-repowise](../agent/skills/ck-repowise/SKILL.md) owns scenario-specific methods, query execution and the [conditional index lifecycle](../agent/skills/ck-repowise/references/index-lifecycle.md). Loading the skill/case does not require catalog discovery or index preparation. The primary has standing authorization for guarded local preparation only when selected supported analysis needs it, including read-only analysis; children request that prerequisite from the primary when their own assignment needs it. This is not a readiness barrier before all analysis/delegation or an MCP auto-index feature. Data remains in `.repowise/`; editor/coverage preferences and embedding authorization can constrain safe refresh without creating another index-presence approval gate. MCP availability and host-side startup discovery remain separate from task selection. `get_answer` can autodetect credentials, and template indexing can use explicitly configured embeddings: flags against model-written prose are not a universal model-call barrier. The skill owns the exact guards and authorization boundaries.
 
 Repowise keeps the adapter's default lazy lifecycle: it can disconnect after idleness and reopen the on-disk index on demand. The skill owns index freshness and session-reconnection checks. Keep the server command in `mcp.json`, rather than duplicating it in the adapter overlay.
 
@@ -247,7 +262,7 @@ Lazy loading is not a promise of zero startup work: missing or invalid cached me
 Search is a compact summary, not a complete parameter contract. Before constructing a request with unfamiliar parameters, use the selected tool's `describe` result:
 
 ```javascript
-mcp({ server: "repowise" })
+mcp({ search: "<selected operation>", server: "repowise", includeSchemas: false })
 mcp({ describe: "<returned tool name>", server: "repowise" })
 ```
 
@@ -283,4 +298,4 @@ Follow the [configuration maintenance policy](#configuration-maintenance-policy)
 - [Current model evidence](models-2026-10-17.md); [child configuration](pi-subagents.md); [model-selection method](model-selection.md).
 - Client declarations and transport: Pi 1.3.0 bundled `@earendil-works/pi-ai/dist/providers/{data/openai-codex.json,openai-codex.js}`.
 - Adapter: [configuration](https://github.com/nicobailon/pi-mcp-adapter/blob/main/docs/configuration.md) and [tool discovery, approvals, and output limits](https://github.com/nicobailon/pi-mcp-adapter/blob/main/docs/tools.md).
-- Main skill discovery: Pi 1.5.0 `docs/{skills,settings}.md` and `dist/core/{skills,package-manager}.js` under `~/.pi/agent/install/releases/1.5.0/node_modules/@earendil-works/pi-coding-agent/`.
+- Main skill discovery and exact exclusions: Pi 1.5.2 `docs/{skills,settings,packages}.md` and `dist/core/{skills,package-manager,resource-loader}.js` under `~/.pi/agent/install/releases/1.5.2/node_modules/@earendil-works/pi-coding-agent/`. Repowise method/support and safety sources are maintained in the [skill README](../agent/skills/ck-repowise/README.md#source-contract-and-upgrades).

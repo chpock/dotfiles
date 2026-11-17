@@ -12,6 +12,7 @@
 
 - Obtain operator approval for new or changed architectural decisions, public or cross-component contracts, constraints, and material trade-offs. Present options and consequences; make implementation decisions within the agreed design independently.
 - Reuse suitable existing code, native features, and installed dependencies before introducing new implementations or dependencies.
+- For work on source files (Python, JS/TS, Go, Rust, Java, C/C++/C#, Kotlin, Ruby, Swift, Dart, Scala, PHP, Elixir, F#, VB.NET, Apex, Objective-C, Pascal, COBOL, GDScript, Luau, Shell, Clojure, Haskell, Lean, QML, Erlang, dbt SQL, Vue/Svelte/Astro/Razor code regions), analysis of repository or decision history, literal link/anchor/import/path resolution, or requested Repowise analysis or index maintenance, first verify this CWD is inside a Git worktree using Git or a CWD-specific verified parent handoff; reuse prior verification. If confirmed, load and follow `ck-repowise`.
 - Do not commit, push, publish, or deploy without explicit authorization. Use Conventional Commits when commits are requested.
 - Use English for all internal work, including agent-to-agent communication and working artifacts.
 
@@ -26,12 +27,6 @@
 - Comment only when the reason is non-obvious.
 - Write code comments and project documentation for readers without access to the task conversation: explain the subject, behavior, constraints, and relevant rationale. Keep narration of your task execution, progress, operator requests, and task-specific follow-ups in operator communication or task reports, not in those files.
 - Validate external inputs at boundaries; handle reachable edge cases explicitly and surface failures rather than masking them. Rely on established internal invariants instead of adding redundant checks or speculative recovery for states they rule out.
-
-## Repository context
-
-- For planned code edits/refactoring, repository exploration/planning, code-health/change-impact analysis, code review, architecture/dependency/history questions, or index maintenance, first verify that this session's CWD is inside a Git worktree, using Git or a CWD-specific verified parent handoff. Once confirmed, load and follow the `ck-repowise` skill, then the matching Repowise workflow skill.
-- Keep AFT primary for source lookup, reading and editing.
-- For eligible work, local `.repowise/` index preparation under the skill's safety procedure is standing-authorized, including read-only repository analysis. This does not authorize source/editor/hook changes, commits or model-backed generation.
 
 ## Testing
 
@@ -50,7 +45,7 @@
 
 ## Questions are read-only
 
-- For questions, answer first; obtain approval before making changes, even trivial ones, except the local Repowise index preparation authorized under Repository context.
+- For questions, answer first; obtain approval before making changes, even trivial ones, except the local Repowise index preparation authorized by `ck-repowise`.
 
 ## Delegation
 
