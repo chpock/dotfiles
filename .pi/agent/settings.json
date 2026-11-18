@@ -295,7 +295,6 @@
           "grep",
           "find",
           "watchdog_diff",
-          "web_enable",
           "web_search",
           "fetch_content",
           "get_search_content",
