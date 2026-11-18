@@ -2,7 +2,7 @@
 
 Use this guide when revisiting model/provider choices or preparing `models-YYYY-MM-DD.md`. It owns the reusable method, abstract capability/depth profiles and report requirements. Configuration values and their motivation belong in [settings.md](settings.md) and [pi-subagents.md](pi-subagents.md); dated reports contain model evidence and comparisons. See [CONTEXT.md](CONTEXT.md) for the documentation map.
 
-**Current assessment:** [2026-10-17](models-2026-10-17.md).
+**Current assessment:** [2026-11-18](models-2026-11-18.md), a focused Astra/Sol successor refresh. The [2026-10-17 assessment](models-2026-10-17.md) retains the broader earlier-generation comparison.
 
 ## Decision rule
 

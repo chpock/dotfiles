@@ -2,7 +2,7 @@
 
 This guide describes the selected shared Pi configuration: values, motivation, effects and behavior when omitted. It is a configuration reference, not a change log or deployment audit.
 
-Scope: shared `settings.json` choices, package selection and MCP settings. [pi-subagents.md](pi-subagents.md) owns child-role settings and their rationale. Model evidence is in the [2026-10-17 assessment](models-2026-10-17.md); the [selection guide](model-selection.md) owns the reusable research method. See [CONTEXT.md](CONTEXT.md) for document boundaries.
+Scope: shared `settings.json` choices, package selection and MCP settings. [pi-subagents.md](pi-subagents.md) owns child-role settings and their rationale. Model evidence is in the [2026-11-18 assessment](models-2026-11-18.md); the [selection guide](model-selection.md) owns the reusable research method. See [CONTEXT.md](CONTEXT.md) for document boundaries.
 
 ## Configuration ownership
 
@@ -95,7 +95,7 @@ Selected main-agent baseline, as a merge fragment for `~/.pi/agent/settings.json
 ```json
 {
   "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-6.1-sol",
+  "defaultModel": "gpt-6.2-sol",
   "defaultThinkingLevel": "xhigh"
 }
 ```
@@ -103,7 +103,7 @@ Selected main-agent baseline, as a merge fragment for `~/.pi/agent/settings.json
 | Setting | Why and effect | If omitted |
 | --- | --- | --- |
 | `defaultProvider: "openai-codex"` | Uses the ChatGPT-sign-in provider as the startup preference, matching the subscription access path. Provider identity matters: an API-key model with the same bare ID is a different connection/accounting path. | Pi chooses a provider automatically when no stronger selection exists. |
-| `defaultModel: "gpt-6.1-sol"` | Selects a General-capability model for complex work with lower credit weights than Astra. The [model comparison](models-2026-10-17.md#task-specific-capabilities) supplies the supporting evidence. | Pi chooses a model automatically when no stronger selection exists. |
+| `defaultModel: "gpt-6.2-sol"` | Selects the current General-capability Sol successor for complex work at lower Standard credit weights than Astra 6.2. The [model comparison](models-2026-11-18.md#task-specific-capabilities) and [2026-11-18 migration decision](model-decisions.md#2026-11-18--astra-and-sol-62-successors) record evidence and the in-class replacement of Sol 6.1. | Pi chooses a model automatically when no stronger selection exists. |
 | `defaultThinkingLevel: "xhigh"` | Increases main-session reasoning depth because ordinary Sol/high use produced unacceptable gross errors. The [2026-10-31 decision](model-decisions.md#2026-10-31--more-reasoning-for-execution-sol-for-routine-review) records the practical basis and accepted limits. This is a supported effort, not a fixed token budget or quota multiplier. | A per-model startup setting can apply; otherwise Pi's builtin default is `medium`, subject to model support and stronger session/launch selection. |
 
 These are startup defaults, not a mechanism that overwrites every active session: CLI/explicit selection, project settings, per-model thinking and restored session state can matter. The design assumes the main agent uses the selected defaults; no live tracking of temporary session changes is required.
@@ -112,7 +112,7 @@ The [worker/delegate/reviewer settings](pi-subagents.md#worker-delegate-and-revi
 
 ### Provider compatibility
 
-For the selected OpenAI Codex connection, Pi 1.3.0's bundled metadata declares a **500,000-token context** for Sol 6.1 and **272,000** for Astra/Sol/Luna and the 5.6 models, with **128,000** maximum output. These client declarations differ from the [published API contract](models-2026-10-17.md#model-interface-and-reasoning-support); an API specification alone does not expand the client's budget. Treat the client declaration and provider contract as separate limits, not proof of an adapter defect or account entitlement.
+For the selected OpenAI Codex connection, the Pi 1.5.2 catalog cached in `~/.pi/agent/models-store.json`, inspected **2026-11-18**, declares a **500,000-token context** for Sol 6.2 and **272,000** for Astra 6.2 and Luna 6, with **128,000** maximum output. The new IDs support the selected high/xhigh/max efforts. These client declarations differ from the [published 1,050,000-token API contract](models-2026-11-18.md#model-interface-and-reasoning-support); an API specification alone does not expand the client's budget. Treat client declarations, product contracts and account entitlement as separate facts. No context-limit override is selected.
 
 The provider uses `openai-codex-responses`; product access still depends on the account/workspace. Consult the [selection guide](model-selection.md#refresh-workflow) when changing model/provider. Local catalog presence alone is not access evidence.
 
@@ -120,26 +120,26 @@ The provider uses `openai-codex-responses`; product access still depends on the 
 
 `enabledModels` is an explicit working selection, not the complete catalog:
 
-- `openai-codex`: the four OpenAI models selected for use, with the main default and child assignments documented in their owning sections.
+- `openai-codex`: **Astra 6.2, Sol 6.2 and Luna 6**. The [2026-11-18 decision](model-decisions.md#2026-11-18--astra-and-sol-62-successors) replaces the older Astra/Sol selections without changing Luna's task tier. The main default and child assignments are documented in their owning sections.
 - `opencode-go`: **only `deepseek-v4.1-flash`**. The operator does not intend to use the other models from this provider. In the [Go-plan usage-limits table](https://opencode.ai/v2/docs/console/go/#usage-limits), checked **2026-11-04**, DeepSeek V4.1 Flash is the only model listed with a **$100 Monthly limit**, for both Peak and Off-Peak usage. This is the Go plan, not Go Plus or Go Teams. The [decision journal](model-decisions.md#2026-11-04--deepseek-flash-only-for-opencode-go) records the replacement of the former $60-based selection.
-- `github-copilot` and `anthropic`: Claude Opus/Sonnet/Haiku 5.5 through each provider. As of **2026-11-04**, these are selected as the latest generation in each retained class with favorable published pricing relative to preceding same-class versions. The [Claude 5.5 decision](model-decisions.md#2026-11-04--claude-55-for-anthropic-and-copilot) records the comparison, including Sonnet's lower cache-read rate rather than lower base input/output prices versus Sonnet 5. These are distinct connection/authentication paths, not interchangeable model IDs or identical subscription accounting.
+- `github-copilot` and `anthropic`: Claude Opus/Sonnet/Haiku 5.5 through each provider. As of **2026-11-04**, these are selected as the latest generation in each retained class with favorable published pricing relative to preceding same-class versions. The [Claude 5.5 decision](model-decisions.md#2026-11-04--claude-55-for-anthropic-and-copilot) records the comparison, including Sonnet's lower cache-read rate rather than lower base input/output prices versus Sonnet 5. These are distinct connection/authentication paths, not interchangeable model IDs or identical subscription accounting. Anthropic also has a separate `claude-fable-5` working-list entry; the 5.5 comparison concerns only Opus, Sonnet and Haiku.
 
 Selected merge fragment:
 
 ```json
 {
   "enabledModels": [
-    "openai-codex/gpt-6-astra",
-    "openai-codex/gpt-6-sol",
+    "openai-codex/gpt-6.2-astra",
+    "openai-codex/gpt-6.2-sol",
     "openai-codex/gpt-6-luna",
-    "openai-codex/gpt-6.1-sol",
     "github-copilot/claude-opus-5.5",
     "github-copilot/claude-sonnet-5.5",
     "github-copilot/claude-haiku-5.5",
     "anthropic/claude-opus-5-5",
     "anthropic/claude-sonnet-5-5",
     "anthropic/claude-haiku-5-5",
-    "opencode-go/deepseek-v4.1-flash"
+    "opencode-go/deepseek-v4.1-flash",
+    "anthropic/claude-fable-5"
   ]
 }
 ```
@@ -295,7 +295,7 @@ Follow the [configuration maintenance policy](#configuration-maintenance-policy)
 - Go allowance rationale and fallback behavior: [OpenCode Go usage limits](https://opencode.ai/v2/docs/console/go/#usage-limits), Go tab, checked 2026-11-04; [usage beyond limits](https://opencode.ai/v2/docs/console/go/#usage-beyond-limits).
 - Package capabilities: installed package READMEs under `~/.pi/agent/npm/node_modules/` and the [local toolview README](../../../../w/projects/pi-toolview/README.md). Theme design and renderer references: [themes/README.md](../agent/themes/README.md).
 - MCP setup: `docs/settings.md`, `docs/packages.md`, `docs/mcp.md`, and `docs/extensions.md` under the Pi 1.2.0 release's `@earendil-works/pi-coding-agent/` directory.
-- [Current model evidence](models-2026-10-17.md); [child configuration](pi-subagents.md); [model-selection method](model-selection.md).
+- [Current model evidence](models-2026-11-18.md); [child configuration](pi-subagents.md); [model-selection method](model-selection.md).
 - Client declarations and transport: Pi 1.3.0 bundled `@earendil-works/pi-ai/dist/providers/{data/openai-codex.json,openai-codex.js}`.
 - Adapter: [configuration](https://github.com/nicobailon/pi-mcp-adapter/blob/main/docs/configuration.md) and [tool discovery, approvals, and output limits](https://github.com/nicobailon/pi-mcp-adapter/blob/main/docs/tools.md).
 - Main skill discovery and exact exclusions: Pi 1.5.2 `docs/{skills,settings,packages}.md` and `dist/core/{skills,package-manager,resource-loader}.js` under `~/.pi/agent/install/releases/1.5.2/node_modules/@earendil-works/pi-coding-agent/`. Repowise method/support and safety sources are maintained in the [skill README](../agent/skills/ck-repowise/README.md#source-contract-and-upgrades).

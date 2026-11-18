@@ -18,10 +18,10 @@ The configuration guides define the selected settings, their effects and why the
 | [agent/themes/README.md](../agent/themes/README.md) | Changing the selected theme or diagnosing colors | Palette motivation, color-role hierarchy and native/extension rendering boundaries | Shared settings values; layout and tool permissions |
 | [pi-subagents.md](pi-subagents.md) | Configuring pi-subagents | Selected role configuration, model/thinking, context inheritance, skills/tools/providers, MCP access, configuration semantics and relevant validation | AGENTS/APPEND instruction policy and rationale (`agents-md/`); shared Pi settings; reusable model-research method |
 | [model-selection.md](model-selection.md) | Revisiting models/providers or creating a dated assessment | Task-based model tiers, capability/depth requirements, source-based selection/refresh procedure, relative-consumption method, report contract and cross-harness practice evidence | Concrete settings; current model-comparison results |
-| [models-YYYY-MM-DD.md](models-2026-10-17.md) | Comparing models using evidence available on that date | Public model capabilities, lifecycle, reasoning support, relative resource weights, abstract-profile fit and sources | Local configuration, role assignments, settings proposals, research methodology and process histories |
+| [models-YYYY-MM-DD.md](models-2026-11-18.md) | Comparing models using evidence available on that date | Public model capabilities, lifecycle, reasoning support, relative resource weights, abstract-profile fit and sources | Local configuration, role assignments, settings proposals, research methodology and process histories |
 | [model-decisions.md](model-decisions.md) | Understanding why model/thinking choices changed over time | Dated decisions, practical observations, motivations, accepted trade-offs and approval/application status | Full configuration details; reusable selection method; published model-comparison reports |
 
-**Current assessment:** [models-2026-10-17.md](models-2026-10-17.md).
+**Current assessment:** [models-2026-11-18.md](models-2026-11-18.md), focused on the Astra/Sol successor generation. [models-2026-10-17.md](models-2026-10-17.md) remains the earlier broader comparison.
 
 For each settings topic, keep the selected value/fragment, motivation, owning file/precedence, omission behavior, trade-offs and relevant functional checks together.
 

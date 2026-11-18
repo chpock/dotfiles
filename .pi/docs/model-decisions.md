@@ -2,13 +2,13 @@
 
 This journal records why model and reasoning choices change over time. Each dated decision separates practical observations, interpretation, the accepted choice and its trade-offs. Later decisions supersede earlier ones explicitly rather than rewriting their rationale.
 
-The [selection guide](model-selection.md) owns the reusable method; [dated assessments](models-2026-10-17.md) own published model evidence. [Shared settings](settings.md) and [subagent configuration](pi-subagents.md) own configuration details. A decision's approval does not mean its runtime settings have been applied.
+The [selection guide](model-selection.md) owns the reusable method; [dated assessments](models-2026-11-18.md) own published model evidence. [Shared settings](settings.md) and [subagent configuration](pi-subagents.md) own configuration details. A decision's approval does not mean its runtime settings have been applied.
 
 ## 2026-10-31 — More reasoning for execution; Sol for routine review
 
 **Status:** Applied to `agent/settings.json` and the configuration guides on 2026-10-31. This sets the baseline for new sessions and launches; it does not switch existing sessions or running children.
 
-**Supersession:** The [2026-11-04 decision](#2026-11-04--luna-executors-and-task-based-model-tiers) replaces the worker/delegate assignments and worker/main parity requirement. The main-session and reviewer decisions below remain in force.
+**Supersession:** The [2026-11-04 decision](#2026-11-04--luna-executors-and-task-based-model-tiers) replaces the worker/delegate assignments and worker/main parity requirement. The [2026-11-18 decision](#2026-11-18--astra-and-sol-62-successors) subsequently replaces the main model generation and Astra selections; the reasoning-depth and routine-review rationale remain historical grounds for those policies.
 
 ### Practical basis
 
@@ -182,3 +182,37 @@ Select **`consultant`** on **`anthropic/claude-sonnet-5-5`**, with default **`me
 - Continued history can increase prompt consumption and does not guarantee provider-cache hits or availability after temporary-file cleanup. Real authentication and quota availability remain separate from source/configuration inspection. The local prohibition on configuration tests remains in force.
 
 The [consultant policy guide](agents-md/consultant.md) explains authorization and alternatives; [pi-subagents.md](pi-subagents.md#operator-authorized-consultant) owns concrete settings and native continuation limits. Revisit the profile if ordinary authorized use exposes unsuitable advice, excessive consumption or continuity requirements beyond native retention.
+
+## 2026-11-18 — Astra and Sol 6.2 successors
+
+**Status:** Operator-authorized and applied to `agent/settings.json` and the configuration guides on 2026-11-18. This changes the defaults for new sessions and role launches after configuration refresh, not existing sessions' recorded models or already-running children.
+
+### Evidence and selection framework
+
+The operator requests migration to the newly released Astra/Sol generation under the existing [selection procedure](model-selection.md#refresh-workflow). The [2026-11-18 assessment](models-2026-11-18.md) records official release, task-fit, interface and economic evidence separately from these configuration choices. OpenAI released `gpt-6.2-astra` and `gpt-6.2-sol` on 2026-11-17; both already appear under `openai-codex` in the local Pi catalog.
+
+Retain the task-based tiers and the existing split between General-capability main/routine review and Deep-capability bounded analysis. Official guidance supports Sol 6.2 for multistep work and Astra 6.2 for demanding projects; the provider reports improvements over each predecessor. Codex Standard rates are unchanged for Sol versus 6.1, while Astra 6.2 is 20% lower on uncached input/output and 60% lower on cached input than Astra 6. This motivates an in-class successor migration, not a universal quality ranking or a guarantee of lower included-allowance consumption.
+
+### Accepted choices and supersession
+
+| Assignment | Previous selection | New selection |
+| --- | --- | --- |
+| Main default | `openai-codex/gpt-6.1-sol` / `xhigh` | `openai-codex/gpt-6.2-sol` / `xhigh` |
+| `oracle`, `researcher`, `evidence-auditor` defaults | `openai-codex/gpt-6-astra` / `high` | `openai-codex/gpt-6.2-astra` / `high` |
+| Routine `reviewer` | Active parent model / fixed `max`, normally Sol 6.1 | Same inheritance and fixed `max`; normally Sol 6.2 when the parent uses the new baseline |
+| Individually justified critical review | Explicit Astra 6 / `high` | Explicit Astra 6.2 / `high` |
+| Explicit bounded-research / stronger-executor exceptions | Sol 6.1 / `medium` or `xhigh`, according to the approved task | Sol 6.2 with the same selected effort and task boundaries |
+| OpenAI working list | Astra 6, Sol 6, Luna 6, Sol 6.1 | Astra 6.2, Sol 6.2, Luna 6 |
+
+This supersedes the main-model ID in the 2026-10-31 decision and its retained references in the 2026-11-04 record, plus the previous Astra generation and old Sol/Astra working-list entries. It does not restore worker/main parity or change the routine-review cost/completeness compromise. Earlier entries and the 2026-10-17 assessment remain dated evidence, not current settings.
+
+### Preserved boundaries and accepted limits
+
+- Keep scout on Luna 6/low, worker and delegate on Luna 6/max, second-opinion on DeepSeek Flash/high, and the operator-authorized consultant on Sonnet 5.5/medium. All thinking fields, prompts, tools, skills, providers, instructions and authorization rules are unchanged. Other providers' existing model selections, including the separately configured Anthropic Fable entry, are preserved.
+- Retain xhigh for the main, high for the deep-analysis defaults and max for routine review as deliberate continuations of the existing depth policy. Supported labels do not establish equal computation or quality across generations. The new-integration suggestion to start at medium is not an instruction to discard the prior practical depth decision. Current [task guidance](models-2026-11-18.md#task-specific-capabilities) also recommends Sol 6.2 Extra High for multistep work involving testing and revision, positively supporting the main task class without proving that effort optimal for every question.
+- Pi's cached Codex declarations retain 500,000 context for Sol 6.2 and 272,000 for Astra 6.2, with 128,000 maximum output. Do not replace those with the public API's 1,050,000-token limit or modify context/compaction settings as part of this migration. The high/xhigh/max mappings needed here remain distinct and supported.
+- Published benchmark improvements and lower Astra token weights do not establish review recall, research accuracy, equal high/max quality or whole-task savings. Exact included-subscription conversion remains unknown; the named Sol 6.1 long-context exemption must not be assumed for Sol 6.2. Long-context Sol usage could cost more included allowance after migration if the exemption does not extend, despite equal published token rates. This possibility is unquantified; the API pricing threshold does not establish the subscription rule. Prefix edits can drop retained reasoning under the new API contract, and the release reports some obstacle-omission behavior. Preserve independent verification and explicit reporting of blocked or unverified work; no claim is made that Pi receives Codex-specific prompt mitigations.
+- Removing old IDs from `enabledModels` narrows normal cycling, not the provider catalog or explicit-selection capability. Keep the ChatGPT-sign-in connection; no API-key path, speed tier, fallback model or retry policy is introduced.
+- Existing primaries need refreshed settings/instructions; a restored session can retain its old model. Select Sol 6.2 explicitly with `/model` when updating an existing main session, preserving xhigh. Reviewer follows the active parent, not the `defaultModel` field. Retained/resumed children preserve their launch contract; use a fresh child to adopt a new role pin.
+
+Verification is limited to source, catalog and file inspection under the local prohibition on configuration tests and model-backed test scenarios. No local benchmark, SDK probe or model-access test is part of this decision. Reconsider the selected depth or generation if ordinary use reveals consequential omissions, repeated rework, changed access or unacceptable allowance consumption; do not add automatic escalation or fallback.

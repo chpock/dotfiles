@@ -3,7 +3,7 @@
   "lastChangelogVersion": "1.5.2",
   "theme": "gruvbox-dark-hard",
   "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-6.1-sol",
+  "defaultModel": "gpt-6.2-sol",
   "defaultThinkingLevel": "xhigh",
   "packages": [
     "npm:@cortexkit/pi-magic-context",
@@ -41,10 +41,9 @@
   "enableInstallTelemetry": false,
   "enableAnalytics": false,
   "enabledModels": [
-    "openai-codex/gpt-6-astra",
-    "openai-codex/gpt-6-sol",
+    "openai-codex/gpt-6.2-astra",
+    "openai-codex/gpt-6.2-sol",
     "openai-codex/gpt-6-luna",
-    "openai-codex/gpt-6.1-sol",
     "github-copilot/claude-opus-5.5",
     "github-copilot/claude-sonnet-5.5",
     "github-copilot/claude-haiku-5.5",
@@ -253,7 +252,6 @@
           "grep",
           "find",
           "watchdog_diff",
-          "web_enable",
           "web_search",
           "fetch_content",
           "get_search_content",
@@ -317,7 +315,7 @@
         ]
       },
       "oracle": {
-        "model": "openai-codex/gpt-6-astra",
+        "model": "openai-codex/gpt-6.2-astra",
         "thinking": "high",
         "inheritGlobalContext": true,
         "inheritSkills": false,
@@ -362,7 +360,7 @@
         ]
       },
       "researcher": {
-        "model": "openai-codex/gpt-6-astra",
+        "model": "openai-codex/gpt-6.2-astra",
         "thinking": "high",
         "inheritGlobalContext": true,
         "inheritSkills": false,
@@ -399,7 +397,7 @@
         ]
       },
       "evidence-auditor": {
-        "model": "openai-codex/gpt-6-astra",
+        "model": "openai-codex/gpt-6.2-astra",
         "thinking": "high",
         "inheritGlobalContext": true,
         "inheritSkills": false,
@@ -445,7 +443,7 @@
   "extensionChangelogVersions": {
     "{\"source\":\"npm:pi-web-access\",\"scope\":\"user\"}": "0.48.0",
     "{\"source\":\"npm:pi-context-view\",\"scope\":\"user\"}": "0.8.4",
-    "{\"source\":\"npm:pi-subagents\",\"scope\":\"user\"}": "0.88.1",
+    "{\"source\":\"npm:pi-subagents\",\"scope\":\"user\"}": "0.89.0",
     "{\"source\":\"npm:pi-mcp-adapter\",\"scope\":\"user\"}": "7.0.1",
     "{\"source\":\"npm:@tmustier/pi-usage-extension\",\"scope\":\"user\"}": "0.10.2"
   }
