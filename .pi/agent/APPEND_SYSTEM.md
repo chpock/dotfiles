@@ -12,7 +12,7 @@ Use `second-opinion` before committing, in any domain, to:
 - a design or plan with interdependent decisions or substantial downstream dependencies;
 - a costly-to-reverse decision or action.
 
-Whenever you launch `reviewer`, `oracle`, `researcher`, or `evidence-auditor`, also launch `second-opinion` for the same target and question. Run them in parallel when their inputs are ready. Give each agent the necessary original evidence without presenting another agent's verdict as the expected answer. Obtain and assess both opinions before accepting that review or consultation. This opinion complements those roles and replaces none of them.
+Whenever you launch `oracle`, `researcher`, or `evidence-auditor`, also launch `second-opinion` for the same target and question. Run them in parallel when their inputs are ready. Give each agent the necessary original evidence without presenting another agent's verdict as the expected answer. Obtain and assess both opinions before accepting that review or consultation. This opinion complements those roles and replaces none of them.
 
 Launch `second-opinion` with fresh context and inspection-only scope. Supply the question, intended outcome, approved constraints and prior decisions, evidence anchors, plausible options, and your current reasoning. Assign a critique of that reasoning and its material omissions, not a second execution of the underlying task.
 

@@ -2,7 +2,9 @@
 
 ## Decision and ownership
 
-**Invocation-policy decision: 2026-11-14. Status: approved and applied.** The operator approved the complete revised `Independent second opinion` section, including the explicit costly-to-reverse decision/action branch and mandatory companions for four roles. The [2026-11-17 scope clarification](#2026-11-17--critique-scope-not-duplicate-execution) changes briefing and inspection depth, not these invocation conditions.
+**Current policy (2026-11-21):** The operator removed `reviewer` from the mandatory companion list. Launching `reviewer` no longer requires `second-opinion` by itself. The general task-based conditions still apply, and `oracle`, `researcher`, and `evidence-auditor` still require a companion on the same target and question.
+
+The 2026-11-14 decision introduced the three general task-based conditions and the four-role companion list described in the history below. The [2026-11-17 scope clarification](#2026-11-17--critique-scope-not-duplicate-execution) changed briefing and inspection depth, not invocation conditions.
 
 The authoritative instructions are in [`agent/APPEND_SYSTEM.md`, Independent second opinion](../../agent/APPEND_SYSTEM.md#independent-second-opinion). This document records the operator's goals, the alternatives considered, the deliberation with Fable, and the later scope clarification. It is explanatory decision history, not another invocation rule or a required read before every consultation. Historical quotations below are rejected or superseded proposals unless identified as selected.
 
@@ -10,7 +12,7 @@ The [role definition](../../agent/agents/second-opinion.md) owns how the advisor
 
 ## Operator goal
 
-The operator reported that the existing instruction caused overly frequent `second-opinion` launches, including simple factual questions and trivial, unambiguous decisions. The desired outcome is more selective invocation while retaining independent discovery of overlooked assumptions, alternatives, consequences, and incomplete or incorrect reasoning.
+Before the 2026-11-14 decision, the operator reported that the existing instruction caused overly frequent `second-opinion` launches, including simple factual questions and trivial, unambiguous decisions. The desired outcome is more selective invocation while retaining independent discovery of overlooked assumptions, alternatives, consequences, and incomplete or incorrect reasoning.
 
 The purpose is not merely to have a second agent recheck risks the primary already recognizes. An independently discovered problem should cause the primary to reconsider its reasoning, including when the primary initially considers its answer complete and sees no risk. Confidence is not evidence of completeness.
 
@@ -23,7 +25,7 @@ The selection combined the operator's explicit constraints with the existing sco
 - Write concise, actionable agent instructions using the `writing-for-agents` skill, not explanatory documentation in the always-loaded instruction file.
 - Allow a coherent rewrite of the whole section, rather than treating the first paragraph as the only editable part.
 
-The reported excess is practical operator feedback, not a measured attribution of launch counts to individual clauses. The accepted companion expansion is deliberate: the goal is not to minimize every source of consultation or remove independent review from those four roles.
+The reported excess was practical operator feedback, not a measured attribution of launch counts to individual clauses. The 2026-11-14 expansion was deliberate: the operator wanted to narrow general invocation while keeping mandatory companions for those four roles at the time.
 
 ## Starting policy
 
@@ -47,7 +49,7 @@ An opposite option, requiring a known defect or an explicit unresolved factual g
 
 The first concrete proposal used a material correctness/completeness risk threshold and would have made companions for `reviewer` and `oracle` conditional on the same threshold. It also proposed grouping concerns into one bounded consultation with a separate condition for repeat consultations.
 
-The operator rejected removing automatic companions. The retained decision was stronger: every launch of `reviewer`, `oracle`, `researcher`, or `evidence-auditor` receives a parallel `second-opinion` on the same target and question. This branch is independent of the general task-based conditions; it is not subject to a second complexity or risk assessment.
+The operator rejected removing automatic companions at the time. The 2026-11-14 decision required a parallel `second-opinion` on the same target and question whenever `reviewer`, `oracle`, `researcher`, or `evidence-auditor` was launched. This branch was independent of the general task-based conditions.
 
 The final text retains bounded assignments and the existing no-recursion rule, rather than introducing a new per-decision consultation-count or repeat-launch policy.
 
@@ -140,7 +142,7 @@ The three branches identify different structures in which independent challenge 
 
 These properties can be present when the parent is fully confident. The advisor's own prompt supplies the method for inspecting framing, assumptions, alternatives, and completeness; the parent instruction supplies when to request that inspection and how to use the result.
 
-The automatic companion branch remains distinct. Launching any of the four named roles is sufficient, regardless of how the parent classifies the general task-based conditions. Original evidence is supplied independently, both outputs are assessed, and the advisor does not replace the companion's role.
+The companion branch remains distinct. Launching a role on the current list in APPEND is sufficient, regardless of how the parent classifies the general task-based conditions. Original evidence is supplied independently, both outputs are assessed, and the advisor does not replace the specialist.
 
 The whole-section organization follows `writing-for-agents`: a separate condition for each invocation branch; briefing obligations together; verification and reassessment together; failure handling explicit; method and identity left in the role prompt where appropriate. The full operative text is maintained only in APPEND, rather than copied into this decision record or the runtime guide.
 
@@ -154,7 +156,7 @@ The change grants no new child delegation authority, no approval authority, and 
 
 - `substantive`, `substantial downstream dependencies`, and `costly-to-reverse` remain judgment terms. The policy offers a more specific basis for that judgment, not a mechanical classifier or a guarantee against over- or under-invocation.
 - A confident agent can still misclassify the structure or significance of a task. Removing a confidence-based prerequisite is not a guarantee that every unknown blind spot will be found. The optional confidence-contrast sentence was not included in the approved text.
-- “Less aggressive” means more selective general invocation while preserving the accepted mandatory companions. It does not establish a numerical reduction in total launches, latency, or resource use; expanding the companion list can increase consultations on that branch.
+- The 2026-11-14 decision made general invocation more selective while expanding the companion list. The 2026-11-21 decision narrows that list. Neither establishes a measured change in total launches, latency, or resource use.
 - The counterexamples and wording comparisons establish reasons for the choice, not measured behavioral efficacy. Practical effect is assessed through ordinary use. The [local configuration maintenance policy](../settings.md#configuration-maintenance-policy) prohibits configuration tests and model-backed test scenarios.
 - The instruction is prompt policy, not a scheduler hook. Existing primary sessions need `/reload` to load the revised profile. The [project-APPEND replacement and fork boundaries](instruction-layers.md#project-append-replacement) remain; this decision does not change prompt-loading behavior.
 
