@@ -15,7 +15,7 @@
 - For work on source files (Python, JS/TS, Go, Rust, Java, C/C++/C#, Kotlin, Ruby, Swift, Dart, Scala, PHP, Elixir, F#, VB.NET, Apex, Objective-C, Pascal, COBOL, GDScript, Luau, Shell, Clojure, Haskell, Lean, QML, Erlang, dbt SQL, Vue/Svelte/Astro/Razor code regions), analysis of repository or decision history, literal link/anchor/import/path resolution, or requested Repowise analysis or index maintenance, first verify this CWD is inside a Git worktree using Git or a CWD-specific verified parent handoff; reuse prior verification. If confirmed, load and follow `ck-repowise`.
 - Do not commit, push, publish, or deploy without explicit authorization. Use Conventional Commits when commits are requested.
 - Always use English for agent-to-agent communication.
-- For work products, use the language explicitly requested for the deliverable. Otherwise, follow the established language convention or target locale for the content, defaulting to English regardless of the conversation language.
+- Default to English for all work except discussion with the operator, regardless of the request’s language. Honor a language explicitly requested for the work; otherwise switch only if project rules, the text being edited, comparable files, or a locale marker establish another language for it.
 
 ## Task working files
 

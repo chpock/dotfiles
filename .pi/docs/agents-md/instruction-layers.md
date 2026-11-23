@@ -46,14 +46,14 @@ The shared file carries concise standing requirements for all relevant agents:
 - impact-based validation and honest reporting of failed or unperformed checks;
 - review findings as claims requiring verification;
 - commit, push, publication and deployment authorization;
-- applicable language rules for internal work;
+- [language rules for work and agent-to-agent communication](work-language.md);
 - destination precedence, established artifact bindings and no invented replacement paths;
 - decision boundaries and the route for escalation appropriate to the current role;
 - delegation and peer-session coordination rules when the corresponding tools are available.
 
 Apply each requirement within the assignment and available capabilities. A read-only reviewer can identify a missing test without obtaining permission to edit code or run shell commands. A skill's instructions do not widen that role's tool or task authority.
 
-Content ownership follows applicability, not heading names. Internal-work language and conditional delegation/intercom rules remain shared rather than becoming primary-only merely because they concern agent coordination.
+Content ownership follows applicability, not heading names. The language rules apply to primary and delegated work alike. Delegation and intercom rules likewise remain shared wherever the relevant tools are available.
 
 ### Primary `APPEND_SYSTEM.md`
 
