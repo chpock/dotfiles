@@ -4,7 +4,13 @@ The operator gives tasks in Russian and has sometimes received work in Russian w
 
 ## Why the distinction is about purpose
 
-“Work products” can suggest only finished project files. A working plan or report is still work when it is saved outside the repository. A plan delivered in a chat reply is also work: the plan can be in English and the surrounding explanation in Russian. Listing artifact types or writing separate rules for project files and task materials would make the always-loaded instructions longer each time a new case appeared.
+“Work products” can suggest only finished project files. Naming files the agent creates or edits covers a draft plan outside the repository as well as a maintained project document, without listing every kind of artifact. A plan supplied in full in a chat reply still defaults to English. The surrounding explanation and a `todowrite` list used to show progress may be in Russian.
+
+## Where the previous wording failed
+
+During a Repowise AUR update on 2026-11-24, the session included the instruction “all work except discussion with the operator.” The operator’s requests were written in Russian; neither specified a language for the report. The agent created a Markdown review report outside the repository, wrote it in Russian from the first line, and added its validation results in Russian. It later linked the report from a Russian completion message. The file was new, and there was no evidence of a project rule, comparable report, or locale marker calling for Russian. The written artifact in this case was a report; the execution plan was a `todowrite` list.
+
+The agent later suggested it may have treated the report as part of its message to the operator. It recorded no reason for the choice at the time. Writing a document **for** the operator does not make the document part of the conversation: the message linking to the report could be in Russian, but the report itself should have been in English.
 
 ## What establishes another language
 
@@ -12,6 +18,6 @@ An explicit language request takes priority for the work it names. “Discuss th
 
 The evidence must apply to the particular work. The text being edited can establish the language on its own: a new paragraph in a German README belongs in German even without a comparable file or locale marker. A project rule can set the language even for a new document. Comparable guides in the same documentation set can show that convention; an unrelated translation cannot. In an English-language project, `locales/ru.json` calls for Russian strings, not Russian code comments.
 
-A useful check is to translate the request into English without changing its meaning. Would the reason to use Russian remain? A request for a Russian plan or a `ru` locale marker survives that check. For a new project or a standalone plan with no such evidence, the default is English.
+A useful check is to translate the request into English without changing its meaning. Would the reason to use Russian remain? A request for a Russian plan or a `ru` locale marker survives that check. For a new project or a standalone plan with neither an explicit language request nor such evidence, English is required.
 
 Agent-to-agent communication stays separate because it has no language exceptions: even when the requested result is a Russian translation, the assignment to a subagent is in English.
