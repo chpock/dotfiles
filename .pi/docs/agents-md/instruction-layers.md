@@ -59,11 +59,14 @@ Content ownership follows applicability, not heading names. The language rules a
 
 The primary profile owns additional coordination duties:
 
+- tell the operator what comes next when unfinished work pauses;
 - read/reread `ck-task-workflow` for plans, roadmaps, multi-step work and otherwise-unassigned working-file placement;
 - pass selected absolute paths to delegated agents;
 - apply the [second-opinion consultation policy](../../agent/APPEND_SYSTEM.md#independent-second-opinion), including required companion opinions and parent verification. Its operative instructions remain in APPEND, not in every child role; the [policy decision record](second-opinion.md) explains the invocation criteria, operator goals and alternatives;
 - apply [subagent contribution reporting](../../agent/APPEND_SYSTEM.md#subagent-contribution-reporting), preserving the starting position, each advisor's contribution and the resulting recommendation for the operator. The [reporting guide](subagent-contribution-reporting.md) explains its purpose and operation; shared verification, disposition and approval rules remain in AGENTS;
 - manage [consultant authorization and continuation](../../agent/APPEND_SYSTEM.md#consultant) within the operator's session/task grant. The [consultant policy guide](consultant.md) explains selective resource use, revocation and retained consultation without adding a programmatic gate.
+
+A report can accurately list completed and outstanding work yet leave the operator guessing whether to reply. When this profile is selected, its opening rule applies even without a written plan or when the repository manages its own plans. The [milestone and handoff procedure](../../agent/skills/ck-task-workflow/SKILL.md#complete-or-hand-off) stays in the skill so its details do not occupy every prompt.
 
 The skill owns the detailed task/roadmap lifecycle, destination-selection procedure and overall completion assessment. Shared evidence, approval, review, delegation and communication rules remain in AGENTS rather than being restated in APPEND. The primary agent receives both files; the addendum supplements the common rules.
 

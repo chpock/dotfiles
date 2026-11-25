@@ -64,6 +64,12 @@ The directory represents lifecycle stage. Progress and readiness remain substant
 
 This is a default convention for new project plans, not a migration of existing documents. Assigned plan paths, maintained project material and native reports retain their own destinations. A standard-store plan is not copied into its working directory, and no new report destination follows merely from creating it.
 
+## Milestones and handoffs
+
+Finishing one approved change can look like the end of the assignment even when another step is ready. For example, the operator may have authorized comparing two saved outputs but not changing their format. Waiting for approval to compare them makes the operator say “continue” without making a decision. The [milestone check](SKILL.md#complete-or-hand-off) looks at the remaining assignment, not just the completed change.
+
+At a planning handoff, explaining why one step should come first, or why new evidence calls for revising it, gives the operator a choice they can evaluate. That recommendation does not authorize implementation. In contrast, “When the check finishes, I’ll compare its output with the baseline” tells the operator that work will resume without a reply. A finished assignment needs no invented next step.
+
 ## Examples and boundaries
 
 - A one-line, well-understood correction can be performed directly when authorized. A requested plan for that correction still belongs to the planning branch.
@@ -82,7 +88,7 @@ Material decisions and concise current state belong in the plan. Detailed logs a
 | Owner | Responsibility |
 | --- | --- |
 | [Shared `AGENTS.md`, Task working files](../../AGENTS.md#task-working-files) | Destination precedence, task-storage lifetime, independence of durable artifacts, no relocation/extra copies, maintained project locations, established task-path continuity and ambiguity/failure escalation. |
-| [Primary `APPEND_SYSTEM.md`, Task working files](../../APPEND_SYSTEM.md#task-working-files) | Requires reading/rereading this skill for matching work and passing selected absolute paths to delegated agents. |
+| [Primary `APPEND_SYSTEM.md`](../../APPEND_SYSTEM.md) | Owns the operator-facing pause rule, the instruction to read/reread this skill for matching work and the requirement to pass selected absolute paths to delegated agents. |
 | [`SKILL.md`](SKILL.md) and its conditional branches | Task lifecycle, plan contents/readiness, identity/lookup/state transitions and the operative resolver/naming/create-only-when-needed procedure. |
 | [Task-workspace reference](../../../docs/agents-md/task-workspaces.md) | Detailed resolver contract, rationale, examples, normalization, retention and limits. Explanatory, not a required additional read. |
 | `ck-testing` | Test-design methods; those instructions are not duplicated here. |

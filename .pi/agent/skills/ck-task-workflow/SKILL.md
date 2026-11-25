@@ -36,6 +36,9 @@ Apply the procedures relevant to the assignment, within its authority and existi
 
 ## Complete or hand off
 
+- At a milestone, check the remaining assignment. If an authorized step is ready, take it, even if another branch is blocked.
+- When handing over a plan, recommend where to start and why. If new evidence calls for revising the plan, identify the affected step, the proposed change and its reason.
+- If the operator must decide, ask the specific question and explain which option you recommend. If work will resume automatically, name the result you are waiting for and what you will do when it arrives.
 - For multi-step work, reconcile each completion criterion with the result: fulfilled and verified; work performed but unverified or failing verification; not fulfilled; or changed/excluded by an agreed decision. Support the disposition with relevant evidence or the decision.
 - Before completing the task, check its lasting deliverables and memory updates for task-storage references; preserve required findings within the authorized scope or report the gap.
 - Report remaining blockers, limitations and deviations explicitly. Do not present a partial handoff as completed implementation or an agreed omission as a passed check.
