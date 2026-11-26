@@ -229,7 +229,7 @@
         ]
       },
       "second-opinion": {
-        "model": "opencode-go/deepseek-v4.1-flash",
+        "model": "github-copilot/mai-code-2-flash",
         "thinking": "high",
         "advertise": false,
         "acceptanceRole": "read-only",
